@@ -1,0 +1,57 @@
+---
+version: '3'
+
+services:
+  ccd-case-management-web:
+    image: "docker.artifactory.reform.hmcts.net/ccd/ccd-case-management-web:${BRANCH:-master}"
+    container_name: ccd-case-management-web
+    environment:
+      IDAM_LOGIN_URL: https://localhost:3501/login
+      CCD_GATEWAY_BASE_URL: http://localhost:3453
+      CCD_ACTIVITY_BASE_URL:
+      DM_GATEWAY_BASE_URL: https://api-gateway.dev.dm.reform.hmcts.net
+      OAUTH2_CLIENT_ID: ccd_gateway
+    ports:
+      - 3451:80
+    depends_on:
+      - ccd-api-gateway
+
+  ccd-api-gateway:
+    image: "docker.artifactory.reform.hmcts.net/ccd/ccd-api-gateway:${BRANCH:-master}"
+    container_name: ccd-api-gateway
+    environment:
+      IDAM_LOGOUT_URL: https://localhost:3501/login/logout
+      IDAM_BASE_URL: http://idam-api:8080
+      IDAM_USER_URL: http://idam-api:8080
+      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      IDAM_SERVICE_KEY: "${IDAM_KEY_CCD_GATEWAY}"
+      IDAM_OAUTH2_CLIENT_ID: ccd_gateway
+      IDAM_OAUTH2_CLIENT_SECRET: "${OAUTH2_CLIENT_CCD_GATEWAY}"
+      IDAM_OAUTH2_TOKEN_ENDPOINT: http://idam-api:8080/oauth2/token
+      PROXY_AGGREGATED: http://ccd-data-store-api:4452
+      PROXY_DATA: http://ccd-data-store-api:4452
+      PROXY_DEFINITION_IMPORT: http://ccd-definition-store-api:4451
+      PROXY_DEFINITION_DATA: http://ccd-definition-store-api:4451/api/data
+      PROXY_DEFINITION_DISPLAY: http://ccd-definition-store-api:4451/api/display
+      APPINSIGHTS_INSTRUMENTATIONKEY: key
+    ports:
+      - 3453:3453
+    depends_on:
+      - ccd-user-profile-api
+      - ccd-definition-store-api
+      - ccd-data-store-api
+
+  authentication-web:
+    image: docker.artifactory.reform.hmcts.net/auth/authentication-web:latest
+    environment:
+     IDAM_API_URL: http://idam-api:8080
+     IDAM_CONTINUE_URL_VALIDATOR_ENFORCE_TLS: "false"
+     REFORM_SERVICE_NAME: idam-api
+     REFORM_TEAM: idam
+     REFORM_ENVIRONMENT: local
+    ports:
+      - 3501:8000
+    links:
+      - idam-api
+    depends_on:
+      - idam-api

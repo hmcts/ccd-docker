@@ -1,0 +1,194 @@
+---
+version: '3'
+
+services:
+  ccd-user-profile-api:
+    image: "docker.artifactory.reform.hmcts.net/ccd/ccd-user-profile-api:${BRANCH:-master}"
+    environment:
+      USER_PROFILE_DB_HOST: ccd-user-profile-database
+      USER_PROFILE_DB_PORT: 5432
+      USER_PROFILE_DB_USERNAME:
+      USER_PROFILE_DB_PASSWORD:
+      USER_PROFILE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_definition
+      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      REFORM_SERVICE_NAME: ccd-user-profile-api
+      REFORM_TEAM: ccd
+      REFORM_ENVIRONMENT: local
+      APPINSIGHTS_INSTRUMENTATIONKEY: key
+    ports:
+      - 4453:4453
+    depends_on:
+      - ccd-user-profile-database
+    links:
+      - ccd-user-profile-database
+      - service-auth-provider-api
+
+  ccd-user-profile-database:
+    image: "docker.artifactory.reform.hmcts.net/ccd/ccd-user-profile-database:${BRANCH:-master}"
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    environment:
+      USER_PROFILE_DB_USERNAME:
+      USER_PROFILE_DB_PASSWORD:
+    ports:
+      - 5453:5432
+    volumes:
+      - ccd-user-profile-database-data:/var/lib/postgresql/data
+
+  ccd-definition-store-api:
+    image: "docker.artifactory.reform.hmcts.net/ccd/ccd-definition-store-api:${BRANCH:-master}"
+    environment:
+      DEFINITION_STORE_DB_HOST: ccd-definition-store-database
+      DEFINITION_STORE_DB_PORT: 5432
+      DEFINITION_STORE_DB_USERNAME:
+      DEFINITION_STORE_DB_PASSWORD:
+      DEFINITION_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DEFINITION_STORE}"
+      DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw
+      USER_PROFILE_HOST: http://ccd-user-profile-api:4453
+      IDAM_USER_URL: http://idam-api:8080
+      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      REFORM_SERVICE_NAME: ccd-definition-store-api
+      REFORM_TEAM: ccd
+      REFORM_ENVIRONMENT: local
+      APPINSIGHTS_INSTRUMENTATIONKEY: key
+    ports:
+      - 4451:4451
+    depends_on:
+      - ccd-definition-store-database
+      - ccd-user-profile-api
+    links:
+      - ccd-definition-store-database
+      - ccd-user-profile-api
+      - idam-api
+      - service-auth-provider-api
+
+  ccd-definition-store-database:
+    image: "docker.artifactory.reform.hmcts.net/ccd/ccd-definition-store-database:${BRANCH:-master}"
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    environment:
+      DEFINITION_STORE_DB_USERNAME:
+      DEFINITION_STORE_DB_PASSWORD:
+    ports:
+      - 5451:5432
+    volumes:
+      - ccd-definition-store-database-data:/var/lib/postgresql/data
+
+  ccd-data-store-api:
+    image: "docker.artifactory.reform.hmcts.net/ccd/ccd-data-store-api:${BRANCH:-master}"
+    environment:
+      DATA_STORE_DB_HOST: ccd-data-store-database
+      DATA_STORE_DB_PORT: 5432
+      DATA_STORE_DB_USERNAME:
+      DATA_STORE_DB_PASSWORD:
+      DATA_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DATA_STORE}"
+      DATA_STORE_TOKEN_SECRET: iuasbcuasdcbasdgcasdgcuysachjsacyasdgjcgasdj
+      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw
+      DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
+      USER_PROFILE_HOST: http://ccd-user-profile-api:4453
+      IDAM_USER_URL: http://idam-api:8080
+      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      REFORM_SERVICE_NAME: ccd-data-store-api
+      REFORM_TEAM: ccd
+      REFORM_ENVIRONMENT: local
+      APPINSIGHTS_INSTRUMENTATIONKEY: key
+    ports:
+      - 4452:4452
+    depends_on:
+      - ccd-data-store-database
+      - ccd-user-profile-api
+      - ccd-definition-store-api
+    links:
+      - ccd-data-store-database
+      - ccd-user-profile-api
+      - ccd-definition-store-api
+      - idam-api
+      - service-auth-provider-api
+
+  ccd-data-store-database:
+    image: "docker.artifactory.reform.hmcts.net/ccd/ccd-data-store-database:${BRANCH:-master}"
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    environment:
+      DATA_STORE_DB_USERNAME:
+      DATA_STORE_DB_PASSWORD:
+    ports:
+      - 5452:5432
+    volumes:
+      - ccd-data-store-database-data:/var/lib/postgresql/data
+
+  idam-api:
+    image: docker.artifactory.reform.hmcts.net/auth/idam-api:latest
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    environment:
+      IDAM_SUPERUSER_EMAIL: ccd@hmcts.net
+      SPRING_DATASOURCE_URL: jdbc:postgresql://idam-database:5432/idam
+      SPRING_MAIL_HOST: smtp-server
+      IDAM_TESTING_SUPPORT_ENABLED: "true"
+      NOTIFY_API_KEY: AAAAAAAAAAAAAAAA
+      NOTIFY_CMC_ACTIVATE_USER_TEMPLATE: 76aa8695-64e8-4afd-ae13-bc8385302b1f
+      IDAM_SECRET: idam_test_secret
+      IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_CCD_GATEWAY: "${OAUTH2_CLIENT_CCD_GATEWAY}"
+      IDAM_CCD_WHITELIST: http://localhost:3451/oauth2redirect
+      NOTIFY: "false"
+      NOTIFY_CMC_WELCOME_USER_TEMPLATE: fake
+      NOTIFY_DIVORCE_WELCOME_USER_TEMPLATE: fake
+      NOTIFY_SSCS_WELCOME_USER_TEMPLATE: fake
+      NOTIFY_RESET_PASSWORD_TEMPLATE: fake
+      NOTIFY_PROBATE_ACTIVATE_USER_TEMPLATE: fake
+      NOTIFY_DIVORCE_ACTIVATE_USER_TEMPLATE: fake
+      NOTIFY_SSCS_ACTIVATE_USER_TEMPLATE: fake
+      NOTIFY_CCD_ACTIVATE_USER_TEMPLATE: fake
+      REFORM_SERVICE_NAME: idam-api
+      REFORM_TEAM: idam
+      REFORM_ENVIRONMENT: local
+      http_proxy:
+      https_proxy:
+      no_proxy:
+    ports:
+      - 4501:8080
+    links:
+      - smtp-server
+      - idam-database
+    depends_on:
+      - idam-database
+      - smtp-server
+  idam-database:
+    image: docker.artifactory.reform.hmcts.net/auth/idam-database:latest
+    ports:
+      - 5501:5432
+    volumes:
+      - idam-database:/var/lib/postgresql/data
+
+  service-auth-provider-api:
+    image: docker.artifactory.reform.hmcts.net/auth/service-auth-provider-api:47e18b53aad48ae8124744041988565e07dfed50
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    ports:
+      - 4502:8080
+    environment:
+      auth.provider.service.server.jwtKey: wThK0f0/lh3FlxFcL4xUWDMI5C1J9KyQBgXV4wseh1e5J1uYJIjvTvArHxQDrYoHJ23xFxjHkOnvNbR5dXRoxA==
+      auth.provider.service.server.microserviceKeys.ccd_data: "${IDAM_KEY_CCD_DATA_STORE}"
+      auth.provider.service.server.microserviceKeys.ccd_gw: "${IDAM_KEY_CCD_GATEWAY}"
+      auth.provider.service.server.microserviceKeys.ccd_definition: "${IDAM_KEY_CCD_DEFINITION_STORE}"
+      auth.provider.service.testing-support.enabled: "true"
+
+  smtp-server:
+    image: mailhog/mailhog
+
+volumes:
+  ccd-user-profile-database-data:
+  ccd-definition-store-database-data:
+  ccd-data-store-database-data:
+  idam-database:
