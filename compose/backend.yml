@@ -9,6 +9,7 @@ services:
       USER_PROFILE_DB_PORT: 5432
       USER_PROFILE_DB_USERNAME:
       USER_PROFILE_DB_PASSWORD:
+      USER_PROFILE_DB_USE_SSL:
       USER_PROFILE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_definition
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       REFORM_SERVICE_NAME: ccd-user-profile-api
@@ -44,6 +45,7 @@ services:
       DEFINITION_STORE_DB_PORT: 5432
       DEFINITION_STORE_DB_USERNAME:
       DEFINITION_STORE_DB_PASSWORD:
+      DEFINITION_STORE_DB_USE_SSL:
       DEFINITION_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DEFINITION_STORE}"
       DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
@@ -85,6 +87,7 @@ services:
       DATA_STORE_DB_PORT: 5432
       DATA_STORE_DB_USERNAME:
       DATA_STORE_DB_PASSWORD:
+      DATA_STORE_DB_USE_SSL:
       DATA_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DATA_STORE}"
       DATA_STORE_TOKEN_SECRET: iuasbcuasdcbasdgcasdgcuysachjsacyasdgjcgasdj
       DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw
