@@ -322,9 +322,9 @@ Here are the important variables exposed in the compose files:
 | USER_PROFILE_S2S_AUTHORISED_SERVICES | List of micro-services authorised to call this service, comma-separated, as registered in `service-auth-provider-api` |
 | DATA_STORE_TOKEN_SECRET | Secret for generation of internal event tokens |
 | APPINSIGHTS_INSTRUMENTATIONKEY | Secret for Microsoft Insights logging, can be a dummy string in local |
-| DATA_STORE_DB_USE_SSL | Should data store application user SSL while accessing DB, `false` for local environments |
-| DEFINITION_STORE_DB_USE_SSL | Should definition store application user SSL while accessing DB, `false` for local environments  |
-| USER_PROFILE_DB_USE_SSL | Should user profile application user SSL while accessing DB, `false` for local environments  |
+| DATA_STORE_DB_USE_SSL | `true` if data store application must use SSL while accessing DB, can be `false` for local environments |
+| DEFINITION_STORE_DB_USE_SSL | `true` if definition store application must use SSL while accessing DB, can be `false` for local environments  |
+| USER_PROFILE_DB_USE_SSL | `true` if user profile application must use SSL while accessing DB, can be `false` for local environments  |
 
 
 ## Remarks
