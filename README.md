@@ -351,6 +351,20 @@ DRIVER              VOLUME NAME
 # better be empty
 ```
 
+- If you happen to see a following error when running `docker pull <image>` (eg. `docker pull idam-api`):
+```
+$ docker pull idam-api
+Using default tag: latest
+Error response from daemon: Get https://registry-1.docker.io/v2/library/idam-api/manifests/latest: unauthorized: incorrect username or password
+```
+then try running `docker image ls`
+```
+$ docker image ls
+REPOSITORY                                                                        TAG                                        IMAGE ID            CREATED             SIZE
+docker.artifactory.reform.hmcts.net/auth/idam-api                                 latest                                     8c25cb589020        11 days ago         121MB
+```
+and then see the actual registry IMAGE ID. You can then rerun it with proper IMAGE ID `docker pull docker.artifactory.reform.hmcts.net/auth/idam-api` to pull the image.
+
 ## LICENSE
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
