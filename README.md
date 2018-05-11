@@ -363,7 +363,7 @@ $ docker image ls
 REPOSITORY                                                                        TAG                                        IMAGE ID            CREATED             SIZE
 docker.artifactory.reform.hmcts.net/auth/idam-api                                 latest                                     8c25cb589020        11 days ago         121MB
 ```
-and then see the actual registry IMAGE ID. You can then rerun it with proper IMAGE ID `docker pull docker.artifactory.reform.hmcts.net/auth/idam-api` to pull the image.
+and then see the actual registry REPOSITORY. You can then rerun it with proper REPOSITORY `docker pull docker.artifactory.reform.hmcts.net/auth/idam-api` to pull the image.
 
 ## LICENSE
 
