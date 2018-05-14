@@ -179,7 +179,7 @@ services:
       timeout: 10s
       retries: 10
     ports:
-      - 4502:8080
+      - 4502:8489
     environment:
       AUTH_PROVIDER_SERVICE_SERVER_JWT_KEY: wThK0f0/lh3FlxFcL4xUWDMI5C1J9KyQBgXV4wseh1e5J1uYJIjvTvArHxQDrYoHJ23xFxjHkOnvNbR5dXRoxA==
       AUTH_PROVIDER_SERVICE_SERVER_MICROSERVICE_KEYS_CCD_DATA: "${IDAM_KEY_CCD_DATA_STORE}"
