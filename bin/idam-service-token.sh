@@ -9,4 +9,12 @@
 
 MICROSERVICE="${1:-ccd_gw}"
 
-curl --silent http://localhost:4502/testing-support/lease -Fmicroservice="${MICROSERVICE}"
+generate_post_data()
+{
+  cat <<EOF
+{
+"microservice":"${MICROSERVICE}"
+}
+EOF
+}
+curl --silent -H "Content-Type: application/json" http://localhost:4502/testing-support/lease --data "$(generate_post_data)"

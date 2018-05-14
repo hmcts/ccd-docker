@@ -173,19 +173,19 @@ services:
       - idam-database:/var/lib/postgresql/data
 
   service-auth-provider-api:
-    image: docker.artifactory.reform.hmcts.net/auth/service-auth-provider-api:47e18b53aad48ae8124744041988565e07dfed50
+    image: hmcts/service-auth-provider-app
     healthcheck:
       interval: 10s
       timeout: 10s
       retries: 10
     ports:
-      - 4502:8080
+      - 4502:8489
     environment:
-      auth.provider.service.server.jwtKey: wThK0f0/lh3FlxFcL4xUWDMI5C1J9KyQBgXV4wseh1e5J1uYJIjvTvArHxQDrYoHJ23xFxjHkOnvNbR5dXRoxA==
-      auth.provider.service.server.microserviceKeys.ccd_data: "${IDAM_KEY_CCD_DATA_STORE}"
-      auth.provider.service.server.microserviceKeys.ccd_gw: "${IDAM_KEY_CCD_GATEWAY}"
-      auth.provider.service.server.microserviceKeys.ccd_definition: "${IDAM_KEY_CCD_DEFINITION_STORE}"
-      auth.provider.service.testing-support.enabled: "true"
+      AUTH_PROVIDER_SERVICE_SERVER_JWT_KEY: wThK0f0/lh3FlxFcL4xUWDMI5C1J9KyQBgXV4wseh1e5J1uYJIjvTvArHxQDrYoHJ23xFxjHkOnvNbR5dXRoxA==
+      AUTH_PROVIDER_SERVICE_SERVER_MICROSERVICE_KEYS_CCD_DATA: "${IDAM_KEY_CCD_DATA_STORE}"
+      AUTH_PROVIDER_SERVICE_SERVER_MICROSERVICE_KEYS_CCD_GW: "${IDAM_KEY_CCD_GATEWAY}"
+      AUTH_PROVIDER_SERVICE_SERVER_MICROSERVICE_KEYS_CCD_DEFINITION: "${IDAM_KEY_CCD_DEFINITION_STORE}"
+      AUTH_PROVIDER_SERVICE_TESTING_SUPPORT_ENABLED: "true"
 
   smtp-server:
     image: mailhog/mailhog
