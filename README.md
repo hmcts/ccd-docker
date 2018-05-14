@@ -365,6 +365,8 @@ docker.artifactory.reform.hmcts.net/auth/idam-api                               
 ```
 and then see the actual registry REPOSITORY. You can then rerun it with proper REPOSITORY `docker pull docker.artifactory.reform.hmcts.net/auth/idam-api` to pull the image.
 
+Alternatively use the recommended `./compose-frotned.sh pull` which will pull all required images using `docker-compose` command.
+
 ## LICENSE
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
