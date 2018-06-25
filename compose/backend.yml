@@ -5,11 +5,11 @@ services:
   ccd-user-profile-api:
     image: hmcts/ccd-user-profile-api
     environment:
-      USER_PROFILE_DB_HOST: ccd-user-profile-database
+      USER_PROFILE_DB_HOST: ccd-shared-database
       USER_PROFILE_DB_PORT: 5432
-      USER_PROFILE_DB_USERNAME:
-      USER_PROFILE_DB_PASSWORD:
-      USER_PROFILE_DB_USE_SSL:
+      USER_PROFILE_DB_USERNAME: "${DB_USERNAME}"
+      USER_PROFILE_DB_PASSWORD: "${DB_PASSWORD}"
+      USER_PROFILE_DB_USE_SSL: "${DB_USE_SSL}"
       USER_PROFILE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_definition
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       REFORM_SERVICE_NAME: ccd-user-profile-api
@@ -19,33 +19,19 @@ services:
     ports:
       - 4453:4453
     depends_on:
-      - ccd-user-profile-database
+      - ccd-shared-database
     links:
-      - ccd-user-profile-database
+      - ccd-shared-database
       - service-auth-provider-api
-
-  ccd-user-profile-database:
-    image: "docker.artifactory.reform.hmcts.net/ccd/ccd-user-profile-database:${BRANCH:-master}"
-    healthcheck:
-      interval: 10s
-      timeout: 10s
-      retries: 10
-    environment:
-      USER_PROFILE_DB_USERNAME:
-      USER_PROFILE_DB_PASSWORD:
-    ports:
-      - 5453:5432
-    volumes:
-      - ccd-user-profile-database-data:/var/lib/postgresql/data
 
   ccd-definition-store-api:
     image: hmcts/ccd-definition-store-api
     environment:
-      DEFINITION_STORE_DB_HOST: ccd-definition-store-database
+      DEFINITION_STORE_DB_HOST: ccd-shared-database
       DEFINITION_STORE_DB_PORT: 5432
-      DEFINITION_STORE_DB_USERNAME:
-      DEFINITION_STORE_DB_PASSWORD:
-      DEFINITION_STORE_DB_USE_SSL:
+      DEFINITION_STORE_DB_USERNAME: "${DB_USERNAME}"
+      DEFINITION_STORE_DB_PASSWORD: "${DB_PASSWORD}"
+      DEFINITION_STORE_DB_USE_SSL: "${DB_USE_SSL}"
       DEFINITION_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DEFINITION_STORE}"
       DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
@@ -58,36 +44,22 @@ services:
     ports:
       - 4451:4451
     depends_on:
-      - ccd-definition-store-database
+      - ccd-shared-database
       - ccd-user-profile-api
     links:
-      - ccd-definition-store-database
+      - ccd-shared-database
       - ccd-user-profile-api
       - idam-api
       - service-auth-provider-api
 
-  ccd-definition-store-database:
-    image: "docker.artifactory.reform.hmcts.net/ccd/ccd-definition-store-database:${BRANCH:-master}"
-    healthcheck:
-      interval: 10s
-      timeout: 10s
-      retries: 10
-    environment:
-      DEFINITION_STORE_DB_USERNAME:
-      DEFINITION_STORE_DB_PASSWORD:
-    ports:
-      - 5451:5432
-    volumes:
-      - ccd-definition-store-database-data:/var/lib/postgresql/data
-
   ccd-data-store-api:
     image: hmcts/ccd-data-store-api
     environment:
-      DATA_STORE_DB_HOST: ccd-data-store-database
+      DATA_STORE_DB_HOST: ccd-shared-database
       DATA_STORE_DB_PORT: 5432
-      DATA_STORE_DB_USERNAME:
-      DATA_STORE_DB_PASSWORD:
-      DATA_STORE_DB_USE_SSL:
+      DATA_STORE_DB_USERNAME: "${DB_USERNAME}"
+      DATA_STORE_DB_PASSWORD: "${DB_PASSWORD}"
+      DATA_STORE_DB_USE_SSL: "${DB_USE_SSL}"
       DATA_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DATA_STORE}"
       DATA_STORE_TOKEN_SECRET: iuasbcuasdcbasdgcasdgcuysachjsacyasdgjcgasdj
       DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw
@@ -102,29 +74,15 @@ services:
     ports:
       - 4452:4452
     depends_on:
-      - ccd-data-store-database
+      - ccd-shared-database
       - ccd-user-profile-api
       - ccd-definition-store-api
     links:
-      - ccd-data-store-database
+      - ccd-shared-database
       - ccd-user-profile-api
       - ccd-definition-store-api
       - idam-api
       - service-auth-provider-api
-
-  ccd-data-store-database:
-    image: "docker.artifactory.reform.hmcts.net/ccd/ccd-data-store-database:${BRANCH:-master}"
-    healthcheck:
-      interval: 10s
-      timeout: 10s
-      retries: 10
-    environment:
-      DATA_STORE_DB_USERNAME:
-      DATA_STORE_DB_PASSWORD:
-    ports:
-      - 5452:5432
-    volumes:
-      - ccd-data-store-database-data:/var/lib/postgresql/data
 
   idam-api:
     image: docker.artifactory.reform.hmcts.net/auth/idam-api:latest
@@ -134,7 +92,9 @@ services:
       retries: 10
     environment:
       IDAM_SUPERUSER_EMAIL: ccd@hmcts.net
-      SPRING_DATASOURCE_URL: jdbc:postgresql://idam-database:5432/idam
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ccd-shared-database:5432/idam
+      SPRING_DATASOURCE_USERNAME: "${DB_USERNAME}"
+      SPRING_DATASOURCE_PASSWORD: "${DB_PASSWORD}"
       SPRING_MAIL_HOST: smtp-server
       IDAM_TESTING_SUPPORT_ENABLED: "true"
       NOTIFY_API_KEY: AAAAAAAAAAAAAAAA
@@ -161,16 +121,10 @@ services:
       - 4501:8080
     links:
       - smtp-server
-      - idam-database
+      - ccd-shared-database
     depends_on:
-      - idam-database
+      - ccd-shared-database
       - smtp-server
-  idam-database:
-    image: docker.artifactory.reform.hmcts.net/auth/idam-database:latest
-    ports:
-      - 5501:5432
-    volumes:
-      - idam-database:/var/lib/postgresql/data
 
   service-auth-provider-api:
     image: hmcts/service-auth-provider-app
@@ -191,8 +145,19 @@ services:
   smtp-server:
     image: mailhog/mailhog
 
+  ccd-shared-database:
+    build: ../database
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    environment:
+      DB_USERNAME:
+      DB_PASSWORD:
+    ports:
+      - 5000:5432
+    volumes:
+      - ccd-docker-ccd-shared-database-data:/var/lib/postgresql/data
+
 volumes:
-  ccd-user-profile-database-data:
-  ccd-definition-store-database-data:
-  ccd-data-store-database-data:
-  idam-database:
+  ccd-docker-ccd-shared-database-data:
