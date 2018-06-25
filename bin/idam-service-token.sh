@@ -6,7 +6,9 @@
 ##
 ## Returns a valid IDAM service token for the given microservice.
 
+microservice="${1:-ccd_gw}"
 
-MICROSERVICE="${1:-ccd_gw}"
-
-curl --silent http://localhost:4502/testing-support/lease -Fmicroservice="${MICROSERVICE}"
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"microservice":"'${microservice}'"}' \
+  http://localhost:4502/testing-support/lease

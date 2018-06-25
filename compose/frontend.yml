@@ -3,7 +3,7 @@ version: '3'
 
 services:
   ccd-case-management-web:
-    image: "docker.artifactory.reform.hmcts.net/ccd/ccd-case-management-web:${BRANCH:-master}"
+    image: "hmcts/ccd-case-management-web"
     container_name: ccd-case-management-web
     environment:
       IDAM_LOGIN_URL: https://localhost:3501/login
@@ -12,12 +12,12 @@ services:
       DM_GATEWAY_BASE_URL: https://api-gateway.dev.dm.reform.hmcts.net
       OAUTH2_CLIENT_ID: ccd_gateway
     ports:
-      - 3451:80
+      - 3451:3451
     depends_on:
       - ccd-api-gateway
 
   ccd-api-gateway:
-    image: "docker.artifactory.reform.hmcts.net/ccd/ccd-api-gateway:${BRANCH:-master}"
+    image: "hmcts/ccd-api-gateway"
     container_name: ccd-api-gateway
     environment:
       IDAM_LOGOUT_URL: https://localhost:3501/login/logout
