@@ -8,7 +8,6 @@
   - [Stopping and cleaning up](#stopping-and-cleaning-up)
   - [Applying updates](#applying-updates)
   - [Pulling images](#pulling-images)
-  - [Switching branches](#switching-branches)
   - [Service to service configuration](#service-to-service-configuration)
 - [Containers](#containers)
 - [Local development](#local-development)
@@ -190,23 +189,13 @@ To get the latest version of an image from Artifactory, the `pull` command must 
 ./compose-frontend.sh pull [service]
 ```
 
-### Switching branches
-
-By default, the compose files are using CCD's `master` tag which indicates stable, release candidate code.
-
-To switch to the Docker images representing the latest state of development, a `BRANCH` environment variable must be defined as `develop`.
-
-```bash
-export BRANCH=develop
-```
-
 ### Service to service configuration
 
 Micro-services names and secret keys must be registered as part of `service-auth-provider-api` configuration by adding environment variables like:
 
 ```yml
 environment:
-  auth.provider.service.server.microserviceKeys.<microservice_name>: <secret_key>
+  AUTH_PROVIDER_SERVICE_SERVER_MICROSERVICE_KEYS_<microservice_name>: <secret_key>
 ```
 
 The `secret_key` must then also be provided to the container running the micro-service.
@@ -221,7 +210,7 @@ IDAM_KEY_CCD_DATA_STORE=AAAAAAAAAAAAAAAB
 `compose/backend.yml`:
 ```yml
 environment:
-  auth.provider.service.server.microserviceKeys.ccd_data: "${IDAM_KEY_CCD_DATA_STORE}"
+  AUTH_PROVIDER_SERVICE_SERVER_MICROSERVICE_KEYS_CCD_DATA: "${IDAM_KEY_CCD_DATA_STORE}"
 ```
 
 ## Containers
@@ -322,9 +311,6 @@ Here are the important variables exposed in the compose files:
 | USER_PROFILE_S2S_AUTHORISED_SERVICES | List of micro-services authorised to call this service, comma-separated, as registered in `service-auth-provider-api` |
 | DATA_STORE_TOKEN_SECRET | Secret for generation of internal event tokens |
 | APPINSIGHTS_INSTRUMENTATIONKEY | Secret for Microsoft Insights logging, can be a dummy string in local |
-| DATA_STORE_DB_USE_SSL | `true` if data store application must use SSL while accessing DB, can be `false` for local environments |
-| DEFINITION_STORE_DB_USE_SSL | `true` if definition store application must use SSL while accessing DB, can be `false` for local environments  |
-| USER_PROFILE_DB_USE_SSL | `true` if user profile application must use SSL while accessing DB, can be `false` for local environments  |
 
 
 ## Remarks
@@ -354,4 +340,3 @@ DRIVER              VOLUME NAME
 ## LICENSE
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
-
