@@ -62,6 +62,14 @@ case $project in
     exit 1 ;;
 esac
 
+# When `master` branch, reset tag
+if [ $branch == "master" ]
+  then
+    touch $TAGS_FILE
+    sed -i '' "/$tagEnv/d" $TAGS_FILE
+    exit 0
+fi
+
 # Prepare workspace
 workspace="$WORKSPACE_ROOT/$project"
 
