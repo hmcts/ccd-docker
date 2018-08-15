@@ -74,7 +74,8 @@ mkdir -p $workspace
 # Checkout project's branch
 git clone --branch $branch $repository $workspace
 
-gitHash=$(cd $workspace && git rev-parse HEAD)
+gitHash=$(cd $workspace && git rev-parse HEAD | cut -c -7)
+branch_and_hash=${branch}-${gitHash}
 
 # Build project artefacts required by Dockerfile
 if [ -n "$buildCommand" ]
@@ -83,9 +84,9 @@ if [ -n "$buildCommand" ]
 fi
 
 # Build Docker image
-(cd $workspace && docker build . -t hmcts/$project:$gitHash)
+(cd $workspace && docker build . -t hmcts/$project:$branch_and_hash)
 
 # Set image tag in `.tags.env` file
 touch $TAGS_FILE
 sed -i '' "/$tagEnv/d" $TAGS_FILE
-echo "export $tagEnv=$gitHash" >> $TAGS_FILE
+echo "export $tagEnv=$branch_and_hash" >> $TAGS_FILE
