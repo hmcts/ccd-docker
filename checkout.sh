@@ -16,21 +16,16 @@ TAGS_FILE=".tags.env"
 WORKSPACE_ROOT=".workspace"
 GRADLE_ASSEMBLE_CMD="./gradlew assemble"
 
+# Validate mandatory parameters
+if [ $# -ne 2 ]
+  then
+    echo "Usage: $(basename $0) <project> <branch>"
+    exit 1
+fi
+
 project=$1
 branch=$2
 
-# Validate mandatory parameters
-if [ -z "$project" ]
-  then
-    echo "Usage: ./checkout.sh <project> <branch>"
-    exit 1
-fi
-
-if [ -z "$branch" ]
-  then
-    echo "Usage: ./checkout.sh <project> <branch>"
-    exit 1
-fi
 
 # Initialise script for given project
 case $project in
