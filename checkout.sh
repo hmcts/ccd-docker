@@ -1,4 +1,5 @@
-#/bin/bash
+#!/bin/bash
+
 ## Usage: ./checkout.sh <project> <branch>
 ##
 ## Build a Docker image for the given project and branch and switch Docker Compose
