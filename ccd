@@ -1,0 +1,79 @@
+#!/bin/bash
+
+TAGS_FILE=".tags.env"
+WORKSPACE_ROOT=".workspace"
+
+# Build related
+GRADLE_ASSEMBLE_CMD="./gradlew assemble"
+
+function repository_params() {
+    project=$1
+    case $project in
+        ccd-data-store-api)
+            repository="git@github.com:hmcts/ccd-data-store-api.git"
+            tagEnv="CCD_DATA_STORE_API_TAG"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+        ccd-definition-store-api)
+            repository="git@github.com:hmcts/ccd-definition-store-api.git"
+            tagEnv="CCD_DEFINITION_STORE_API_TAG"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+        ccd-user-profile-api)
+            repository="git@github.com:hmcts/ccd-user-profile-api.git"
+            tagEnv="CCD_USER_PROFILE_API_TAG"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+        ccd-api-gateway)
+            repository="git@github.com:hmcts/ccd-api-gateway.git"
+            tagEnv="CCD_API_GATEWAY_TAG"
+            ;;
+        ccd-case-management-web)
+            repository="git@github.com:hmcts/ccd-case-management-web.git"
+            tagEnv="CCD_CASE_MANAGEMENT_WEB_TAG"
+            ;;
+        *)
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web"
+            exit 1 ;;
+esac
+
+}
+
+function usage() {
+    echo "$(basename $0) command [options]"
+    echo 
+    echo "Commands:"
+    echo "  set repo branch [repo branch] - add overrides and build project"
+    echo "  reset repo [repo] - remove repo overrides"
+    echo "  status - list current override and their status against upstream"
+    echo "  update repo [repo] - update rep overirde to match upstream branch and build"
+    echo
+    exit 1
+}
+
+function notimplemented() {
+    echo "Not Implemented yet"
+    exit 1
+}
+
+if [ $# -lt 1 ]; then
+    usage
+fi
+
+case $1 in
+    set)
+        notimplemented
+        ;;
+    unset)
+        notimplemented
+        ;;
+    status)
+        notimplemented
+        ;;
+    update)
+        notimplemented
+        ;;
+    *)
+        usage
+        ;;
+esac
