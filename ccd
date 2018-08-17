@@ -6,8 +6,9 @@ WORKSPACE_ROOT=".workspace"
 # Build related
 GRADLE_ASSEMBLE_CMD="./gradlew assemble"
 
-function repository_params() {
+function project_config() {
     project=$1
+    config=$2
     case $project in
         ccd-data-store-api)
             repository="git@github.com:hmcts/ccd-data-store-api.git"
@@ -35,20 +36,130 @@ function repository_params() {
         *)
             echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web"
             exit 1 ;;
-esac
+    esac
+    case $config in
+        tagEnv)
+            echo $tagEnv
+            ;;
+        repository)
+            echo $repository
+            ;;
+        buildCommand)
+            echo $buildCommand
+            ;;
+        *)
+            echo "Config is one of repository, tagEnv or buildCommand. '$config' is unkown"
+            exit 1
+            ;;
+    esac
+}
 
+
+function tag_unset() {
+    project=$1
+    tagEnv=$(project_config $project tagEnv)
+    touch $TAGS_FILE
+    sed -i '' "/$tagEnv/d" $TAGS_FILE
+}
+
+
+function tag_set() {
+    project=$1
+    branch=$2
+    tagEnv=$(project_config $project tagEnv)
+    tagName=$(tag_name $project $branch)
+    touch $TAGS_FILE
+    sed -i '' "/$tagEnv/d" $TAGS_FILE
+    echo "export $tagEnv=$tagName" >> $TAGS_FILE
+}
+
+function workspace_dir() {
+    project=$1
+    workspace="$WORKSPACE_ROOT/$project"
+    echo $workspace
+}
+
+function clean_name() {
+    name=$1
+    clean=$(echo $name | sed 's#/#-#')
+    echo $clean
+}
+
+function git_clone() {
+    project=$1
+    branch=$2
+    workspace=$(workspace_dir $project)
+    repository=$(project_config $project repository)
+    rm -rf $workspace
+    mkdir -p $workspace
+    git clone --branch $branch $repository $workspace || exit $?
+}
+
+git_hash() {
+    project=$1
+    workspace=$(workspace_dir $project)
+    gitHash=$(cd $workspace && git rev-parse HEAD | cut -c -7)
+    echo $gitHash
+}
+
+
+function tag_name() {
+    project=$1
+    branch=$2
+    gitHash=$(git_hash $project)
+    cleanBranch=$(clean_name $branch)
+    branch_and_hash=${cleanBranch}-${gitHash}
+    echo $branch_and_hash
+}
+
+
+function project_build() {
+    project=$1
+    workspace=$(workspace_dir $project)
+    buildCommand=$(project_config $project buildCommand)
+    # Build if required
+    if [ -n "$buildCommand" ]; then
+        (cd $workspace && eval $buildCommand || exit $?)
+    fi
+}
+
+
+function docker_build() {
+    project=$1
+    branch=$2
+    workspace=$(workspace_dir $project)
+    tagName=$(tag_name $project $branch)
+    (cd $workspace && docker build . -t hmcts/$project:$tagName || exit $?)
 }
 
 function usage() {
-    echo "$(basename $0) command [options]"
+    echo "Usage: $(basename $0) command [options]"
     echo 
     echo "Commands:"
     echo "  set repo branch [repo branch] - add overrides and build project"
-    echo "  reset repo [repo] - remove repo overrides"
-    echo "  status - list current override and their status against upstream"
+    echo "  unset repo [repo] - remove repo overrides"
+    echo "  status - list current overrides and their status against upstream"
     echo "  update repo [repo] - update rep overirde to match upstream branch and build"
     echo
     exit 1
+}
+
+function usage_set() {
+    if [ $# -ne 2 -o "$1" == "-h" ]; then
+        echo "Overrides project to use the supplied branch, and build the project."
+        echo "Usage: $(basename $0) set <project> <branch>"
+        echo
+        exit 1
+    fi
+}
+
+function usage_unset() {
+    if [ $# -lt 1 -o "$1" == "-h" ]; then
+        echo "Remove branch overrides for the given projects."
+        echo "Usage: $(basename $0) unset <project(s)>"
+        echo
+        exit 1
+    fi
 }
 
 function notimplemented() {
@@ -56,22 +167,55 @@ function notimplemented() {
     exit 1
 }
 
+function ccd_set() {
+    usage_set $*
+    project=$1
+    branch=$2
+    if [ $branch == "master" ]; then
+        tag_unset $project
+        return
+    fi
+    git_clone $project $branch
+    project_build $project
+    docker_build $project $branch
+    tag_set $project $branch
+}
+
+function ccd_unset() {
+    usage_unset $*
+    projects=$*
+    for project in $projects
+    do
+        tag_unset $project
+    done
+}
+
+function ccd_status() {
+    notimplemented
+}
+
+function ccd_update() {
+    notimplemented
+}
+
 if [ $# -lt 1 ]; then
     usage
 fi
 
-case $1 in
+command=$1
+shift
+case $command in
     set)
-        notimplemented
+        ccd_set $*
         ;;
     unset)
-        notimplemented
+        ccd_unset $*
         ;;
     status)
-        notimplemented
+        ccd_status
         ;;
     update)
-        notimplemented
+        ccd_update
         ;;
     *)
         usage
