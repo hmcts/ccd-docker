@@ -244,14 +244,14 @@ function usage() {
     echo "Usage: $(basename $0) command [options]"
     echo 
     echo "Commands:"
-    echo "  set repo branch [repo branch] - add overrides and build project"
-    echo "  unset repo [repo] - remove repo overrides"
-    echo "  branches [project] - list available branches"
+    echo "  set <project> <branch> - override and build project"
+    echo "  unset <project...> - remove project override(s)"
+    echo "  branches <project...> - list available branches"
     echo "  status - list current overrides and their status against upstream"
-    echo "  update repo [repo] - update rep overirde to match upstream branch and build"
-    echo "  enable [options] - enable a project"
-    echo "  disable [options] - disable a project"
-    echo "  compose [options] - wrap docker compose for your configuration"
+    echo "  update <project...> - update project overide to match upstream branch; and build"
+    echo "  enable <project>|defaults|show - enable a compose file"
+    echo "  disable <project> - disable a compose file"
+    echo "  compose [<docker-compose command> [options]] - wrap docker compose for your configuration"
     echo
     exit 1
 }
@@ -268,7 +268,7 @@ function usage_set() {
 function usage_unset() {
     if [ $# -lt 1 -o "$1" == "-h" ]; then
         echo "Remove branch overrides for the given projects."
-        echo "Usage: $(basename $0) unset <project(s)>"
+        echo "Usage: $(basename $0) unset <project...>"
         echo
         exit 1
     fi
@@ -277,7 +277,7 @@ function usage_unset() {
 function usage_branches() {
     if [ $# -lt 1 -o "$1" == "-h" ]; then
         echo "List available branches for the given projects."
-        echo "Usage: $(basename $0) branches [project]"
+        echo "Usage: $(basename $0) branches <project...>"
         echo
         exit 1
     fi
@@ -287,7 +287,7 @@ function usage_enable() {
     if [ $# -eq 1 -a "$1" == "-h" ]; then
         echo "Enable projects that will be run by 'compose'"
         echo "Usage:"
-        echo "  $(basename $0) enable [project] - enable 'project'"
+        echo "  $(basename $0) enable <project> - enable 'project'"
         echo "  $(basename $0) enable defaults - reset the enabled projects to the defaults"
         echo "  $(basename $0) enable show - currently enabled projects"
         echo
@@ -298,7 +298,7 @@ function usage_enable() {
 function usage_disable() {
     if [ $# -ne 1 -o "$1" == "-h" ]; then
         echo "Disable a projects from being run by 'compose'"
-        echo "Usage: $(basename $0) disable [project]"
+        echo "Usage: $(basename $0) disable <project>"
         echo
         exit 1
     fi
@@ -307,7 +307,7 @@ function usage_disable() {
 function usage_compose() {
     if [ $# -eq 1 -a "$1" == "-h" ]; then
         echo "Use docker-compose to run the configured overrides and enabled projects"
-        echo "Usage: $(basename $0) compose [docker-compose options]"
+        echo "Usage: $(basename $0) compose [<docker-comopose command> [options]]"
         echo
         exit 1
     fi
