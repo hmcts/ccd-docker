@@ -73,6 +73,34 @@ function tag_set() {
     echo "export $tagEnv=$tagName" >> $TAGS_FILE
 }
 
+function has_active_tags() {
+    egrep -q "_TAG=" $TAGS_FILE
+    if [ $? -eq 0 ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+function active_tags() {
+    egrep "_TAG=" $TAGS_FILE | sed -E 's/^export +(.*)_TAG=.*/\1/'
+}
+
+function active_tag_hash() {
+    tag=$1
+    egrep "${tag}_TAG=" $TAGS_FILE | sed -E 's/.*[-]([a-f0-9]+)$/\1/'
+}
+
+function active_tag_branch() {
+    tag=$1
+    egrep "${tag}_TAG=" $TAGS_FILE | sed -E 's/.*=(.+)[-][a-f0-9]+$/\1/'
+}
+
+function tag_friendly_name() {
+    tag=$1
+    echo $1 | tr "[:upper:]_" "[:lower:]-"
+}
+
 function workspace_dir() {
     project=$1
     workspace="$WORKSPACE_ROOT/$project"
@@ -164,6 +192,28 @@ function create_compose_file_options() {
             compose_file_options="$compose_file_options -f compose/${compose_file}.yml"
     done
     echo $compose_file_options
+}
+
+function status_tags() {
+    if [ $(has_active_tags) -eq 1 ]; then
+        echo "Current overrides:"
+        for tag in $(active_tags)
+        do
+            echo "$(tag_friendly_name $tag) branch:$(active_tag_branch $tag) hash:$(active_tag_hash $tag)"
+        done
+    else
+        echo "No overrides, all using master"
+    fi
+}
+
+function status_compose_files() {
+    if [ $(has_active_compose_files) -eq 1 ]; then
+        echo "Active compose files:"
+        echo "$(active_compose_files)"
+    else
+        echo "Using default compose files:"
+        echo "$(default_compose_files)"
+    fi
 }
 
 function usage() {
@@ -258,7 +308,13 @@ function ccd_unset() {
 }
 
 function ccd_status() {
-    notimplemented
+    echo "Status:"
+    echo "======="
+    echo
+    status_compose_files
+    echo
+    status_tags
+    echo
 }
 
 function ccd_update() {
@@ -361,6 +417,8 @@ function ccd_disable() {
 
 function ccd_compose() {
     usage_compose $*
+    status_compose_files
+    status_tags
     options="$@"
     source $TAGS_FILE
     compose_file_options=$(create_compose_file_options)
