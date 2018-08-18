@@ -136,9 +136,18 @@ function available_compose_files() {
     find compose -name "*.yml" | xargs -I % basename % .yml
 }
 
+function default_compose_files() {
+    cat compose/defaults.conf
+}
+
 function active_compose_files() {
-    source $TAGS_FILE
-    echo $(available_compose_files)
+    egrep -q "^CCD_ENABLED_COMPOSE_FILES=" $TAGS_FILE
+    if [ $? -eq 0 ]; then
+        source $TAGS_FILE
+        echo $CCD_ENABLED_COMPOSE_FILES
+    else
+        echo $(default_compose_files)
+    fi
 }
 
 function create_compose_file_options() {
