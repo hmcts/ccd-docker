@@ -140,9 +140,17 @@ function default_compose_files() {
     cat compose/defaults.conf
 }
 
-function active_compose_files() {
+function isactive_compose_files() {
     egrep -q "^CCD_ENABLED_COMPOSE_FILES=" $TAGS_FILE
     if [ $? -eq 0 ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+function active_compose_files() {
+    if [ $(isactive_compose_files) -eq 1 ]; then
         source $TAGS_FILE
         echo $CCD_ENABLED_COMPOSE_FILES
     else
@@ -186,6 +194,27 @@ function usage_unset() {
     if [ $# -lt 1 -o "$1" == "-h" ]; then
         echo "Remove branch overrides for the given projects."
         echo "Usage: $(basename $0) unset <project(s)>"
+        echo
+        exit 1
+    fi
+}
+
+function usage_enable() {
+    if [ $# -eq 1 -a "$1" == "-h" ]; then
+        echo "Enable projects that will be run by 'compose'"
+        echo "Usage:"
+        echo "  $(basename $0) enable [project] - enable 'project'"
+        echo "  $(basename $0) enable defaults - reset the enabled projects to the defaults"
+        echo "  $(basename $0) enable show - currently enabled projects"
+        echo
+        exit 1
+    fi
+}
+
+function usage_disable() {
+    if [ $# -ne 1 -o "$1" == "-h" ]; then
+        echo "Disable a projects from being run by 'compose'"
+        echo "Usage: $(basename $0) disable [project]"
         echo
         exit 1
     fi
@@ -236,12 +265,98 @@ function ccd_update() {
     notimplemented
 }
 
+function ccd_enable_show() {
+    if [ $(isactive_compose_files) -eq 1 ]; then
+        echo "Currently active compose files:"
+        for compose_file in $(active_compose_files)
+        do
+            echo $compose_file
+        done | sort
+        echo
+    fi
+    echo "Default compose files:"
+    for compose_file in $(default_compose_files)
+    do
+        echo $compose_file
+    done | sort
+}
+
+function ccd_enable_defaults() {
+    if [ $(isactive_compose_files) -eq 1 ]; then
+        sed -i '' "/CCD_ENABLED_COMPOSE_FILES/d" $TAGS_FILE
+    fi
+}
+
+function ccd_enable_compose_file() {
+    for compose_file in $*
+    do
+        if [ ! -f compose/${compose_file}.yml ]; then
+            (>&2 echo "No such compose file.  Choose one of:"
+            echo $(available_compose_files))
+        else
+            touch $TAGS_FILE
+            source $TAGS_FILE
+            sed -i '' "/CCD_ENABLED_COMPOSE_FILES/d" $TAGS_FILE
+            existing=0
+            for enabled_file in $CCD_ENABLED_COMPOSE_FILES
+            do
+                if [ "$compose_file" == "$enabled_file" ]; then
+                    existing=1
+                fi
+            done
+            if [ $existing -eq 0 ]; then
+                echo "CCD_ENABLED_COMPOSE_FILES=\"$CCD_ENABLED_COMPOSE_FILES $compose_file\"" >> $TAGS_FILE
+            else
+                echo "CCD_ENABLED_COMPOSE_FILES=\"$CCD_ENABLED_COMPOSE_FILES\"" >> $TAGS_FILE
+            fi
+        fi
+    done
+}
+
 function ccd_enable() {
-    notimplemented
+    usage_enable $*
+        subcommand=$1
+    case $subcommand in
+        show)
+            ccd_enable_show
+            ;;
+        default|defaults)
+            ccd_enable_defaults
+            ;;
+        *)
+            ccd_enable_compose_file $*
+            ;;
+    esac
 }
 
 function ccd_disable() {
-    notimplemented
+    if [ $(isactive_compose_files) -eq 0 ]; then
+        (>&2 echo "No enabled compose files, so we can't remove this.  Currently using defaults:" 
+        echo $(default_compose_files))
+    else
+        for compose_file in $*
+        do
+            touch $TAGS_FILE
+            source $TAGS_FILE
+            sed -i '' "/CCD_ENABLED_COMPOSE_FILES/d" $TAGS_FILE
+            existing=0
+            for enabled_file in $CCD_ENABLED_COMPOSE_FILES
+            do
+                if [ "$compose_file" != "$enabled_file" ]; then
+                    new_enabled="$new_enabled $enabled_file"
+                else
+                    existing=1
+                fi
+            done
+            if [ $existing -eq 0 ]; then
+                (>&2 echo "Cannot disable \"$compose_file\", as it is not active.  Currently active:" 
+                echo $(active_compose_files))
+            fi
+            if [ "$new_enabled" != "" ]; then
+                echo "CCD_ENABLED_COMPOSE_FILES=\"$new_enabled\"" >> $TAGS_FILE
+            fi
+        done
+    fi
 }
 
 function ccd_compose() {
@@ -272,10 +387,10 @@ case $command in
         ccd_update
         ;;
     enable)
-        ccd_enable
+        ccd_enable $*
         ;;
     disable)
-        ccd_disable
+        ccd_disable $*
         ;;
     compose)
         ccd_compose "$@"
