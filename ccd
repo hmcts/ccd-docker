@@ -132,6 +132,23 @@ function docker_build() {
     (cd $workspace && docker build . -t hmcts/$project:$tagName || exit $?)
 }
 
+function available_compose_files() {
+    find compose -name "*.yml" | xargs -I % basename % .yml
+}
+
+function active_compose_files() {
+    source $TAGS_FILE
+    echo $(available_compose_files)
+}
+
+function create_compose_file_options() {
+    for compose_file in $(active_compose_files)
+    do
+            compose_file_options="$compose_file_options -f compose/${compose_file}.yml"
+    done
+    echo $compose_file_options
+}
+
 function usage() {
     echo "Usage: $(basename $0) command [options]"
     echo 
@@ -140,6 +157,9 @@ function usage() {
     echo "  unset repo [repo] - remove repo overrides"
     echo "  status - list current overrides and their status against upstream"
     echo "  update repo [repo] - update rep overirde to match upstream branch and build"
+    echo "  enable [options] - enable a project"
+    echo "  disable [options] - disable a project"
+    echo "  compose [options] - wrap docker compose for your configuration"
     echo
     exit 1
 }
@@ -157,6 +177,15 @@ function usage_unset() {
     if [ $# -lt 1 -o "$1" == "-h" ]; then
         echo "Remove branch overrides for the given projects."
         echo "Usage: $(basename $0) unset <project(s)>"
+        echo
+        exit 1
+    fi
+}
+
+function usage_compose() {
+    if [ $# -eq 1 -a "$1" == "-h" ]; then
+        echo "Use docker-compose to run the configured overrides and enabled projects"
+        echo "Usage: $(basename $0) compose [docker-compose options]"
         echo
         exit 1
     fi
@@ -198,6 +227,22 @@ function ccd_update() {
     notimplemented
 }
 
+function ccd_enable() {
+    notimplemented
+}
+
+function ccd_disable() {
+    notimplemented
+}
+
+function ccd_compose() {
+    usage_compose $*
+    options="$@"
+    source $TAGS_FILE
+    compose_file_options=$(create_compose_file_options)
+    docker-compose $compose_file_options $options
+}
+
 if [ $# -lt 1 ]; then
     usage
 fi
@@ -216,6 +261,15 @@ case $command in
         ;;
     update)
         ccd_update
+        ;;
+    enable)
+        ccd_enable
+        ;;
+    disable)
+        ccd_disable
+        ;;
+    compose)
+        ccd_compose "$@"
         ;;
     *)
         usage
