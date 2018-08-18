@@ -116,11 +116,35 @@ function clean_name() {
 function git_clone() {
     project=$1
     branch=$2
+    if [ -n "$branch" ]; then
+        branch_option="--branch $branch"
+    fi
     workspace=$(workspace_dir $project)
     repository=$(project_config $project repository)
     rm -rf $workspace
     mkdir -p $workspace
-    git clone --branch $branch $repository $workspace || exit $?
+    result=$(git clone $branch_option $repository $workspace 2>&1 || exit $?)
+    exitcode=$?
+    echo "$result"
+    echo $result | egrep -q "Remote branch .* not found in upstream origin"
+    no_branch=$?
+    if [ $no_branch -eq 0 ]; then
+        echo
+        echo "$project does not contain the branch '$branch'"
+        echo
+        echo "  $(basename $0) branches $project"
+        echo
+        echo "To list available branches in '$project'"
+        echo
+        exit $exitcode
+    fi
+}
+
+function available_branches() {
+    project=$1
+    workspace=$(workspace_dir $project)
+    git_clone $project
+    (cd $workspace; git branch -vr --sort refname --no-merged) | egrep -v 'HEAD|master|demo' | sed 's#origin/##'
 }
 
 git_hash() {
@@ -222,6 +246,7 @@ function usage() {
     echo "Commands:"
     echo "  set repo branch [repo branch] - add overrides and build project"
     echo "  unset repo [repo] - remove repo overrides"
+    echo "  branches [project] - list available branches"
     echo "  status - list current overrides and their status against upstream"
     echo "  update repo [repo] - update rep overirde to match upstream branch and build"
     echo "  enable [options] - enable a project"
@@ -244,6 +269,15 @@ function usage_unset() {
     if [ $# -lt 1 -o "$1" == "-h" ]; then
         echo "Remove branch overrides for the given projects."
         echo "Usage: $(basename $0) unset <project(s)>"
+        echo
+        exit 1
+    fi
+}
+
+function usage_branches() {
+    if [ $# -lt 1 -o "$1" == "-h" ]; then
+        echo "List available branches for the given projects."
+        echo "Usage: $(basename $0) branches [project]"
         echo
         exit 1
     fi
@@ -304,6 +338,18 @@ function ccd_unset() {
     for project in $projects
     do
         tag_unset $project
+    done
+}
+
+function ccd_branches() {
+    usage_branches $*
+    projects=$*
+    for project in $projects
+    do
+        echo "Branches in '$project'"
+        git_clone $project
+        available_branches $project
+        echo
     done
 }
 
@@ -437,6 +483,9 @@ case $command in
         ;;
     unset)
         ccd_unset $*
+        ;;
+    branches)
+        ccd_branches $*
         ;;
     status)
         ccd_status
