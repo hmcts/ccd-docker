@@ -140,7 +140,7 @@ function default_compose_files() {
     cat compose/defaults.conf
 }
 
-function isactive_compose_files() {
+function has_active_compose_files() {
     egrep -q "^CCD_ENABLED_COMPOSE_FILES=" $TAGS_FILE
     if [ $? -eq 0 ]; then
         echo 1
@@ -150,7 +150,7 @@ function isactive_compose_files() {
 }
 
 function active_compose_files() {
-    if [ $(isactive_compose_files) -eq 1 ]; then
+    if [ $(has_active_compose_files) -eq 1 ]; then
         source $TAGS_FILE
         echo $CCD_ENABLED_COMPOSE_FILES
     else
@@ -266,7 +266,7 @@ function ccd_update() {
 }
 
 function ccd_enable_show() {
-    if [ $(isactive_compose_files) -eq 1 ]; then
+    if [ $(has_active_compose_files) -eq 1 ]; then
         echo "Currently active compose files:"
         for compose_file in $(active_compose_files)
         do
@@ -282,7 +282,7 @@ function ccd_enable_show() {
 }
 
 function ccd_enable_defaults() {
-    if [ $(isactive_compose_files) -eq 1 ]; then
+    if [ $(has_active_compose_files) -eq 1 ]; then
         sed -i '' "/CCD_ENABLED_COMPOSE_FILES/d" $TAGS_FILE
     fi
 }
@@ -330,7 +330,7 @@ function ccd_enable() {
 }
 
 function ccd_disable() {
-    if [ $(isactive_compose_files) -eq 0 ]; then
+    if [ $(has_active_compose_files) -eq 0 ]; then
         (>&2 echo "No enabled compose files, so we can't remove this.  Currently using defaults:" 
         echo $(default_compose_files))
     else
