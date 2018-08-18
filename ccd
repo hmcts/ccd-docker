@@ -322,7 +322,7 @@ function ccd_set() {
     usage_set $*
     project=$1
     branch=$2
-    if [ $branch == "master" ]; then
+    if [ "$branch" == "master" ]; then
         tag_unset $project
         return
     fi
