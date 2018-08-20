@@ -74,11 +74,15 @@ function tag_set() {
 }
 
 function has_active_tags() {
-    egrep -q "_TAG=" $TAGS_FILE
-    if [ $? -eq 0 ]; then
-        echo 1
-    else
+    if [ $(has_tagfile) -eq 0 ]; then
         echo 0
+    else
+        egrep -q "_TAG=" $TAGS_FILE
+        if [ $? -eq 0 ]; then
+            echo 1
+        else
+            echo 0
+        fi
     fi
 }
 
@@ -192,12 +196,24 @@ function default_compose_files() {
     cat compose/defaults.conf
 }
 
-function has_active_compose_files() {
-    egrep -q "^CCD_ENABLED_COMPOSE_FILES=" $TAGS_FILE
-    if [ $? -eq 0 ]; then
+function has_tagfile() {
+    if [ -f $TAGS_FILE ]; then
         echo 1
     else
         echo 0
+    fi
+}
+
+function has_active_compose_files() {
+    if [ $(has_tagfile) -eq 0 ]; then
+        echo 0
+    else
+        egrep -q "^CCD_ENABLED_COMPOSE_FILES=" $TAGS_FILE
+        if [ $? -eq 0 ]; then
+            echo 1
+        else
+            echo 0
+        fi
     fi
 }
 
@@ -466,7 +482,9 @@ function ccd_compose() {
     status_compose_files
     status_tags
     options="$@"
-    source $TAGS_FILE
+    if [ $(has_tagfile) -eq 1 ]; then
+        source $TAGS_FILE
+    fi
     compose_file_options=$(create_compose_file_options)
     docker-compose $compose_file_options $options
 }
