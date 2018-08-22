@@ -257,8 +257,8 @@ function status_compose_files() {
 }
 
 function usage() {
-    echo "Usage: $(basename $0) command [options]"
-    echo 
+    echo "Usage: $(basename $0) <command> [options]"
+    echo
     echo "Commands:"
     echo "  set <project> <branch> - override and build project"
     echo "  unset <project...> - remove project override(s)"
@@ -323,7 +323,7 @@ function usage_disable() {
 function usage_compose() {
     if [ $# -eq 1 -a "$1" == "-h" ]; then
         echo "Use docker-compose to run the configured overrides and enabled projects"
-        echo "Usage: $(basename $0) compose [<docker-comopose command> [options]]"
+        echo "Usage: $(basename $0) compose [<docker-compose command> [options]]"
         echo
         exit 1
     fi
@@ -342,6 +342,7 @@ function ccd_set() {
         tag_unset $project
         return
     fi
+    project_config $project repository
     git_clone $project $branch
     project_build $project
     docker_build $project $branch
@@ -449,7 +450,7 @@ function ccd_enable() {
 
 function ccd_disable() {
     if [ $(has_active_compose_files) -eq 0 ]; then
-        (>&2 echo "No enabled compose files, so we can't remove this.  Currently using defaults:" 
+        (>&2 echo "No enabled compose files, so we can't remove this.  Currently using defaults:"
         echo $(default_compose_files))
     else
         for compose_file in $*
@@ -467,7 +468,7 @@ function ccd_disable() {
                 fi
             done
             if [ $existing -eq 0 ]; then
-                (>&2 echo "Cannot disable \"$compose_file\", as it is not active.  Currently active:" 
+                (>&2 echo "Cannot disable \"$compose_file\", as it is not active.  Currently active:"
                 echo $(active_compose_files))
             fi
             if [ "$new_enabled" != "" ]; then
