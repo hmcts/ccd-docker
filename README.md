@@ -5,7 +5,7 @@
 - [Using CCD](#using-ccd)
 - [Compose branches](#compose-branches)
 - [Compose projects](#compose-projects)
-- [Under the hood](#under-the-hood)
+- [Under the hood](#under-the-hood-speedboat)
 - [Containers](#containers)
 - [Local development](#local-development)
 - [Variables](#variables)
@@ -189,7 +189,7 @@ when no branches are used; or:
 
 when branches are in use.
 
-*:information_source: In addition to the `status` command, the current status is also displayed for every `compose` commands.*
+:information_source: *In addition to the `status` command, the current status is also displayed for every `compose` commands.*
 
 ## Compose projects
 
@@ -250,7 +250,7 @@ Retrieve from `.tags.env` the branches and compose files currently enabled and d
 
 The compose command acts as a wrapper around `docker-compose` and accept all commands and options supported by it.
 
-*:information_source: For the complete documentation of Docker Compose CLI, see [Compose command-line reference](https://docs.docker.com/compose/reference/).*
+:information_source: *For the complete documentation of Docker Compose CLI, see [Compose command-line reference](https://docs.docker.com/compose/reference/).*
 
 Here are some useful commands:
 
@@ -331,7 +331,7 @@ environment:
 
 The `CLIENT_SECRET` must then also be provided to the container used by the client service.
 
-*:information_source: To prevent duplication, the client secret should be defined in the `.env` file and then used in the compose files using string interpolation `"${<VARIABLE_NAME>}"`.*
+:information_source: *To prevent duplication, the client secret should be defined in the `.env` file and then used in the compose files using string interpolation `"${<VARIABLE_NAME>}"`.*
 
 #### Service-to-Service
 
@@ -344,7 +344,7 @@ environment:
 
 The `SERVICE_SECRET` must then also be provided to the container running the micro-service.
 
-*:information_source: To prevent duplication, the client secret should be defined in the `.env` file and then used in the compose files using string interpolation `"${<VARIABLE_NAME>}"`.*
+:information_source: *To prevent duplication, the client secret should be defined in the `.env` file and then used in the compose files using string interpolation `"${<VARIABLE_NAME>}"`.*
 
 ## Containers
 
