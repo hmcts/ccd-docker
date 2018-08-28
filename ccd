@@ -1,0 +1,527 @@
+#!/bin/bash
+
+TAGS_FILE=".tags.env"
+WORKSPACE_ROOT=".workspace"
+
+# Build related
+GRADLE_ASSEMBLE_CMD="./gradlew assemble"
+
+function project_config() {
+    project=$1
+    config=$2
+    case $project in
+        ccd-data-store-api)
+            repository="git@github.com:hmcts/ccd-data-store-api.git"
+            tagEnv="CCD_DATA_STORE_API_TAG"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+        ccd-definition-store-api)
+            repository="git@github.com:hmcts/ccd-definition-store-api.git"
+            tagEnv="CCD_DEFINITION_STORE_API_TAG"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+        ccd-user-profile-api)
+            repository="git@github.com:hmcts/ccd-user-profile-api.git"
+            tagEnv="CCD_USER_PROFILE_API_TAG"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+        ccd-api-gateway)
+            repository="git@github.com:hmcts/ccd-api-gateway.git"
+            tagEnv="CCD_API_GATEWAY_TAG"
+            ;;
+        ccd-case-management-web)
+            repository="git@github.com:hmcts/ccd-case-management-web.git"
+            tagEnv="CCD_CASE_MANAGEMENT_WEB_TAG"
+            ;;
+        *)
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web"
+            exit 1 ;;
+    esac
+    case $config in
+        tagEnv)
+            echo $tagEnv
+            ;;
+        repository)
+            echo $repository
+            ;;
+        buildCommand)
+            echo $buildCommand
+            ;;
+        *)
+            echo "Config is one of repository, tagEnv or buildCommand. '$config' is unkown"
+            exit 1
+            ;;
+    esac
+}
+
+
+function tag_unset() {
+    project=$1
+    tagEnv=$(project_config $project tagEnv)
+    touch $TAGS_FILE
+    sed -i '' "/$tagEnv/d" $TAGS_FILE
+}
+
+
+function tag_set() {
+    project=$1
+    branch=$2
+    tagEnv=$(project_config $project tagEnv)
+    tagName=$(tag_name $project $branch)
+    touch $TAGS_FILE
+    sed -i '' "/$tagEnv/d" $TAGS_FILE
+    echo "export $tagEnv=$tagName" >> $TAGS_FILE
+}
+
+function has_active_tags() {
+    if [ $(has_tagfile) -eq 0 ]; then
+        echo 0
+    else
+        egrep -q "_TAG=" $TAGS_FILE
+        if [ $? -eq 0 ]; then
+            echo 1
+        else
+            echo 0
+        fi
+    fi
+}
+
+function active_tags() {
+    egrep "_TAG=" $TAGS_FILE | sed -E 's/^export +(.*)_TAG=.*/\1/'
+}
+
+function active_tag_hash() {
+    tag=$1
+    egrep "${tag}_TAG=" $TAGS_FILE | sed -E 's/.*[-]([a-f0-9]+)$/\1/'
+}
+
+function active_tag_branch() {
+    tag=$1
+    egrep "${tag}_TAG=" $TAGS_FILE | sed -E 's/.*=(.+)[-][a-f0-9]+$/\1/'
+}
+
+function tag_friendly_name() {
+    tag=$1
+    echo $1 | tr "[:upper:]_" "[:lower:]-"
+}
+
+function workspace_dir() {
+    project=$1
+    workspace="$WORKSPACE_ROOT/$project"
+    echo $workspace
+}
+
+function clean_name() {
+    name=$1
+    clean=$(echo $name | sed 's#/#-#')
+    echo $clean
+}
+
+function git_clone() {
+    project=$1
+    branch=$2
+    if [ -n "$branch" ]; then
+        branch_option="--branch $branch"
+    fi
+    workspace=$(workspace_dir $project)
+    repository=$(project_config $project repository)
+    rm -rf $workspace
+    mkdir -p $workspace
+    result=$(git clone $branch_option $repository $workspace 2>&1 || exit $?)
+    exitcode=$?
+    echo "$result"
+    echo $result | egrep -q "Remote branch .* not found in upstream origin"
+    no_branch=$?
+    if [ $no_branch -eq 0 ]; then
+        echo
+        echo "$project does not contain the branch '$branch'"
+        echo
+        echo "  $(basename $0) branches $project"
+        echo
+        echo "To list available branches in '$project'"
+        echo
+        exit $exitcode
+    fi
+}
+
+function available_branches() {
+    project=$1
+    workspace=$(workspace_dir $project)
+    git_clone $project
+    (cd $workspace; git branch -vr --sort refname --no-merged) | egrep -v 'HEAD|master|demo' | sed 's#origin/##'
+}
+
+git_hash() {
+    project=$1
+    workspace=$(workspace_dir $project)
+    gitHash=$(cd $workspace && git rev-parse HEAD | cut -c -7)
+    echo $gitHash
+}
+
+
+function tag_name() {
+    project=$1
+    branch=$2
+    gitHash=$(git_hash $project)
+    cleanBranch=$(clean_name $branch)
+    branch_and_hash=${cleanBranch}-${gitHash}
+    echo $branch_and_hash
+}
+
+
+function project_build() {
+    project=$1
+    workspace=$(workspace_dir $project)
+    buildCommand=$(project_config $project buildCommand)
+    # Build if required
+    if [ -n "$buildCommand" ]; then
+        (cd $workspace && eval $buildCommand || exit $?)
+    fi
+}
+
+
+function docker_build() {
+    project=$1
+    branch=$2
+    workspace=$(workspace_dir $project)
+    tagName=$(tag_name $project $branch)
+    (cd $workspace && docker build . -t hmcts/$project:$tagName || exit $?)
+}
+
+function available_compose_files() {
+    find compose -name "*.yml" | xargs -I % basename % .yml
+}
+
+function default_compose_files() {
+    cat compose/defaults.conf
+}
+
+function has_tagfile() {
+    if [ -f $TAGS_FILE ]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+function has_active_compose_files() {
+    if [ $(has_tagfile) -eq 0 ]; then
+        echo 0
+    else
+        egrep -q "^CCD_ENABLED_COMPOSE_FILES=" $TAGS_FILE
+        if [ $? -eq 0 ]; then
+            echo 1
+        else
+            echo 0
+        fi
+    fi
+}
+
+function active_compose_files() {
+    if [ $(has_active_compose_files) -eq 1 ]; then
+        source $TAGS_FILE
+        echo $CCD_ENABLED_COMPOSE_FILES
+    else
+        echo $(default_compose_files)
+    fi
+}
+
+function create_compose_file_options() {
+    for compose_file in $(active_compose_files)
+    do
+            compose_file_options="$compose_file_options -f compose/${compose_file}.yml"
+    done
+    echo $compose_file_options
+}
+
+function status_tags() {
+    if [ $(has_active_tags) -eq 1 ]; then
+        echo "Current overrides:"
+        for tag in $(active_tags)
+        do
+            echo "$(tag_friendly_name $tag) branch:$(active_tag_branch $tag) hash:$(active_tag_hash $tag)"
+        done
+    else
+        echo "No overrides, all using master"
+    fi
+}
+
+function status_compose_files() {
+    if [ $(has_active_compose_files) -eq 1 ]; then
+        echo "Active compose files:"
+        echo "$(active_compose_files)"
+    else
+        echo "Using default compose files:"
+        echo "$(default_compose_files)"
+    fi
+}
+
+function usage() {
+    echo "Usage: $(basename $0) <command> [options]"
+    echo
+    echo "Commands:"
+    echo "  set <project> <branch> - override and build project"
+    echo "  unset <project...> - remove project override(s)"
+    echo "  branches <project...> - list available branches"
+    echo "  status - list current overrides and their status against upstream"
+    echo "  update <project...> - update project overide to match upstream branch; and build"
+    echo "  enable <project>|defaults|show - enable a compose file"
+    echo "  disable <project> - disable a compose file"
+    echo "  compose [<docker-compose command> [options]] - wrap docker compose for your configuration"
+    echo
+    exit 1
+}
+
+function usage_set() {
+    if [ $# -ne 2 -o "$1" == "-h" ]; then
+        echo "Overrides project to use the supplied branch, and build the project."
+        echo "Usage: $(basename $0) set <project> <branch>"
+        echo
+        exit 1
+    fi
+}
+
+function usage_unset() {
+    if [ $# -lt 1 -o "$1" == "-h" ]; then
+        echo "Remove branch overrides for the given projects."
+        echo "Usage: $(basename $0) unset <project...>"
+        echo
+        exit 1
+    fi
+}
+
+function usage_branches() {
+    if [ $# -lt 1 -o "$1" == "-h" ]; then
+        echo "List available branches for the given projects."
+        echo "Usage: $(basename $0) branches <project...>"
+        echo
+        exit 1
+    fi
+}
+
+function usage_enable() {
+    if [ $# -eq 1 -a "$1" == "-h" ]; then
+        echo "Enable projects that will be run by 'compose'"
+        echo "Usage:"
+        echo "  $(basename $0) enable <project> - enable 'project'"
+        echo "  $(basename $0) enable defaults - reset the enabled projects to the defaults"
+        echo "  $(basename $0) enable show - currently enabled projects"
+        echo
+        exit 1
+    fi
+}
+
+function usage_disable() {
+    if [ $# -ne 1 -o "$1" == "-h" ]; then
+        echo "Disable a projects from being run by 'compose'"
+        echo "Usage: $(basename $0) disable <project>"
+        echo
+        exit 1
+    fi
+}
+
+function usage_compose() {
+    if [ $# -eq 1 -a "$1" == "-h" ]; then
+        echo "Use docker-compose to run the configured overrides and enabled projects"
+        echo "Usage: $(basename $0) compose [<docker-compose command> [options]]"
+        echo
+        exit 1
+    fi
+}
+
+function notimplemented() {
+    echo "Not Implemented yet"
+    exit 1
+}
+
+function ccd_set() {
+    usage_set $*
+    project=$1
+    branch=$2
+    if [ "$branch" == "master" ]; then
+        tag_unset $project
+        return
+    fi
+    project_config $project repository
+    git_clone $project $branch
+    project_build $project
+    docker_build $project $branch
+    tag_set $project $branch
+}
+
+function ccd_unset() {
+    usage_unset $*
+    projects=$*
+    for project in $projects
+    do
+        tag_unset $project
+    done
+}
+
+function ccd_branches() {
+    usage_branches $*
+    projects=$*
+    for project in $projects
+    do
+        echo "Branches in '$project'"
+        git_clone $project
+        available_branches $project
+        echo
+    done
+}
+
+function ccd_status() {
+    echo "Status:"
+    echo "======="
+    echo
+    status_compose_files
+    echo
+    status_tags
+    echo
+}
+
+function ccd_update() {
+    notimplemented
+}
+
+function ccd_enable_show() {
+    if [ $(has_active_compose_files) -eq 1 ]; then
+        echo "Currently active compose files:"
+        for compose_file in $(active_compose_files)
+        do
+            echo $compose_file
+        done | sort
+        echo
+    fi
+    echo "Default compose files:"
+    for compose_file in $(default_compose_files)
+    do
+        echo $compose_file
+    done | sort
+}
+
+function ccd_enable_defaults() {
+    if [ $(has_active_compose_files) -eq 1 ]; then
+        sed -i '' "/CCD_ENABLED_COMPOSE_FILES/d" $TAGS_FILE
+    fi
+}
+
+function ccd_enable_compose_file() {
+    for compose_file in $*
+    do
+        if [ ! -f compose/${compose_file}.yml ]; then
+            (>&2 echo "No such compose file.  Choose one of:"
+            echo $(available_compose_files))
+        else
+            touch $TAGS_FILE
+            source $TAGS_FILE
+            sed -i '' "/CCD_ENABLED_COMPOSE_FILES/d" $TAGS_FILE
+            existing=0
+            for enabled_file in $CCD_ENABLED_COMPOSE_FILES
+            do
+                if [ "$compose_file" == "$enabled_file" ]; then
+                    existing=1
+                fi
+            done
+            if [ $existing -eq 0 ]; then
+                echo "CCD_ENABLED_COMPOSE_FILES=\"$CCD_ENABLED_COMPOSE_FILES $compose_file\"" >> $TAGS_FILE
+            else
+                echo "CCD_ENABLED_COMPOSE_FILES=\"$CCD_ENABLED_COMPOSE_FILES\"" >> $TAGS_FILE
+            fi
+        fi
+    done
+}
+
+function ccd_enable() {
+    usage_enable $*
+        subcommand=$1
+    case $subcommand in
+        show)
+            ccd_enable_show
+            ;;
+        default|defaults)
+            ccd_enable_defaults
+            ;;
+        *)
+            ccd_enable_compose_file $*
+            ;;
+    esac
+}
+
+function ccd_disable() {
+    if [ $(has_active_compose_files) -eq 0 ]; then
+        (>&2 echo "No enabled compose files, so we can't remove this.  Currently using defaults:"
+        echo $(default_compose_files))
+    else
+        for compose_file in $*
+        do
+            touch $TAGS_FILE
+            source $TAGS_FILE
+            sed -i '' "/CCD_ENABLED_COMPOSE_FILES/d" $TAGS_FILE
+            existing=0
+            for enabled_file in $CCD_ENABLED_COMPOSE_FILES
+            do
+                if [ "$compose_file" != "$enabled_file" ]; then
+                    new_enabled="$new_enabled $enabled_file"
+                else
+                    existing=1
+                fi
+            done
+            if [ $existing -eq 0 ]; then
+                (>&2 echo "Cannot disable \"$compose_file\", as it is not active.  Currently active:"
+                echo $(active_compose_files))
+            fi
+            if [ "$new_enabled" != "" ]; then
+                echo "CCD_ENABLED_COMPOSE_FILES=\"$new_enabled\"" >> $TAGS_FILE
+            fi
+        done
+    fi
+}
+
+function ccd_compose() {
+    usage_compose $*
+    status_compose_files
+    status_tags
+    options="$@"
+    if [ $(has_tagfile) -eq 1 ]; then
+        source $TAGS_FILE
+    fi
+    compose_file_options=$(create_compose_file_options)
+    docker-compose $compose_file_options $options
+}
+
+if [ $# -lt 1 ]; then
+    usage
+fi
+
+command=$1
+shift
+case $command in
+    set)
+        ccd_set $*
+        ;;
+    unset)
+        ccd_unset $*
+        ;;
+    branches)
+        ccd_branches $*
+        ;;
+    status)
+        ccd_status
+        ;;
+    update)
+        ccd_update
+        ;;
+    enable)
+        ccd_enable $*
+        ;;
+    disable)
+        ccd_disable $*
+        ;;
+    compose)
+        ccd_compose "$@"
+        ;;
+    *)
+        usage
+        ;;
+esac

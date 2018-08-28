@@ -1,66 +1,56 @@
 # CCD Docker :whale:
 
-- [Getting started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Starting CCD](#starting-ccd)
-  - [Using CCD](#using-ccd)
-  - [Monitoring](#monitoring-)
-  - [Stopping and cleaning up](#stopping-and-cleaning-up)
-  - [Applying updates](#applying-updates)
-  - [Pulling images](#pulling-images)
-  - [Service to service configuration](#service-to-service-configuration)
+- [Prerequisites](#prerequisites)
+- [Quick start](#quick-start)
+- [Using CCD](#using-ccd)
+- [Compose branches](#compose-branches)
+- [Compose projects](#compose-projects)
+- [Under the hood](#under-the-hood-speedboat)
 - [Containers](#containers)
 - [Local development](#local-development)
 - [Variables](#variables)
 - [Remarks](#remarks)
+- [License](#license)
 
-## Getting started
-
-The following documentation assumes that the current directory is `ccd-docker`.
-
-### Prerequisites
+## Prerequisites
 
 - [Docker](https://www.docker.com)
 
-### Starting CCD
+*The following documentation assumes that the current directory is `ccd-docker`.*
 
-Choice is given to start CCD with or without its front-end depending on the use case.
+## Quick start
 
-To start CCD __with__ the front-end:
-
-```bash
-./compose-frontend.sh up -d
-```
-
-To start CCD __without__ the front-end:
+Checkout `ccd-docker` project:
 
 ```bash
-./compose-backend.sh up -d
+git clone git@github.com:hmcts/ccd-docker.git
 ```
 
-The `-d` (detached) option start the containers in the background.
-
-The `./compose-frontend.sh` and `./compose-backend.sh` are wrappers for the following commands:
-- `./compose-frontend.sh` -> `docker-compose -f compose/backend.yml -f compose/frontend.yml`
-- `./compose-backend.sh` -> `docker-compose -f compose/backend.yml`
-
-Regular `docker-compose` commands and options can be provided to the wrappers.
-
-The containers will take ~1 minute to start. Their current status can be checked using the command:
+Pulling latest Docker images:
 
 ```bash
-docker ps
+./ccd compose pull
 ```
 
-All containers should be flagged as `Up` and `healthy`.
+Creating and starting the containers:
 
-### Using CCD
+```bash
+./ccd compose up -d
+```
+
+Usage and commands available:
+
+```bash
+./ccd
+```
+
+## Using CCD
 
 Once the containers are running, CCD's frontend can be accessed at [http://localhost:3451](http://localhost:3451).
 
 However, 3 more steps are required to correctly configure IDAM and CCD before it can be used:
 
-#### 1. Create a caseworker user
+### 1. Create a caseworker user
 
 A caseworker user can be created in IDAM using the following command:
 
@@ -79,7 +69,7 @@ For example:
 ./bin/idam-create-caseworker.sh caseworker-probate,caseworker-probate-solicitor probate@hmcts.net
 ```
 
-#### 2. Add roles
+### 2. Add roles
 
 Before a definition can be imported, roles referenced in a case definition Authorisation tabs must be defined in CCD using:
 
@@ -91,7 +81,7 @@ Parameters:
 - `role`: Name of the role, e.g: `caseworker-divorce`.
 - `classification`: Optional. One of `PUBLIC`, `PRIVATE` or `RESTRICTED`. Defaults to `PUBLIC`.
 
-#### 3. Import case definition
+### 3. Import case definition
 
 To reduce impact on performances, case definitions are imported via the command line rather than using CCD's dedicated UI:
 
@@ -114,104 +104,247 @@ Validation errors occurred importing the spreadsheet.
 
 Then the indicated role, here `caseworker-cmc-loa1`, must be added to CCD (See [2. Add roles](#2-add-roles)).
 
-#### Ready for take-off 🛫
+### Ready for take-off 🛫
 
 Back to [http://localhost:3451](http://localhost:3451), you can now log in with the email and password defined at [step 1](#1-create-a-caseworker-user).
 If you left the password out when creating the caseworker, by default it's set to: `password`.
 
-### Monitoring 🚥
+## Compose branches
 
-Status of the containers can be checked using Docker's `ps` command:
+By default, all CCD containers are running with the `latest` tag, built from the `master` branch.
 
-```bash
-./compose-frontend.sh ps
-```
+### Switch to a branch
 
-Logs for running containers can be viewed with:
+Using the `set` command, branches can be changed per project.
 
-```bash
-./compose-frontend.sh logs [-f] [service]
-```
-
-The `-f` option allows to follow the tail of the logs.
-
-The `service` parameter restricts the logs to the given service. It must match the name of a service as defined in the compose file.
-
-For example:
+Usage of the command is:
 
 ```bash
-./compose-frontend.sh logs -f ccd-definition-store-api
+./ccd set <project> <branch>
 ```
 
-Omitting the `service` parameter will show logs for all the containers.
+* `<project>` must be one of:
+  * ccd-data-store-api
+  * ccd-definition-store-api
+  * ccd-user-profile-api
+  * ccd-api-gateway
+  * ccd-case-management-web
+* `<branch>` must be an existing **remote** branch for the selected project.
 
-### Stopping and cleaning up
-
-Containers can be stopped with:
+Branches for a project can be listed using:
 
 ```bash
-./compose-frontend.sh stop [service]
+./ccd branches <project>
 ```
 
-Omitting the `service` parameters will stop all containers.
+### Apply
 
-Stopped containers are **not** destroyed and can be restarted later using:
+When switching to a branch, a Docker image is built locally and the Docker compose configuration is updated.
+
+However, to make that configuration effective, the Docker containers must be updated using:
 
 ```bash
-./compose-frontend.sh start [service]
+./ccd compose up -d
 ```
 
-To stop and destroy containers:
+### Revert to `master`
+
+When a project has been switched to a branch, it can be reverted to `master` in 2 ways:
 
 ```bash
-./compose-frontend.sh down [-v] [service]
+./ccd set <project> master
 ```
+
+or
+
+```bash
+./ccd unset <project> [<projects...>]
+```
+
+The only difference is that `unset` allows for multiple projects to be reset to `master`.
+
+In both cases, like with the `set` command, for the reset to be effective it requires the containers to be updated:
+
+```bash
+./ccd compose up -d
+```
+
+### Current branches
+
+To know which branches are currently used, the `status` command can be used:
+
+```bash
+./ccd status
+```
+
+The 2nd part of the output indicates the current branches.
+The output can either be of the form:
+
+> No overrides, all using master
+
+when no branches are used; or:
+
+> Current overrides:
+> ccd-case-management-web branch:RDM-2414 hash:ced648d
+
+when branches are in use.
+
+:information_source: *In addition to the `status` command, the current status is also displayed for every `compose` commands.*
+
+## Compose projects
+
+By default, `ccd-docker` runs the most commonly used backend and frontend projects required:
+
+* Back-end:
+  * **idam-api**: Identity and access control
+  * **service-auth-provider-api**: Service-to-service security layer
+  * **ccd-user-profile-api**: Users/jurisdictions association and usage preferences
+  * **ccd-definition-store-api**: CCD's dynamic case definition repository
+  * **ccd-data-store-api**: CCD's cases repository
+* Front-end:
+  * **authentication-web**: IDAM's login UI
+  * **ccd-api-gateway**: Proxy with IDAM and S2S integration
+  * **ccd-case-management-web**: Caseworker UI
+
+In the future, optional compose files will allow other projects to be enabled on demand using the `enable` and `disable` commands.
+
+## Under the hood :speedboat:
+
+### Set
+
+#### Non-`master` branches
+
+When switching to a branch with the `set` command, the following actions take place:
+
+1. The given branch is cloned in the temporary `.workspace` folder
+2. If required, the project is built
+3. A docker image is built
+4. The Docker image is tagged as `hmcts/<project>:<branch>-<git hash>`
+5. An entry is added to file `.tags.env` exporting an environment variable `<PROJECT>_TAG` with a value `<branch>-<git hash>` matching the Docker image tag
+
+The `.tags.env` file is sourced whenever the `ccd compose` command is used and allows to override the Docker images version used in the Docker compose files.
+
+Hence, to make that change effective, the containers must be updated using `./ccd compose up`.
+
+#### `master` branch
+
+When switching a project to `master` branch, the branch override is removed using the `unset` command detailed below.
+
+### Unset
+
+Given a list of 1 or more projects, for each project:
+
+1. If `.tags.env` contains an entry for the project, the entry is removed
+
+Similarly to when branches are set, for a change to `.tags.env` to be applied, the containers must be updated using `./ccd compose up`.
+
+### Status
+
+Retrieve from `.tags.env` the branches and compose files currently enabled and display them.
+
+### Compose
+
+```bash
+./ccd compose [<docker-compose command> [options]]
+```
+
+The compose command acts as a wrapper around `docker-compose` and accept all commands and options supported by it.
+
+:information_source: *For the complete documentation of Docker Compose CLI, see [Compose command-line reference](https://docs.docker.com/compose/reference/).*
+
+Here are some useful commands:
+
+#### Up
+
+```bash
+./ccd compose up [-d]
+```
+
+This command:
+1. Create missing containers
+2. Recreate outdated containers (= apply configuration changes)
+3. Start all enabled containers
+
+The `-d` (detached) option start the containers in the background.
+
+#### Down
+
+```bash
+./ccd compose down [-v] [project]
+```
+
+This stops and destroys all composed containers.
 
 If provided, the `-v` option will also clean the volumes.
 
-Destroyed containers cannot be restarted. A new container will need to be built using the `up` command.
+Destroyed containers cannot be restarted. New containers will need to be built using the `up` command.
 
-### Applying updates
-
-Changes to container configuration, for example by using environment variables, can be applied by calling:
+#### Ps
 
 ```bash
-./compose-frontend.sh up [service]
+./ccd compose ps [<project>]
 ```
 
-Docker will compare the new configuration with the one currently running and recreate the modified containers.
+Gives the current state of all or specified composed projects.
 
-### Pulling images
-
-To get the latest version of an image from Artifactory, the `pull` command must be used.
+#### Logs
 
 ```bash
-./compose-frontend.sh pull [service]
+./ccd compose logs [-f] [<project>]
 ```
 
-### Service to service configuration
+Displays the logs for all or specified composed projects.
+
+The `-f` (follow) option allows to follow the tail of the logs.
+
+#### Start/stop
+
+```bash
+./ccd compose start [<project>]
+./ccd compose stop [<project>]
+```
+
+Start or stop all or specified composed containers. Stopped containers can be restarted with the `start` command.
+
+:warning: Please note: Re-starting a project with stop/start does **not** apply configuration changes. Instead, the `up` command should be used to that end.
+
+#### Pull
+
+```bash
+./ccd compose pull [project]
+```
+
+Fetch the latest version of an image from its source. For the new version to be used, the associated container must be re-created using the `up` command.
+
+### Configuration
+
+#### OAuth 2
+
+OAuth 2 clients must be explicitly declared in service `idam-api` with their ID and secret.
+
+A client is defined as an environment variable complying to the pattern:
+
+```yml
+environment:
+  IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_<CLIENT_ID>: <CLIENT_SECRET>
+```
+
+The `CLIENT_SECRET` must then also be provided to the container used by the client service.
+
+:information_source: *To prevent duplication, the client secret should be defined in the `.env` file and then used in the compose files using string interpolation `"${<VARIABLE_NAME>}"`.*
+
+#### Service-to-Service
 
 Micro-services names and secret keys must be registered as part of `service-auth-provider-api` configuration by adding environment variables like:
 
 ```yml
 environment:
-  AUTH_PROVIDER_SERVICE_SERVER_MICROSERVICE_KEYS_<microservice_name>: <secret_key>
+  MICROSERVICE_KEYS_<SERVICE_NAME>: <SERVICE_SECRET>
 ```
 
-The `secret_key` must then also be provided to the container running the micro-service.
+The `SERVICE_SECRET` must then also be provided to the container running the micro-service.
 
-To remove duplication, the `secret_key` can be extracted to the Docker `.env` file and then be interpolated in the compose file, e.g:
-
-`.env`:
-```
-IDAM_KEY_CCD_DATA_STORE=AAAAAAAAAAAAAAAB
-```
-
-`compose/backend.yml`:
-```yml
-environment:
-  AUTH_PROVIDER_SERVICE_SERVER_MICROSERVICE_KEYS_CCD_DATA: "${IDAM_KEY_CCD_DATA_STORE}"
-```
+:information_source: *To prevent duplication, the client secret should be defined in the `.env` file and then used in the compose files using string interpolation `"${<VARIABLE_NAME>}"`.*
 
 ## Containers
 
@@ -282,8 +415,8 @@ For other systems, the host IP address could be used.
 
 Once the compose files have been updated, the new configuration can be applied by running:
 
-```bash
-./compose-frontend.sh up
+```
+./ccd compose up -d
 ```
 
 ### 2. Configure local project to use containers
