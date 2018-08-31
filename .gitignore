@@ -2,3 +2,7 @@
 .tags.env
 
 .workspace
+
+# IntelliJ IDEA files
+.idea/
+*.iml
