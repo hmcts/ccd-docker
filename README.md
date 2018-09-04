@@ -208,6 +208,9 @@ By default, `ccd-docker` runs the most commonly used backend and frontend projec
 
 In the future, optional compose files will allow other projects to be enabled on demand using the `enable` and `disable` commands.
 
+* To enable **document-management-store-app**
+`./ccd enable backend frontend dm-store`
+
 ## Under the hood :speedboat:
 
 ### Set
