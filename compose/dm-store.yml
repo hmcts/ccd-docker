@@ -1,0 +1,72 @@
+---
+version: '3'
+
+services:
+  ccd-case-management-web:
+    environment:
+      DM_GATEWAY_BASE_URL: http://document-management-store:8080
+    depends_on:
+    - document-management-store
+
+  ccd-api-gateway:
+    environment:
+      PROXY_DOCUMENT_MANAGEMENT: http://document-management-store:8080
+    depends_on:
+    - document-management-store
+
+  ccd-data-store-api:
+    environment:
+      CCD_DM_DOMAIN: http://document-management-store:8080
+
+  service-auth-provider-api:
+    environment:
+      AUTH_PROVIDER_SERVICE_SERVER_MICROSERVICE_KEYS_DOCUMENT_MANAGEMENT_STORE: "AAAAAAAAAAAAAAAD"
+
+  document-management-store:
+    image: docker.artifactory.reform.hmcts.net/evidence/document-management-store:latest
+    command: --wait-for-database 30
+    healthcheck:
+      disable: true
+    environment:
+      SERVER_PORT: 8080
+      IDAM_SUPERUSER_EMAIL:
+      IDAM_SECRET_KEY: "AAAAAAAAAAAAAAAD"
+      GOV_NOTIFY_API_KEY:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ccd-shared-database:5432/evidence
+      SPRING_DATASOURCE_USERNAME: "${DB_USERNAME}"
+      SPRING_DATASOURCE_PASSWORD: "${DB_PASSWORD}"
+      SPRING_PROFILES_ACTIVE: dev
+      IDAM_TESTING_SUPPORT_ENABLED: "true"
+      LOGGING_LEVEL_UK_GOV_HMCTS_IDAM: DEBUG
+      IDAM_USER_BASE_URI: http://idam-api:8080
+      IDAM_S2S_BASE_URI: http://service-auth-provider-api:8080
+      S2S_NAMES_WHITELIST: sscs,divorce,ccd,em_gw,document-management-store,ccd_gw,idam-api
+      http_proxy:
+      https_proxy:
+      no_proxy:
+      #      logging env vars
+      ROOT_APPENDER: JSON_CONSOLE
+      JSON_CONSOLE_PRETTY_PRINT: "false"
+      REFORM_SERVICE_TYPE: java
+      REFORM_SERVICE_NAME: document-management-store
+      REFORM_TEAM: cc
+      REFORM_ENVIRONMENT: docker
+      #      healthcheck env vars
+      PACKAGES_ENVIRONMENT: docker
+      PACKAGES_PROJECT: evidence
+      PACKAGES_NAME: document-management-store
+      PACKAGES_VERSION: unknown
+    #      debug mode
+    #    JAVA_OPTS: -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+    links:
+      - ccd-shared-database
+      - idam-api
+      - service-auth-provider-api
+    depends_on:
+      - ccd-shared-database
+      - idam-api
+      - service-auth-provider-api
+    ports:
+      - 4506:8080
+    #   debug port exposed
+    #   - 5006:5005
