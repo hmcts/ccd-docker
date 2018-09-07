@@ -4,19 +4,19 @@ version: '3'
 services:
   ccd-case-management-web:
     environment:
-      DM_GATEWAY_BASE_URL: http://document-management-store:8080
+      DM_GATEWAY_BASE_URL: http://ccd-api-gateway:3453
     depends_on:
     - document-management-store
 
   ccd-api-gateway:
     environment:
-      PROXY_DOCUMENT_MANAGEMENT: http://document-management-store:8080
+      PROXY_DOCUMENT_MANAGEMENT: http://host.docker.internal:4603
     depends_on:
     - document-management-store
 
   ccd-data-store-api:
     environment:
-      CCD_DM_DOMAIN: http://document-management-store:8080
+      CCD_DM_DOMAIN: http://host.docker.internal:4603
 
   service-auth-provider-api:
     environment:
