@@ -6,24 +6,24 @@ services:
     environment:
       DM_GATEWAY_BASE_URL: http://ccd-api-gateway:3453
     depends_on:
-    - document-management-store
+    - dm-store
 
   ccd-api-gateway:
     environment:
-      PROXY_DOCUMENT_MANAGEMENT: http://host.docker.internal:4603
+      PROXY_DOCUMENT_MANAGEMENT: http://dm-store:8080
     depends_on:
-    - document-management-store
+    - dm-store
 
   ccd-data-store-api:
     environment:
-      CCD_DM_DOMAIN: http://host.docker.internal:4603
+      CCD_DM_DOMAIN: http://dm-store:8080
 
   service-auth-provider-api:
     environment:
       AUTH_PROVIDER_SERVICE_SERVER_MICROSERVICE_KEYS_DOCUMENT_MANAGEMENT_STORE: "AAAAAAAAAAAAAAAD"
 
-  document-management-store:
-    image: docker.artifactory.reform.hmcts.net/evidence/document-management-store:latest
+  dm-store:
+    image: "hmcts/dm-store:${DM_STORE_TAG:-latest}"
     command: --wait-for-database 30
     healthcheck:
       disable: true
@@ -35,6 +35,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://ccd-shared-database:5432/evidence
       SPRING_DATASOURCE_USERNAME: "${DB_USERNAME}"
       SPRING_DATASOURCE_PASSWORD: "${DB_PASSWORD}"
+      STORAGEACCOUNT_PRIMARY_CONNECTION_STRING: "${STORAGEACCOUNT_PRIMARY_CONNECTION_STRING}"
+      STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME: "${STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME}"
       SPRING_PROFILES_ACTIVE: dev
       IDAM_TESTING_SUPPORT_ENABLED: "true"
       LOGGING_LEVEL_UK_GOV_HMCTS_IDAM: DEBUG
