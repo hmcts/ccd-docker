@@ -209,7 +209,7 @@ By default, `ccd-docker` runs the most commonly used backend and frontend projec
 In the future, optional compose files will allow other projects to be enabled on demand using the `enable` and `disable` commands.
 
 * To enable **document-management-store-app**
-`./ccd enable backend frontend dm-store`
+  * `./ccd enable backend frontend dm-store`
 
 ## Under the hood :speedboat:
 
@@ -448,7 +448,8 @@ Here are the important variables exposed in the compose files:
 | USER_PROFILE_S2S_AUTHORISED_SERVICES | List of micro-services authorised to call this service, comma-separated, as registered in `service-auth-provider-api` |
 | DATA_STORE_TOKEN_SECRET | Secret for generation of internal event tokens |
 | APPINSIGHTS_INSTRUMENTATIONKEY | Secret for Microsoft Insights logging, can be a dummy string in local |
-
+| STORAGEACCOUNT_PRIMARY_CONNECTION_STRING | (If dm-store is enabled) Secret for Azure Blob Storage. It is pointing to dockerized Azure Blob Storage emulator. |
+| STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME | (If dm-store is enabled) Container name for Azure Blob Storage |
 
 ## Remarks
 
