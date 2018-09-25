@@ -4,26 +4,26 @@ version: '3'
 services:
   ccd-case-management-web:
     environment:
-      DM_GATEWAY_BASE_URL: http://document-management-store:8080
+      DM_GATEWAY_BASE_URL: http://ccd-api-gateway:3453
     depends_on:
-    - document-management-store
+    - dm-store
 
   ccd-api-gateway:
     environment:
-      PROXY_DOCUMENT_MANAGEMENT: http://document-management-store:8080
+      PROXY_DOCUMENT_MANAGEMENT: http://dm-store:8080
     depends_on:
-    - document-management-store
+    - dm-store
 
   ccd-data-store-api:
     environment:
-      CCD_DM_DOMAIN: http://document-management-store:8080
+      CCD_DM_DOMAIN: http://dm-store:8080
 
   service-auth-provider-api:
     environment:
       AUTH_PROVIDER_SERVICE_SERVER_MICROSERVICE_KEYS_DOCUMENT_MANAGEMENT_STORE: "AAAAAAAAAAAAAAAD"
 
-  document-management-store:
-    image: docker.artifactory.reform.hmcts.net/evidence/document-management-store:latest
+  dm-store:
+    image: "hmcts/dm-store:${DM_STORE_TAG:-latest}"
     command: --wait-for-database 30
     healthcheck:
       disable: true
@@ -35,6 +35,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://ccd-shared-database:5432/evidence
       SPRING_DATASOURCE_USERNAME: "${DB_USERNAME}"
       SPRING_DATASOURCE_PASSWORD: "${DB_PASSWORD}"
+      STORAGEACCOUNT_PRIMARY_CONNECTION_STRING: "${STORAGEACCOUNT_PRIMARY_CONNECTION_STRING:-DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azure-storage-emulator-azurite:10000/devstoreaccount1}"
+      STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME: "${STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME:-hmctstestcontainer}"
       SPRING_PROFILES_ACTIVE: dev
       IDAM_TESTING_SUPPORT_ENABLED: "true"
       LOGGING_LEVEL_UK_GOV_HMCTS_IDAM: DEBUG
@@ -70,3 +72,15 @@ services:
       - 4506:8080
     #   debug port exposed
     #   - 5006:5005
+
+  azure-storage-emulator-azurite:
+    image: arafato/azurite
+    ports:
+      - 10000:10000
+    environment:
+      executable: "blob"
+    volumes:
+      - ccd-docker-azure-blob-data:/opt/azurite/folder
+
+volumes:
+  ccd-docker-azure-blob-data:

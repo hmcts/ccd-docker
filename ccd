@@ -33,12 +33,13 @@ function project_config() {
             repository="git@github.com:hmcts/ccd-case-management-web.git"
             tagEnv="CCD_CASE_MANAGEMENT_WEB_TAG"
             ;;
-        document-management-store-app)
+        dm-store)
             repository="git@github.com:hmcts/document-management-store-app.git"
             tagEnv="DM_STORE_TAG"
+            buildCommand="./gradlew installDist assemble"
             ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, dm-store"
             exit 1 ;;
     esac
     case $config in
