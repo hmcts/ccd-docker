@@ -132,7 +132,7 @@ function git_clone() {
     repository=$(project_config $project repository)
     rm -rf $workspace
     mkdir -p $workspace
-    result=$(git clone $branch_option $repository $workspace 2>&1 || exit $?)
+    result=$(git clone --depth=20 --no-tags $branch_option $repository $workspace 2>&1 || exit $?)
     exitcode=$?
     echo "$result"
     echo $result | egrep -q "Remote branch .* not found in upstream origin"
