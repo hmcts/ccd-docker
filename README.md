@@ -210,6 +210,8 @@ In the future, optional compose files will allow other projects to be enabled on
 
 * To enable **document-management-store-app**
   * `./ccd enable backend frontend dm-store`
+  * run docker-compose `./ccd compose up -d`
+  * create Blob Store in Azurite `./bin/document-management-store-create-blob-store-container.sh`
 
 ## Under the hood :speedboat:
 
