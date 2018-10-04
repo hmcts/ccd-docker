@@ -1,7 +1,7 @@
 # Dynamic image tags
 .tags.env
 
-.workspace
+.workspace/
 
 # IntelliJ IDEA files
 .idea/
