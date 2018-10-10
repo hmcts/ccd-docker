@@ -20,7 +20,7 @@ services:
 
   service-auth-provider-api:
     environment:
-      AUTH_PROVIDER_SERVICE_SERVER_MICROSERVICE_KEYS_DOCUMENT_MANAGEMENT_STORE: "AAAAAAAAAAAAAAAD"
+      MICROSERVICE_KEYS_EM_GW: "${IDAM_KEY_DM_STORE}"
 
   dm-store:
     image: "hmcts/dm-store:${DM_STORE_TAG:-latest}"
@@ -30,7 +30,7 @@ services:
     environment:
       SERVER_PORT: 8080
       IDAM_SUPERUSER_EMAIL:
-      IDAM_SECRET_KEY: "AAAAAAAAAAAAAAAD"
+      IDAM_SECRET_KEY: "${IDAM_KEY_DM_STORE}"
       GOV_NOTIFY_API_KEY:
       SPRING_DATASOURCE_URL: jdbc:postgresql://ccd-shared-database:5432/evidence
       SPRING_DATASOURCE_USERNAME: "${DB_USERNAME}"
