@@ -20,11 +20,11 @@ services:
     image: "hmcts/ccd-api-gateway:${CCD_API_GATEWAY_TAG:-latest}"
     container_name: ccd-api-gateway
     environment:
-      IDAM_LOGOUT_URL: https://localhost:3501/login/logout
       IDAM_BASE_URL: http://idam-api:8080
       IDAM_USER_URL: http://idam-api:8080
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       IDAM_SERVICE_KEY: "${IDAM_KEY_CCD_GATEWAY}"
+      IDAM_OAUTH2_LOGOUT_ENDPOINT: http://idam-api:8080/session/:token
       IDAM_OAUTH2_CLIENT_ID: ccd_gateway
       IDAM_OAUTH2_CLIENT_SECRET: "${OAUTH2_CLIENT_CCD_GATEWAY}"
       IDAM_OAUTH2_TOKEN_ENDPOINT: http://idam-api:8080/oauth2/token
