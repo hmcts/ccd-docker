@@ -4,3 +4,4 @@
 # Declare files that will always have CRLF line endings on checkout.
 ccd text eol=lf
 *.sh text eol=lf
+*.conf text eol=lf
