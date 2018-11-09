@@ -351,6 +351,10 @@ The `SERVICE_SECRET` must then also be provided to the container running the mic
 
 :information_source: *To prevent duplication, the client secret should be defined in the `.env` file and then used in the compose files using string interpolation `"${<VARIABLE_NAME>}"`.*
 
+#### Address lookup
+
+To use UK address lookup feature an API key for https://postcodeinfo.service.justice.gov.uk is required. When API key is available it needs to be set on host side under `ADDRESS_LOOKUP_TOKEN` variable name.
+
 ## Containers
 
 ### Back-end
