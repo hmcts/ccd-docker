@@ -28,6 +28,7 @@ services:
       IDAM_OAUTH2_CLIENT_ID: ccd_gateway
       IDAM_OAUTH2_CLIENT_SECRET: "${OAUTH2_CLIENT_CCD_GATEWAY}"
       IDAM_OAUTH2_TOKEN_ENDPOINT: http://idam-api:8080/oauth2/token
+      ADDRESS_LOOKUP_TOKEN:
       PROXY_AGGREGATED: http://ccd-data-store-api:4452
       PROXY_DATA: http://ccd-data-store-api:4452
       PROXY_DEFINITION_IMPORT: http://ccd-definition-store-api:4451
