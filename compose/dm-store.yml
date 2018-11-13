@@ -4,15 +4,16 @@ version: '3'
 services:
   ccd-case-management-web:
     environment:
-      DM_GATEWAY_BASE_URL: http://ccd-api-gateway:3453
+      DM_URL: http://localhost:3453/documents
+      DM_URL_REMOTE: http://dm-store:8080/documents
     depends_on:
-    - dm-store
+      - dm-store
 
   ccd-api-gateway:
     environment:
       PROXY_DOCUMENT_MANAGEMENT: http://dm-store:8080
     depends_on:
-    - dm-store
+      - dm-store
 
   ccd-data-store-api:
     environment:
