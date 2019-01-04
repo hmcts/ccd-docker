@@ -42,7 +42,7 @@ services:
       REFORM_ENVIRONMENT: local
       APPINSIGHTS_INSTRUMENTATIONKEY: key
       ELASTIC_SEARCH_ENABLED: "true"
-      ELASTIC_SEARCH_HOST: "host.docker.internal"
+      ELASTIC_SEARCH_HOST: "ccd-elasticsearch"
       ELASTIC_SEARCH_FAIL_ON_IMPORT: "true"
     ports:
       - 4451:4451
@@ -75,8 +75,8 @@ services:
       REFORM_ENVIRONMENT: local
       APPINSIGHTS_INSTRUMENTATIONKEY: key
       ELASTIC_SEARCH_ENABLED: "true"
-      ELASTIC_SEARCH_HOSTS: http://host.docker.internal:9200
-      ELASTIC_SEARCH_DATA_NODES_HOSTS: "http://host.docker.internal:9200"
+      ELASTIC_SEARCH_HOSTS: ccd-elasticsearch:9200
+      ELASTIC_SEARCH_DATA_NODES_HOSTS: "http://ccd-elasticsearch:9200"
     ports:
       - 4452:4452
     depends_on:
