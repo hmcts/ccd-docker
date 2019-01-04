@@ -21,7 +21,7 @@ services:
       - compose_default
 
   ccd-logstash:
-    image: ccd-logstash:latest
+    image: "hmcts/ccd-logstash:latest"
     container_name: ccd-logstash
     depends_on:
           - "ccd-elasticsearch"
