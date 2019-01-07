@@ -215,9 +215,9 @@ In the future, optional compose files will allow other projects to be enabled on
 
 * To enable **elastic search**
   * NOTE: we recommend at lest 6GB of memory for Docker when enabling elasticsearch 
-  * `./ccd enable elasticsearch`
+  * `./ccd enable elasticsearch` (assuming `backend` is already enabled, otherwise enable it)
   * export ES_ENABLED_DOCKER=true
-  * verify Data Store is able to connect to elasticsearch: `curl localhost:4452/health` 
+  * verify that Data Store is able to connect to elasticsearch: `curl localhost:4452/health` 
 
 
 
