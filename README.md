@@ -213,6 +213,13 @@ In the future, optional compose files will allow other projects to be enabled on
   * run docker-compose `./ccd compose up -d`
   * create Blob Store in Azurite `./bin/document-management-store-create-blob-store-container.sh`
 
+* To enable **elastic search**
+  * `./ccd enable elasticsearch`
+  * export ES_ENABLED_DOCKER=true
+  * verify Data Store is able to connect to elasticsearch: `curl localhost:4452/health` 
+
+
+
 ## Under the hood :speedboat:
 
 ### Set
