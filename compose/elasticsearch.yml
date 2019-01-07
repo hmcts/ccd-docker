@@ -3,6 +3,8 @@ services:
   ccd-elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.4.2
     container_name: ccd-elasticsearch
+    depends_on:
+      - "ccd-data-store-api"
     environment:
       - cluster.name=ccd-docker-es-cluster
       - discovery.type=single-node
