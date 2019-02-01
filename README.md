@@ -26,6 +26,12 @@ Checkout `ccd-docker` project:
 git clone git@github.com:hmcts/ccd-docker.git
 ```
 
+Login to the Azure Container registry:
+
+```bash
+./ccd login
+```
+
 Pulling latest Docker images:
 
 ```bash

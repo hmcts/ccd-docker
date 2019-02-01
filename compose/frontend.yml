@@ -43,7 +43,7 @@ services:
       - ccd-data-store-api
 
   authentication-web:
-    image: docker.artifactory.reform.hmcts.net/auth/authentication-web:latest
+    image: hmcts.azurecr.io/hmcts/tidam-authentication-web:latest
     environment:
      IDAM_API_URL: http://idam-api:8080
      IDAM_CONTINUE_URL_VALIDATOR_ENFORCE_TLS: "false"
