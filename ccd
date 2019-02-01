@@ -494,6 +494,10 @@ function ccd_compose() {
     docker-compose $compose_file_options $options
 }
 
+function ccd_login() {
+    az acr login --name hmcts --subscription 1c4f0704-a29e-403d-b719-b90c34ef14c9
+}
+
 if [ $# -lt 1 ]; then
     usage
 fi
@@ -524,6 +528,9 @@ case $command in
         ;;
     compose)
         ccd_compose "$@"
+        ;;
+    login)
+        ccd_login
         ;;
     *)
         usage
