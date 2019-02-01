@@ -91,7 +91,7 @@ services:
       - service-auth-provider-api
 
   idam-api:
-    image: docker.artifactory.reform.hmcts.net/auth/idam-api:latest
+    image: hmcts.azurecr.io/hmcts/tidam-api:latest
     healthcheck:
       interval: 10s
       timeout: 10s
