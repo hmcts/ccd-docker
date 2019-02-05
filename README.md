@@ -213,7 +213,7 @@ By default, `ccd-docker` runs the most commonly used backend and frontend projec
   * **ccd-api-gateway**: Proxy with IDAM and S2S integration
   * **ccd-case-management-web**: Caseworker UI
 
-In the future, optional compose files will allow other projects to be enabled on demand using the `enable` and `disable` commands.
+Optional compose files will allow other projects to be enabled on demand using the `enable` and `disable` commands.
 
 * To enable **document-management-store-app**
   * `./ccd enable backend frontend dm-store`
@@ -226,6 +226,10 @@ In the future, optional compose files will allow other projects to be enabled on
   * export ES_ENABLED_DOCKER=true
   * verify that Data Store is able to connect to elasticsearch: `curl localhost:4452/health` 
 
+* To enable **ccd-definition-designer-api**
+  * `./ccd enable backend ccd-definition-designer-api`
+  * run docker-compose `./ccd compose up -d`
+  * verify that ccd-definition-designer-api is up and running by `curl localhost:4544/health`
 
 
 ## Under the hood :speedboat:
