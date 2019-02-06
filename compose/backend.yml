@@ -90,7 +90,6 @@ services:
       - idam-api
       - service-auth-provider-api
 
-
   idam-api:
     image: hmcts.azurecr.io/hmcts/tidam-api:latest
     healthcheck:
