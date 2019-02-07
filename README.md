@@ -32,7 +32,7 @@ Login to the Azure Container registry:
 ```bash
 ./ccd login
 ```
-For [Azure Authentication for pulling updated docker images](###3.-Azure-Login/Authentication-for-pulling-updated-docker-images)
+For [Azure Authentication for pulling latest docker images](#azure-authentication-for-pulling-latest-docker-images)
 
 Pulling latest Docker images:
 
@@ -456,7 +456,7 @@ Mainly, this means:
   - :warning: using the right key, as defined in `service-auth-provider-api` container
 - **URLs**: all URLs should be updated to point to the corresponding locally exposed port
 
-### 3. Azure Login/Authentication for pulling updated docker images
+### Azure Authentication for pulling latest docker images
 
 ```bash
 ERROR: Get <docker_image_url>: unauthorized: authentication required
