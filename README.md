@@ -32,6 +32,7 @@ Login to the Azure Container registry:
 ```bash
 ./ccd login
 ```
+For [Azure Authentication for pulling latest docker images](#azure-authentication-for-pulling-latest-docker-images)
 
 Pulling latest Docker images:
 
@@ -454,6 +455,38 @@ Mainly, this means:
   - pointing to the locally exposed port for `service-auth-provider-api`
   - :warning: using the right key, as defined in `service-auth-provider-api` container
 - **URLs**: all URLs should be updated to point to the corresponding locally exposed port
+
+### Azure Authentication for pulling latest docker images
+
+```bash
+ERROR: Get <docker_image_url>: unauthorized: authentication required
+```
+
+If you see this above authentication issue while pulling images, please follow below commands,
+
+Install Azure-CLI locally,
+
+```bash
+brew update && brew install azure-cli
+```
+
+and to update a Azure-CLI locally,
+
+```bash
+brew update azure-cli
+```
+
+then,
+login to MS Azure,
+
+```bash
+az login
+```
+and finally, Login to the Azure Container registry:
+
+```bash
+./ccd login
+```
 
 ## Variables
 Here are the important variables exposed in the compose files:
