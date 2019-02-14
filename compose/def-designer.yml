@@ -1,0 +1,47 @@
+---
+version: '3'
+
+services:
+
+  ccd-api-gateway:
+    environment:
+      PROXY_DEFINITION_DESIGNER: http://ccd-definition-designer-api:4544
+    depends_on:
+      - ccd-definition-designer-api
+
+  service-auth-provider-api:
+    environment:
+      MICROSERVICE_KEYS_DEFINITION_DESIGNER: "${IDAM_KEY_CCD_DEFINITION_DESIGNER}"
+
+  ccd-definition-designer-api:
+    image: "hmcts.azurecr.io/hmcts/ccd-definition-designer-api:latest"
+    command: --wait-for-database 30
+    healthcheck:
+      disable: true
+    environment:
+      DEFINITION_DESIGNER_DB_HOST: "${DB_HOST_COMMON}"
+      DEFINITION_DESIGNER_DB_PORT: "${DB_PORT_COMMON}"
+      DEFINITION_DESIGNER_DB_USERNAME: "${DB_USERNAME}"
+      DEFINITION_DESIGNER_DB_PASSWORD: "${DB_PASSWORD}"
+      DEFINITION_DESIGNER_DB_USE_SSL: "${DB_USE_SSL}"
+      DEFINITION_DESIGNER_IDAM_KEY: "${IDAM_KEY_CCD_DEFINITION_DESIGNER}"
+      DEFINITION_DESIGNER_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_admin
+      USER_PROFILE_HOST: http://ccd-user-profile-api:4453
+      IDAM_USER_URL: http://idam-api:8080
+      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      REFORM_TEAM: ccd
+      REFORM_ENVIRONMENT: local
+      APPINSIGHTS_INSTRUMENTATIONKEY: key
+      ELASTIC_SEARCH_ENABLED: "false"
+      ELASTIC_SEARCH_HOST: "ccd-elasticsearch"
+      ELASTIC_SEARCH_FAIL_ON_IMPORT: "false"
+    ports:
+      - 4544:4544
+    depends_on:
+      - ccd-shared-database
+      - ccd-user-profile-api
+    links:
+      - ccd-shared-database
+      - ccd-user-profile-api
+      - idam-api
+      - service-auth-provider-api
