@@ -128,7 +128,7 @@ Using the `set` command, branches can be changed per project.
 Usage of the command is:
 
 ```bash
-./ccd set <project> <branch>
+./ccd set <project> <branch> <file://local_repository_path>
 ```
 
 * `<project>` must be one of:
@@ -138,6 +138,8 @@ Usage of the command is:
   * ccd-api-gateway
   * ccd-case-management-web
 * `<branch>` must be an existing **remote** branch for the selected project.
+* `<file://local_repository_path>` is the path of the local repository in case you want to switch to a local branch 
+
 
 Branches for a project can be listed using:
 
