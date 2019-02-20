@@ -125,6 +125,7 @@ function clean_name() {
 function git_clone() {
     project=$1
     branch=$2
+    local_repository=$3
     if [ -n "$branch" ]; then
         branch_option="--branch $branch"
     fi
@@ -132,7 +133,13 @@ function git_clone() {
     repository=$(project_config $project repository)
     rm -rf $workspace
     mkdir -p $workspace
-    result=$(git clone --depth=20 --no-tags $branch_option $repository $workspace 2>&1 || exit $?)
+    if [ "$local_repository" ]; then
+        echo "Cloning from local repository $local_repository"
+        repo=$local_repository
+    else
+        repo=$repository
+    fi
+    result=$(git clone --depth=20 --no-tags $branch_option $repo $workspace 2>&1 || exit $?)
     exitcode=$?
     echo "$result"
     echo $result | egrep -q "Remote branch .* not found in upstream origin"
@@ -265,7 +272,7 @@ function usage() {
     echo "Usage: $(basename $0) <command> [options]"
     echo
     echo "Commands:"
-    echo "  set <project> <branch> - override and build project"
+    echo "  set <project> <branch> <file://local_repository_path> - override and build project"
     echo "  unset <project...> - remove project override(s)"
     echo "  branches <project...> - list available branches"
     echo "  status - list current overrides and their status against upstream"
@@ -278,9 +285,9 @@ function usage() {
 }
 
 function usage_set() {
-    if [ $# -ne 2 -o "$1" == "-h" ]; then
-        echo "Overrides project to use the supplied branch, and build the project."
-        echo "Usage: $(basename $0) set <project> <branch>"
+    if [ "$1" == "-h" ] || ([ $# -ne 2 ] && [ $# -ne 3 ]); then
+        echo "Overrides project to use the supplied branch, and build the project. To use a local repository provide its path (file://..) as a third parameter"
+        echo "Usage: $(basename $0) set <project> <branch> <file://local_repository_path>"
         echo
         exit 1
     fi
@@ -348,7 +355,7 @@ function ccd_set() {
         return
     fi
     project_config $project repository
-    git_clone $project $branch
+    git_clone $*
     project_build $project
     docker_build $project $branch
     tag_set $project $branch
