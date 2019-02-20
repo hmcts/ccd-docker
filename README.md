@@ -140,7 +140,6 @@ Usage of the command is:
 * `<branch>` must be an existing **remote** branch for the selected project.
 * `<file://local_repository_path>` is the path of the local repository in case you want to switch to a local branch 
 
-
 Branches for a project can be listed using:
 
 ```bash
