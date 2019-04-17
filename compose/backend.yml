@@ -35,7 +35,7 @@ services:
       DEFINITION_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DEFINITION_STORE}"
       DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
-      IDAM_USER_URL: http://idam-api:8080
+      IDAM_USER_URL: http://sidam-api:5000
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       REFORM_SERVICE_NAME: ccd-definition-store-api
       REFORM_TEAM: ccd
@@ -52,7 +52,7 @@ services:
     links:
       - ccd-shared-database
       - ccd-user-profile-api
-      - idam-api
+      - sidam-api
       - service-auth-provider-api
 
   ccd-data-store-api:
@@ -68,7 +68,7 @@ services:
       DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,fpl_case_service,ccd_data,ccd_ps
       DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
-      IDAM_USER_URL: http://idam-api:8080
+      IDAM_USER_URL: http://sidam-api:5000
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       REFORM_SERVICE_NAME: ccd-data-store-api
       REFORM_TEAM: ccd
@@ -87,52 +87,24 @@ services:
       - ccd-shared-database
       - ccd-user-profile-api
       - ccd-definition-store-api
-      - idam-api
+      - sidam-api
       - service-auth-provider-api
 
-  idam-api:
-    image: hmcts.azurecr.io/hmcts/tidam-api:latest
-    healthcheck:
-      interval: 10s
-      timeout: 10s
-      retries: 10
+  sidam-api:
+    image: hmcts.azurecr.io/hmcts/sidam/idam-api:1.0.0
     environment:
-      IDAM_SUPERUSER_EMAIL: ccd@hmcts.net
-      SPRING_DATASOURCE_URL: jdbc:postgresql://ccd-shared-database:5432/idam
-      SPRING_DATASOURCE_USERNAME: "${DB_USERNAME}"
-      SPRING_DATASOURCE_PASSWORD: "${DB_PASSWORD}"
-      SPRING_MAIL_HOST: smtp-server
-      IDAM_TESTING_SUPPORT_ENABLED: "true"
-      NOTIFY_API_KEY: AAAAAAAAAAAAAAAA
-      NOTIFY_CMC_ACTIVATE_USER_TEMPLATE: 76aa8695-64e8-4afd-ae13-bc8385302b1f
-      IDAM_SECRET: idam_test_secret
-      IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_CCD_GATEWAY: "${OAUTH2_CLIENT_CCD_GATEWAY}"
-      IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_CCD_ADMIN: "${OAUTH2_CLIENT_CCD_ADMIN}"
-      IDAM_CCD_WHITELIST: http://localhost:3451/oauth2redirect
-      IDAM_CCD_ADMIN_WHITELIST: https://localhost:3100/oauth2redirect
-      NOTIFY: "false"
-      NOTIFY_CMC_WELCOME_USER_TEMPLATE: fake
-      NOTIFY_DIVORCE_WELCOME_USER_TEMPLATE: fake
-      NOTIFY_SSCS_WELCOME_USER_TEMPLATE: fake
-      NOTIFY_RESET_PASSWORD_TEMPLATE: fake
-      NOTIFY_PROBATE_ACTIVATE_USER_TEMPLATE: fake
-      NOTIFY_DIVORCE_ACTIVATE_USER_TEMPLATE: fake
-      NOTIFY_SSCS_ACTIVATE_USER_TEMPLATE: fake
-      NOTIFY_CCD_ACTIVATE_USER_TEMPLATE: fake
-      REFORM_SERVICE_NAME: idam-api
-      REFORM_TEAM: idam
-      REFORM_ENVIRONMENT: local
-      http_proxy:
-      https_proxy:
-      no_proxy:
+      JAVA_OPTS: -Xms128m -Xms512m
+      SPRING_DATASOURCE_URL: jdbc:postgresql://shared-db:5432/openidm?currentSchema=fridam
     ports:
-      - 4501:8080
+      - 5000:5000
     links:
-      - smtp-server
-      - ccd-shared-database
+      - fr-am
+      - fr-idm
+      - shared-db
     depends_on:
-      - ccd-shared-database
-      - smtp-server
+      - fr-am
+      - fr-idm
+      - shared-db
 
   service-auth-provider-api:
     image: hmcts/service-auth-provider-app
@@ -152,6 +124,25 @@ services:
       MICROSERVICEKEYS_FPL_CASE_SERVICE: "${IDAM_KEY_FPL_CASE_SERVICE}"
       TESTING_SUPPORT_ENABLED: "true"
 
+  fr-am:
+    image: hmcts.azurecr.io/hmcts/sidam/sidam-fr-am:1.0.0
+    ports:
+      - 8080:8080
+      - 1389:1389
+    depends_on:
+      - shared-db
+
+  fr-idm:
+    image: hmcts.azurecr.io/hmcts/sidam/sidam-fr-idm:1.0.0
+    ports:
+      - 18080:18080
+      - 9010:9010
+    environment:
+      JAVA_TOOL_OPTIONS: -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=vm-ubuntu16 -Dcom.sun.management.jmxremote.rmi.port=9010
+    depends_on:
+      - fr-am
+      - shared-db
+
   smtp-server:
     image: mailhog/mailhog
 
@@ -161,13 +152,15 @@ services:
       interval: 10s
       timeout: 10s
       retries: 10
-    environment:
-      DB_USERNAME:
-      DB_PASSWORD:
     ports:
-      - 5000:5432
+      - 5050:5432
     volumes:
       - ccd-docker-ccd-shared-database-data:/var/lib/postgresql/data
+
+  shared-db:
+    image: hmcts.azurecr.io/hmcts/sidam/sidam-idm-pg:1.0.0
+    ports:
+      - 5051:5432
 
 volumes:
   ccd-docker-ccd-shared-database-data:

@@ -27,7 +27,7 @@ services:
       DEFINITION_DESIGNER_IDAM_KEY: "${IDAM_KEY_CCD_DEFINITION_DESIGNER}"
       DEFINITION_DESIGNER_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_admin
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
-      IDAM_USER_URL: http://idam-api:8080
+      IDAM_USER_URL: http://sidam-api:5000
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
@@ -43,5 +43,5 @@ services:
     links:
       - ccd-shared-database
       - ccd-user-profile-api
-      - idam-api
+      - sidam-api
       - service-auth-provider-api
