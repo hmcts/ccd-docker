@@ -10,4 +10,4 @@
 ROLE="${1:-ccd-import}"
 USER_ID="${2:-1}"
 
-curl --silent http://localhost:4501/testing-support/lease -Fid="${USER_ID}" -Frole="${ROLE}"
+curl --silent http://localhost:5000/testing-support/lease -Fid="${USER_ID}" -Frole="${ROLE}"
