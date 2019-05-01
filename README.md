@@ -454,8 +454,8 @@ Once the compose files have been updated, the new configuration can be applied b
 The local project properties must be reviewed to use the containers and comply to their configuration.
 
 Mainly, this means:
-- **Database**: pointing to the locally exposed port for the associated DB
-- **IDAM**: pointing to the locally exposed port for IDAM
+- **Database**: pointing to the locally exposed port for the associated DB. This port used to be 5000 but has been changed to 5050 after SIDAM integration, which came to use 5000 for sidam-api application.
+- **SIDAM**: pointing to the locally exposed port for SIDAM
 - **S2S**:
   - pointing to the locally exposed port for `service-auth-provider-api`
   - :warning: using the right key, as defined in `service-auth-provider-api` container
