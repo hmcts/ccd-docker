@@ -493,6 +493,14 @@ and finally, Login to the Azure Container registry:
 ./ccd login
 ```
 
+On windows platform, we are installing the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) using executable .msi file.
+If "az login" command throws an error like "Access Denied", please follow these steps.
+We will need to install the az cli using Python PIP.
+1. If Microsoft Azure CLI is already installed, uninstall it from control panel.
+2. Setup the Python(version 2.x/3.x) on windows machine. PIP is bundled with Python.
+3. Execute the command "pip install azure-cli" using command line. It takes about 20 minutes to install the azure cli.
+4. Verify the installation using the command az --version.
+
 ## Variables
 Here are the important variables exposed in the compose files:
 
