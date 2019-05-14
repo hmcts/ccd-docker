@@ -346,7 +346,7 @@ Fetch the latest version of an image from its source. For the new version to be 
 
 #### OAuth 2
 
-OAuth 2 clients must be explicitly declared in service `idam-api` with their ID and secret.
+OAuth 2 clients must be explicitly declared in service `sidam-api` with their ID and secret.
 
 A client is defined as an environment variable complying to the pattern:
 
