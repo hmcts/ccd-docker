@@ -205,14 +205,14 @@ when branches are in use.
 By default, `ccd-docker` runs the most commonly used backend and frontend projects required:
 
 * Back-end:
-  * **idam-api**: Identity and access control
+  * **sidam-api**: Strategic identity and access control
   * **service-auth-provider-api**: Service-to-service security layer
   * **ccd-user-profile-api**: Users/jurisdictions association and usage preferences
   * **ccd-definition-store-api**: CCD's dynamic case definition repository
   * **ccd-data-store-api**: CCD's cases repository
 * Front-end:
-  * **authentication-web**: IDAM's login UI
-  * **ccd-api-gateway**: Proxy with IDAM and S2S integration
+  * **idam-web-public**: SIDAM's login UI
+  * **ccd-api-gateway**: Proxy with SIDAM and S2S integration
   * **ccd-case-management-web**: Caseworker UI
 
 Optional compose files will allow other projects to be enabled on demand using the `enable` and `disable` commands.
