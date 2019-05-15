@@ -17,7 +17,7 @@ services:
       - ccd-api-gateway
 
   ccd-api-gateway:
-    image: "hmcts.azurecr.io/hmcts/ccd-api-gateway:${CCD_API_GATEWAY_TAG:-latest}"
+    image: "hmcts.azurecr.io/hmcts/ccd-api-gateway-web:${CCD_API_GATEWAY_TAG:-latest}"
     container_name: ccd-api-gateway
     environment:
       IDAM_BASE_URL: http://idam-api:8080
