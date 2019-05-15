@@ -23,7 +23,7 @@ services:
       - compose_default
 
   ccd-logstash:
-    image: "hmcts.azurecr.io/hmcts/ccd-logstash:latest"
+    image: "hmcts/ccd-logstash:latest"
     container_name: ccd-logstash
     depends_on:
           - "ccd-elasticsearch"
