@@ -38,8 +38,13 @@ function project_config() {
             tagEnv="DM_STORE_TAG"
             buildCommand="./gradlew installDist assemble"
             ;;
+        ccd-definition-designer-api|definition-designer-api|definition-designer|def-design|designer)
+            repository="git@github.com:hmcts/ccd-definition-designer-api.git"
+            tagEnv="CCD_DEFINITION_DESIGNER_API_TAG"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, dm-store"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, dm-store, ccd-definition-designer-api"
             exit 1 ;;
     esac
     case $config in

@@ -14,7 +14,7 @@ services:
       MICROSERVICE_KEYS_DEFINITION_DESIGNER: "${IDAM_KEY_CCD_DEFINITION_DESIGNER}"
 
   ccd-definition-designer-api:
-    image: "hmcts.azurecr.io/hmcts/ccd-definition-designer-api:latest"
+    image: "${CCD_DEFINITION_DESIGNER_API_TAG_LOCAL-hmcts.azurecr.io/}hmcts/ccd-definition-designer-api:${CCD_DEFINITION_DESIGNER_API_TAG:-latest}"
     command: --wait-for-database 30
     healthcheck:
       disable: true
