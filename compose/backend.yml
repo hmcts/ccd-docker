@@ -135,7 +135,7 @@ services:
       - smtp-server
 
   service-auth-provider-api:
-    image: hmcts/service-auth-provider-app
+    image: hmcts.azurecr.io/hmcts/rpe-service-auth-provider:latest
     healthcheck:
       interval: 10s
       timeout: 10s
