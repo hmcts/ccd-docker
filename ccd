@@ -65,6 +65,7 @@ function tag_unset() {
     tagEnv=$(project_config $project tagEnv)
     touch $TAGS_FILE
     sed -i '' "/$tagEnv/d" $TAGS_FILE
+    sed -i '' "/${tagEnv}_LOCAL/d" $TAGS_FILE
 }
 
 
@@ -76,6 +77,7 @@ function tag_set() {
     touch $TAGS_FILE
     sed -i '' "/$tagEnv/d" $TAGS_FILE
     echo "export $tagEnv=$tagName" >> $TAGS_FILE
+    echo "export ${tagEnv}_LOCAL=''" >> $TAGS_FILE
 }
 
 function has_active_tags() {
