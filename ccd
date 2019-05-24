@@ -11,34 +11,41 @@ function project_config() {
     config=$2
     case $project in
         ccd-data-store-api|data-store-api|data-store|datastore|data-store)
+            name=ccd-data-store-api
             repository="git@github.com:hmcts/ccd-data-store-api.git"
             envPrefix="CCD_DATA_STORE_API"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         ccd-definition-store-api|definition-store-api|definition-store|def-store|defstore)
+            name=ccd-definition-store-api
             repository="git@github.com:hmcts/ccd-definition-store-api.git"
             envPrefix="CCD_DEFINITION_STORE_API"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         ccd-user-profile-api|user-profile-api|user-profile|userprofile)
+            name=ccd-user-profile-api
             repository="git@github.com:hmcts/ccd-user-profile-api.git"
             envPrefix="CCD_USER_PROFILE_API"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         ccd-api-gateway|api-gateway|gateway)
+            name=ccd-api-gateway
             repository="git@github.com:hmcts/ccd-api-gateway.git"
             envPrefix="CCD_API_GATEWAY"
             ;;
         ccd-case-management-web|case-management-web|management-web|case-man|web|man-web)
+            name=ccd-case-management-web
             repository="git@github.com:hmcts/ccd-case-management-web.git"
             envPrefix="CCD_CASE_MANAGEMENT_WEB"
             ;;
         dm-store|document-store)
+            name=dm-store
             repository="git@github.com:hmcts/document-management-store-app.git"
             envPrefix="DM_STORE"
             buildCommand="./gradlew installDist assemble"
             ;;
         ccd-definition-designer-api|definition-designer-api|definition-designer|def-design|designer)
+            name=ccd-definition-designer-api
             repository="git@github.com:hmcts/ccd-definition-designer-api.git"
             envPrefix="CCD_DEFINITION_DESIGNER_API"
             buildCommand=$GRADLE_ASSEMBLE_CMD
@@ -48,6 +55,9 @@ function project_config() {
             exit 1 ;;
     esac
     case $config in
+        name)
+            echo $name
+            ;;
         tagEnv)
             echo ${envPrefix}_TAG
             ;;
@@ -61,7 +71,7 @@ function project_config() {
             echo $buildCommand
             ;;
         *)
-            echo "Config is one of repository, tagEnv, useLocalEnv or buildCommand. '$config' is unkown"
+            echo "Config is one of name, repository, tagEnv, useLocalEnv or buildCommand. '$config' is unkown"
             exit 1
             ;;
     esac
@@ -124,7 +134,8 @@ function tag_friendly_name() {
 
 function workspace_dir() {
     project=$1
-    workspace="$WORKSPACE_ROOT/$project"
+    name=$(project_config $project name)
+    workspace="$WORKSPACE_ROOT/$name"
     echo $workspace
 }
 
