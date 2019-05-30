@@ -3,7 +3,7 @@ version: '3'
 
 services:
   ccd-user-profile-api:
-    image: "hmcts/ccd-user-profile-api:${CCD_USER_PROFILE_API_TAG:-latest}"
+    image: "${CCD_USER_PROFILE_API_USE_LOCAL-hmcts.azurecr.io/}hmcts/ccd-user-profile-api:${CCD_USER_PROFILE_API_TAG:-latest}"
     environment:
       USER_PROFILE_DB_HOST: ccd-shared-database
       USER_PROFILE_DB_PORT: 5432
@@ -25,7 +25,7 @@ services:
       - service-auth-provider-api
 
   ccd-definition-store-api:
-    image: "hmcts/ccd-definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
+    image: "${CCD_DEFINITION_STORE_API_USE_LOCAL-hmcts.azurecr.io/}hmcts/ccd-definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
     environment:
       DEFINITION_STORE_DB_HOST: ccd-shared-database
       DEFINITION_STORE_DB_PORT: 5432
@@ -56,7 +56,7 @@ services:
       - service-auth-provider-api
 
   ccd-data-store-api:
-    image: "hmcts/ccd-data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
+    image: "${CCD_DATA_STORE_API_USE_LOCAL-hmcts.azurecr.io/}hmcts/ccd-data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
     environment:
       DATA_STORE_DB_HOST: ccd-shared-database
       DATA_STORE_DB_PORT: 5432
@@ -108,7 +108,7 @@ services:
       - shared-db
 
   service-auth-provider-api:
-    image: hmcts/service-auth-provider-app
+    image: hmcts.azurecr.io/hmcts/rpe-service-auth-provider:latest
     healthcheck:
       interval: 10s
       timeout: 10s

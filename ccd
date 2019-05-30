@@ -10,41 +10,59 @@ function project_config() {
     project=$1
     config=$2
     case $project in
-        ccd-data-store-api)
+        ccd-data-store-api|data-store-api|data-store|datastore|data-store)
+            name=ccd-data-store-api
             repository="git@github.com:hmcts/ccd-data-store-api.git"
-            tagEnv="CCD_DATA_STORE_API_TAG"
+            envPrefix="CCD_DATA_STORE_API"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
-        ccd-definition-store-api)
+        ccd-definition-store-api|definition-store-api|definition-store|def-store|defstore)
+            name=ccd-definition-store-api
             repository="git@github.com:hmcts/ccd-definition-store-api.git"
-            tagEnv="CCD_DEFINITION_STORE_API_TAG"
+            envPrefix="CCD_DEFINITION_STORE_API"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
-        ccd-user-profile-api)
+        ccd-user-profile-api|user-profile-api|user-profile|userprofile)
+            name=ccd-user-profile-api
             repository="git@github.com:hmcts/ccd-user-profile-api.git"
-            tagEnv="CCD_USER_PROFILE_API_TAG"
+            envPrefix="CCD_USER_PROFILE_API"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
-        ccd-api-gateway)
+        ccd-api-gateway|api-gateway|gateway)
+            name=ccd-api-gateway
             repository="git@github.com:hmcts/ccd-api-gateway.git"
-            tagEnv="CCD_API_GATEWAY_TAG"
+            envPrefix="CCD_API_GATEWAY"
             ;;
-        ccd-case-management-web)
+        ccd-case-management-web|case-management-web|management-web|case-man|web|man-web)
+            name=ccd-case-management-web
             repository="git@github.com:hmcts/ccd-case-management-web.git"
-            tagEnv="CCD_CASE_MANAGEMENT_WEB_TAG"
+            envPrefix="CCD_CASE_MANAGEMENT_WEB"
             ;;
-        dm-store)
+        dm-store|document-store)
+            name=dm-store
             repository="git@github.com:hmcts/document-management-store-app.git"
-            tagEnv="DM_STORE_TAG"
+            envPrefix="DM_STORE"
             buildCommand="./gradlew installDist assemble"
             ;;
+        ccd-definition-designer-api|definition-designer-api|definition-designer|def-design|designer)
+            name=ccd-definition-designer-api
+            repository="git@github.com:hmcts/ccd-definition-designer-api.git"
+            envPrefix="CCD_DEFINITION_DESIGNER_API"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, dm-store"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, dm-store, ccd-definition-designer-api"
             exit 1 ;;
     esac
     case $config in
+        name)
+            echo $name
+            ;;
         tagEnv)
-            echo $tagEnv
+            echo ${envPrefix}_TAG
+            ;;
+        useLocalEnv)
+            echo ${envPrefix}_USE_LOCAL
             ;;
         repository)
             echo $repository
@@ -53,7 +71,7 @@ function project_config() {
             echo $buildCommand
             ;;
         *)
-            echo "Config is one of repository, tagEnv or buildCommand. '$config' is unkown"
+            echo "Config is one of name, repository, tagEnv, useLocalEnv or buildCommand. '$config' is unkown"
             exit 1
             ;;
     esac
@@ -63,8 +81,10 @@ function project_config() {
 function tag_unset() {
     project=$1
     tagEnv=$(project_config $project tagEnv)
+    useLocalEnv=$(project_config $project useLocalEnv)
     touch $TAGS_FILE
     sed -i '' "/$tagEnv/d" $TAGS_FILE
+    sed -i '' "/${useLocalEnv}/d" $TAGS_FILE
 }
 
 
@@ -72,10 +92,12 @@ function tag_set() {
     project=$1
     branch=$2
     tagEnv=$(project_config $project tagEnv)
+    useLocalEnv=$(project_config $project useLocalEnv)
     tagName=$(tag_name $project $branch)
     touch $TAGS_FILE
     sed -i '' "/$tagEnv/d" $TAGS_FILE
     echo "export $tagEnv=$tagName" >> $TAGS_FILE
+    echo "export ${useLocalEnv}=''" >> $TAGS_FILE
 }
 
 function has_active_tags() {
@@ -112,7 +134,8 @@ function tag_friendly_name() {
 
 function workspace_dir() {
     project=$1
-    workspace="$WORKSPACE_ROOT/$project"
+    name=$(project_config $project name)
+    workspace="$WORKSPACE_ROOT/$name"
     echo $workspace
 }
 
