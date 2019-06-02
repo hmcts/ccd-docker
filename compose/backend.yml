@@ -169,5 +169,17 @@ services:
     volumes:
       - ccd-docker-ccd-shared-database-data:/var/lib/postgresql/data
 
+  am-db:
+    build: ../database-am-db
+    environment:
+      POSTGRES_PASSWORD: "${DB_AM_PASSWORD}"
+      POSTGRES_USER: "${DB_AM_USERNAME}"
+      POSTGRES_DB: "${DB_AM}"
+    ports:
+      - 5500:5432
+    volumes:
+      - am-db:/var/lib/postgresql/data
+
 volumes:
   ccd-docker-ccd-shared-database-data:
+  am-db:
