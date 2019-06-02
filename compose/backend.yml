@@ -178,6 +178,5 @@ services:
     ports:
       - 5500:5432
 
-
 volumes:
   ccd-docker-ccd-shared-database-data:
