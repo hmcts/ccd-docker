@@ -3,7 +3,7 @@ version: '3'
 
 services:
   ccd-case-management-web:
-    image: "hmcts/ccd-case-management-web:${CCD_CASE_MANAGEMENT_WEB_TAG:-latest}"
+    image: "${CCD_CASE_MANAGEMENT_WEB_USE_LOCAL-hmcts.azurecr.io/}hmcts/ccd-case-management-web:${CCD_CASE_MANAGEMENT_WEB_TAG:-latest}"
     container_name: ccd-case-management-web
     environment:
       IDAM_LOGIN_URL: https://localhost:3501/login
@@ -17,8 +17,8 @@ services:
       - ccd-api-gateway
 
   ccd-api-gateway:
-    image: "hmcts/ccd-api-gateway:${CCD_API_GATEWAY_TAG:-latest}"
-    container_name: ccd-api-gateway
+    image: "${CCD_API_GATEWAY_USE_LOCAL-hmcts.azurecr.io/}hmcts/ccd-api-gateway-web:${CCD_API_GATEWAY_TAG:-latest}"
+    container_name: ccd-api-gateway-web
     environment:
       IDAM_BASE_URL: http://idam-api:8080
       IDAM_USER_URL: http://idam-api:8080
