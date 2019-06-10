@@ -170,7 +170,7 @@ services:
       - ccd-docker-ccd-shared-database-data:/var/lib/postgresql/data
 
   am-database:
-    image: hmcts/am-db
+    image: hmcts.azurecr.io/am-db
     container_name: access_management_db
     environment:
       AM_DB:
