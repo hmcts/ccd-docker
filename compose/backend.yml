@@ -176,6 +176,10 @@ services:
       AM_DB:
       AM_DB_USERNAME:
       AM_DB_PASSWORD:
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
     ports:
       - 5600:5432
 
