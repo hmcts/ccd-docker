@@ -515,8 +515,6 @@ function ccd_compose() {
     usage_compose $*
     status_compose_files
     status_tags
-    set_environment_variables_unix
-    set_environment_variables_windows
     options="$@"
     if [ $(has_tagfile) -eq 1 ]; then
         source $TAGS_FILE
@@ -524,7 +522,9 @@ function ccd_compose() {
     compose_file_options=$(create_compose_file_options)
     docker-compose $compose_file_options $options
 
-    if [[ ${options} == *"upqwghjvdwq"* ]]; then
+    set_environment_variables_unix
+    set_environment_variables_windows
+    if [[ ${options} == *"up"* ]]; then
         ./create_roles.sh
     fi
 }
@@ -552,7 +552,7 @@ function set_env_variables() {
       setx $key $value
       done < "$file"
     else
-      echo "$file not found."
+      echo "Environment variable file : $file not found."
     fi
 }
 
