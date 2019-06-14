@@ -515,24 +515,45 @@ function ccd_compose() {
     usage_compose $*
     status_compose_files
     status_tags
-    set_environment_variables
+    set_environment_variables_unix
+    set_environment_variables_windows
     options="$@"
     if [ $(has_tagfile) -eq 1 ]; then
         source $TAGS_FILE
     fi
     compose_file_options=$(create_compose_file_options)
     docker-compose $compose_file_options $options
-    if [[ ${options} == *"up"* ]]; then
+
+    if [[ ${options} == *"upqwghjvdwq"* ]]; then
         ./create_roles.sh
     fi
 }
 
-function set_environment_variables () {
-  echo "Setting environment variables"
+function set_environment_variables_unix () {
+  echo "Setting environment variables on Unix"
   set -a
      source ./env_data_store.txt
      source ./env_definition_store.txt
   set +a
+}
+
+function set_environment_variables_windows () {
+  set_env_variables "env_data_store.txt"
+  set_env_variables "env_definition_store.txt"
+}
+
+function set_env_variables() {
+    file=$1
+    if [ -f "$file" ]
+    then
+      echo "$file found."
+      while IFS='=' read -r key value
+      do
+      setx $key $value
+      done < "$file"
+    else
+      echo "$file not found."
+    fi
 }
 
 function ccd_login() {
