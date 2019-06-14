@@ -515,12 +515,21 @@ function ccd_compose() {
     usage_compose $*
     status_compose_files
     status_tags
+    set_environment_variables
     options="$@"
     if [ $(has_tagfile) -eq 1 ]; then
         source $TAGS_FILE
     fi
     compose_file_options=$(create_compose_file_options)
     docker-compose $compose_file_options $options
+}
+
+function set_environment_variables () {
+  echo "Setting environment variables"
+  set -a
+     source ./env_data_store.txt
+     source ./env_definition_store.txt
+  set +a
 }
 
 function ccd_login() {
