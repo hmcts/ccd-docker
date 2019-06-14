@@ -522,10 +522,9 @@ function ccd_compose() {
     fi
     compose_file_options=$(create_compose_file_options)
     docker-compose $compose_file_options $options
-    echo $options
     if [[ ${options} == *"up"* ]]; then
         ./create_roles.sh
-     fi
+    fi
 }
 
 function set_environment_variables () {
