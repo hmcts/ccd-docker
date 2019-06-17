@@ -524,17 +524,12 @@ function ccd_compose() {
     set_env_variables
     create_user_roles
 }
-function create_user_roles() {
-    if [[ ${options} == *"up"* ]]; then
-        ./create_roles.sh
-    fi
-}
 
 function set_env_variables() {
  if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-         set_environment_variables_unix
-    elif [ "$(expr substr $(uname -s) 1 5)" == "MINGW" ]; then
-         set_environment_variables_windows
+    set_environment_variables_unix
+ elif [ "$(expr substr $(uname -s) 1 5)" == "MINGW" ]; then
+    set_environment_variables_windows
  fi
 }
 
@@ -565,6 +560,11 @@ function set_env_variables_from_file() {
     fi
 }
 
+function create_user_roles() {
+    if [[ ${options} == *"up"* ]]; then
+        ./create_roles.sh
+    fi
+}
 function ccd_login() {
     az acr login --name hmcts --subscription 1c4f0704-a29e-403d-b719-b90c34ef14c9
 }
