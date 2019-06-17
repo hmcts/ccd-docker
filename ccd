@@ -542,6 +542,7 @@ function set_environment_variables_unix () {
 }
 
 function set_environment_variables_windows () {
+ echo "Setting environment variables on Windows"
   set_env_variables_from_file "env_data_store.txt"
   set_env_variables_from_file "env_definition_store.txt"
 }
