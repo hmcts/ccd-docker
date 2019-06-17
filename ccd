@@ -521,8 +521,10 @@ function ccd_compose() {
     fi
     compose_file_options=$(create_compose_file_options)
     docker-compose $compose_file_options $options
-    set_env_variables
-    create_user_roles
+    if [[ ${options} == *"up"* ]]; then
+        set_env_variables
+        create_user_roles
+    fi
 }
 
 function set_env_variables() {
@@ -542,7 +544,7 @@ function set_environment_variables_unix () {
 }
 
 function set_environment_variables_windows () {
- echo "Setting environment variables on Windows."
+  echo "Setting environment variables on Windows."
   set_env_variables_from_file "env_data_store.txt"
   set_env_variables_from_file "env_definition_store.txt"
 }
@@ -562,10 +564,9 @@ function set_env_variables_from_file() {
 }
 
 function create_user_roles() {
-    if [[ ${options} == *"up"* ]]; then
-        ./create_roles.sh
-    fi
+    ./create_roles.sh
 }
+
 function ccd_login() {
     az acr login --name hmcts --subscription 1c4f0704-a29e-403d-b719-b90c34ef14c9
 }
