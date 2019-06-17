@@ -521,12 +521,21 @@ function ccd_compose() {
     fi
     compose_file_options=$(create_compose_file_options)
     docker-compose $compose_file_options $options
-
-    set_environment_variables_unix
-    set_environment_variables_windows
+    set_env_variables
+    create_user_roles
+}
+function create_user_roles() {
     if [[ ${options} == *"up"* ]]; then
         ./create_roles.sh
     fi
+}
+
+function set_env_variables() {
+ if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+         set_environment_variables_unix
+    elif [ "$(expr substr $(uname -s) 1 5)" == "MINGW" ]; then
+         set_environment_variables_windows
+ fi
 }
 
 function set_environment_variables_unix () {
@@ -538,11 +547,11 @@ function set_environment_variables_unix () {
 }
 
 function set_environment_variables_windows () {
-  set_env_variables "env_data_store.txt"
-  set_env_variables "env_definition_store.txt"
+  set_env_variables_from_file "env_data_store.txt"
+  set_env_variables_from_file "env_definition_store.txt"
 }
 
-function set_env_variables() {
+function set_env_variables_from_file() {
     file=$1
     if [ -f "$file" ]
     then
@@ -550,7 +559,7 @@ function set_env_variables() {
       while IFS='=' read -r key value
       do
       setx $key $value
-      done < "$file"
+    done < "$file"
     else
       echo "Environment variable file : $file not found."
     fi
