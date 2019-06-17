@@ -11,4 +11,4 @@ microservice="${1:-ccd_gw}"
 curl -X POST \
   -H "Content-Type: application/json" \
   -d '{"microservice":"'${microservice}'"}' \
-  http://localhost:5000/testing-support/lease
+  http://localhost:4502/testing-support/lease
