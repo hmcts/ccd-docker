@@ -523,51 +523,6 @@ function ccd_compose() {
     docker-compose $compose_file_options $options
 }
 
-function  prepare_all_for_functional_tests () {
-    set_env_variables
-    create_user_roles
-}
-
-function set_env_variables() {
-    if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-        set_environment_variables_unix
-    elif [ "$(expr substr $(uname -s) 1 5)" == "MINGW" ]; then
-        set_environment_variables_windows
-    fi
-}
-
-function set_environment_variables_unix () {
-  echo "Setting environment variables on Unix."
-  set -a
-     source ./env_data_store.txt
-     source ./env_definition_store.txt
-  set +a
-}
-
-function set_environment_variables_windows () {
-  echo "Setting environment variables on Windows."
-  set_env_variables_from_file "env_data_store.txt"
-  set_env_variables_from_file "env_definition_store.txt"
-}
-
-function set_env_variables_from_file() {
-    file=$1
-    if [ -f "$file" ]
-    then
-      echo "$file found."
-      while IFS='=' read -r key value
-      do
-      setx $key $value
-    done < "$file"
-    else
-      echo "Environment variable file : $file NOT found. Variables NOT set."
-    fi
-}
-
-function create_user_roles() {
-    ./create_roles.sh
-}
-
 function ccd_login() {
     az acr login --name hmcts --subscription 1c4f0704-a29e-403d-b719-b90c34ef14c9
 }
@@ -605,9 +560,6 @@ case $command in
         ;;
     login)
         ccd_login
-        ;;
-    prepare)
-        prepare_all_for_functional_tests
         ;;
     *)
         usage
