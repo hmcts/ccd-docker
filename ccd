@@ -521,10 +521,11 @@ function ccd_compose() {
     fi
     compose_file_options=$(create_compose_file_options)
     docker-compose $compose_file_options $options
-    if [[ ${options} == *"up"* ]]; then
-        set_env_variables
-        create_user_roles
-    fi
+}
+
+function  prepare_all_for_functional_tests () {
+    set_env_variables
+    create_user_roles
 }
 
 function set_env_variables() {
@@ -604,6 +605,9 @@ case $command in
         ;;
     login)
         ccd_login
+        ;;
+    prepare)
+        prepare_all_for_functional_tests
         ;;
     *)
         usage
