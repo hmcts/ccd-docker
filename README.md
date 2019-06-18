@@ -52,6 +52,17 @@ Usage and commands available:
 ./ccd
 ```
 
+### Setting up environment variables
+Environment variables for CCD-Data-Store-API and CCD-Definition-Store-API can be done by executing the following script.
+The script works for both windows and Linux platforms.
+ccd-docker$ ./bin/set_environment_variables.sh
+
+This environment variables are stored in the following files:
+
+./bin/env_data_store.txt
+
+./bin/env_definition_store.txt
+
 ## Using CCD
 
 Once the containers are running, CCD's frontend can be accessed at [http://localhost:3451](http://localhost:3451).
@@ -111,6 +122,11 @@ Validation errors occurred importing the spreadsheet.
 ```
 
 Then the indicated role, here `caseworker-cmc-loa1`, must be added to CCD (See [2. Add roles](#2-add-roles)).
+
+### NOTE: 
+The user and role creation can be done by executing the script
+
+ccd-docker$ ./bin/create_roles.sh
 
 ### Ready for take-off 🛫
 
