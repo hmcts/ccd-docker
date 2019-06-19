@@ -31,9 +31,9 @@ function set_env_variables_from_file() {
     if [ -f ${file} ]
     then
       echo "$file found."
-      while IFS='=' read -r key value
+    while IFS="=" read -r key value
       do
-      setx $key $value
+      setx "$key" $(echo $value | sed -e 's/\r//g')
     done < "$file"
     else
       echo "Environment variable file : $file NOT found. Variables NOT set."
