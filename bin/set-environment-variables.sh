@@ -8,7 +8,7 @@ function set_env_variables() {
     osName="$(uname -s)"
     echo "OS is $osName"
 
-    if [[ "Darwin Aristo Foucault Weber" == *"$osName"* ]];then
+    if [[ "Darwin" == "$osName" ]];then
         set_environment_variables_on_mac
     else
         set_environment_variables_windows
