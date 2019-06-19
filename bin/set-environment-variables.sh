@@ -5,13 +5,13 @@
 
 function set_env_variables() {
 
-    osName="$(sw_vers -productName)"
-    echo "OS is ${osName:0:3}"
+    osName="$(uname -s)"
+    echo "OS is $osName"
 
-    if [[ "${osName:0:3}" == "Mac" ]];then
+    if [[ "Darwin Aristo Foucault Weber" == *"$osName"* ]];then
         set_environment_variables_on_mac
     else
-        set_environment_variables_on_mac
+        set_environment_variables_windows
     fi
 }
 
