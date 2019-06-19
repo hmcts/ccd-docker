@@ -1,4 +1,5 @@
 #!/bin/bash
+
 ##This script will create the user roles.
 
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
