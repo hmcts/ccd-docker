@@ -5,7 +5,7 @@
 
 function set_env_variables() {
     set_env_variables_from_file "./env_data_store.txt"
-   set_env_variables_from_file "./env_definition_store.txt"
+    set_env_variables_from_file "./env_definition_store.txt"
 }
 
 function set_env_variables_from_file() {
