@@ -53,15 +53,15 @@ Usage and commands available:
 ```
 
 ### Setting up environment variables
-Environment variables for CCD-Data-Store-API and CCD-Definition-Store-API can be done by executing the following script.
+Environment variables for CCD Data Store API and CCD Definition Store API can be done by executing the following script.
 The script works for both windows and Linux platforms.
 ccd-docker$ ./bin/set_environment_variables.sh
 
 This environment variables are stored in the following files:
 
-./bin/env_data_store.txt
+./env_data_store.txt
 
-./bin/env_definition_store.txt
+./env_definition_store.txt
 
 ## Using CCD
 

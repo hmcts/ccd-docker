@@ -13,8 +13,8 @@ function set_env_variables() {
 function set_environment_variables_unix () {
   echo "Setting environment variables on Unix."
   set -a
-     source env_data_store.txt
-     source env_definition_store.txt
+     source ../env_data_store.txt
+     source ../env_definition_store.txt
   set +a
 }
 
@@ -22,8 +22,8 @@ function set_environment_variables_windows () {
   echo "Setting environment variables on Windows."
   parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
   cd "$parent_path"
-  set_env_variables_from_file "../bin/env_data_store.txt"
-  set_env_variables_from_file "../bin/env_definition_store.txt"
+  set_env_variables_from_file "../env_data_store.txt"
+  set_env_variables_from_file "../env_definition_store.txt"
 }
 
 function set_env_variables_from_file() {
