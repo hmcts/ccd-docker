@@ -219,6 +219,7 @@ function docker_build() {
     buildProject=$project
     workspace=$(workspace_dir $project)
     tagName=$(tag_name $project $branch)
+    # ccd-api-gateway image from azure coming as ccd-api-gateway-web, to match and fix for local branch build
     if [[ $project == "ccd-api-gateway" && $branch != "master" ]]; then
         buildProject="$buildProject-web"
     fi
