@@ -56,9 +56,51 @@ Usage and commands available:
 
 Once the containers are running, CCD's frontend can be accessed at [http://localhost:3451](http://localhost:3451).
 
-However, 3 more steps are required to correctly configure IDAM and CCD before it can be used:
+However, 5 more steps are required to correctly configure SIDAM and CCD before it can be used:
 
-### 1. Create a caseworker user
+### 1. Configure Oauth2 Client of CCD Gateway on SIDAM
+
+An oauth2 client should be configured for ccd-gateway application, on SIDAM Web Admin.
+You need to login to the SIDAM Web Admin as explained here: https://tools.hmcts.net/confluence/x/eQP3P
+
+Values to be entered on the client configuration screen are:
+```
+client_id : ccd_gateway
+client_secret : ccd_gateway_secret
+redirect_uri : http://localhost:3451/oauth2redirect
+```
+
+After defining the above client, a role with "ccd-import" label must be defined under this client.
+
+Once the role is defined under the client, you need to edit the client configuration and check the checkbox for the role "ccd-import".
+
+**Any business-related roles like `caseworker`,`caseworker-<jurisdiction>` etc to be used in CCD later must also be defined under the client configuration at this stage.**
+
+### 2. Create a Default User with "ccd-import" Role
+
+A user with import role should be created using the following command:
+
+```bash
+./bin/idam-create-caseworker.sh ccd-import ccd.docker.default@hmcts.net Pa55word11 Default CCD_Docker
+```
+
+This call will create a user in SIDAM with ccd-import role. This user will be used to acquire a user token with "ccd-import" role.
+
+
+### 3. Add Initial Roles
+
+Before a definition can be imported, roles referenced in a case definition Authorisation tabs must be defined in CCD using:
+
+```bash
+./bin/ccd-add-role.sh <role> [classification]
+```
+
+Parameters:
+- `role`: Name of the role, e.g: `caseworker-divorce`.
+- `classification`: Optional. One of `PUBLIC`, `PRIVATE` or `RESTRICTED`. Defaults to `PUBLIC`.
+
+
+### 4. Add Initial Case Worker Users
 
 A caseworker user can be created in IDAM using the following command:
 
@@ -77,19 +119,7 @@ For example:
 ./bin/idam-create-caseworker.sh caseworker-probate,caseworker-probate-solicitor probate@hmcts.net
 ```
 
-### 2. Add roles
-
-Before a definition can be imported, roles referenced in a case definition Authorisation tabs must be defined in CCD using:
-
-```bash
-./bin/ccd-add-role.sh <role> [classification]
-```
-
-Parameters:
-- `role`: Name of the role, e.g: `caseworker-divorce`.
-- `classification`: Optional. One of `PUBLIC`, `PRIVATE` or `RESTRICTED`. Defaults to `PUBLIC`.
-
-### 3. Import case definition
+### 5. Import case definition
 
 To reduce impact on performances, case definitions are imported via the command line rather than using CCD's dedicated UI:
 
@@ -205,14 +235,14 @@ when branches are in use.
 By default, `ccd-docker` runs the most commonly used backend and frontend projects required:
 
 * Back-end:
-  * **idam-api**: Identity and access control
+  * **sidam-api**: Strategic identity and access control
   * **service-auth-provider-api**: Service-to-service security layer
   * **ccd-user-profile-api**: Users/jurisdictions association and usage preferences
   * **ccd-definition-store-api**: CCD's dynamic case definition repository
   * **ccd-data-store-api**: CCD's cases repository
 * Front-end:
-  * **authentication-web**: IDAM's login UI
-  * **ccd-api-gateway**: Proxy with IDAM and S2S integration
+  * **idam-web-public**: SIDAM's login UI
+  * **ccd-api-gateway**: Proxy with SIDAM and S2S integration
   * **ccd-case-management-web**: Caseworker UI
 
 Optional compose files will allow other projects to be enabled on demand using the `enable` and `disable` commands.
@@ -346,7 +376,7 @@ Fetch the latest version of an image from its source. For the new version to be 
 
 #### OAuth 2
 
-OAuth 2 clients must be explicitly declared in service `idam-api` with their ID and secret.
+OAuth 2 clients must be explicitly declared in service `sidam-api` with their ID and secret.
 
 A client is defined as an environment variable complying to the pattern:
 
@@ -454,8 +484,8 @@ Once the compose files have been updated, the new configuration can be applied b
 The local project properties must be reviewed to use the containers and comply to their configuration.
 
 Mainly, this means:
-- **Database**: pointing to the locally exposed port for the associated DB
-- **IDAM**: pointing to the locally exposed port for IDAM
+- **Database**: pointing to the locally exposed port for the associated DB. This port used to be 5000 but has been changed to 5050 after SIDAM integration, which came to use 5000 for sidam-api application.
+- **SIDAM**: pointing to the locally exposed port for SIDAM
 - **S2S**:
   - pointing to the locally exposed port for `service-auth-provider-api`
   - :warning: using the right key, as defined in `service-auth-provider-api` container
