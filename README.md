@@ -61,7 +61,7 @@ However, 5 more steps are required to correctly configure SIDAM and CCD before i
 ### 1. Configure Oauth2 Client of CCD Gateway on SIDAM
 
 An oauth2 client should be configured for ccd-gateway application, on SIDAM Web Admin.
-This is a straightforward process as explained here: https://tools.hmcts.net/confluence/x/eQP3P
+You need to login to the SIDAM Web Admin as explained here: https://tools.hmcts.net/confluence/x/eQP3P
 
 Values to be entered on the client configuration screen are:
 ```
@@ -70,8 +70,12 @@ client_secret : ccd_gateway_secret
 redirect_uri : http://localhost:3451/oauth2redirect
 ```
 
+After defining the above client, a role with "ccd-import" label must be defined under this client.
 
-### 2. Create default user for import role
+Once the role is defined under the client, you need to edit the client configuration and check the checkbox for the role "ccd-import".
+
+
+### 2. Create a Default User with "ccd-import" Role
 
 A user with import role should be created using the following command:
 
@@ -79,8 +83,23 @@ A user with import role should be created using the following command:
 ./bin/idam-create-caseworker.sh ccd-import ccd.docker.default@hmcts.net Pa55word11 Default CCD_Docker
 ```
 
+This call will create a user in SIDAM with ccd-import role. This user will be used to acquire a user token with "ccd-import" role.
 
-### 3. Create a caseworker user
+
+### 3. Add Initial Roles
+
+Before a definition can be imported, roles referenced in a case definition Authorisation tabs must be defined in CCD using:
+
+```bash
+./bin/ccd-add-role.sh <role> [classification]
+```
+
+Parameters:
+- `role`: Name of the role, e.g: `caseworker-divorce`.
+- `classification`: Optional. One of `PUBLIC`, `PRIVATE` or `RESTRICTED`. Defaults to `PUBLIC`.
+
+
+### 4. Add Initial Case Worker Users
 
 A caseworker user can be created in IDAM using the following command:
 
@@ -98,18 +117,6 @@ For example:
 ```bash
 ./bin/idam-create-caseworker.sh caseworker-probate,caseworker-probate-solicitor probate@hmcts.net
 ```
-
-### 4. Add roles
-
-Before a definition can be imported, roles referenced in a case definition Authorisation tabs must be defined in CCD using:
-
-```bash
-./bin/ccd-add-role.sh <role> [classification]
-```
-
-Parameters:
-- `role`: Name of the role, e.g: `caseworker-divorce`.
-- `classification`: Optional. One of `PUBLIC`, `PRIVATE` or `RESTRICTED`. Defaults to `PUBLIC`.
 
 ### 5. Import case definition
 
