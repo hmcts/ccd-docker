@@ -153,6 +153,9 @@ services:
       interval: 10s
       timeout: 10s
       retries: 10
+    environment:
+      DB_USERNAME:
+      DB_PASSWORD:
     ports:
       - 5050:5432
     volumes:
