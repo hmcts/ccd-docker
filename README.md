@@ -74,6 +74,7 @@ After defining the above client, a role with "ccd-import" label must be defined 
 
 Once the role is defined under the client, you need to edit the client configuration and check the checkbox for the role "ccd-import".
 
+**Any business-relates roles like caseworker, caseworker-<jurisdiction> etc to be used in CCD later must also be defined under the client configuration at this stage.**
 
 ### 2. Create a Default User with "ccd-import" Role
 
