@@ -6,7 +6,7 @@ services:
     image: "${CCD_CASE_MANAGEMENT_WEB_USE_LOCAL-hmcts.azurecr.io/}hmcts/ccd-case-management-web:${CCD_CASE_MANAGEMENT_WEB_TAG:-latest}"
     container_name: ccd-case-management-web
     environment:
-      IDAM_LOGIN_URL: https://localhost:3501/login
+      IDAM_LOGIN_URL: http://localhost:3501/login
       CCD_GATEWAY_BASE_URL: http://localhost:3453
       CCD_ACTIVITY_BASE_URL:
       DM_GATEWAY_BASE_URL: https://api-gateway.dev.dm.reform.hmcts.net
@@ -20,14 +20,14 @@ services:
     image: "${CCD_API_GATEWAY_USE_LOCAL-hmcts.azurecr.io/}hmcts/ccd-api-gateway-web:${CCD_API_GATEWAY_TAG:-latest}"
     container_name: ccd-api-gateway-web
     environment:
-      IDAM_BASE_URL: http://idam-api:8080
-      IDAM_USER_URL: http://idam-api:8080
+      IDAM_BASE_URL: http://sidam-api:5000
+      IDAM_USER_URL: http://sidam-api:5000
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       IDAM_SERVICE_KEY: "${IDAM_KEY_CCD_GATEWAY}"
-      IDAM_OAUTH2_LOGOUT_ENDPOINT: http://idam-api:8080/session/:token
+      IDAM_OAUTH2_LOGOUT_ENDPOINT: http://sidam-api:5000/session/:token
       IDAM_OAUTH2_CLIENT_ID: ccd_gateway
-      IDAM_OAUTH2_CLIENT_SECRET: "${OAUTH2_CLIENT_CCD_GATEWAY}"
-      IDAM_OAUTH2_TOKEN_ENDPOINT: http://idam-api:8080/oauth2/token
+      IDAM_OAUTH2_CLIENT_SECRET: ccd_gateway_secret
+      IDAM_OAUTH2_TOKEN_ENDPOINT: http://sidam-api:5000/oauth2/token
       ADDRESS_LOOKUP_TOKEN:
       PROXY_AGGREGATED: http://ccd-data-store-api:4452
       PROXY_DATA: http://ccd-data-store-api:4452
@@ -42,17 +42,29 @@ services:
       - ccd-definition-store-api
       - ccd-data-store-api
 
-  authentication-web:
-    image: hmcts.azurecr.io/hmcts/tidam-authentication-web:latest
+  idam-web-admin:
+    image: hmcts.azurecr.io/hmcts/sidam/idam-web-admin:1.0.0
     environment:
-     IDAM_API_URL: http://idam-api:8080
+      JAVA_OPTS: -Xms128m -Xms512m
+      STRATEGIC_SERVICE_URL: http://sidam-api:5000
+    ports:
+      - 8082:8080
+    links:
+      - sidam-api
+    depends_on:
+      - sidam-api
+
+  idam-web-public:
+    image: "hmcts.azurecr.io/hmcts/sidam/idam-web-public:1.0.0"
+    environment:
+     STRATEGIC_SERVICE_URL: http://sidam-api:5000
      IDAM_CONTINUE_URL_VALIDATOR_ENFORCE_TLS: "false"
-     REFORM_SERVICE_NAME: idam-api
+     REFORM_SERVICE_NAME: sidam-api
      REFORM_TEAM: idam
      REFORM_ENVIRONMENT: local
     ports:
-      - 3501:8000
+      - 3501:8080
     links:
-      - idam-api
+      - sidam-api
     depends_on:
-      - idam-api
+      - sidam-api
