@@ -25,7 +25,6 @@ services:
 
   dm-store:
     image: "${DM_STORE_USE_LOCAL-hmcts.azurecr.io/}hmcts/dm-store:${DM_STORE_TAG:-latest}"
-    command: --wait-for-database 30
     healthcheck:
       disable: true
     environment:
@@ -36,8 +35,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://ccd-shared-database:5432/evidence
       SPRING_DATASOURCE_USERNAME: "${DB_USERNAME}"
       SPRING_DATASOURCE_PASSWORD: "${DB_PASSWORD}"
-      #ENABLE_AZURE_STORAGE_CONTAINER: "false"
-      #ENABLE_POSTGRES_BLOB_STORAGE: "true"
+      ENABLE_AZURE_STORAGE_CONTAINER: "true"
+      ENABLE_POSTGRES_BLOB_STORAGE: "false"
       STORAGEACCOUNT_PRIMARY_CONNECTION_STRING: "${STORAGEACCOUNT_PRIMARY_CONNECTION_STRING:-DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azure-storage-emulator-azurite:10000/devstoreaccount1}"
       STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME: "${STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME:-hmctstestcontainer}"
       BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY_REQUIRED: "${BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY_REQUIRED:-false}"
