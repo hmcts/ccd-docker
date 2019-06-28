@@ -130,9 +130,10 @@ For example:
 ./bin/idam-create-caseworker.sh caseworker-probate,caseworker-probate-solicitor probate@hmcts.net
 ```
 
-Note: Initial roles and case worker users can be created using the following script.
+### NOTE: 
+Initial user and role creation can be done by executing the following script
 
- ./bin/create-initial-roles-and-users.sh
+ccd-docker$ ./bin/create-initial-roles-and-users.sh
 
 ### 5. Import case definition
 
@@ -156,11 +157,6 @@ Validation errors occurred importing the spreadsheet.
 ```
 
 Then the indicated role, here `caseworker-cmc-loa1`, must be added to CCD (See [2. Add roles](#2-add-roles)).
-
-### NOTE: 
-Initial user and role creation can be done by executing the following script
-
-ccd-docker$ ./bin/create-initial-roles-and-users.sh
 
 ### Ready for take-off 🛫
 
