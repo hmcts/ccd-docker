@@ -5,6 +5,7 @@
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd "$parent_path"
 
+#Roles are being created in Definition store
 ./ccd-add-role.sh caseworker-autotest1 PUBLIC
 ./ccd-add-role.sh caseworker-autotest1-private PRIVATE
 ./ccd-add-role.sh caseworker-autotest1-senior RESTRICTED
@@ -14,7 +15,8 @@ cd "$parent_path"
 ./ccd-add-role.sh caseworker-autotest2-senior RESTRICTED
 ./ccd-add-role.sh caseworker-autotest2-solicitor PRIVATE
 
-./idam-create-caseworker.sh caseworker,caseworker-autotest1 auto.test.cnp@gmail.com Pa55word11 singla nitish
+#Case workers are being created in SIDAM
+./idam-create-caseworker.sh caseworker,caseworker-autotest1,ccd-import auto.test.cnp@gmail.com Pa55word11 testsurname testfirstname
 ./idam-create-caseworker.sh caseworker,caseworker-autotest1,caseworker-autotest1-private auto.test.cnp+private@gmail.com Pa55word11
 ./idam-create-caseworker.sh caseworker,caseworker-autotest1,caseworker-autotest1-senior auto.test.cnp+senior@gmail.com Pa55word11
 ./idam-create-caseworker.sh caseworker,caseworker-autotest1,caseworker-autotest1-solicitor auto.test.cnp+solc@gmail.com Pa55word11
