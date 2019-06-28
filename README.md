@@ -130,6 +130,10 @@ For example:
 ./bin/idam-create-caseworker.sh caseworker-probate,caseworker-probate-solicitor probate@hmcts.net
 ```
 
+Note: Initial roles and case worker users can be created using the following script.
+
+ ./bin/create-initial-roles-and-users.sh
+
 ### 5. Import case definition
 
 To reduce impact on performances, case definitions are imported via the command line rather than using CCD's dedicated UI:
