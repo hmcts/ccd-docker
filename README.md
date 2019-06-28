@@ -16,6 +16,7 @@
 
 - [Docker](https://www.docker.com)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) - minimum version 2.0.57 
+- [jq Json Processor] (https://stedolan.github.io/jq)
 
 *The following documentation assumes that the current directory is `ccd-docker`.*
 
