@@ -44,6 +44,12 @@ function project_config() {
             envPrefix="DM_STORE"
             buildCommand="./gradlew installDist assemble"
             ;;
+        ccd-test-stubs-service|test-stubs-service)
+            name=ccd-test-stubs-service
+            repository="git@github.com:hmcts/ccd-test-stubs-service.git"
+            envPrefix="CCD_TEST_STUBS_SERVICE"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
         ccd-definition-designer-api|definition-designer-api|definition-designer|def-design|designer)
             name=ccd-definition-designer-api
             repository="git@github.com:hmcts/ccd-definition-designer-api.git"

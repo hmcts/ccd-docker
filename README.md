@@ -214,6 +214,7 @@ Usage of the command is:
   * ccd-user-profile-api
   * ccd-api-gateway
   * ccd-case-management-web
+  * ccd-test-stubs-service
 * `<branch>` must be an existing **remote** branch for the selected project.
 * `[file://local_repository_path]` path of the local repository in case you want to switch to a local branch 
 
@@ -287,6 +288,7 @@ By default, `ccd-docker` runs the most commonly used backend and frontend projec
   * **ccd-user-profile-api**: Users/jurisdictions association and usage preferences
   * **ccd-definition-store-api**: CCD's dynamic case definition repository
   * **ccd-data-store-api**: CCD's cases repository
+  * **ccd-test-stubs-service**: CCD's testing support for stubbing http calls (service callbacks etc)
 * Front-end:
   * **idam-web-public**: SIDAM's login UI
   * **ccd-api-gateway**: Proxy with SIDAM and S2S integration
@@ -469,6 +471,11 @@ Store where the versioned instances of cases are recorded.
 
 Display preferences for the CCD users.
 
+#### ccd-test-stubs-service
+
+Service to facilitate testing of external http calls using wiremock to return canned responses for requests matching 
+the predefined criteria.
+
 ### Front-end
 
 #### ccd-api-gateway
@@ -597,6 +604,8 @@ Here are the important variables exposed in the compose files:
 | AM_DB | Access Management database name |
 | AM_DB_USERNAME | Access Management database username |
 | AM_DB_PASSWORD | Access Management database password |
+| WIREMOCK_SERVER_MAPPINGS_PATH | Path to the WireMock mapping files. If not set, it will use the default mappings from the project resource repository. __Note__: If setting the variable, please keep all WireMock json stub files in a directory named _mappings_ and exclude this directory in the path. For e.g. if you place the _mappings_ in /home/user/mappings then export WIREMOCK_SERVER_MAPPINGS_PATH=/home/user |
+
 ## Remarks
 
 - A container can be configured to call a localhost host resource with the localhost shortcut added for docker containers recently. However the shortcut must be set according the docker host operating system.
