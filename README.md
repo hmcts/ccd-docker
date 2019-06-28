@@ -112,7 +112,7 @@ A caseworker user can be created in IDAM using the following command:
 Parameters:
 - `roles`: a comma-separated list of roles. Roles must be existing IDAM roles for the CCD domain. Every caseworker requires at least it's coarse-grained jurisdiction role (`caseworker-<jurisdiction>`).
 - `email`: Email address used for logging in.
-- `password`: Optional. Password for logging in. Defaults to `password`.
+- `password`: Optional. Password for logging in. Defaults to `Pa55word11`.
 
 For example:
 
@@ -146,7 +146,7 @@ Then the indicated role, here `caseworker-cmc-loa1`, must be added to CCD (See [
 ### Ready for take-off 🛫
 
 Back to [http://localhost:3451](http://localhost:3451), you can now log in with the email and password defined at [step 1](#1-create-a-caseworker-user).
-If you left the password out when creating the caseworker, by default it's set to: `password`.
+If you left the password out when creating the caseworker, by default it's set to: `Pa55word11`.
 
 ## Compose branches
 
