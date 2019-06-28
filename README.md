@@ -59,9 +59,9 @@ ccd-docker$ ./bin/set_environment_variables.sh
 
 This environment variables are stored in the following files:
 
-./env_data_store.txt
+./bin/env_data_store.txt
 
-./env_definition_store.txt
+./bin/env_definition_store.txt
 
 ## Using CCD
 
