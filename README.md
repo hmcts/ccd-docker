@@ -15,6 +15,7 @@
 ## Prerequisites
 
 - [Docker](https://www.docker.com)
+
 *Memory and CPU allocations may need to be increased for successful execution of ccd applications altogether. (On Preferences / Advanced)*
 
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) - minimum version 2.0.57 
