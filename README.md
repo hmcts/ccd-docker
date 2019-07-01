@@ -81,9 +81,14 @@ client_secret : ccd_gateway_secret
 redirect_uri : http://localhost:3451/oauth2redirect
 ```
 
-After defining the above client, a role with "ccd-import" label must be defined under this client.
+1.a After defining the above client, a role with "ccd-import" label must be defined under this client.
+1.b To run the functional test cases, create the following roles in SIDAM.
 
-Once the role is defined under the client, you need to edit the client configuration and check the checkbox for the role "ccd-import".
+    * casworker
+    * caseworker-autotest1
+    * caseworker-autotest2
+
+Once the roles are defined under the client, you need to edit the client configuration and check the checkbox for the role "ccd-import".
 
 **Any business-related roles like `caseworker`,`caseworker-<jurisdiction>` etc to be used in CCD later must also be defined under the client configuration at this stage.**
 
@@ -131,7 +136,7 @@ For example:
 ```
 
 ### NOTE: 
-Initial user and role creation can be done by executing the following script
+For running functional test cases, initial user and role creation can be done by executing the following script
 
 ccd-docker$ ./bin/create-initial-roles-and-users.sh
 
