@@ -84,7 +84,7 @@ redirect_uri : http://localhost:3451/oauth2redirect
 1.a After defining the above client, a role with "ccd-import" label must be defined under this client.
 1.b To run the functional test cases, create the following roles in SIDAM.
 
-    * casworker
+    * caseworker
     * caseworker-autotest1
     * caseworker-autotest2
 
