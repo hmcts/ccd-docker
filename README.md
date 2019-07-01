@@ -15,6 +15,8 @@
 ## Prerequisites
 
 - [Docker](https://www.docker.com)
+*Memory and CPU allocations may need to be increased for successful execution of ccd applications altogether. (On Preferences / Advanced)*
+
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) - minimum version 2.0.57 
 - [jq Json Processor] (https://stedolan.github.io/jq)
 
@@ -62,7 +64,7 @@ However, 5 more steps are required to correctly configure SIDAM and CCD before i
 ### 1. Configure Oauth2 Client of CCD Gateway on SIDAM
 
 An oauth2 client should be configured for ccd-gateway application, on SIDAM Web Admin.
-You need to login to the SIDAM Web Admin as explained here: https://tools.hmcts.net/confluence/x/eQP3P
+You need to login to the SIDAM Web Admin with the URL and logic credentials here: https://tools.hmcts.net/confluence/x/eQP3P
 
 Values to be entered on the client configuration screen are:
 ```
