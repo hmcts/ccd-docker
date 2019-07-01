@@ -15,7 +15,11 @@
 ## Prerequisites
 
 - [Docker](https://www.docker.com)
+
+*Memory and CPU allocations may need to be increased for successful execution of ccd applications altogether. (On Preferences / Advanced)*
+
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) - minimum version 2.0.57 
+- [jq Json Processor] (https://stedolan.github.io/jq)
 
 *The following documentation assumes that the current directory is `ccd-docker`.*
 
@@ -52,16 +56,17 @@ Usage and commands available:
 ./ccd
 ```
 
-### Setting up environment variables
+## Setting up environment variables
 Environment variables for CCD Data Store API and CCD Definition Store API can be done by executing the following script.
-The script works for both windows and Linux platforms.
-ccd-docker$ ./bin/set_environment_variables.sh
+The script works for both Windows and Mac platforms.
+`ccd-docker$ ./bin/set_environment_variables.sh`
 
-This environment variables are stored in the following files:
+ This environment variables are stored in the following files:
 
-./bin/env_data_store.txt
+ `./bin/env_data_store.txt`
 
-./bin/env_definition_store.txt
+ `./bin/env_definition_store.txt`
+
 
 ## Using CCD
 
@@ -72,7 +77,7 @@ However, 5 more steps are required to correctly configure SIDAM and CCD before i
 ### 1. Configure Oauth2 Client of CCD Gateway on SIDAM
 
 An oauth2 client should be configured for ccd-gateway application, on SIDAM Web Admin.
-You need to login to the SIDAM Web Admin as explained here: https://tools.hmcts.net/confluence/x/eQP3P
+You need to login to the SIDAM Web Admin with the URL and logic credentials here: https://tools.hmcts.net/confluence/x/eQP3P
 
 Values to be entered on the client configuration screen are:
 ```
@@ -81,8 +86,8 @@ client_secret : ccd_gateway_secret
 redirect_uri : http://localhost:3451/oauth2redirect
 ```
 
-1.a After defining the above client, a role with "ccd-import" label must be defined under this client.
-1.b To run the functional test cases, create the following roles in SIDAM.
+After defining the above client, a role with "ccd-import" label must be defined under this client.
+For use in the automated functional test runs, the following roles are also needed:
 
     * casworker
     * caseworker-autotest1
@@ -127,7 +132,7 @@ A caseworker user can be created in IDAM using the following command:
 Parameters:
 - `roles`: a comma-separated list of roles. Roles must be existing IDAM roles for the CCD domain. Every caseworker requires at least it's coarse-grained jurisdiction role (`caseworker-<jurisdiction>`).
 - `email`: Email address used for logging in.
-- `password`: Optional. Password for logging in. Defaults to `password`.
+- `password`: Optional. Password for logging in. Defaults to `Pa55word11`.
 
 For example:
 
@@ -136,9 +141,10 @@ For example:
 ```
 
 ### NOTE: 
-For running functional test cases, initial user and role creation can be done by executing the following script
+For running functional test cases, initial user and role creation can be done by executing the following script:
 
 ccd-docker$ ./bin/create-initial-roles-and-users.sh
+
 
 ### 5. Import case definition
 
@@ -166,7 +172,7 @@ Then the indicated role, here `caseworker-cmc-loa1`, must be added to CCD (See [
 ### Ready for take-off 🛫
 
 Back to [http://localhost:3451](http://localhost:3451), you can now log in with the email and password defined at [step 1](#1-create-a-caseworker-user).
-If you left the password out when creating the caseworker, by default it's set to: `password`.
+If you left the password out when creating the caseworker, by default it's set to: `Pa55word11`.
 
 ## Compose branches
 
