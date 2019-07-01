@@ -13,7 +13,7 @@
 
 rolesStr=$1
 email=$2
-password=${3:-password}
+password=${3:-Pa55word11}
 surname=${4:-Test}
 forename=${5:-User}
 
