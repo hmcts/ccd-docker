@@ -56,6 +56,18 @@ Usage and commands available:
 ./ccd
 ```
 
+## Setting up environment variables
+Environment variables for CCD Data Store API and CCD Definition Store API can be done by executing the following script.
+The script works for both Windows and Mac platforms.
+`ccd-docker$ ./bin/set_environment_variables.sh`
+
+ This environment variables are stored in the following files:
+
+ `./bin/env_data_store.txt`
+
+ `./bin/env_definition_store.txt`
+
+
 ## Using CCD
 
 Once the containers are running, CCD's frontend can be accessed at [http://localhost:3451](http://localhost:3451).
@@ -75,8 +87,13 @@ redirect_uri : http://localhost:3451/oauth2redirect
 ```
 
 After defining the above client, a role with "ccd-import" label must be defined under this client.
+For use in the automated functional test runs, the following roles are also needed:
 
-Once the role is defined under the client, you need to edit the client configuration and check the checkbox for the role "ccd-import".
+    * casworker
+    * caseworker-autotest1
+    * caseworker-autotest2
+
+Once the roles are defined under the client, you need to edit the client configuration and check the checkbox for the role "ccd-import".
 
 **Any business-related roles like `caseworker`,`caseworker-<jurisdiction>` etc to be used in CCD later must also be defined under the client configuration at this stage.**
 
@@ -122,6 +139,11 @@ For example:
 ```bash
 ./bin/idam-create-caseworker.sh caseworker-probate,caseworker-probate-solicitor probate@hmcts.net
 ```
+
+### NOTE: 
+For running functional test cases, initial user and role creation can be done by executing the following script:
+
+ ccd-docker$ ./bin/create-initial-roles-and-users.sh
 
 ### 5. Import case definition
 
