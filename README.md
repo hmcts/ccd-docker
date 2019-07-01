@@ -143,7 +143,8 @@ For example:
 ### NOTE: 
 For running functional test cases, initial user and role creation can be done by executing the following script:
 
- ccd-docker$ ./bin/create-initial-roles-and-users.sh
+ccd-docker$ ./bin/create-initial-roles-and-users.sh
+
 
 ### 5. Import case definition
 
