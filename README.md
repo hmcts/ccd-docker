@@ -568,7 +568,9 @@ Here are the important variables exposed in the compose files:
 | APPINSIGHTS_INSTRUMENTATIONKEY | Secret for Microsoft Insights logging, can be a dummy string in local |
 | STORAGEACCOUNT_PRIMARY_CONNECTION_STRING | (If dm-store is enabled) Secret for Azure Blob Storage. It is pointing to dockerized Azure Blob Storage emulator. |
 | STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME | (If dm-store is enabled) Container name for Azure Blob Storage |
-
+| AM_DB | Access Management database name |
+| AM_DB_USERNAME | Access Management database username |
+| AM_DB_PASSWORD | Access Management database password |
 ## Remarks
 
 - A container can be configured to call a localhost host resource with the localhost shortcut added for docker containers recently. However the shortcut must be set according the docker host operating system.
