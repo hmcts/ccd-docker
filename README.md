@@ -59,7 +59,9 @@ Usage and commands available:
 ## Setting up environment variables
 Environment variables for CCD Data Store API and CCD Definition Store API can be done by executing the following script.
 The script works for both Windows and Mac platforms.
-`ccd-docker$ ./bin/set_environment_variables.sh`
+Windows : `./bin/set_environment_variables.sh`
+Mac : `source ./bin/set_environment_variables.sh`
+
 
  This environment variables are stored in the following files:
 
