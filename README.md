@@ -58,27 +58,19 @@ Usage and commands available:
 
 ## Setting up environment variables
 Environment variables for CCD Data Store API and CCD Definition Store API can be done by executing the following script.
-The script works for both Windows and Mac platforms.
 
 Windows : `./bin/set_environment_variables.sh`
 
 Mac : `source ./bin/set_environment_variables.sh`
 
-To persist the environment variables in Mac, copy the contents of ./bash_profile.copy file into ~/.bash_profile.
-
-
- This environment variables are stored in the following files:
-
- `./bin/env_data_store.txt`
-
- `./bin/env_definition_store.txt`
-
+To persist the environment variables in Mac, copy the contents of `env_variables_all.txt` file into ~/.bash_profile.
+A prefix 'export' will be required for each of environment variable.
 
 ## Using CCD
 
 Once the containers are running, CCD's frontend can be accessed at [http://localhost:3451](http://localhost:3451).
 
-However, 5 more steps are required to correctly configure SIDAM and CCD before it can be used:
+However, 6 more steps are required to correctly configure SIDAM and CCD before it can be used:
 
 ### 1. Configure Oauth2 Client of CCD Gateway on SIDAM
 
@@ -91,7 +83,7 @@ client_id : ccd_gateway
 client_secret : ccd_gateway_secret
 redirect_uri : http://localhost:3451/oauth2redirect
 ```
-
+### 2. Create ccd-import role
 After defining the above client, a role with "ccd-import" label must be defined under this client.
 For use in the automated functional test runs, the following roles are also needed:
 
@@ -103,7 +95,7 @@ Once the roles are defined under the client, you need to edit the client configu
 
 **Any business-related roles like `caseworker`,`caseworker-<jurisdiction>` etc to be used in CCD later must also be defined under the client configuration at this stage.**
 
-### 2. Create a Default User with "ccd-import" Role
+### 3. Create a Default User with "ccd-import" Role
 
 A user with import role should be created using the following command:
 
@@ -114,7 +106,7 @@ A user with import role should be created using the following command:
 This call will create a user in SIDAM with ccd-import role. This user will be used to acquire a user token with "ccd-import" role.
 
 
-### 3. Add Initial Roles
+### 4. Add Initial Roles
 
 Before a definition can be imported, roles referenced in a case definition Authorisation tabs must be defined in CCD using:
 
@@ -127,7 +119,7 @@ Parameters:
 - `classification`: Optional. One of `PUBLIC`, `PRIVATE` or `RESTRICTED`. Defaults to `PUBLIC`.
 
 
-### 4. Add Initial Case Worker Users
+### 5. Add Initial Case Worker Users
 
 A caseworker user can be created in IDAM using the following command:
 
@@ -152,7 +144,7 @@ For running functional test cases, initial user and role creation can be done by
 ccd-docker$ ./bin/create-initial-roles-and-users.sh
 
 
-### 5. Import case definition
+### 6. Import case definition
 
 To reduce impact on performances, case definitions are imported via the command line rather than using CCD's dedicated UI:
 
