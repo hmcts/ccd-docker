@@ -139,10 +139,13 @@ For example:
 ```
 
 ### NOTE: 
-For running functional test cases, initial user and role creation can be done by executing the following script:
+For running functional test cases,
+
+A. Initial user and role creation can be done by executing the following script:
 
 ccd-docker$ ./bin/create-initial-roles-and-users.sh
 
+#####B. Before running CCD Data Store tests, execute the CCD Definition store test cases first so that case definitions are loaded from CCD_CNP_27.xlsx.
 
 ### 6. Import case definition
 
