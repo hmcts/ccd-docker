@@ -138,20 +138,22 @@ For example:
 ./bin/idam-create-caseworker.sh caseworker-probate,caseworker-probate-solicitor probate@hmcts.net
 ```
 
-### NOTE: 
+### Note:
 For running functional test cases,
 
-A. Initial user and role creation can be done by executing the following script:
+- A. Initial user and role creation can be done by executing the following script:
 
-ccd-docker$ ./bin/create-initial-roles-and-users.sh
+```bash
+./bin/create-initial-roles-and-users.sh
+```
 
-#####B. Before running CCD Data Store tests, execute the CCD Definition store test cases first so that case definitions are loaded from CCD_CNP_27.xlsx.
+- B. Before running CCD Data Store tests, execute the CCD Definition store test cases first so that case definitions are loaded from CCD_CNP_27.xlsx.
 
-#####C. Set the TEST_URL environment variable to match the service the functional tests should executed against:
+- C. Set the TEST_URL environment variable to match the service the functional tests should executed against:
 
           For ccd-definition-store-api functional tests the set TEST_URL=http://localhost:4451
 
-          For ccd-data-store-api functional tests set TEST_URL=[http://localhost:4452/
+          For ccd-data-store-api functional tests set TEST_URL=http://localhost:4452
 
 ### 6. Import case definition
 
