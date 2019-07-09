@@ -147,6 +147,12 @@ ccd-docker$ ./bin/create-initial-roles-and-users.sh
 
 #####B. Before running CCD Data Store tests, execute the CCD Definition store test cases first so that case definitions are loaded from CCD_CNP_27.xlsx.
 
+#####C. Set the TEST_URL environment variable to match the service the functional tests should executed against:
+
+          For ccd-definition-store-api functional tests the set TEST_URL=http://localhost:4451
+
+          For ccd-data-store-api functional tests set TEST_URL=[http://localhost:4452/
+
 ### 6. Import case definition
 
 To reduce impact on performances, case definitions are imported via the command line rather than using CCD's dedicated UI:
