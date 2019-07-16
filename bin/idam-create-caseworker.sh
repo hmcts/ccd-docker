@@ -4,7 +4,7 @@
 ## Options:
 ##    - role: Comma-separated list of roles. Roles must exist in IDAM (i.e `caseworker-probate,caseworker-probate-solicitor`)
 ##    - email: Email address
-##    - password: User's password. Default to `password`.
+##    - password: User's password. Default to `Pa55word11`. Weak passwords that do not match the password criteria by SIDAM will cause use creation to fail, and such failure may not be expressly communicated to the user. 
 ##    - surname: Last name. Default to `Test`.
 ##    - forename: First name. Default to `User`.
 ##
