@@ -124,13 +124,6 @@ Parameters:
 - `role`: Name of the role, e.g: `caseworker-divorce`.
 - `classification`: Optional. One of `PUBLIC`, `PRIVATE` or `RESTRICTED`. Defaults to `PUBLIC`.
 
-#### Note:
-If you get `{"timestamp":"2019-07-16T09:11:57.403+0000","status":403,"error":"Forbidden","message":"Access Denied","path":"/api/user-role"}` error you may need to install the `jq` library like so:
-```bash
-brew update;
-brew install jq;
-```
-
 ### 5. Add Initial Case Worker Users
 
 A caseworker user can be created in IDAM using the following command:
