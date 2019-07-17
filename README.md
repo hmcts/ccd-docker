@@ -131,9 +131,6 @@ brew update;
 brew install jq;
 ```
 
-If you are using Windows you should buy a Mac at this point :)
-
-
 ### 5. Add Initial Case Worker Users
 
 A caseworker user can be created in IDAM using the following command:
