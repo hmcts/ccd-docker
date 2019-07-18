@@ -77,22 +77,28 @@ However, 6 more steps are required to correctly configure SIDAM and CCD before i
 An oauth2 client should be configured for ccd-gateway application, on SIDAM Web Admin.
 You need to login to the SIDAM Web Admin with the URL and logic credentials here: https://tools.hmcts.net/confluence/x/eQP3P
 
-Values to be entered on the client configuration screen are:
+Navigate to Home > Manage Services > Add a new Service
+
+On the **Add Service** screen the following fields are required:
 ```
+label : <any>
+description : <any>
 client_id : ccd_gateway
 client_secret : ccd_gateway_secret
 redirect_uri : http://localhost:3451/oauth2redirect
 ```
 ### 2. Create ccd-import role
-After defining the above client, a role with "ccd-import" label must be defined under this client.
+After defining the above client/service, a role with "ccd-import" label must be defined under this client/service (Home > Manage Roles > select your service).
 For use in the automated functional test runs, the following roles are also needed:
 
     * caseworker
     * caseworker-autotest1
     * caseworker-autotest2
 
-Once the roles are defined under the client, you need to edit the client configuration and check the checkbox for the role "ccd-import".
+Don't worry about the *Assignable roles* section when adding roles
 
+Once the roles are defined under the client/service, go to the service configuration for the service you created in Step 1 (Home > Manage Services > select your service) and select `ccd-import` role radio option under **Private Beta Role** section
+ 
 **Any business-related roles like `caseworker`,`caseworker-<jurisdiction>` etc to be used in CCD later must also be defined under the client configuration at this stage.**
 
 ### 3. Create a Default User with "ccd-import" Role
@@ -117,7 +123,6 @@ Before a definition can be imported, roles referenced in a case definition Autho
 Parameters:
 - `role`: Name of the role, e.g: `caseworker-divorce`.
 - `classification`: Optional. One of `PUBLIC`, `PRIVATE` or `RESTRICTED`. Defaults to `PUBLIC`.
-
 
 ### 5. Add Initial Case Worker Users
 
