@@ -190,9 +190,9 @@ If you left the password out when creating the caseworker, by default it's set t
 
 If you see only a grey screen after entering your user credentials in the login page, you may need to set profile settings in ccd_user_profile database by adding a single line for the user in the below tables:
 
-1- User_Profile
+1- user_profile
 
-2- User_Profile_Jurisdiction
+2- user_profile_jurisdiction
 
 ## Compose branches
 
