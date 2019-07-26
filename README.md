@@ -187,8 +187,11 @@ Then the indicated role, here `caseworker-cmc-loa1`, must be added to CCD (See [
 
 Back to [http://localhost:3451](http://localhost:3451), you can now log in with the email and password defined at [step 1](#1-create-a-caseworker-user).
 If you left the password out when creating the caseworker, by default it's set to: `Pa55word11`.
+
 If you see only a grey screen after entering your user credentials in the login page, you may need to set profile settings in ccd_user_profile database by adding a single line for the user in the below tables:
+
 1- User_Profile
+
 2- User_Profile_Jurisdiction
 
 ## Compose branches
