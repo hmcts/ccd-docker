@@ -165,6 +165,8 @@ services:
     image: hmcts.azurecr.io/hmcts/sidam/sidam-idm-pg:1.0.0
     ports:
       - 5051:5432
+    volumes:
+      - ccd-docker-idam-shared-database-data:/var/lib/postgresql/data
 
   am-database:
     image: hmcts.azurecr.io/am-db
@@ -182,3 +184,4 @@ services:
 
 volumes:
   ccd-docker-ccd-shared-database-data:
+  ccd-docker-idam-shared-database-data:
