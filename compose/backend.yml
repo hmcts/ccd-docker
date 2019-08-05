@@ -93,7 +93,7 @@ services:
   sidam-api:
     image: hmcts.azurecr.io/hmcts/sidam/idam-api:1.0.0
     environment:
-      JAVA_OPTS: -Xms128m -Xms512m -Dlogging.level.uk.gov.hmcts=DEBUG
+      JAVA_OPTS: -Xms128m -Xmx512m -Dlogging.level.uk.gov.hmcts=DEBUG
       SPRING_DATASOURCE_URL: jdbc:postgresql://shared-db:5432/openidm?currentSchema=fridam
       TESTING_SUPPORT_ENABLED: "true"
     ports:
