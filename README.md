@@ -36,6 +36,9 @@ Login to the Azure Container registry:
 ```bash
 ./ccd login
 ```
+Note:
+if you experience any error with the above command, try `az login` first
+
 For [Azure Authentication for pulling latest docker images](#azure-authentication-for-pulling-latest-docker-images)
 
 Pulling latest Docker images:
@@ -63,6 +66,8 @@ Windows : `./bin/set-environment-variables.sh`
 
 Mac : `source ./bin/set-environment-variables.sh`
 
+Note: some users of zsh 'Oh My Zsh' experienced issues. Try switching to bash for this step
+
 To persist the environment variables in Mac, copy the contents of `env_variables_all.txt` file into ~/.bash_profile.
 A prefix 'export' will be required for each of environment variable.
 
@@ -85,7 +90,7 @@ label : <any>
 description : <any>
 client_id : ccd_gateway
 client_secret : ccd_gateway_secret
-redirect_uri : http://localhost:3451/oauth2redirect
+new redirect_uri (click 'Add URI' before saving) : http://localhost:3451/oauth2redirect
 ```
 ### 2. Create ccd-import role
 After defining the above client/service, a role with "ccd-import" label must be defined under this client/service (Home > Manage Roles > select your service).
@@ -181,11 +186,11 @@ Validation errors occurred importing the spreadsheet.
 - Invalid IdamRole 'caseworker-cmc-loa1' in AuthorisationCaseField tab, case type 'MoneyClaimCase', case field 'submitterId', crud 'CRUD'
 ```
 
-Then the indicated role, here `caseworker-cmc-loa1`, must be added to CCD (See [2. Add roles](#2-add-roles)).
+Then the indicated role, here `caseworker-cmc-loa1`, must be added to CCD (See [4. Add Initial Roles](#4-add-initial-roles)).
 
 ### Ready for take-off 🛫
 
-Back to [http://localhost:3451](http://localhost:3451), you can now log in with the email and password defined at [step 1](#1-create-a-caseworker-user).
+Back to [http://localhost:3451](http://localhost:3451), you can now log in with the email and password defined at [5. Add Initial Case Worker Users](#5-add-initial-case-worker-users).
 If you left the password out when creating the caseworker, by default it's set to: `Pa55word11`.
 
 If you see only a grey screen after entering your user credentials in the login page, you may need to set profile settings in ccd_user_profile database by adding a single line for the user in the below tables:
