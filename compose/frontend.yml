@@ -62,6 +62,7 @@ services:
      REFORM_SERVICE_NAME: sidam-api
      REFORM_TEAM: idam
      REFORM_ENVIRONMENT: local
+     JAVA_OPTS: -Xms128m -Xmx512m
     ports:
       - 3501:8080
     links:
