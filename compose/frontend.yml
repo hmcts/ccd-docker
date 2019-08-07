@@ -43,9 +43,9 @@ services:
       - ccd-data-store-api
 
   idam-web-admin:
-    image: hmcts.azurecr.io/hmcts/sidam/idam-web-admin:1.0.0
+    image: "hmctspublic.azurecr.io/idam/web-admin:latest"
     environment:
-      JAVA_OPTS: -Xms128m -Xmx512m
+      JAVA_OPTS: -Xms128m -Xms512m
       STRATEGIC_SERVICE_URL: http://sidam-api:5000
     ports:
       - 8082:8080
@@ -55,17 +55,17 @@ services:
       - sidam-api
 
   idam-web-public:
-    image: "hmcts.azurecr.io/hmcts/sidam/idam-web-public:1.0.0"
+    image: "hmctspublic.azurecr.io/idam/web-public:latest"
     environment:
      STRATEGIC_SERVICE_URL: http://sidam-api:5000
      IDAM_CONTINUE_URL_VALIDATOR_ENFORCE_TLS: "false"
      REFORM_SERVICE_NAME: sidam-api
      REFORM_TEAM: idam
      REFORM_ENVIRONMENT: local
-     JAVA_OPTS: -Xms128m -Xmx512m
     ports:
       - 3501:8080
     links:
       - sidam-api
     depends_on:
       - sidam-api
+
