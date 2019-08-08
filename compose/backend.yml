@@ -91,9 +91,9 @@ services:
       - service-auth-provider-api
 
   sidam-api:
-    image: "hmctspublic.azurecr.io/idam/api:pr-350"
+    image: "hmctspublic.azurecr.io/idam/api:latest"
     environment:
-      JAVA_OPTS: -Xms128m -Xms512m -Dlogging.level.uk.gov.hmcts=DEBUG
+      JAVA_OPTS: -Xms128m -Xmx512m -Dlogging.level.uk.gov.hmcts=DEBUG
       SPRING_DATASOURCE_URL: jdbc:postgresql://shared-db:5432/openidm?currentSchema=fridam
       TESTING_SUPPORT_ENABLED: "true"
     ports:
@@ -140,6 +140,7 @@ services:
       - 9010:9010
     environment:
       JAVA_TOOL_OPTIONS: -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=vm-ubuntu16 -Dcom.sun.management.jmxremote.rmi.port=9010
+      JAVA_OPTS: -Xms128m -Xmx512m
     depends_on:
       - fr-am
       - shared-db
@@ -165,9 +166,8 @@ services:
     image: "hmctsprivate.azurecr.io/idam/shared-db:latest"
     ports:
       - 5051:5432
-    volumes:
-      - ccd-docker-idam-shared-database-data:/var/lib/postgresql/data  
 
+# am-database is removed as there is no image in new ACR, will have to spin separately
   # am-database:
   #   image: hmcts.azurecr.io/am-db
   #   container_name: access_management_db
@@ -194,4 +194,3 @@ services:
 volumes:
   ccd-docker-ccd-shared-database-data:
   wiremock:
-  ccd-docker-idam-shared-database-data:
