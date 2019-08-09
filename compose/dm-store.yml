@@ -24,7 +24,7 @@ services:
       MICROSERVICE_KEYS_EM_GW: "${IDAM_KEY_DM_STORE}"
 
   dm-store:
-    image: "${DM_STORE_USE_LOCAL-hmcts.azurecr.io/}hmcts/dm-store:${DM_STORE_TAG:-latest}"
+    image: "${DM_STORE_USE_LOCAL-hmctspublic.azurecr.io/}dm/store:${DM_STORE_TAG:-latest}"
     healthcheck:
       disable: true
     environment:
