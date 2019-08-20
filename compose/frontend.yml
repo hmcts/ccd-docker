@@ -43,7 +43,7 @@ services:
       - ccd-data-store-api
 
   idam-web-admin:
-    image: "hmctspublic.azurecr.io/idam/web-admin:latest"
+    image: "hmctspublic.azurecr.io/idam/web-admin:preview"
     environment:
       JAVA_OPTS: -Xms128m -Xmx512m
       STRATEGIC_SERVICE_URL: http://sidam-api:5000
@@ -55,7 +55,7 @@ services:
       - sidam-api
 
   idam-web-public:
-    image: "hmctspublic.azurecr.io/idam/web-public:latest"
+    image: "hmctspublic.azurecr.io/idam/web-public:preview"
     environment:
      STRATEGIC_SERVICE_URL: http://sidam-api:5000
      IDAM_CONTINUE_URL_VALIDATOR_ENFORCE_TLS: "false"
