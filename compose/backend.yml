@@ -77,12 +77,16 @@ services:
       ELASTIC_SEARCH_ENABLED: "${ES_ENABLED_DOCKER}"
       ELASTIC_SEARCH_HOSTS: ccd-elasticsearch:9200
       ELASTIC_SEARCH_DATA_NODES_HOSTS: "http://ccd-elasticsearch:9200"
+      JAVA_OPTS: -Xdebug -Xms128m -Xms512m -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+
+
     ports:
       - 4452:4452
+      - 5005:5005
     depends_on:
       - ccd-shared-database
       - ccd-user-profile-api
-      - ccd-definition-store-api
+      - ccd-definition-store-api   
     links:
       - ccd-shared-database
       - ccd-user-profile-api
@@ -91,16 +95,18 @@ services:
       - service-auth-provider-api
 
   sidam-api:
-    image: "hmctspublic.azurecr.io/idam/api:preview"
+    image: "hmctspublic.azurecr.io/idam/api:latest"
     environment:
       JAVA_OPTS: -Xms128m -Xmx512m -Dlogging.level.uk.gov.hmcts=DEBUG
       SPRING_DATASOURCE_URL: jdbc:postgresql://shared-db:5432/openidm?currentSchema=fridam
       TESTING_SUPPORT_ENABLED: "true"
+
       IDAMHEALTHCHECK_AM_ENABLED: "false"
       IDAMHEALTHCHECK_IDM_ENABLED: "false"
       STRATEGIC_ADMIN_URL: http://idam-web-admin:8082
       STRATEGIC_WEBPUBLIC_URL: http://idam-web-public:9002
       SPRING_PROFILES_ACTIVE: local
+      SPRING_DATASOURCE_URL: jdbc:postgresql://shared-db:5432/openidm?currentSchema=fridam
       SPRING_DATASOURCE_USERNAME: openidm
       SPRING_DATASOURCE_PASSWORD: openidm
       SECURITY_OAUTH2_CLIENT_CLIENTSECRET: password
@@ -114,8 +120,10 @@ services:
       IDAM_SPI_FORGEROCK_IDM_ROOT: http://fr-idm:18080/openidm
       IDAM_SPI_FORGEROCK_IDM_USERNAME: openidm-admin
       IDAM_SPI_FORGEROCK_IDM_PASSWORD: openidm-admin
+      APPSETTING_NODE_PATH: es/
     ports:
       - 5000:5000
+    tmpfs: /opt/app/es
     links:
       - fr-am
       - fr-idm
@@ -144,7 +152,7 @@ services:
       TESTING_SUPPORT_ENABLED: "true"
 
   fr-am:
-    image: "hmctsprivate.azurecr.io/idam/idam-fr-am:latest"
+    image: "hmctsprivate.azurecr.io/idam/idam-fr-am:cmc"
     environment:
       JAVA_OPTS: -Xms128m -Xmx512m
     ports:
