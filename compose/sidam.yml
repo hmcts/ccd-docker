@@ -1,0 +1,76 @@
+---
+version: '3'
+
+services:
+
+  sidam-api:
+    image: hmcts.azurecr.io/hmcts/sidam/idam-api:1.0.0
+    environment:
+      JAVA_OPTS: -Xms128m -Xmx512m -Dlogging.level.uk.gov.hmcts=DEBUG
+      SPRING_DATASOURCE_URL: jdbc:postgresql://shared-db:5432/openidm?currentSchema=fridam
+      TESTING_SUPPORT_ENABLED: "true"
+    ports:
+      - 5000:5000
+    links:
+      - fr-am
+      - fr-idm
+      - shared-db
+    depends_on:
+      - fr-am
+      - fr-idm
+      - shared-db
+
+  fr-am:
+    image: hmcts.azurecr.io/hmcts/sidam/sidam-fr-am:1.0.0
+    environment:
+      JAVA_OPTS: -Xms128m -Xmx512m
+    ports:
+      - 8080:8080
+      - 1389:1389
+    depends_on:
+      - shared-db
+
+  fr-idm:
+    image: hmcts.azurecr.io/hmcts/sidam/sidam-fr-idm:1.0.0
+    ports:
+      - 18080:18080
+      - 9010:9010
+    environment:
+      JAVA_TOOL_OPTIONS: -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=vm-ubuntu16 -Dcom.sun.management.jmxremote.rmi.port=9010
+      JAVA_OPTS: -Xms128m -Xmx512m
+    depends_on:
+      - fr-am
+      - shared-db
+
+  idam-web-admin:
+    image: hmcts.azurecr.io/hmcts/sidam/idam-web-admin:1.0.0
+    environment:
+      JAVA_OPTS: -Xms128m -Xmx512m
+      STRATEGIC_SERVICE_URL: http://sidam-api:5000
+    ports:
+      - 8082:8080
+    links:
+      - sidam-api
+    depends_on:
+      - sidam-api
+
+  idam-web-public:
+    image: "hmcts.azurecr.io/hmcts/sidam/idam-web-public:1.0.0"
+    environment:
+      STRATEGIC_SERVICE_URL: http://sidam-api:5000
+      IDAM_CONTINUE_URL_VALIDATOR_ENFORCE_TLS: "false"
+      REFORM_SERVICE_NAME: sidam-api
+      REFORM_TEAM: idam
+      REFORM_ENVIRONMENT: local
+      JAVA_OPTS: -Xms128m -Xmx512m
+    ports:
+      - 3501:8080
+    links:
+      - sidam-api
+    depends_on:
+      - sidam-api
+
+  shared-db:
+    image: hmcts.azurecr.io/hmcts/sidam/sidam-idm-pg:1.0.0
+    ports:
+      - 5051:5432
