@@ -19,6 +19,8 @@ services:
       - fr-am
       - fr-idm
       - shared-db
+    networks:
+      - compose_default
 
   fr-am:
     image: hmcts.azurecr.io/hmcts/sidam/sidam-fr-am:1.0.0
@@ -29,6 +31,8 @@ services:
       - 1389:1389
     depends_on:
       - shared-db
+    networks:
+      - compose_default
 
   fr-idm:
     image: hmcts.azurecr.io/hmcts/sidam/sidam-fr-idm:1.0.0
@@ -41,6 +45,8 @@ services:
     depends_on:
       - fr-am
       - shared-db
+    networks:
+      - compose_default
 
   idam-web-admin:
     image: hmcts.azurecr.io/hmcts/sidam/idam-web-admin:1.0.0
@@ -53,6 +59,8 @@ services:
       - sidam-api
     depends_on:
       - sidam-api
+    networks:
+      - compose_default
 
   idam-web-public:
     image: "hmcts.azurecr.io/hmcts/sidam/idam-web-public:1.0.0"
@@ -69,8 +77,18 @@ services:
       - sidam-api
     depends_on:
       - sidam-api
+    networks:
+      - compose_default
 
   shared-db:
     image: hmcts.azurecr.io/hmcts/sidam/sidam-idm-pg:1.0.0
     ports:
       - 5051:5432
+    networks:
+      - compose_default
+    depends_on:
+      - ccd-api-gateway
+
+networks:
+  compose_default:
+    external: true

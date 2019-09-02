@@ -6,7 +6,7 @@ services:
     image: "${CCD_CASE_MANAGEMENT_WEB_USE_LOCAL-hmctspublic.azurecr.io/}ccd/case-management-web:${CCD_CASE_MANAGEMENT_WEB_TAG:-latest}"
     container_name: ccd-case-management-web
     environment:
-      IDAM_LOGIN_URL: http://localhost:5555/login
+      IDAM_LOGIN_URL: "${IDAM_STUB_LOGIN_DOCKER:-http://localhost:3501}/login"
       CCD_GATEWAY_BASE_URL: http://localhost:3453
       CCD_ACTIVITY_BASE_URL:
       DM_GATEWAY_BASE_URL: https://api-gateway.dev.dm.reform.hmcts.net
@@ -20,14 +20,14 @@ services:
     image: "${CCD_API_GATEWAY_USE_LOCAL-hmctspublic.azurecr.io/}ccd/api-gateway-web:${CCD_API_GATEWAY_TAG:-latest}"
     container_name: ccd-api-gateway-web
     environment:
-      IDAM_BASE_URL: http://ccd-test-stubs-service:5555
-      IDAM_USER_URL: http://ccd-test-stubs-service:5555
+      IDAM_BASE_URL: "${IDAM_STUB_DOCKER:-http://sidam-api:5000}"
+      IDAM_USER_URL: "${IDAM_STUB_DOCKER:-http://sidam-api:5000}"
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       IDAM_SERVICE_KEY: "${IDAM_KEY_CCD_GATEWAY}"
-      IDAM_OAUTH2_LOGOUT_ENDPOINT: http://ccd-test-stubs-service:5555/session/:token
+      IDAM_OAUTH2_LOGOUT_ENDPOINT: "${IDAM_STUB_DOCKER:-http://sidam-api:5000}/session/:token"
       IDAM_OAUTH2_CLIENT_ID: ccd_gateway
       IDAM_OAUTH2_CLIENT_SECRET: ccd_gateway_secret
-      IDAM_OAUTH2_TOKEN_ENDPOINT: http://ccd-test-stubs-service:5555/oauth2/token
+      IDAM_OAUTH2_TOKEN_ENDPOINT: "${IDAM_STUB_DOCKER:-http://sidam-api:5000}/oauth2/token"
       ADDRESS_LOOKUP_TOKEN:
       PROXY_AGGREGATED: http://ccd-data-store-api:4452
       PROXY_DATA: http://ccd-data-store-api:4452
