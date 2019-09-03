@@ -63,7 +63,7 @@ services:
       - compose_default
 
   idam-web-public:
-    image: "hmcts.azurecr.io/hmcts/sidam/idam-web-public:1.0.0"
+    image: "hmctspublic.azurecr.io/idam/web-public:latest"
     environment:
       STRATEGIC_SERVICE_URL: http://sidam-api:5000
       IDAM_CONTINUE_URL_VALIDATOR_ENFORCE_TLS: "false"
