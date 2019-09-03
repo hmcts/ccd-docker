@@ -4,7 +4,7 @@ version: '3'
 services:
 
   sidam-api:
-    image: hmcts.azurecr.io/hmcts/sidam/idam-api:1.0.0
+    image: "hmctspublic.azurecr.io/idam/api:latest"
     environment:
       JAVA_OPTS: -Xms128m -Xmx512m -Dlogging.level.uk.gov.hmcts=DEBUG
       SPRING_DATASOURCE_URL: jdbc:postgresql://shared-db:5432/openidm?currentSchema=fridam
@@ -23,7 +23,7 @@ services:
       - compose_default
 
   fr-am:
-    image: hmcts.azurecr.io/hmcts/sidam/sidam-fr-am:1.0.0
+    image: "hmctsprivate.azurecr.io/idam/idam-fr-am:latest"
     environment:
       JAVA_OPTS: -Xms128m -Xmx512m
     ports:
@@ -35,7 +35,7 @@ services:
       - compose_default
 
   fr-idm:
-    image: hmcts.azurecr.io/hmcts/sidam/sidam-fr-idm:1.0.0
+    image: "hmctsprivate.azurecr.io/idam/idam-fr-idm:latest"
     ports:
       - 18080:18080
       - 9010:9010
@@ -49,7 +49,7 @@ services:
       - compose_default
 
   idam-web-admin:
-    image: hmcts.azurecr.io/hmcts/sidam/idam-web-admin:1.0.0
+    image: "hmctspublic.azurecr.io/idam/web-admin:latest"
     environment:
       JAVA_OPTS: -Xms128m -Xmx512m
       STRATEGIC_SERVICE_URL: http://sidam-api:5000
@@ -81,7 +81,7 @@ services:
       - compose_default
 
   shared-db:
-    image: hmcts.azurecr.io/hmcts/sidam/sidam-idm-pg:1.0.0
+    image: "hmctspublic.azurecr.io/idam/web-public:latest"
     ports:
       - 5051:5432
     networks:

@@ -91,7 +91,7 @@ services:
       - service-auth-provider-api
 
   service-auth-provider-api:
-    image: hmcts.azurecr.io/hmcts/rpe-service-auth-provider:latest
+    image: "hmctspublic.azurecr.io/rpe/service-auth-provider:latest"
     healthcheck:
       interval: 10s
       timeout: 10s
