@@ -536,8 +536,8 @@ function ccd_compose() {
 }
 
 function ccd_login() {
-    docker logout hmctspublic.azurecr.io &>/dev/null
-    az acr login --name hmcts --subscription 1c4f0704-a29e-403d-b719-b90c34ef14c9
+    #docker logout hmctspublic.azurecr.io &>/dev/null
+    az acr login --name hmctsprivate --subscription 8999dec3-0104-4a27-94ee-6588559729d1
 }
 
 if [ $# -lt 1 ]; then
