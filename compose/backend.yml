@@ -190,9 +190,6 @@ services:
       - WIREMOCK_SERVER_MAPPINGS_PATH=wiremock
     ports:
       - 5555:5555
-    volumes:
-      - $WIREMOCK_SERVER_MAPPINGS_PATH:/opt/app/wiremock
 
 volumes:
   ccd-docker-ccd-shared-database-data:
-  wiremock:
