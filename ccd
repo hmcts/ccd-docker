@@ -525,6 +525,16 @@ function ccd_disable() {
 }
 
 function ccd_compose() {
+
+    if [ $1 = "down" ]; then
+        read -p "WARNING - compose down will remove idam data when idam compose files are enabled. Do you want to continue?" yn
+        case $yn in
+            [Yy]* ) ;;
+            [Nn]* ) exit;;
+            * ) echo "Please answer yes or no.";;
+        esac
+    fi
+
     usage_compose $*
     status_compose_files
     status_tags
