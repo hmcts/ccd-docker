@@ -1,94 +1,39 @@
 ---
-version: '3'
+version: '2.4'
 
 services:
-
-  sidam-api:
-    image: "hmctspublic.azurecr.io/idam/api:latest"
-    environment:
-      JAVA_OPTS: -Xms128m -Xmx512m -Dlogging.level.uk.gov.hmcts=DEBUG
-      SPRING_DATASOURCE_URL: jdbc:postgresql://shared-db:5432/openidm?currentSchema=fridam
-      TESTING_SUPPORT_ENABLED: "true"
-    ports:
-      - 5000:5000
-    links:
-      - fr-am
-      - fr-idm
-      - shared-db
-    depends_on:
-      - fr-am
-      - fr-idm
-      - shared-db
-    networks:
-      - compose_default
-
   fr-am:
-    image: "hmctsprivate.azurecr.io/idam/idam-fr-am:latest"
-    environment:
-      JAVA_OPTS: -Xms128m -Xmx512m
-    ports:
-      - 8080:8080
-      - 1389:1389
+    image: hmctsprivate.azurecr.io/idam/idam-fr-am:latest
+    hostname: localam
     depends_on:
-      - shared-db
-    networks:
-      - compose_default
-
+      shared-db:
+        condition: service_started
   fr-idm:
-    image: "hmctsprivate.azurecr.io/idam/idam-fr-idm:latest"
-    ports:
-      - 18080:18080
-      - 9010:9010
-    environment:
-      JAVA_TOOL_OPTIONS: -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=vm-ubuntu16 -Dcom.sun.management.jmxremote.rmi.port=9010
-      JAVA_OPTS: -Xms128m -Xmx512m
+    image: hmctsprivate.azurecr.io/idam/idam-fr-idm:latest
+    hostname: localidm
     depends_on:
-      - fr-am
-      - shared-db
-    networks:
-      - compose_default
-
-  idam-web-admin:
-    image: "hmctspublic.azurecr.io/idam/web-admin:latest"
-    environment:
-      JAVA_OPTS: -Xms128m -Xmx512m
-      STRATEGIC_SERVICE_URL: http://sidam-api:5000
-    ports:
-      - 8082:8080
-    links:
-      - sidam-api
-    depends_on:
-      - sidam-api
-    networks:
-      - compose_default
-
-  idam-web-public:
-    image: "hmctspublic.azurecr.io/idam/web-public:latest"
-    environment:
-      STRATEGIC_SERVICE_URL: http://sidam-api:5000
-      IDAM_CONTINUE_URL_VALIDATOR_ENFORCE_TLS: "false"
-      REFORM_SERVICE_NAME: sidam-api
-      REFORM_TEAM: idam
-      REFORM_ENVIRONMENT: local
-      JAVA_OPTS: -Xms128m -Xmx512m
-    ports:
-      - 3501:8080
-    links:
-      - sidam-api
-    depends_on:
-      - sidam-api
-    networks:
-      - compose_default
-
+      fr-am:
+        condition: service_started
+      shared-db:
+        condition: service_started
   shared-db:
-    image: "hmctspublic.azurecr.io/idam/web-public:latest"
-    ports:
-      - 5051:5432
-    networks:
-      - compose_default
+    image: hmctsprivate.azurecr.io/idam/shared-db:latest
+  smtp-server:
+    image: mailhog/mailhog
+  idam-api:
+    image: hmctspublic.azurecr.io/idam/api:preview
     depends_on:
-      - ccd-api-gateway
-
-networks:
-  compose_default:
-    external: true
+      fr-am:
+        condition: service_started
+      shared-db:
+        condition: service_started
+  idam-web-public:
+    image: hmctspublic.azurecr.io/idam/web-public:preview
+    depends_on:
+      idam-api:
+        condition: service_started
+  idam-web-admin:
+    image: hmctspublic.azurecr.io/idam/web-admin:preview
+    depends_on:
+      idam-api:
+        condition: service_started
