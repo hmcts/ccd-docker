@@ -526,14 +526,7 @@ function ccd_disable() {
 
 function ccd_compose() {
 
-    if [ $1 = "down" ]; then
-        read -p "WARNING - 'down' will remove idam data (if idam compose files are enabled). Use 'stop' to preserve data. Do you want to continue?" yn
-        case $yn in
-            [Yy]* ) ;;
-            [Nn]* ) exit;;
-            * ) echo "Please answer yes or no.";;
-        esac
-    fi
+    print_warn_on_compose_down_if_idam_enabled $*
 
     usage_compose $*
     status_compose_files
@@ -546,6 +539,17 @@ function ccd_compose() {
     echo "Docker compose:"
     echo -e "docker-compose $compose_file_options $options\n"
     docker-compose $compose_file_options $options
+}
+
+function print_warn_on_compose_down_if_idam_enabled {
+    if [[ $(active_compose_files) == *"sidam"* ]] && [[ $1 = "down" ]]; then
+        read -p "WARNING - 'down' will remove idam data. Use 'stop' to preserve data. Do you want to continue?" yn
+        case $yn in
+            [Yy]* ) ;;
+            [Nn]* ) exit;;
+            * ) echo "Please answer yes or no.";;
+        esac
+    fi
 }
 
 function ccd_login() {
