@@ -16,7 +16,7 @@ services:
     depends_on:
       - sidam-api
     networks:
-      - compose_default
+      - ccd-network
 
   idam-web-public:
     image: "hmctspublic.azurecr.io/idam/web-public:latest"
@@ -33,13 +33,13 @@ services:
     depends_on:
       - sidam-api
     networks:
-      - compose_default
+      - ccd-network
 
   shared-db:
     ports:
       - 5051:5432
     networks:
-      - compose_default
+      - ccd-network
     depends_on:
       - ccd-api-gateway
 

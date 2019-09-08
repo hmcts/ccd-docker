@@ -23,6 +23,8 @@ services:
     links:
       - ccd-shared-database
       - service-auth-provider-api
+    networks:
+      - ccd-network
 
   ccd-definition-store-api:
     image: "${CCD_DEFINITION_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
@@ -53,6 +55,8 @@ services:
       - ccd-shared-database
       - ccd-user-profile-api
       - service-auth-provider-api
+    networks:
+      - ccd-network
 
   ccd-data-store-api:
     image: "${CCD_DATA_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
@@ -87,6 +91,8 @@ services:
       - ccd-user-profile-api
       - ccd-definition-store-api
       - service-auth-provider-api
+    networks:
+      - ccd-network
 
   service-auth-provider-api:
     image: "hmctspublic.azurecr.io/rpe/service-auth-provider:latest"
@@ -105,6 +111,8 @@ services:
       MICROSERVICEKEYS_CCD_ADMIN: "${IDAM_KEY_CCD_ADMIN}"
       MICROSERVICEKEYS_FPL_CASE_SERVICE: "${IDAM_KEY_FPL_CASE_SERVICE}"
       TESTING_SUPPORT_ENABLED: "true"
+    networks:
+      - ccd-network
 
   ccd-shared-database:
     build: ../database
@@ -119,6 +127,8 @@ services:
       - 5050:5432
     volumes:
       - ccd-docker-ccd-shared-database-data:/var/lib/postgresql/data
+    networks:
+      - ccd-network
 
 #  am-database:
 #    image: hmcts.azurecr.io/am-db
@@ -140,9 +150,13 @@ services:
       - WIREMOCK_SERVER_MAPPINGS_PATH=wiremock
     ports:
       - 5555:5555
-#    volumes:
-#      - $WIREMOCK_SERVER_MAPPINGS_PATH:/opt/app/wiremock
+    networks:
+      - ccd-network
 
 volumes:
   ccd-docker-ccd-shared-database-data:
   wiremock:
+
+networks:
+  ccd-network:
+    external: true
