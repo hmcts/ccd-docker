@@ -485,8 +485,11 @@ Display preferences for the CCD users.
 
 #### ccd-test-stubs-service
 
-Service to facilitate testing of external http calls using wiremock to return canned responses for requests matching 
+Service to facilitate testing of external http calls using wiremock. It returns canned responses for requests matching
 the predefined criteria.
+Currently used for:
+   - expose a set of default callbacks that can be invoked for testing purposes
+   - stub IDAM
 
 ### Front-end
 
