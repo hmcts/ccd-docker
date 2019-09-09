@@ -416,6 +416,11 @@ function ccd_branches() {
     done
 }
 
+function ccd_init() {
+    echo "creating docker network 'ccd-network'"
+    docker network create ccd-network && echo "'ccd-network' created"
+}
+
 function ccd_status() {
     echo "Status:"
     echo "======="
@@ -564,6 +569,9 @@ fi
 command=$1
 shift
 case $command in
+    init)
+        ccd_init
+        ;;
     set)
         ccd_set $*
         ;;
