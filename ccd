@@ -512,7 +512,8 @@ function ccd_disable() {
             existing=0
             for enabled_file in $CCD_ENABLED_COMPOSE_FILES
             do
-                if [ "$compose_file" != "$enabled_file" ]; then
+                #if enabled_file is not in the list to be disabled and it's not in $new_enabled yet
+                if [[ ! " $* " =~ .*\ $enabled_file\ .* ]] && [[ ! " $new_enabled " =~ .*\ $enabled_file\ .* ]]; then
                     new_enabled="$new_enabled $enabled_file"
                 else
                     existing=1
