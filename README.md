@@ -8,6 +8,7 @@
 - [Under the hood](#under-the-hood-speedboat)
 - [Containers](#containers)
 - [Local development](#local-development)
+- [Troubleshooting](#troubleshooting)
 - [Variables](#variables)
 - [Remarks](#remarks)
 - [License](#license)
@@ -45,6 +46,12 @@ Pulling latest Docker images:
 
 ```bash
 ./ccd compose pull
+```
+
+Running initialisation steps:
+
+```bash
+./ccd init
 ```
 
 Creating and starting the containers:
@@ -589,6 +596,19 @@ We will need to install the az cli using Python PIP.
 2. Setup the Python(version 2.x/3.x) on windows machine. PIP is bundled with Python.
 3. Execute the command "pip install azure-cli" using command line. It takes about 20 minutes to install the azure cli.
 4. Verify the installation using the command az --version.
+
+## Troubleshooting
+
+CCD UI not loading:
+
+- it might take few minutes for all the services to startup
+    > Wait few minutes and then retry accessing CCD UI
+- sometimes happens that some of the back-ends (data store, definition store, user profile) cannot startup because the database liquibase lock is stuck.
+    > check on the back-end log if there's the following exception: 'liquibase.exception.LockException: Could not acquire change log lock'
+    Execute the following command on the database:
+    UPDATE DATABASECHANGELOGLOCK SET LOCKED=FALSE, LOCKGRANTED=null, LOCKEDBY=null where ID=1;
+
+
 
 ## Variables
 Here are the important variables exposed in the compose files:
