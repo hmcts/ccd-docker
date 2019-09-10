@@ -287,7 +287,7 @@ To allow definition imports to work ('ccd-import-definition.sh') you need to:
 export IDAM_STUB_LOCALHOST=http://localhost:5555
 ```
 
-NOTE: remember to unset 'IDAM_STUB_LOCALHOST' when switching back to the real Idam, otherwise definition import won't work
+:warning: Please note: remember to unset 'IDAM_STUB_LOCALHOST' when switching back to the real Idam, otherwise definition import won't work
 
 ```bash
 unset IDAM_STUB_LOCALHOST
@@ -297,7 +297,7 @@ It's possible to seamlessly switch back and forth between Idam and Idam Stub
 
 TODO add example
 
-NOTE: always use 'compose up' rather than 'compose start' when switching between Idam and Idam Stub to have docker compose pick up env vars changes.
+:warning: Please note: always use 'compose up' rather than 'compose start' when switching between Idam and Idam Stub to have docker compose pick up env vars changes.
 
 ## Compose branches
 
