@@ -3,6 +3,7 @@
 - [Prerequisites](#prerequisites)
 - [Quick start](#quick-start)
 - [Using CCD](#using-ccd)
+- [Idam Stub](#idam-stub)
 - [Compose branches](#compose-branches)
 - [Compose projects](#compose-projects)
 - [Under the hood](#under-the-hood-speedboat)
@@ -49,6 +50,9 @@ Pulling latest Docker images:
 ```
 
 Running initialisation steps:
+
+Note:
+required only on the first run. Once executed, it doesn't need to be executed again
 
 ```bash
 ./ccd init
@@ -205,6 +209,95 @@ If you see only a grey screen after entering your user credentials in the login 
 1- user_profile
 
 2- user_profile_jurisdiction
+
+## Idam Stub
+It's possible to disable the Idam containers and run CCD with an Idam Stub provided by ccd-test-stubs-service
+
+Step 1 - Disable Sidam containers
+
+make sure 'sidam', 'sidam-local', 'sidam-local-ccd' docker compose files are not enabled. How you do that depends on your currently active compose files.
+When no active compose files are present, the default ones are executed. But if there's any active, then the defautl ones are ignored. For example:
+
+```bash
+./ccd enable show
+
+Currently active compose files:
+backend
+frontend
+sidam
+sidam-local
+sidam-local-ccd
+
+Default compose files:
+backend
+frontend
+sidam
+sidam-local
+sidam-local-ccd
+```
+
+In this case sidam is currently explicitly enabled. To disable it:
+
+```bash
+./ccd disable sidam sidam-local sidam-local-ccd
+```
+
+If you are instead running with the default compose file as in:
+```bash
+./ccd enable show
+
+Default compose files:
+backend
+frontend
+sidam
+sidam-local
+sidam-local-ccd
+```
+
+You must explicitly enable only CCD compose files but exclude sidam:
+
+```bash
+./ccd enable backend frontend
+./ccd enable show
+
+Currently active compose files:
+backend
+frontend
+
+Default compose files:
+backend
+frontend
+sidam
+sidam-local
+sidam-local-ccd
+```
+
+Step 2 - Setup Env Vars
+
+in the '.env' file, uncomment:
+
+```yaml
+#IDAM_STUB_SERVICE_NAME=http://ccd-test-stubs-service:5555
+#IDAM_STUB_LOCALHOST=http://localhost:5555
+```
+
+To allow definition imports to work ('ccd-import-definition.sh') you need to:
+
+```bash
+export IDAM_STUB_LOCALHOST=http://localhost:5555
+```
+
+NOTE: remember to unset 'IDAM_STUB_LOCALHOST' when switching back to the real Idam, otherwise definition import won't work
+
+```bash
+unset IDAM_STUB_LOCALHOST
+```
+
+It's possible to seamlessly switch back and forth between Idam and Idam Stub
+
+TODO add example
+
+NOTE: always use 'compose up' rather than 'compose start' when switching between Idam and Idam Stub to have docker compose pick up env vars changes.
 
 ## Compose branches
 
