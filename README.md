@@ -103,10 +103,11 @@ client_id : ccd_gateway
 client_secret : ccd_gateway_secret
 new redirect_uri (click 'Add URI' before saving) : http://localhost:3451/oauth2redirect
 ```
-### 2. Create ccd-import role
-After defining the above client/service, a role with "ccd-import" label must be defined under this client/service (Home > Manage Roles > select your service).
-For use in the automated functional test runs, the following roles are also needed:
+### 2. Create Idam roles
+After defining the above client/service, the following roles must be defined under this client/service (Home > Manage Roles > select your service)
+(some of these roles are used in the automated functional test):
 
+    * ccd-import
     * caseworker
     * caseworker-autotest1
     * caseworker-autotest2
@@ -706,7 +707,7 @@ CCD UI not loading:
 - it's possible that some of the services cannot start or crash because of lack of availabel memory. This especially when starting Idam and or ElasticSearch
     > give more memory to Docker. Configurable under Preferences -> Advanced
 
-
+TOD add ccd-network
 
 ## Variables
 Here are the important variables exposed in the compose files:
