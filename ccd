@@ -549,7 +549,8 @@ function ccd_compose() {
 
 function print_warn_on_compose_down_if_idam_enabled {
     if [[ $(active_compose_files) == *"sidam"* ]] && [[ $1 = "down" ]]; then
-        read -p "WARNING - 'down' will remove idam data. Use 'stop' to preserve data. Do you want to continue?" yn
+        read -p "WARNING - 'down' will remove Idam data. Use 'stop' to preserve data. Or if you wanted to remove only CCD containers, you can disable Idam
+        first. Do you want to continue?" yn
         case $yn in
             [Yy]* ) ;;
             [Nn]* ) exit;;
