@@ -104,7 +104,7 @@ client_secret : ccd_gateway_secret
 new redirect_uri (click 'Add URI' before saving) : http://localhost:3451/oauth2redirect
 ```
 ### 2. Create Idam roles
-After defining the above client/service, the following roles must be defined under this client/service (Home > Manage Roles > select your service)
+After defining the above client/service, the following roles must be defined under this client/service (Home > Manage Roles > select your service > Role Label)
 (some of these roles are used in the automated functional test):
 
     * ccd-import
