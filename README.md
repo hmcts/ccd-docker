@@ -605,11 +605,13 @@ We will need to install the az cli using Python PIP.
 CCD UI not loading:
 
 - it might take few minutes for all the services to startup
-    > Wait few minutes and then retry accessing CCD UI
+    > wait few minutes and then retry accessing CCD UI
 - sometimes happens that some of the back-ends (data store, definition store, user profile) cannot startup because the database liquibase lock is stuck.
     > check on the back-end log if there's the following exception: 'liquibase.exception.LockException: Could not acquire change log lock'
     Execute the following command on the database:
     UPDATE DATABASECHANGELOGLOCK SET LOCKED=FALSE, LOCKGRANTED=null, LOCKEDBY=null where ID=1;
+- it's possible that some of the services cannot start or crash because of lack of availabel memory. This especially when starting Idam and or ElasticSearch
+    > give more memory to Docker. Configurable under Preferences -> Advanced
 
 
 
