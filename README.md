@@ -581,8 +581,8 @@ Display preferences for the CCD users.
 Service to facilitate testing of external http calls using wiremock. It returns canned responses for requests matching
 the predefined criteria.
 Currently used for:
-   - expose a set of default callbacks that can be invoked for testing purposes
-   - stub IDAM
+   - exposing a set of default callbacks that can be invoked for testing purposes
+   - Idam Stub
 
 ### Front-end
 
