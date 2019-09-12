@@ -296,9 +296,37 @@ export IDAM_STUB_LOCALHOST=http://localhost:5555
 unset IDAM_STUB_LOCALHOST
 ```
 
-### Swiching between Idam and Idam Stub
+### Revert to Idam
 
-Example:
+#### Step 1 - Enable Sidam containers
+
+```bash
+./ccd enable sidam sidam-local sidam-local-ccd
+```
+
+or just revert to the default:
+
+```bash
+./ccd enable default
+```
+
+#### Step 2 - Setup Env Vars
+
+in the '.env' file, make sure the following env vars are commented:
+
+```yaml
+#IDAM_STUB_SERVICE_NAME=http://ccd-test-stubs-service:5555
+#IDAM_STUB_LOCALHOST=http://localhost:5555
+```
+
+then from the command line:
+
+```bash
+unset IDAM_STUB_LOCALHOST
+```
+
+
+### Switching between Idam and Idam Stub Example
 
 ```bash
 #assuming no containers running and Idam is enabled
@@ -320,7 +348,7 @@ Example:
 you also can issue a 'down' when Idam Stub is enabled without risking of losing Idam data, since it's disabled
 ./ccd compose down
 
-enable Idam follwing the steps in 'Enable Idam'
+enable Idam follwing the steps in 'Revert to Idam'
 
 #start with Idam. This will now create new CCD containers and reuse the old Idam ones
 ./ccd compose up -d
