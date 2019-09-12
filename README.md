@@ -212,9 +212,11 @@ If you see only a grey screen after entering your user credentials in the login 
 2- user_profile_jurisdiction
 
 ## Idam Stub
-It's possible to disable the Idam containers and run CCD with an Idam Stub provided by ccd-test-stubs-service
+It's possible to disable the Idam containers and run CCD with an Idam Stub provided by ccd-test-stubs-service. This is useful as a back up plan for when docker Idam is broken or when you local machine is running low on memory and you don't want to spin up the whole Idam containers
 
-Step 1 - Disable Sidam containers
+### Enable Idam Stub
+
+#### Step 1 - Disable Sidam containers
 
 make sure 'sidam', 'sidam-local', 'sidam-local-ccd' docker compose files are not enabled. How you do that depends on your currently active compose files.
 When no active compose files are present, the default ones are executed. But if there's any active, then the defautl ones are ignored. For example:
@@ -273,7 +275,7 @@ sidam-local
 sidam-local-ccd
 ```
 
-Step 2 - Setup Env Vars
+#### Step 2 - Setup Env Vars
 
 in the '.env' file, uncomment:
 
@@ -294,11 +296,37 @@ export IDAM_STUB_LOCALHOST=http://localhost:5555
 unset IDAM_STUB_LOCALHOST
 ```
 
-It's possible to seamlessly switch back and forth between Idam and Idam Stub
+### Swiching between Idam and Idam Stub
 
-TODO add example
+Example:
 
-:warning: Please note: always use 'compose up' rather than 'compose start' when switching between Idam and Idam Stub to have docker compose pick up env vars changes.
+```bash
+#assuming no containers running and Idam is enabled
+
+#start with Idam
+./ccd compose up -d
+
+#services started
+
+./ccd compose stop
+
+#enable Idam Stub follwing the steps in 'Enable Idam Stub'
+
+#start with Idam Stub
+./ccd compose up -d
+
+#services started
+
+you also can issue a 'down' when Idam Stub is enabled without risking of losing Idam data, since it's disabled
+./ccd compose down
+
+enable Idam follwing the steps in 'Enable Idam'
+
+#start with Idam. This will now create new CCD containers and reuse the old Idam ones
+./ccd compose up -d
+```
+
+NOTE: :warning: always use 'compose up' rather than 'compose start' when switching between Idam and Idam Stub to have docker compose pick up env vars changes.
 
 ## Compose branches
 
