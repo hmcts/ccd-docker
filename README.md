@@ -118,7 +118,19 @@ Once the roles are defined under the client/service, go to the service configura
  
 **Any business-related roles like `caseworker`,`caseworker-<jurisdiction>` etc to be used in CCD later must also be defined under the client configuration at this stage.**
 
-### 3. Create a Default User with "ccd-import" Role
+### 3. Create users and roles
+
+#### 3.1 Automated creation
+
+A script is provided that sets up some initial users and roles for running functional tests. Execute the following:
+
+```bash
+./bin/create-initial-roles-and-users.sh
+```
+
+#### 3.2 Manual creation
+
+##### 3.2.1 Create a Default User with "ccd-import" Role
 
 A user with import role should be created using the following command:
 
@@ -129,7 +141,7 @@ A user with import role should be created using the following command:
 This call will create a user in SIDAM with ccd-import role. This user will be used to acquire a user token with "ccd-import" role.
 
 
-### 4. Add Initial Roles
+##### 3.2.2 Add Initial Roles
 
 Before a definition can be imported, roles referenced in a case definition Authorisation tabs must be defined in CCD using:
 
@@ -141,7 +153,7 @@ Parameters:
 - `role`: Name of the role, e.g: `caseworker-divorce`.
 - `classification`: Optional. One of `PUBLIC`, `PRIVATE` or `RESTRICTED`. Defaults to `PUBLIC`.
 
-### 5. Add Initial Case Worker Users
+##### 3.2.3 Add Initial Case Worker Users
 
 A caseworker user can be created in IDAM using the following command:
 
@@ -160,24 +172,15 @@ For example:
 ./bin/idam-create-caseworker.sh caseworker-probate,caseworker-probate-solicitor probate@hmcts.net
 ```
 
-### Note:
-For running functional test cases,
-
-- A. Initial user and role creation can be done by executing the following script:
-
-```bash
-./bin/create-initial-roles-and-users.sh
-```
-
-- B. Before running CCD Data Store tests, execute the CCD Definition store test cases first so that case definitions are loaded from CCD_CNP_27.xlsx.
-
-- C. Set the TEST_URL environment variable to match the service the functional tests should executed against:
+#### Note:
+- A. Before running CCD Data Store tests, execute the CCD Definition store test cases first so that case definitions are loaded from CCD_CNP_27.xlsx.
+- B. Set the TEST_URL environment variable to match the service the functional tests should executed against:
 
           For ccd-definition-store-api functional tests the set TEST_URL=http://localhost:4451
 
           For ccd-data-store-api functional tests set TEST_URL=http://localhost:4452
 
-### 6. Import case definition
+### 4. Import case definition
 
 To reduce impact on performances, case definitions are imported via the command line rather than using CCD's dedicated UI:
 
