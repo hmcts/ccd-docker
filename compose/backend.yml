@@ -2,6 +2,35 @@
 version: '3'
 
 services:
+
+  annotation-api:
+    image: hmctspublic.azurecr.io/em/anno:latest
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://annotation-api-db:5432/emannotationapp
+      - SPRING_DATASOURCE_USERNAME=emannotationapp
+      - SPRING_DATASOURCE_PASSWORD=emannotationapp
+      - S2S_BASE_URI=http://service-auth-provider-api:8080
+      - IDAM_API_BASE_URI=http://idam-api:8080
+      - ENABLE_LIQUIBASE=true
+      - S2S_NAMES_WHITELIST=sscs,divorce,ccd,em_gw,jui_webapp,pui_webapp,em_npa_app,ccd_gw,ccd_gateway
+      - IDAM_API_BASE_URI=http://sidam-api:5000
+    links:
+      - annotation-api-db
+    depends_on:
+      - annotation-api-db
+    ports:
+      - 4623:8080
+
+    annotation-api-db:
+      image: postgres
+      restart: always
+      environment:
+        - POSTGRES_DB=emannotationapp
+        - POSTGRES_USER=emannotationapp
+        - POSTGRES_PASSWORD=emannotationapp
+      ports:
+        - 5444:5432
+
   ccd-user-profile-api:
     image: "${CCD_USER_PROFILE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/user-profile-api:${CCD_USER_PROFILE_API_TAG:-latest}"
     environment:
