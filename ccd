@@ -286,18 +286,19 @@ function status_tags() {
         do
             echo "$(tag_friendly_name $tag) branch:$(active_tag_branch $tag) hash:$(active_tag_hash $tag)"
         done
+        echo -e "\n"
     else
-        echo "No overrides, all using master"
+        echo -e "No overrides, all using master\n"
     fi
 }
 
 function status_compose_files() {
     if [ $(has_active_compose_files) -eq 1 ]; then
         echo "Active compose files:"
-        echo "$(active_compose_files)"
+        echo -e "$(active_compose_files)\n"
     else
         echo "Using default compose files:"
-        echo "$(default_compose_files)"
+        echo -e "$(default_compose_files)\n"
     fi
 }
 
@@ -415,6 +416,11 @@ function ccd_branches() {
     done
 }
 
+function ccd_init() {
+    echo "creating docker network 'ccd-network'"
+    docker network create ccd-network && echo "'ccd-network' created"
+}
+
 function ccd_status() {
     echo "Status:"
     echo "======="
@@ -506,7 +512,8 @@ function ccd_disable() {
             existing=0
             for enabled_file in $CCD_ENABLED_COMPOSE_FILES
             do
-                if [ "$compose_file" != "$enabled_file" ]; then
+                #if enabled_file is not in the list to be disabled and it's not in $new_enabled yet
+                if [[ ! " $* " =~ .*\ $enabled_file\ .* ]] && [[ ! " $new_enabled " =~ .*\ $enabled_file\ .* ]]; then
                     new_enabled="$new_enabled $enabled_file"
                 else
                     existing=1
@@ -524,6 +531,9 @@ function ccd_disable() {
 }
 
 function ccd_compose() {
+
+    print_warn_on_compose_down_if_idam_enabled $*
+
     usage_compose $*
     status_compose_files
     status_tags
@@ -532,7 +542,21 @@ function ccd_compose() {
         source $TAGS_FILE
     fi
     compose_file_options=$(create_compose_file_options)
+    echo "Docker compose:"
+    echo -e "docker-compose $compose_file_options $options\n"
     docker-compose $compose_file_options $options
+}
+
+function print_warn_on_compose_down_if_idam_enabled {
+    if [[ $(active_compose_files) == *"sidam"* ]] && [[ $1 = "down" ]]; then
+        read -p "WARNING - 'down' will remove Idam data. Use 'stop' to preserve data. Or if you intended to remove only CCD containers, disable Idam
+        compose files first. Do you want to continue?" yn
+        case $yn in
+            [Yy]* ) ;;
+            [Nn]* ) exit;;
+            * ) echo "Please answer yes or no.";;
+        esac
+    fi
 }
 
 function ccd_login() {
@@ -547,6 +571,9 @@ fi
 command=$1
 shift
 case $command in
+    init)
+        ccd_init
+        ;;
     set)
         ccd_set $*
         ;;
