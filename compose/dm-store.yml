@@ -87,6 +87,8 @@ services:
       executable: "blob"
     volumes:
       - ccd-docker-azure-blob-data:/opt/azurite/folder
+    networks:
+      - ccd-network
 
 volumes:
   ccd-docker-azure-blob-data:
