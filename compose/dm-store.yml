@@ -76,6 +76,8 @@ services:
       - 4506:8080
     #   debug port exposed
     #   - 5006:5005
+    networks:
+      - ccd-network
 
   azure-storage-emulator-azurite:
     image: arafato/azurite
@@ -88,3 +90,7 @@ services:
 
 volumes:
   ccd-docker-azure-blob-data:
+
+networks:
+  ccd-network:
+    external: true
