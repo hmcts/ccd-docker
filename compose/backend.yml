@@ -1,5 +1,6 @@
 ---
 version: '2.4'
+#only add core CCD services here. Side services should be added to others.yaml
 
 services:
   ccd-user-profile-api:
