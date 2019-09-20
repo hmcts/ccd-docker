@@ -1,5 +1,5 @@
 ---
-version: '3'
+version: '2.4'
 
 services:
   ccd-case-management-web:
@@ -44,7 +44,7 @@ services:
       SPRING_PROFILES_ACTIVE: dev
       IDAM_TESTING_SUPPORT_ENABLED: "true"
       LOGGING_LEVEL_UK_GOV_HMCTS_IDAM: DEBUG
-      IDAM_USER_BASE_URI: http://sidam-api:5000
+      IDAM_USER_BASE_URI: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       IDAM_S2S_BASE_URI: http://service-auth-provider-api:8080
       S2S_NAMES_WHITELIST: sscs,divorce,ccd,em_gw,document-management-store,ccd_gw,idam-api,fpl_case_service
       http_proxy:
@@ -66,17 +66,18 @@ services:
     #    JAVA_OPTS: -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
     links:
       - ccd-shared-database
-      - sidam-api
       - service-auth-provider-api
     depends_on:
       - ccd-shared-database
-      - sidam-api
+      - idam-api
       - service-auth-provider-api
       - azure-storage-emulator-azurite
     ports:
       - 4506:8080
     #   debug port exposed
     #   - 5006:5005
+    networks:
+      - ccd-network
 
   azure-storage-emulator-azurite:
     image: arafato/azurite
@@ -86,6 +87,12 @@ services:
       executable: "blob"
     volumes:
       - ccd-docker-azure-blob-data:/opt/azurite/folder
+    networks:
+      - ccd-network
 
 volumes:
   ccd-docker-azure-blob-data:
+
+networks:
+  ccd-network:
+    external: true
