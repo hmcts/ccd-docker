@@ -1,35 +1,8 @@
 ---
-version: '3'
+version: '2.4'
+#only add core CCD services here. Side services should be added to others.yaml
 
 services:
-
-  mv-annotation-api:
-    image: hmctspublic.azurecr.io/em/anno:latest
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://annotation-api-db:5432/emannotationapp
-      - SPRING_DATASOURCE_USERNAME=emannotationapp
-      - SPRING_DATASOURCE_PASSWORD=emannotationapp
-      - S2S_BASE_URI=http://service-auth-provider-api:8080
-      - ENABLE_LIQUIBASE=true
-      - S2S_NAMES_WHITELIST=sscs,divorce,ccd,em_gw,jui_webapp,pui_webapp,em_npa_app,ccd_gw,ccd_gateway
-      - IDAM_API_BASE_URI=http://sidam-api:5000
-    depends_on:
-      - mv-annotation-api-db
-    ports:
-      - 4623:8080
-
-  mv-annotation-api-db:
-    image: postgres
-    restart: always
-    environment:
-      - POSTGRES_DB=emannotationapp
-      - POSTGRES_USER=emannotationapp
-      - POSTGRES_PASSWORD=emannotationapp
-    ports:
-      - 5444:5432
-    volumes:
-      - ccd-docker-mv-annotation-api-db-data:/var/lib/postgresql/data
-
   ccd-user-profile-api:
     image: "${CCD_USER_PROFILE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/user-profile-api:${CCD_USER_PROFILE_API_TAG:-latest}"
     environment:
@@ -51,6 +24,8 @@ services:
     links:
       - ccd-shared-database
       - service-auth-provider-api
+    networks:
+      - ccd-network
 
   ccd-definition-store-api:
     image: "${CCD_DEFINITION_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
@@ -63,7 +38,7 @@ services:
       DEFINITION_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DEFINITION_STORE}"
       DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
-      IDAM_USER_URL: http://sidam-api:5000
+      IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       REFORM_SERVICE_NAME: ccd-definition-store-api
       REFORM_TEAM: ccd
@@ -80,8 +55,9 @@ services:
     links:
       - ccd-shared-database
       - ccd-user-profile-api
-      - sidam-api
       - service-auth-provider-api
+    networks:
+      - ccd-network
 
   ccd-data-store-api:
     image: "${CCD_DATA_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
@@ -96,7 +72,7 @@ services:
       DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,fpl_case_service,ccd_data,ccd_ps
       DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
-      IDAM_USER_URL: http://sidam-api:5000
+      IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       REFORM_SERVICE_NAME: ccd-data-store-api
       REFORM_TEAM: ccd
@@ -115,25 +91,9 @@ services:
       - ccd-shared-database
       - ccd-user-profile-api
       - ccd-definition-store-api
-      - sidam-api
       - service-auth-provider-api
-
-  sidam-api:
-    image: "hmctspublic.azurecr.io/idam/api:latest"
-    environment:
-      JAVA_OPTS: -Xms128m -Xmx512m -Dlogging.level.uk.gov.hmcts=DEBUG
-      SPRING_DATASOURCE_URL: jdbc:postgresql://shared-db:5432/openidm?currentSchema=fridam
-      TESTING_SUPPORT_ENABLED: "true"
-    ports:
-      - 5000:5000
-    links:
-      - fr-am
-      - fr-idm
-      - shared-db
-    depends_on:
-      - fr-am
-      - fr-idm
-      - shared-db
+    networks:
+      - ccd-network
 
   service-auth-provider-api:
     image: "hmctspublic.azurecr.io/rpe/service-auth-provider:latest"
@@ -152,31 +112,8 @@ services:
       MICROSERVICEKEYS_CCD_ADMIN: "${IDAM_KEY_CCD_ADMIN}"
       MICROSERVICEKEYS_FPL_CASE_SERVICE: "${IDAM_KEY_FPL_CASE_SERVICE}"
       TESTING_SUPPORT_ENABLED: "true"
-
-  fr-am:
-    image: "hmctsprivate.azurecr.io/idam/idam-fr-am:cmc"
-    environment:
-      JAVA_OPTS: -Xms128m -Xmx512m
-    ports:
-      - 8080:8080
-      - 1389:1389
-    depends_on:
-      - shared-db
-
-  fr-idm:
-    image: "hmctsprivate.azurecr.io/idam/idam-fr-idm:latest"
-    ports:
-      - 18080:18080
-      - 9010:9010
-    environment:
-      JAVA_TOOL_OPTIONS: -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=vm-ubuntu16 -Dcom.sun.management.jmxremote.rmi.port=9010
-      JAVA_OPTS: -Xms128m -Xmx512m
-    depends_on:
-      - fr-am
-      - shared-db
-
-  smtp-server:
-    image: mailhog/mailhog
+    networks:
+      - ccd-network
 
   ccd-shared-database:
     build: ../database
@@ -191,26 +128,22 @@ services:
       - 5050:5432
     volumes:
       - ccd-docker-ccd-shared-database-data:/var/lib/postgresql/data
+    networks:
+      - ccd-network
 
-  shared-db:
-    image: "hmctsprivate.azurecr.io/idam/shared-db:latest"
-    ports:
-      - 5051:5432
-
-# am-database is removed as there is no image in new ACR, will have to spin separately
-  # am-database:
-  #   image: hmcts.azurecr.io/am-db
-  #   container_name: access_management_db
-  #   environment:
-  #     AM_DB:
-  #     AM_DB_USERNAME:
-  #     AM_DB_PASSWORD:
-  #   healthcheck:
-  #     interval: 10s
-  #     timeout: 10s
-  #     retries: 10
-  #   ports:
-  #     - 5600:5432
+#  am-database:
+#    image: hmcts.azurecr.io/am-db
+#    container_name: access_management_db
+#    environment:
+#      AM_DB:
+#      AM_DB_USERNAME:
+#      AM_DB_PASSWORD:
+#    healthcheck:
+#      interval: 10s
+#      timeout: 10s
+#      retries: 10
+#    ports:
+#      - 5600:5432
 
   ccd-test-stubs-service:
     image: "${CCD_TEST_STUBS_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}ccd/test-stubs-service:${CCD_TEST_STUBS_SERVICE_TAG:-latest}"
@@ -218,7 +151,13 @@ services:
       - WIREMOCK_SERVER_MAPPINGS_PATH=wiremock
     ports:
       - 5555:5555
+    networks:
+      - ccd-network
 
 volumes:
   ccd-docker-ccd-shared-database-data:
-  ccd-docker-mv-annotation-api-db-data:
+  wiremock:
+
+networks:
+  ccd-network:
+    external: true

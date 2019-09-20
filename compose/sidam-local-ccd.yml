@@ -1,0 +1,42 @@
+---
+version: '2.4'
+
+services:
+  fr-am:
+    environment:
+      JAVA_OPTS: -Xms128m -Xmx512m
+    networks:
+      - ccd-network
+  fr-idm:
+    environment:
+      JAVA_TOOL_OPTIONS: -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=vm-ubuntu16 -Dcom.sun.management.jmxremote.rmi.port=9010
+      JAVA_OPTS: -Xms128m -Xmx512m
+    networks:
+      - ccd-network
+  shared-db:
+    ports:
+      - 5051:5432
+    networks:
+      - ccd-network
+  idam-api:
+    environment:
+      JAVA_OPTS: -Xms128m -Xmx512m
+      TESTING_SUPPORT_ENABLED: "true"
+    networks:
+      - ccd-network
+  idam-web-public:
+    ports:
+      - 3501:8080
+    environment:
+      - JAVA_OPTS=-Xms128m -Xms512m
+    networks:
+      - ccd-network
+  idam-web-admin:
+    environment:
+      - JAVA_OPTS=-Xms128m -Xms512m
+    networks:
+      - ccd-network
+
+networks:
+  ccd-network:
+    external: true

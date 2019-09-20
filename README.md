@@ -3,11 +3,13 @@
 - [Prerequisites](#prerequisites)
 - [Quick start](#quick-start)
 - [Using CCD](#using-ccd)
+- [Idam Stub](#idam-stub)
 - [Compose branches](#compose-branches)
 - [Compose projects](#compose-projects)
 - [Under the hood](#under-the-hood-speedboat)
 - [Containers](#containers)
 - [Local development](#local-development)
+- [Troubleshooting](#troubleshooting)
 - [Variables](#variables)
 - [Remarks](#remarks)
 - [License](#license)
@@ -45,6 +47,15 @@ Pulling latest Docker images:
 
 ```bash
 ./ccd compose pull
+```
+
+Running initialisation steps:
+
+Note:
+required only on the first run. Once executed, it doesn't need to be executed again
+
+```bash
+./ccd init
 ```
 
 Creating and starting the containers:
@@ -92,10 +103,11 @@ client_id : ccd_gateway
 client_secret : ccd_gateway_secret
 new redirect_uri (click 'Add URI' before saving) : http://localhost:3451/oauth2redirect
 ```
-### 2. Create ccd-import role
-After defining the above client/service, a role with "ccd-import" label must be defined under this client/service (Home > Manage Roles > select your service).
-For use in the automated functional test runs, the following roles are also needed:
+### 2. Create Idam roles
+After defining the above client/service, the following roles must be defined under this client/service (Home > Manage Roles > select your service > Role Label)
+(some of these roles are used in the automated functional test):
 
+    * ccd-import
     * caseworker
     * caseworker-autotest1
     * caseworker-autotest2
@@ -106,7 +118,19 @@ Once the roles are defined under the client/service, go to the service configura
  
 **Any business-related roles like `caseworker`,`caseworker-<jurisdiction>` etc to be used in CCD later must also be defined under the client configuration at this stage.**
 
-### 3. Create a Default User with "ccd-import" Role
+### 3. Create users and roles
+
+#### 3.1 Automated creation
+
+A script is provided that sets up some initial users and roles for running functional tests. Execute the following:
+
+```bash
+./bin/create-initial-roles-and-users.sh
+```
+
+#### 3.2 Manual creation
+
+##### 3.2.1 Create a Default User with "ccd-import" Role
 
 A user with import role should be created using the following command:
 
@@ -117,7 +141,7 @@ A user with import role should be created using the following command:
 This call will create a user in SIDAM with ccd-import role. This user will be used to acquire a user token with "ccd-import" role.
 
 
-### 4. Add Initial Roles
+##### 3.2.2 Add Initial Roles
 
 Before a definition can be imported, roles referenced in a case definition Authorisation tabs must be defined in CCD using:
 
@@ -129,7 +153,7 @@ Parameters:
 - `role`: Name of the role, e.g: `caseworker-divorce`.
 - `classification`: Optional. One of `PUBLIC`, `PRIVATE` or `RESTRICTED`. Defaults to `PUBLIC`.
 
-### 5. Add Initial Case Worker Users
+##### 3.2.3 Add Initial Case Worker Users
 
 A caseworker user can be created in IDAM using the following command:
 
@@ -148,24 +172,15 @@ For example:
 ./bin/idam-create-caseworker.sh caseworker-probate,caseworker-probate-solicitor probate@hmcts.net
 ```
 
-### Note:
-For running functional test cases,
-
-- A. Initial user and role creation can be done by executing the following script:
-
-```bash
-./bin/create-initial-roles-and-users.sh
-```
-
-- B. Before running CCD Data Store tests, execute the CCD Definition store test cases first so that case definitions are loaded from CCD_CNP_27.xlsx.
-
-- C. Set the TEST_URL environment variable to match the service the functional tests should executed against:
+#### Note:
+- A. Before running CCD Data Store tests, execute the CCD Definition store test cases first so that case definitions are loaded from CCD_CNP_27.xlsx.
+- B. Set the TEST_URL environment variable to match the service the functional tests should executed against:
 
           For ccd-definition-store-api functional tests the set TEST_URL=http://localhost:4451
 
           For ccd-data-store-api functional tests set TEST_URL=http://localhost:4452
 
-### 6. Import case definition
+### 4. Import case definition
 
 To reduce impact on performances, case definitions are imported via the command line rather than using CCD's dedicated UI:
 
@@ -198,6 +213,151 @@ If you see only a grey screen after entering your user credentials in the login 
 1- user_profile
 
 2- user_profile_jurisdiction
+
+## Idam Stub
+It's possible to disable the Idam containers and run CCD with an Idam Stub provided by ccd-test-stubs-service. This is useful as a back up plan for when docker Idam is broken or when you local machine is running low on memory and you don't want to spin up the whole Idam containers
+
+### Enable Idam Stub
+
+#### Step 1 - Disable Sidam containers
+
+make sure 'sidam', 'sidam-local', 'sidam-local-ccd' docker compose files are not enabled. How you do that depends on your currently active compose files.
+When no active compose files are present, the default ones are executed. But if there's any active, then the defautl ones are ignored. For example:
+
+```bash
+./ccd enable show
+
+Currently active compose files:
+backend
+frontend
+sidam
+sidam-local
+sidam-local-ccd
+
+Default compose files:
+backend
+frontend
+sidam
+sidam-local
+sidam-local-ccd
+```
+
+In this case sidam is currently explicitly enabled. To disable it:
+
+```bash
+./ccd disable sidam sidam-local sidam-local-ccd
+```
+
+If you are instead running with the default compose file as in:
+```bash
+./ccd enable show
+
+Default compose files:
+backend
+frontend
+sidam
+sidam-local
+sidam-local-ccd
+```
+
+You must explicitly enable only CCD compose files but exclude sidam:
+
+```bash
+./ccd enable backend frontend
+./ccd enable show
+
+Currently active compose files:
+backend
+frontend
+
+Default compose files:
+backend
+frontend
+sidam
+sidam-local
+sidam-local-ccd
+```
+
+#### Step 2 - Setup Env Vars
+
+in the '.env' file, uncomment:
+
+```yaml
+#IDAM_STUB_SERVICE_NAME=http://ccd-test-stubs-service:5555
+#IDAM_STUB_LOCALHOST=http://localhost:5555
+```
+
+To allow definition imports to work ('ccd-import-definition.sh') you need to:
+
+```bash
+export IDAM_STUB_LOCALHOST=http://localhost:5555
+```
+
+:warning: Please note: remember to unset 'IDAM_STUB_LOCALHOST' when switching back to the real Idam, otherwise definition import won't work
+
+```bash
+unset IDAM_STUB_LOCALHOST
+```
+
+### Revert to Idam
+
+#### Step 1 - Enable Sidam containers
+
+```bash
+./ccd enable sidam sidam-local sidam-local-ccd
+```
+
+or just revert to the default:
+
+```bash
+./ccd enable default
+```
+
+#### Step 2 - Setup Env Vars
+
+in the '.env' file, make sure the following env vars are commented:
+
+```yaml
+#IDAM_STUB_SERVICE_NAME=http://ccd-test-stubs-service:5555
+#IDAM_STUB_LOCALHOST=http://localhost:5555
+```
+
+then from the command line:
+
+```bash
+unset IDAM_STUB_LOCALHOST
+```
+
+
+### Switching between Idam and Idam Stub Example
+
+```bash
+#assuming no containers running and Idam is enabled
+
+#start with Idam
+./ccd compose up -d
+
+#services started
+
+./ccd compose stop
+
+#enable Idam Stub follwing the steps in 'Enable Idam Stub'
+
+#start with Idam Stub
+./ccd compose up -d
+
+#services started
+
+you also can issue a 'down' when Idam Stub is enabled without risking of losing Idam data, since it's disabled
+./ccd compose down
+
+enable Idam follwing the steps in 'Revert to Idam'
+
+#start with Idam. This will now create new CCD containers and reuse the old Idam ones
+./ccd compose up -d
+```
+
+NOTE: :warning: always use 'compose up' rather than 'compose start' when switching between Idam and Idam Stub to have docker compose pick up env vars changes.
 
 ## Compose branches
 
@@ -478,8 +638,11 @@ Display preferences for the CCD users.
 
 #### ccd-test-stubs-service
 
-Service to facilitate testing of external http calls using wiremock to return canned responses for requests matching 
+Service to facilitate testing of external http calls using wiremock. It returns canned responses for requests matching
 the predefined criteria.
+Currently used for:
+   - exposing a set of default callbacks that can be invoked for testing purposes
+   - Idam Stub
 
 ### Front-end
 
@@ -589,6 +752,25 @@ We will need to install the az cli using Python PIP.
 2. Setup the Python(version 2.x/3.x) on windows machine. PIP is bundled with Python.
 3. Execute the command "pip install azure-cli" using command line. It takes about 20 minutes to install the azure cli.
 4. Verify the installation using the command az --version.
+
+## Troubleshooting
+
+CCD UI not loading:
+
+- it might take few minutes for all the services to startup
+    > wait few minutes and then retry accessing CCD UI
+- sometimes happens that some of the back-ends (data store, definition store, user profile) cannot startup because the database liquibase lock is stuck.
+    > check on the back-end log if there's the following exception: 'liquibase.exception.LockException: Could not acquire change log lock'
+    Execute the following command on the database:
+    UPDATE DATABASECHANGELOGLOCK SET LOCKED=FALSE, LOCKGRANTED=null, LOCKEDBY=null where ID=1;
+- it's possible that some of the services cannot start or crash because of lack of availabel memory. This especially when starting Idam and or ElasticSearch
+    > give more memory to Docker. Configurable under Preferences -> Advanced
+
+ccd-network could not be found error:
+
+- if you get "CCD: ERROR: Network ccd-network declared as external, but could not be found. Please create the network manually using docker network create ccd-network"
+    > ./ccd init
+
 
 ## Variables
 Here are the important variables exposed in the compose files:
