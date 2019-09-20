@@ -10,17 +10,19 @@ services:
   mv-annotation-api:
     image: hmctspublic.azurecr.io/em/anno:latest
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://annotation-api-db:5432/emannotationapp
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://mv-annotation-api-db:5432/emannotationapp
       - SPRING_DATASOURCE_USERNAME=emannotationapp
       - SPRING_DATASOURCE_PASSWORD=emannotationapp
       - S2S_BASE_URI=http://service-auth-provider-api:8080
       - ENABLE_LIQUIBASE=true
       - S2S_NAMES_WHITELIST=sscs,divorce,ccd,em_gw,jui_webapp,pui_webapp,em_npa_app,ccd_gw,ccd_gateway
-      - IDAM_API_BASE_URI=http://sidam-api:5000
+      - IDAM_API_BASE_URI=http://idam-api:5000
     depends_on:
       - mv-annotation-api-db
     ports:
       - 4623:8080
+    networks:
+      - ccd-network
 
   mv-annotation-api-db:
     image: postgres
@@ -31,6 +33,8 @@ services:
       - POSTGRES_PASSWORD=emannotationapp
     ports:
       - 5444:5432
+    networks:
+      - ccd-network
     volumes:
       - ccd-docker-mv-annotation-api-db-data:/var/lib/postgresql/data
 
