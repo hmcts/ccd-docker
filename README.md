@@ -466,6 +466,10 @@ Optional compose files will allow other projects to be enabled on demand using t
   * run docker-compose `./ccd compose up -d`
   * create Blob Store in Azurite `./bin/document-management-store-create-blob-store-container.sh`
 
+* To enable **mv-annotation-api**
+  * `./ccd enable others`
+  * run docker-compose `./ccd compose up -d`
+
 * To enable **elastic search**
   * NOTE: we recommend at lest 6GB of memory for Docker when enabling elasticsearch 
   * `./ccd enable elasticsearch` (assuming `backend` is already enabled, otherwise enable it)
