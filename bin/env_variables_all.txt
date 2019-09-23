@@ -63,4 +63,4 @@ PROXY_DATA=http://localhost:4452
 PROXY_DEFINITION_IMPORT=http://localhost:4451
 PROXY_DEFINITION_DATA=http://localhost:4451/api/data
 PROXY_DEFINITION_DISPLAY=http://localhost:4451/api/display
-PROXY_DOCUMENT_MANAGEMENT=http://localhost:4506       
+PROXY_DOCUMENT_MANAGEMENT=http://localhost:4506
