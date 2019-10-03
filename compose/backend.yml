@@ -131,22 +131,6 @@ services:
     networks:
       - ccd-network
 
-  am-database:
-    image: hmctspublic.azurecr.io/am/db:latest
-    container_name: access_management_db
-    environment:
-      AM_DB:
-      AM_DB_USERNAME:
-      AM_DB_PASSWORD:
-    healthcheck:
-      interval: 10s
-      timeout: 10s
-      retries: 10
-    ports:
-      - 5600:5432
-    volumes:
-      - am-database-data:/var/lib/postgresql/data
-
   ccd-test-stubs-service:
     image: "${CCD_TEST_STUBS_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}ccd/test-stubs-service:${CCD_TEST_STUBS_SERVICE_TAG:-latest}"
     environment:
@@ -159,7 +143,6 @@ services:
 volumes:
   ccd-docker-ccd-shared-database-data:
   wiremock:
-  am-database-data:
 
 networks:
   ccd-network:
