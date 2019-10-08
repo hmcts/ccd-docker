@@ -50,9 +50,6 @@ services:
       http_proxy:
       https_proxy:
       no_proxy:
-      #      logging env vars
-      ROOT_APPENDER: JSON_CONSOLE
-      JSON_CONSOLE_PRETTY_PRINT: "false"
       REFORM_SERVICE_TYPE: java
       REFORM_SERVICE_NAME: document-management-store
       REFORM_TEAM: cc
@@ -69,7 +66,6 @@ services:
       - service-auth-provider-api
     depends_on:
       - ccd-shared-database
-      - idam-api
       - service-auth-provider-api
       - azure-storage-emulator-azurite
     ports:
