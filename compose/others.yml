@@ -2,6 +2,28 @@
 version: '2.4'
 #add non core CCD services here
 
+services:
+  am-database:
+    image: hmctspublic.azurecr.io/am/db:latest
+    container_name: access_management_db
+    environment:
+      AM_DB: "${AM_DB}"
+      AM_DB_USERNAME: "${AM_DB_USERNAME}"
+      AM_DB_PASSWORD: "${AM_DB_PASSWORD}"
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    ports:
+      - 5600:5432
+    volumes:
+      - am-database-data:/var/lib/postgresql/data
+    networks:
+      - ccd-network
+
 networks:
   ccd-network:
     external: true
+
+volumes:
+  am-database-data:

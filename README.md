@@ -755,6 +755,11 @@ We will need to install the az cli using Python PIP.
 
 ## Troubleshooting
 
+ccd-network could not be found error:
+
+- if you get "CCD: ERROR: Network ccd-network declared as external, but could not be found. Please create the network manually using docker network create ccd-network"
+    > ./ccd init
+
 CCD UI not loading:
 
 - it might take few minutes for all the services to startup
@@ -766,11 +771,10 @@ CCD UI not loading:
 - it's possible that some of the services cannot start or crash because of lack of availabel memory. This especially when starting Idam and or ElasticSearch
     > give more memory to Docker. Configurable under Preferences -> Advanced
 
-ccd-network could not be found error:
+DM Store issues:
 
-- if you get "CCD: ERROR: Network ccd-network declared as external, but could not be found. Please create the network manually using docker network create ccd-network"
-    > ./ccd init
-
+- "uk.gov.hmcts.dm.exception.AppConfigurationException: Cloub Blob Container does not exist"
+    > ./bin/document-management-store-create-blob-store-container.sh
 
 ## Variables
 Here are the important variables exposed in the compose files:
