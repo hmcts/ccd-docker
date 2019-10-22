@@ -139,6 +139,10 @@ services:
       - 5555:5555
     networks:
       - ccd-network
+    #provide custom Idam roles when using Idam Stub.
+    #uncomment and add the desired roles to idam_get_details_custom.json. Then restart the Stub Service
+#    volumes:
+#      - ${PWD}/resources/idam_get_details_custom.json:/opt/app/wiremock/mappings/idam_get_details.json
 
 volumes:
   ccd-docker-ccd-shared-database-data:
