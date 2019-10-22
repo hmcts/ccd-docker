@@ -301,7 +301,7 @@ unset IDAM_STUB_LOCALHOST
 
 #### Step 3 - (Optional) Customise Idam roles
 
-Idam Stub comes with a set of default Idam roles. To cusomise the Idam roles follow the instructions in 'backend.yml' ccd-test-stubs-service.
+Idam Stub comes with a set of default Idam roles. To customise the Idam roles follow the instructions in 'backend.yml' ccd-test-stubs-service
 
 ### Revert to Idam
 
