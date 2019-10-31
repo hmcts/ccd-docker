@@ -40,7 +40,7 @@ services:
       ADMINWEB_USER_PROFILE_URL : http://ccd-user-profile-api:4453/users
       ADMINWEB_SAVE_USER_PROFILE_URL : http://ccd-user-profile-api:4453/users/save
       ADMINWEB_USER_ROLE_URL : http://ccd-definition-store-api:4451/api/user-role
-      ADMIN_ALL_USER_ROLES_URL : http://ccd-definition-store-api:4451/api/user-role
+      ADMIN_ALL_USER_ROLES_URL : http://ccd-definition-store-api:4451/api/user-roles
       ADMINWEB_CREATE_DEFINITION_URL : http://ccd-definition-store-api:4451/api/draft
       ADMINWEB_UPDATE_DEFINITION_URL : http://ccd-definition-store-api:4451/api/draft/save
       ADMINWEB_DELETE_DEFINITION_URL : http://ccd-definition-store-api:4451/api/draft
