@@ -56,10 +56,6 @@ services:
     - service-auth-provider-api
     - ccd-definition-store-api
     - ccd-user-profile-api
-    links:
-    - service-auth-provider-api
-    - ccd-definition-store-api
-    - ccd-user-profile-api
     networks:
     - ccd-network
 
