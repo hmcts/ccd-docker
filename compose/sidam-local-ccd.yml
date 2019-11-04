@@ -18,6 +18,8 @@ services:
       - 5051:5432
     networks:
       - ccd-network
+    volumes:
+      - shared-db:/var/lib/postgresql/data
   idam-api:
     environment:
       JAVA_OPTS: -Xms128m -Xmx512m
@@ -28,14 +30,17 @@ services:
     ports:
       - 3501:8080
     environment:
-      - JAVA_OPTS=-Xms128m -Xms512m
+      JAVA_OPTS: -Xms128m -Xms512m
     networks:
       - ccd-network
   idam-web-admin:
     environment:
-      - JAVA_OPTS=-Xms128m -Xms512m
+      JAVA_OPTS: -Xms128m -Xms512m
     networks:
       - ccd-network
+
+volumes:
+  shared-db:
 
 networks:
   ccd-network:

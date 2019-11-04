@@ -23,19 +23,19 @@ services:
   smtp-server:
     image: mailhog/mailhog
   idam-api:
-    image: hmctspublic.azurecr.io/idam/api:preview
+    image: hmctspublic.azurecr.io/idam/api:stable
     depends_on:
       fr-am:
         condition: service_started
       shared-db:
         condition: service_started
   idam-web-public:
-    image: hmctspublic.azurecr.io/idam/web-public:preview
+    image: hmctspublic.azurecr.io/idam/web-public:stable
     depends_on:
       idam-api:
         condition: service_started
   idam-web-admin:
-    image: hmctspublic.azurecr.io/idam/web-admin:preview
+    image: hmctspublic.azurecr.io/idam/web-admin:stable
     depends_on:
       idam-api:
         condition: service_started
