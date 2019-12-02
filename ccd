@@ -41,7 +41,7 @@ function project_config() {
         ccd-admin-web|admin-web|admin-web)
             name=ccd-admin-web
             repository="git@github.com:hmcts/ccd-admin-web.git"
-            envPrefix="CCD-ADMIN-WEB"
+            envPrefix="CCD_ADMIN_WEB"
             ;;
         dm-store|document-store)
             name=dm-store
