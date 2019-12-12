@@ -21,9 +21,6 @@ services:
       - 4453:4453
     depends_on:
       - ccd-shared-database
-    links:
-      - ccd-shared-database
-      - service-auth-provider-api
     networks:
       - ccd-network
 
@@ -56,10 +53,6 @@ services:
     depends_on:
       - ccd-shared-database
       - ccd-user-profile-api
-    links:
-      - ccd-shared-database
-      - ccd-user-profile-api
-      - service-auth-provider-api
     networks:
       - ccd-network
 
@@ -95,11 +88,6 @@ services:
       - ccd-shared-database
       - ccd-user-profile-api
       - ccd-definition-store-api
-    links:
-      - ccd-shared-database
-      - ccd-user-profile-api
-      - ccd-definition-store-api
-      - service-auth-provider-api
     networks:
       - ccd-network
 
