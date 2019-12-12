@@ -40,8 +40,8 @@ services:
     depends_on:
       - ccd-shared-database
       - ccd-user-profile-api
-    networks:
-      - ccd-network
-networks:
-  ccd-network:
-    external: true
+    links:
+      - ccd-shared-database
+      - ccd-user-profile-api
+      - sidam-api
+      - service-auth-provider-api
