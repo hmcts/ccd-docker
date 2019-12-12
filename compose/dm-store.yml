@@ -62,6 +62,9 @@ services:
       ENABLE_DB_MIGRATE: "true"
     #      debug mode
     #    JAVA_OPTS: -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+    links:
+      - ccd-shared-database
+      - service-auth-provider-api
     depends_on:
       - ccd-shared-database
       - service-auth-provider-api
