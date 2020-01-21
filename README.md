@@ -111,6 +111,16 @@ After defining the above client/service, the following roles must be defined und
     * caseworker
     * caseworker-autotest1
     * caseworker-autotest2
+    
+The following roles are additionally required for the new automated functional tests.
+    
+    * caseworker-befta_jurisdiction_1
+    * caseworker-befta_jurisdiction_2
+    * caseworker-befta_jurisdiction_3
+    * caseworker-befta_jurisdiction_2-solicitor_1
+    * caseworker-befta_jurisdiction_2-solicitor_2
+    * caseworker-befta_jurisdiction_2-solicitor_3
+    * caseworker-befta_jurisdiction_3-solicitor 
 
 Don't worry about the *Assignable roles* section when adding roles
 
