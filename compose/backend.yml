@@ -120,6 +120,7 @@ services:
     environment:
       DB_USERNAME:
       DB_PASSWORD:
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - 5050:5432
     volumes:
