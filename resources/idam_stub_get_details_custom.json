@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/details"
+    "urlPath": "/o/userinfo"
   },
   "response": {
     "status": 200,
