@@ -51,6 +51,8 @@ services:
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
       # - 5005:5005
     depends_on:
+      idam-api:
+        condition: service_started
       - ccd-shared-database
       - ccd-user-profile-api
     networks:
@@ -85,6 +87,8 @@ services:
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
       # - 5005:5005
     depends_on:
+      idam-api:
+        condition: service_started
       - ccd-shared-database
       - ccd-user-profile-api
       - ccd-definition-store-api
