@@ -53,8 +53,10 @@ services:
     depends_on:
       idam-api:
         condition: service_started
-      - ccd-shared-database
-      - ccd-user-profile-api
+      ccd-shared-database:
+        condition: service_started
+      ccd-user-profile-api:
+        condition: service_started
     networks:
       - ccd-network
 
@@ -89,9 +91,12 @@ services:
     depends_on:
       idam-api:
         condition: service_started
-      - ccd-shared-database
-      - ccd-user-profile-api
-      - ccd-definition-store-api
+      ccd-shared-database:
+        condition: service_started
+      ccd-user-profile-api:
+        condition: service_started
+      ccd-definition-store-api:
+        condition: service_started
     networks:
       - ccd-network
 
