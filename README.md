@@ -313,6 +313,16 @@ unset IDAM_STUB_LOCALHOST
 
 Idam Stub comes with a set of default Idam roles. To customise the Idam roles follow the instructions in 'backend.yml' ccd-test-stubs-service
 
+#### Step 4 - Enable stub service dependency
+
+Enable ccd-test-stubs-service dependency on ccd-data-store-api and ccd-definition-store-api in 'backend.yml' file.
+
+Uncomment the below lines in 'backend.yml' file
+```yaml 
+      #      ccd-test-stubs-service:
+      #        condition: service_started
+```
+
 ### Revert to Idam
 
 #### Step 1 - Enable Sidam containers
@@ -342,6 +352,15 @@ then from the command line:
 unset IDAM_STUB_LOCALHOST
 ```
 
+#### Step 3 - Disable stub service dependency
+
+Disable ccd-test-stubs-service dependency on ccd-data-store-api and ccd-definition-store-api in 'backend.yml' file.
+
+Comment the below lines in 'backend.yml' file
+```yaml 
+            ccd-test-stubs-service:
+              condition: service_started
+```
 
 ### Switching between Idam and Idam Stub Example
 

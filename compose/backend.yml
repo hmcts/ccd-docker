@@ -51,6 +51,9 @@ services:
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
       # - 5005:5005
     depends_on:
+# Uncomment this line to enable ccd test stub service
+#     ccd-test-stubs-service:
+#       condition: service_started
       idam-api:
         condition: service_started
       ccd-shared-database:
@@ -89,6 +92,9 @@ services:
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
       # - 5005:5005
     depends_on:
+# Uncomment this line to enable ccd test stub service
+#     ccd-test-stubs-service:
+#       condition: service_started
       idam-api:
         condition: service_started
       ccd-shared-database:
