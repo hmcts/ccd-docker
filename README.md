@@ -323,6 +323,12 @@ Uncomment the below lines in 'backend.yml' file
       #        condition: service_started
 ```
 
+Comment the below lines in 'backend.yml' file
+```yaml 
+      idam-api:
+        condition: service_started
+```
+
 ### Revert to Idam
 
 #### Step 1 - Enable Sidam containers
@@ -358,8 +364,14 @@ Disable ccd-test-stubs-service dependency on ccd-data-store-api and ccd-definiti
 
 Comment the below lines in 'backend.yml' file
 ```yaml 
-            ccd-test-stubs-service:
-              condition: service_started
+    #   ccd-test-stubs-service:
+    #       condition: service_started
+```
+
+Uncomment the below lines in 'backend.yml' file
+```yaml 
+      idam-api:
+        condition: service_started
 ```
 
 ### Switching between Idam and Idam Stub Example
