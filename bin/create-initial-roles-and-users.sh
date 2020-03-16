@@ -15,12 +15,13 @@ cd "$parent_path"
 ./ccd-add-role.sh caseworker-autotest2-senior RESTRICTED
 ./ccd-add-role.sh caseworker-autotest2-solicitor PRIVATE
 
-#The following roles are needed for the Functional Test Automation
 ./ccd-add-role.sh caseworker-befta_jurisdiction_1 PUBLIC
 ./ccd-add-role.sh caseworker-befta_jurisdiction_2 PUBLIC
 ./ccd-add-role.sh caseworker-befta_jurisdiction_2-solicitor_1 PUBLIC
 ./ccd-add-role.sh caseworker-befta_jurisdiction_2-solicitor_2 PUBLIC
 ./ccd-add-role.sh caseworker-befta_jurisdiction_2-solicitor_3 PUBLIC
+
+./ccd-add-role.sh citizen PUBLIC
 ./ccd-add-role.sh caseworker-befta_jurisdiction_3 PUBLIC
 ./ccd-add-role.sh caseworker-befta_jurisdiction_3-solicitor PUBLIC
 
@@ -40,12 +41,14 @@ cd "$parent_path"
 ./idam-create-caseworker.sh caseworker,caseworker-autotest1,caseworker-autotest1-senior,caseworker-autotest2,caseworker-autotest2-senior auto.test12.cnp+senior@gmail.com Pa55word11
 ./idam-create-caseworker.sh caseworker,caseworker-autotest1,caseworker-autotest1-senior ccdimportdomain@gmail.com Pa55word11
 
-#The following users are needed for the Functional Test Automation
 ./idam-create-caseworker.sh caseworker,caseworker-befta_jurisdiction_1 befta.caseworker.1@gmail.com Pa55word11
+
 ./idam-create-caseworker.sh caseworker,caseworker-befta_jurisdiction_2 befta.caseworker.2@gmail.com Pa55word11
 ./idam-create-caseworker.sh caseworker,caseworker-befta_jurisdiction_2,caseworker-befta_jurisdiction_2-solicitor_1 befta.caseworker.2.solicitor.1@gmail.com Pa55word11
 ./idam-create-caseworker.sh caseworker,caseworker-befta_jurisdiction_2,caseworker-befta_jurisdiction_2-solicitor_2 befta.caseworker.2.solicitor.2@gmail.com Pa55word11
 ./idam-create-caseworker.sh caseworker,caseworker-befta_jurisdiction_2,caseworker-befta_jurisdiction_2-solicitor_3 befta.caseworker.2.solicitor.3@gmail.com Pa55word11
+
+
 ./idam-create-caseworker.sh citizen befta.citizen.2@gmail.com Pa55word11
 ./idam-create-caseworker.sh caseworker,caseworker-befta_jurisdiction_3,caseworker-befta_jurisdiction_3-solicitor befta.solicitor.3@gmail.com Pa55word11
 ./idam-create-caseworker.sh citizen befta.citizen.3@gmail.com Pa55word11

@@ -16,6 +16,12 @@ function project_config() {
             envPrefix="CCD_DATA_STORE_API"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
+        ccd-case-document-am-api|case-document-api|document-api|case-document)
+            name=ccd-ccd-case-document-am-api
+            repository="git@github.com:hmcts/ccd-case-document-am-api.git"
+            envPrefix="CCD_CASE_DOCUMENT_AM_API"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
         ccd-definition-store-api|definition-store-api|definition-store|def-store|defstore)
             name=ccd-definition-store-api
             repository="git@github.com:hmcts/ccd-definition-store-api.git"
