@@ -91,30 +91,6 @@ services:
     networks:
       - ccd-network
 
-  ccd-case-document-am-api:
-    image: "hmcts/ccd-case-document-am-api_450"
-    environment:
-      CCD_DOCUMENT_API_IDAM_KEY: "${IDAM_KEY_CASE_DOCUMENT}"
-      CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_gw
-      IDAM_S2S_URL: http://service-auth-provider-api:8080
-      DOCUMENT_STORE_URL: http://dm-store:8080
-      CCD_DATA_STORE_URL: http://ccd-data-store-api:4452
-      REFORM_SERVICE_NAME: ccd-case-document-am-api
-      REFORM_TEAM: ccd
-      REFORM_ENVIRONMENT: local
-      APPINSIGHTS_INSTRUMENTATIONKEY: key
-      # Uncomment this line to enable JVM debugging and uncomment the port mapping below
-      JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
-    ports:
-      - 4455:4455
-      # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
-      - 5005:5005
-    depends_on:
-      - ccd-data-store-api
-      - dm-store
-      - service-auth-provider-api
-    networks:
-      - ccd-network
 
   service-auth-provider-api:
     image: "hmctspublic.azurecr.io/rpe/service-auth-provider:latest"
@@ -132,7 +108,7 @@ services:
       MICROSERVICEKEYS_CCD_DEFINITION: "${IDAM_KEY_CCD_DEFINITION_STORE}"
       MICROSERVICEKEYS_CCD_ADMIN: "${IDAM_KEY_CCD_ADMIN}"
       MICROSERVICEKEYS_FPL_CASE_SERVICE: "${IDAM_KEY_FPL_CASE_SERVICE}"
-      MICROSERVICEKEYS_CCD_CASE_DOCUMENT_AM_API : CNTOE7D2NX6XHBKT
+      MICROSERVICEKEYS_CCD_CASE_DOCUMENT_AM_API : "${IDAM_KEY_CASE_DOCUMENT}"
       TESTING_SUPPORT_ENABLED: "true"
     networks:
       - ccd-network
@@ -146,6 +122,7 @@ services:
     environment:
       DB_USERNAME:
       DB_PASSWORD:
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - 5050:5432
     volumes:

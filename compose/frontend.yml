@@ -60,7 +60,7 @@ services:
     - ccd-network
 
   ccd-api-gateway:
-    image: "hmctspublic.azurecr.io/ccd/ccd-api-gateway"
+    image: "hmctspublic.azurecr.io/ccd/api-gateway-web:pr-287"
     container_name: ccd-api-gateway-web
     environment:
       IDAM_BASE_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
