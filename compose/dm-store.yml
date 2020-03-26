@@ -80,6 +80,7 @@ services:
       CCD_DOCUMENT_API_IDAM_KEY: "${IDAM_KEY_CASE_DOCUMENT}"
       CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_gw
       IDAM_S2S_URL: http://service-auth-provider-api:8080
+      IDAM_USER_URL: http://idam-api:5000
       DOCUMENT_STORE_URL: http://dm-store:8080
       CCD_DATA_STORE_URL: http://ccd-data-store-api:4452
       REFORM_SERVICE_NAME: ccd-case-document-am-api
