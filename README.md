@@ -125,7 +125,6 @@ The following roles are additionally required for the new automated functional t
     * caseworker-befta_jurisdiction_2-solicitor_3
     * caseworker-befta_jurisdiction_3-solicitor 
 
-
 Don't worry about the *Assignable roles* section when adding roles
 
 Once the roles are defined under the client/service, go to the service configuration for the service you created in Step 1 (Home > Manage Services > select your service) and select `ccd-import` role radio option under **Private Beta Role** section
