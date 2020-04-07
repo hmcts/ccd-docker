@@ -11,7 +11,6 @@ services:
       USER_PROFILE_DB_USERNAME: "${DB_USERNAME}"
       USER_PROFILE_DB_PASSWORD: "${DB_PASSWORD}"
       USER_PROFILE_DB_USE_SSL: "${DB_USE_SSL}"
-      USER_PROFILE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_definition,ccd_admin
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       REFORM_SERVICE_NAME: ccd-user-profile-api
       REFORM_TEAM: ccd
@@ -73,7 +72,7 @@ services:
       DATA_STORE_DB_USE_SSL: "${DB_USE_SSL}"
       DATA_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DATA_STORE}"
       DATA_STORE_TOKEN_SECRET: iuasbcuasdcbasdgcasdgcuysachjsacyasdgjcgasdj
-      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,fpl_case_service,ccd_data,ccd_ps
+      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps
       DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
       IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
