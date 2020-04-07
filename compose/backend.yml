@@ -11,7 +11,6 @@ services:
       USER_PROFILE_DB_USERNAME: "${DB_USERNAME}"
       USER_PROFILE_DB_PASSWORD: "${DB_PASSWORD}"
       USER_PROFILE_DB_USE_SSL: "${DB_USE_SSL}"
-      USER_PROFILE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_definition,ccd_admin
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       REFORM_SERVICE_NAME: ccd-user-profile-api
       REFORM_TEAM: ccd
