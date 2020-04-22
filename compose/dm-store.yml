@@ -78,15 +78,18 @@ services:
     image: "hmctspublic.azurecr.io/ccd/case-document-am-api:pr-22"
     environment:
       CCD_DOCUMENT_API_IDAM_KEY: "${IDAM_KEY_CASE_DOCUMENT}"
-      CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_gw
+      CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       IDAM_USER_URL: http://idam-api:5000
       DOCUMENT_STORE_URL: http://dm-store:8080
       CCD_DATA_STORE_URL: http://ccd-data-store-api:4452
+      CASE_DOCUMENT_SWAGGER_AM_URL: ccd-case-document-am-api:4455
+      CASE_DOCUMENT_AM_URL: http://ccd-case-document-am-api:4455
       REFORM_SERVICE_NAME: ccd-case-document-am-api
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
       APPINSIGHTS_INSTRUMENTATIONKEY: key
+      DOCUMENT_TTL: 3600000
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
       JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
     ports:
