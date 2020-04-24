@@ -75,6 +75,7 @@ services:
       DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,fpl_case_service,ccd_data,ccd_ps,ccd_case_document_am_api,ccd_gateway
       DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
+      CCD_DM_DOMAIN: http://ccd-case-document-am:4455/cases
       IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       REFORM_SERVICE_NAME: ccd-data-store-api
@@ -126,6 +127,7 @@ services:
       MICROSERVICEKEYS_FPL_CASE_SERVICE: "${IDAM_KEY_FPL_CASE_SERVICE}"
       MICROSERVICEKEYS_CCD_CASE_DOCUMENT_AM_API : "${IDAM_KEY_CASE_DOCUMENT}"
       MICROSERVICEKEYS_BULK_SCAN_PROCESSOR: "${IDAM_KEY_BULK_SCAN_PROCESSOR}"
+      MICROSERVICEKEYS_XUI_WEBAPP: "${IDAM_KEY_XUI_WEBAPP}"
       TESTING_SUPPORT_ENABLED: "true"
     networks:
       - ccd-network
