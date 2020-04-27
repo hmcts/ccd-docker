@@ -3,7 +3,7 @@ version: '2.4'
 
 services:
   ccd-case-management-web:
-    image: "${CCD_CASE_MANAGEMENT_WEB_USE_LOCAL-hmctspublic.azurecr.io/}ccd/case-management-web:${CCD_CASE_MANAGEMENT_WEB_TAG:-latest}"
+    image: "${CCD_CASE_MANAGEMENT_WEB_USE_LOCAL-hmctspublic.azurecr.io/}ccd/case-management-web/build:${CCD_CASE_MANAGEMENT_WEB_TAG:-latest}"
     container_name: ccd-case-management-web
     environment:
       IDAM_LOGIN_URL: "${IDAM_STUB_LOCALHOST:-http://localhost:3501}/login"
