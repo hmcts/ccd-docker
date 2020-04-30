@@ -17,7 +17,8 @@ services:
 
   ccd-data-store-api:
     environment:
-      CCD_DM_DOMAIN: http://dm-store:8080
+      CCD_DM_DOMAIN: http://localhost:4506
+      CASE_DOCUMENT_AM_URL: http://ccd-case-document-am-api:4455
 
   service-auth-provider-api:
     environment:
@@ -75,7 +76,7 @@ services:
 
 
   ccd-case-document-am-api:
-    image: "hmctspublic.azurecr.io/ccd/case-document-am-api:pr-22"
+    image: "hmctspublic.azurecr.io/ccd/case-document-am-api:pr-195"
     environment:
       CCD_DOCUMENT_API_IDAM_KEY: "${IDAM_KEY_CASE_DOCUMENT}"
       CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor
@@ -83,7 +84,7 @@ services:
       IDAM_USER_URL: http://idam-api:5000
       DOCUMENT_STORE_URL: http://dm-store:8080
       CCD_DATA_STORE_URL: http://ccd-data-store-api:4452
-      CASE_DOCUMENT_SWAGGER_AM_URL: ccd-case-document-am-api:4455
+      CASE_DOCUMENT_SWAGGER_AM_URL: http://ccd-case-document-am-api:4455
       CASE_DOCUMENT_AM_URL: http://ccd-case-document-am-api:4455
       REFORM_SERVICE_NAME: ccd-case-document-am-api
       REFORM_TEAM: ccd
