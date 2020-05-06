@@ -28,7 +28,7 @@ cd "$parent_path"
 ./ccd-add-role.sh caseworker-befta_master-solicitor_2 PUBLIC
 ./ccd-add-role.sh caseworker-befta_master-solicitor_3 PUBLIC
 ./ccd-add-role.sh caseworker-befta_master-junior PUBLIC
-./ccd-add-role.sh caseworker-befta_master-senior PUBLIC
+./ccd-add-role.sh caseworker-befta_master-manager PUBLIC
 
 #Case workers are being created in SIDAM
 ./idam-create-caseworker.sh ccd-import ccd.docker.default@hmcts.net Pa55word11 Default CCD_Docker

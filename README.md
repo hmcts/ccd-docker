@@ -128,8 +128,8 @@ The following roles are additionally required for the new automated functional t
     * caseworker-befta_master-solicitor_1
     * caseworker-befta_master-solicitor_2
     * caseworker-befta_master-solicitor_3
-    *caseworker-befta_master-junior
-    *caseworker-befta_master-senior
+    * caseworker-befta_master-junior
+    * caseworker-befta_master-manager
 
 Don't worry about the *Assignable roles* section when adding roles
 
