@@ -14,8 +14,8 @@
 rolesStr=$1
 email=$2
 password=${3:-Pa55word11}
-surname=${4:- }
-forename=${5:-System}
+surname=${4:-Test}
+forename=${5:-User}
 
 if [ -z "$rolesStr" ]
   then
@@ -40,4 +40,4 @@ rolesJson="${rolesJson}]"
 curl -XPOST \
   http://localhost:5000/testing-support/accounts \
   -H "Content-Type: application/json" \
-  -d '{"email":"'${email}'","forename":"System","surname":" ","password":"'${password}'","levelOfAccess":1, "roles": '${rolesJson}', "userGroup": {"code": "caseworker"}}'
+  -d '{"email":"'${email}'","forename":"'${forename}'","surname":"'${surname}'","password":"'${password}'","levelOfAccess":1, "roles": '${rolesJson}', "userGroup": {"code": "caseworker"}}'
