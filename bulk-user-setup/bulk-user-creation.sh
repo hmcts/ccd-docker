@@ -7,7 +7,7 @@ IDAM_CLIENT_SECRET="$4"
 ENV=${5:-prod}
 
 REDIRECT_URI="https://create-bulk-user-test/oauth2redirect"
-CLIENT_ID="create-bulk-users"
+CLIENT_ID="bulk-user-test"
 
 function usage() {
   echo "usage: ./bulk-user-creation.sh <user-csv-file-path> <ccd-admin-user> <ccd-admin-user-pwd> <idam-client-secret> <optional-env>"
