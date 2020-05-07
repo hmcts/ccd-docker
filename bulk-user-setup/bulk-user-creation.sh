@@ -15,18 +15,28 @@ function usage() {
 }
 
 function get_idam_url() {
+    if [ "$ENV" == "prod" ]
+    then
+      url="https://idam-api.platform.hmcts.net"
+    else if [ "$ENV" == "local" ]
+    then
+      url="http://localhost:5000"
+    else
+      url="https://idam-api.${ENV}.platform.hmcts.net"
+    fi
+    fi
+    echo "$url"
+}
 
-if [ "$ENV" == "prod" ]
-then
-  URL="https://idam-api.platform.hmcts.net"
-else if [ "$ENV" == "local" ]
-then
-  URL="http://localhost:5000"
-else
-  URL="https://idam-api.${ENV}.platform.hmcts.net"
-fi
-fi
-echo "$URL"
+function get_idam_token() {
+    idam_token=$(
+         curl --silent --fail --show-error -X POST "${IDAM_URL}/o/token" \
+            -H "accept: application/json" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "client_id=${CLIENT_ID}&client_secret=${IDAM_CLIENT_SECRET}&grant_type=password&username=${ADMIN_USER}&password=${ADMIN_USER_PWD}&redirect_uri=${REDIRECT_URI}&scope=openid roles create-user" \
+            | jq -r .access_token
+         )
+    echo "$idam_token"
 }
 
 if [ -z "${CSV_FILE_PATH}" ] || [ -z "${ADMIN_USER}" ] || [ -z "${ADMIN_USER_PWD}" ] || [ -z "${IDAM_CLIENT_SECRET}" ]
@@ -36,15 +46,11 @@ then
 fi
 
 IDAM_URL=$(get_idam_url)
+idam_access_token=$(get_idam_token)
 
-idam_access_token=$(
-    curl --silent --fail --show-error -X POST "${IDAM_URL}/o/token" -H "accept: application/json" \
-        -H "Content-Type: application/x-www-form-urlencoded" \
-        -d "client_id=${CLIENT_ID}&client_secret=${IDAM_CLIENT_SECRET}&grant_type=password&username=${ADMIN_USER}&password=${ADMIN_USER_PWD}&redirect_uri=${REDIRECT_URI}&scope=openid roles create-user" \
-        | jq -r .access_token
-     )
+# TODO: read csv and call curl in a loop for each record
 
-curl -v -X POST "${IDAM_URL}/user/registration" -H "accept: application/json" -H "Content-Type: application/json" \
+curl -X POST "${IDAM_URL}/user/registration" -H "accept: application/json" -H "Content-Type: application/json" \
     -H "authorization:Bearer ${idam_access_token}" \
     -d '{"email":"Joan45.williams@justice.gov.uk","firstName":"Joanna", "lastName": "Williams", "roles":[ "ccd-import"] }'
 
