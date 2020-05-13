@@ -1,17 +1,5 @@
 #!/usr/bin/env bash
 
-REDIRECT_URI="https://create-bulk-user-test/oauth2redirect"
-CLIENT_ID="create-bulk-users"
-
-function usage() {
-    # read input arguments
-    read -p "Please enter csv file path: " CSV_FILE_PATH
-    read -p "Please enter ccd idam-admin username: " ADMIN_USER
-    read -s -p "Please enter ccd idam-admin password: " ADMIN_USER_PWD
-    read -s -p "Please enter idam client secret for create-bulk-users: " IDAM_CLIENT_SECRET
-    read -p "Please enter environment: " ENV
-}
-
 function get_idam_url() {
     if [ "$ENV" == "prod" ]
     then
@@ -52,13 +40,19 @@ then
   exit 1
 fi
 
+REDIRECT_URI="https://create-bulk-user-test/oauth2redirect"
+CLIENT_ID="create-bulk-users"
 IDAM_URL=$(get_idam_url)
-idam_access_token=$(get_idam_token)
+IDAM_ACCESS_TOKEN=$(get_idam_token)
 
-echo "$idam_access_token"
+if [ -z "$IDAM_ACCESS_TOKEN" ]
+then
+    echo "Problem getting idam token for admin user: $ADMIN_USER"
+    exit 1
+fi
 
 # TODO: read csv and call curl in a loop for each record
 curl -X POST "${IDAM_URL}/user/registration" -H "accept: application/json" -H "Content-Type: application/json" \
-    -H "authorization:Bearer ${idam_access_token}" \
+    -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}" \
     -d '{"email":"Joan45.williams@justice.gov.uk","firstName":"Joanna", "lastName": "Williams", "roles":[ "ccd-import"] }'
 
