@@ -53,7 +53,7 @@ function get_idam_token() {
     else
       echo "${RED}ERROR: Token request has failed with status: ${http_status}${NORMAL}"
     fi
-    # then quit with non-zero exiit code
+    # then quit with non-zero exit code
     exit $(( http_status ))
   fi
 }
@@ -134,7 +134,7 @@ function verify_json_format_includes_field() {
 
   ## verify JSON format by checking JUST THE FIRST ITEM has the required field
   if [ $(echo $json | jq "first(.[] | has(\"${field}\"))") == false ]; then
-    echo "${RED}ERROR: Field not found in input: ${NORMAL} ${field}"
+    echo "${RED}ERROR: Field not found in input:${NORMAL} ${field}"
     exit 99
   fi
 }
@@ -172,6 +172,9 @@ function process_input_file() {
   json="$(convert_input_file_to_json ${CSV_FILE_PATH})"
   check_exit_code_for_error $? "$json"
 
+  # write headers to output file
+  echo "#,Email,User JSON,IDAM Status,IDAM Response" >> "$OUTPUT_FILE_PATH"
+
   # strip JSON into individual compact items then process in a while loop
   echo $json | jq -r -c '.[]' \
       |  \
@@ -204,6 +207,9 @@ function process_input_file() {
         fail_counter=$((fail_counter+1))
         echo "${total_counter}, ${email}, ${user}, ${RED}${response_status}${NORMAL}, ${response_body}"
       fi
+
+      # record log of action in output file (NB: escape generated values for CSV)
+      echo "${total_counter},\"${email//\"/\"\"}\",\"${user//\"/\"\"}\",${response_status},\"${response_body//\"/\"\"}\"" >> "$OUTPUT_FILE_PATH"
     done
 
     if [ $(( success_counter )) -eq $(( total_counter )) ]; then
@@ -231,6 +237,10 @@ read -p "Please enter ccd idam-admin username: " ADMIN_USER
 ADMIN_USER_PWD=$(read_password_with_asterisk "Please enter ccd idam-admin password: ")
 IDAM_CLIENT_SECRET=$(read_password_with_asterisk $'\nPlease enter idam oauth2 secret for ccd-bulk-user-register client: ')
 read -p $'\nPlease enter environment default [prod]: ' ENV
+
+# generate path to output file 
+datestamp=$(date -u +"%FT%H%MZ")
+OUTPUT_FILE_PATH="${CSV_FILE_PATH}_${datestamp}.csv"
 
 ENV=${ENV:-prod}
 
