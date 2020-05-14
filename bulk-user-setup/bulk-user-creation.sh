@@ -229,7 +229,7 @@ function check_exit_code_for_error() {
 read -p "Please enter csv file path: " CSV_FILE_PATH
 read -p "Please enter ccd idam-admin username: " ADMIN_USER
 ADMIN_USER_PWD=$(read_password_with_asterisk "Please enter ccd idam-admin password: ")
-IDAM_CLIENT_SECRET=$(read_password_with_asterisk $'\nPlease enter idam client secret for create-bulk-users: ')
+IDAM_CLIENT_SECRET=$(read_password_with_asterisk $'\nPlease enter idam oauth2 secret for ccd-bulk-user-register client: ')
 read -p $'\nPlease enter environment default [prod]: ' ENV
 
 ENV=${ENV:-prod}
@@ -241,7 +241,7 @@ then
 fi
 
 REDIRECT_URI="https://create-bulk-user-test/oauth2redirect"
-CLIENT_ID="create-bulk-users"
+CLIENT_ID="ccd-bulk-user-register"
 IDAM_URL=$(get_idam_url)
 IDAM_ACCESS_TOKEN=$(get_idam_token)
 check_exit_code_for_error $? "$IDAM_ACCESS_TOKEN"
