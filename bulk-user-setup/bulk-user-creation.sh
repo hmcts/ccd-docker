@@ -25,11 +25,30 @@ function get_idam_token() {
     echo "$idam_token"
 }
 
+function read_password_with_asterisk() {
+    unset password
+    prompt=$1
+    while IFS= read -p "$prompt" -r -s -n 1 char
+    do
+        if [[ $char == $'\0' ]];     then
+            break
+        fi
+        if [[ $char == $'\177' ]];  then
+            prompt=$'\b \b'
+            password="${password%?}"
+        else
+            prompt='*'
+            password+="$char"
+        fi
+    done
+    echo "$password"
+}
+
 # read input arguments
 read -p "Please enter csv file path: " CSV_FILE_PATH
 read -p "Please enter ccd idam-admin username: " ADMIN_USER
-read -s -p "Please enter ccd idam-admin password: " ADMIN_USER_PWD
-read -s -p $'\nPlease enter idam client secret for create-bulk-users:' IDAM_CLIENT_SECRET
+ADMIN_USER_PWD=$(read_password_with_asterisk "Please enter ccd idam-admin password: ")
+IDAM_CLIENT_SECRET=$(read_password_with_asterisk $'\nPlease enter idam client secret for create-bulk-users:')
 read -p $'\nPlease enter environment default [prod]: ' ENV
 
 ENV=${ENV:-prod}
