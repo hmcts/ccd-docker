@@ -23,6 +23,12 @@ cd "$parent_path"
 ./ccd-add-role.sh caseworker-befta_jurisdiction_2-solicitor_3 PUBLIC
 ./ccd-add-role.sh caseworker-befta_jurisdiction_3 PUBLIC
 ./ccd-add-role.sh caseworker-befta_jurisdiction_3-solicitor PUBLIC
+./ccd-add-role.sh caseworker-befta_master PUBLIC
+./ccd-add-role.sh caseworker-befta_master-solicitor_1 PUBLIC
+./ccd-add-role.sh caseworker-befta_master-solicitor_2 PUBLIC
+./ccd-add-role.sh caseworker-befta_master-solicitor_3 PUBLIC
+./ccd-add-role.sh caseworker-befta_master-junior PUBLIC
+./ccd-add-role.sh caseworker-befta_master-manager PUBLIC
 
 #Case workers are being created in SIDAM
 ./idam-create-caseworker.sh ccd-import ccd.docker.default@hmcts.net Pa55word11 Default CCD_Docker
@@ -51,3 +57,7 @@ cd "$parent_path"
 ./idam-create-caseworker.sh citizen befta.citizen.3@gmail.com Pa55word11
 ./idam-create-caseworker.sh caseworker,caseworker-befta_jurisdiction_3 befta.caseworker.3@gmail.com Pa55word11
 ./idam-create-caseworker.sh caseworker,caseworker-befta_jurisdiction_1 befta.caseworker.1.noprofile@gmail.com Pa55word11 testsurname testfirstname
+./idam-create-caseworker.sh caseworker,caseworker-befta_master master.caseworker@gmail.com Pa55word11 befta master
+./idam-create-caseworker.sh caseworker,caseworker-befta_master,caseworker-befta_master-solicitor_1 master.solicitor.1@gmail.com Pa55word11 befta solc1
+./idam-create-caseworker.sh caseworker,caseworker-befta_master,caseworker-befta_master-solicitor_2 master.solicitor.2@gmail.com Pa55word11 befta solc2
+./idam-create-caseworker.sh caseworker,caseworker-befta_master,caseworker-befta_master-solicitor_3 master.solicitor.3@gmail.com Pa55word11 befta solc3
