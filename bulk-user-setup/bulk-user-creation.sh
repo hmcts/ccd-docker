@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
-# console colours
+# console colours / fonts
 RED=$(tput setaf 1)
 YELLOW=$(tput setaf 3)
 GREEN=$(tput setaf 2)
+BOLD=$(tput bold)
 NORMAL=$(tput sgr0)
 
 function get_idam_url() {
@@ -31,7 +32,7 @@ function get_idam_token() {
   exit_code=$?
   if ! [ $exit_code -eq 0 ]; then
     # error so echo response and abort
-    echo "${RED}ERROR: Token request has failed with exit code: $exit_code${NORMAL}"
+    echo "${RED}ERROR: Token request has failed with curl exit code: $exit_code${NORMAL}"
     exit $exit_code
   fi
 
@@ -68,12 +69,32 @@ function submit_user_registation() {
   )
 
   exit_code=$?
-  if ! [ $exit_code -eq 0 ]; then
-    # format response in same way as our CURL call: 'BODY\nHTTP_STATUS'
-    IFS=$'\n'
-    response="ERROR: User registration request has failed with exit code: ${exit_code}${IFS}${exit_code}"
+  if [ $exit_code -eq 0 ]; then
+    # seperate body and status into an array
+    IFS=$'\n' response_array=($curl_result)
+
+    array_length=${#response_array[@]}
+    if [ $array_length -eq 1 ]; then
+      response_body='' # clear body
+      response_status=${response_array[0]}
+    else
+      response_body=${response_array[0]}
+      response_status=${response_array[${array_length}-1]}
+    fi
+
+    if [ $(( response_status )) -gt 199 ] && [ $(( response_status )) -lt 300 ]; then
+      # SUCCESS:
+      response="SUCCESS
+${response_body}"
+    else
+      # FAIL:
+      response="HTTP-${response_status}
+${response_body}"
+    fi
   else
-    response=$curl_result
+    # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
+    response="CURL-${exit_code}
+ERROR: User registration request has failed with curl exit code: ${exit_code}"
   fi
   echo "$response"
 }
@@ -100,12 +121,12 @@ function read_password_with_asterisk() {
 function verify_file_exists() {
   local file=$1
 
-  if ! [ -f $file ]; then
+  if ! [ -f "$file" ]; then
     echo "${RED}ERROR: File not found:${NORMAL} $file"
     exit 99
   fi
 
-  if ! [ -s $file ]; then
+  if ! [ -s "$file" ]; then
       echo "${RED}ERROR: File is empty:${NORMAL} $file"
       exit 99
   fi
@@ -116,7 +137,7 @@ function verify_csv_tools_are_available() {
 
   # csvjson for converting CSV -> JSON
   if ! hash csvjson 2>/dev/null; then
-    echo "${RED}ERROR: CSVJSON tool not found${NORMAL}: try installing ${YELLOW}csvkit${NORMAL}"
+    echo "${RED}ERROR: CSVJSON tool not found${NORMAL}: try installing ${BOLD}csvkit${NORMAL}"
     exit 99
   fi
 
@@ -139,85 +160,147 @@ function verify_json_format_includes_field() {
   fi
 }
 
+function generate_csv_path_with_insert() {
+  local original_filename=$1
+  local insert=$2
+
+  local dirname=$(dirname "${original_filename}")
+  local basename=$(basename "${original_filename}")
+  local filename="${basename%.*}"
+  local extension="${basename##*.}"
+
+  # add default CSV extension if none was found
+  if [ "$extension" = "" ] || [ "$filename" = "$basename" ]; then
+    extension="csv"
+  fi
+
+  echo "${dirname}/${filename}.${insert}.${extension}"
+}
+
 function convert_input_file_to_json() {
   local file=$1
 
   verify_csv_tools_are_available
 
-  verify_file_exists ${file}
+  verify_file_exists "$file"
 
   # read from CSV by using CSVJSON
-  local raw_csv_as_json=$(csvjson $file)
+  local raw_csv_as_json=$(csvjson --datetime-format "." "$file")
 
   # verify JSON format  (ie. check mandatory fields are present)
   verify_json_format_includes_field "${raw_csv_as_json}" "email"
+  verify_json_format_includes_field "${raw_csv_as_json}" "firstName"
+  verify_json_format_includes_field "${raw_csv_as_json}" "lastName"
   verify_json_format_includes_field "${raw_csv_as_json}" "roles"
 
   # then reformat JSON using JQ
   local input_as_json=$(echo $raw_csv_as_json \
     | jq -r -c 'map({
-        "email": .email,
-        "firstName": .firstName,
-        "lastName": .lastName,
-        "roles": (try(.roles | split("|")) // null)
-      })' )
+        "idamUser": {
+          "email": .email,
+          "firstName": .firstName,
+          "lastName": .lastName,
+          "roles": (try(.roles | split("|")) // null)
+        },
+        "extraCsvData": {
+          "roles": .roles,
+          "inviteStatus": .inviteStatus,
+          "idamResponse": .idamResponse,
+          "idamUserJson": .idamUserJson,
+          "timestamp": .timestamp
+        }
+      })' ) # NB: extraCsvData element included in JSON to help preserve csv data when skipping an already complete record (i.e. inviteStatus="success")
 
   echo "$input_as_json"
 }
 
 function process_input_file() {
-  local file=$1
+  local filepath_input_original=$1
+
+  # generate new paths for input and output files 
+  local datestamp=$(date -u +"%FT%H%M%SZ")
+  local filepath_input_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "${datestamp}_INPUT")
+  local filepath_output_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "${datestamp}_OUTPUT")
 
   # convert input file to json
-  json="$(convert_input_file_to_json ${CSV_FILE_PATH})"
+  json=$(convert_input_file_to_json "${filepath_input_original}")
   check_exit_code_for_error $? "$json"
 
-  # write headers to output file
-  echo "#,Email,User JSON,IDAM Status,IDAM Response" >> "$OUTPUT_FILE_PATH"
+  # input file read ok ...
+  # ... so move it to backup location
+  mv "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null
+  if [ $? -eq 0 ]; then
+    echo "Moved input file to backup location: ${BOLD}${filepath_input_newpath}${NORMAL}"
+  else
+    echo "${RED}ERROR: Aborted as unable to move input file to backup location:${NORMAL} ${filepath_input_original}"
+    exit 1
+  fi
 
-  # strip JSON into individual compact items then process in a while loop
+  # write headers to output file
+  echo "email,firstName,lastName,roles,inviteStatus,idamResponse,idamUserJson,timestamp" >> "$filepath_output_newpath"
+
+  # strip JSON into individual items then process in a while loop
   echo $json | jq -r -c '.[]' \
       |  \
-  ( success_counter=0;fail_counter=0;total_counter=0;
+  ( success_counter=0;skipped_counter=0;fail_counter=0;total_counter=0;
     while IFS= read -r user; do
       total_counter=$((total_counter+1))
-      email=$(echo $user | jq --raw-output '.email')
 
-      # make call to IDAM
-      response=$(submit_user_registation "$user")
-      
-      # seperate body and status into an array
-      IFS=$'\n' response_array=($response)
+      # extract CSV fields from json to use in output
+      local email=$(echo $user | jq --raw-output '.idamUser.email')
+      local inviteStatus=$(echo $user | jq --raw-output '.extraCsvData.inviteStatus')
 
-      array_length=${#response_array[@]}
-      if [ $array_length -eq 1 ]; then
-        response_body='' # clear body
-        response_status=${response_array[0]}
+      if [ "$inviteStatus" != "SUCCESS" ]; then
+        # load formatted user JSON ready to send to IDAM 
+        idamUserJson=$(echo $user | jq -c --raw-output '.idamUser')
+
+        # make call to IDAM
+        submit_response=$(submit_user_registation "$idamUserJson")
+
+        # seperate submit_user_registation reponse
+        IFS=$'\n'
+        local response_array=($submit_response)
+        local inviteStatus=${response_array[0]}
+        local idamResponse=${response_array[1]}
+
+        if [ $inviteStatus == "SUCCESS" ]; then
+          # SUCCESS:
+          success_counter=$((success_counter+1))
+          echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: ${idamResponse}"
+        else
+          # FAIL:
+          fail_counter=$((fail_counter+1))
+          echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: ${idamResponse}"
+        fi
+
+        # prepare output (NB: escape generated values for CSV)
+        input_csv=$(echo $user | jq -r '[.idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+        timestamp=$(date -u +"%FT%H:%M:%SZ")
+        output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
       else
-        response_body=${response_array[0]}
-        response_status=${response_array[${array_length}-1]}
+        # SKIP:
+        skipped_counter=$((skipped_counter+1))
+        echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: inviteStatus == ${GREEN}${inviteStatus}${NORMAL}"
+
+        # prepare output
+        output_csv=$(echo $user | jq -r '[.idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles, .extraCsvData.inviteStatus, .extraCsvData.idamResponse // "", .extraCsvData.idamUserJson, '.extraCsvData.timestamp'] | @csv')
       fi
 
-      if [ $(( response_status )) -gt 199 ] && [ $(( response_status )) -lt 300 ]; then
-        # SUCCESS:
-        success_counter=$((success_counter+1))
-        echo "${total_counter}, ${email}, ${user}, ${GREEN}${response_status}${NORMAL}, ${response_body}"
-      else
-        # FAIL:
-        fail_counter=$((fail_counter+1))
-        echo "${total_counter}, ${email}, ${user}, ${RED}${response_status}${NORMAL}, ${response_body}"
-      fi
-
-      # record log of action in output file (NB: escape generated values for CSV)
-      echo "${total_counter},\"${email//\"/\"\"}\",\"${user//\"/\"\"}\",${response_status},\"${response_body//\"/\"\"}\"" >> "$OUTPUT_FILE_PATH"
+      # record log of action in output file (NB: escape values for CSV)
+      echo "$output_csv" >> "$filepath_output_newpath"
     done
 
-    if [ $(( success_counter )) -eq $(( total_counter )) ]; then
-      echo "Process is complete: ${GREEN}success: ${success_counter}${NORMAL}, fail: ${fail_counter}, total: ${total_counter}"
-    else
-      echo "Process is complete: success: ${success_counter}, ${RED}fail: ${fail_counter}${NORMAL}, total: ${total_counter}"
-    fi
+    echo "Process is complete: ${GREEN}success: ${success_counter}${NORMAL}, ${YELLOW}skipped: ${skipped_counter}${NORMAL}, ${RED}fail: ${fail_counter}${NORMAL}, total: ${total_counter}"
   )
+
+  # copy output file back to original input file location so it can be used for re-run
+  cp "$filepath_output_newpath" "$filepath_input_original" 2> /dev/null
+  if [ $? -eq 0 ]; then
+    echo "Updated input file to reflect invite status: ${BOLD}${filepath_input_original}${NORMAL}"
+  else
+    echo "${RED}ERROR: unable to update input file:${NORMAL} ${filepath_input_original}"
+    exit 1
+  fi
 }
 
 function check_exit_code_for_error() {
@@ -237,10 +320,6 @@ read -p "Please enter ccd idam-admin username: " ADMIN_USER
 ADMIN_USER_PWD=$(read_password_with_asterisk "Please enter ccd idam-admin password: ")
 IDAM_CLIENT_SECRET=$(read_password_with_asterisk $'\nPlease enter idam oauth2 secret for ccd-bulk-user-register client: ')
 read -p $'\nPlease enter environment default [prod]: ' ENV
-
-# generate path to output file 
-datestamp=$(date -u +"%FT%H%MZ")
-OUTPUT_FILE_PATH="${CSV_FILE_PATH}_${datestamp}.csv"
 
 ENV=${ENV:-prod}
 

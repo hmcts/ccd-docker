@@ -1,4 +1,6 @@
-The script requires following bash utilities. Please install them depending on your OS.
+# The bulk user creation scrpt
+
+The script requires the following bash utilities. Please install them depending on your OS.
 
 1. jq - [Json Processor](https://stedolan.github.io/jq)
 
@@ -16,19 +18,37 @@ The script will prompt for the following information:
 
 ----
 
-The CSV input file must contain the following elements, including a header row.
+## CSV file format
 
-| Header    | Description                                 |
-|-----------|---------------------------------------------|
-| email     | Email address of user                       |
-| firstName | First name of user                          | 
-| lastName  | Last name of user                           |
-| roles     | A pipe delimited list of roles for the user |
+The CSV input file must contain the following *mandatory* elements, including a header row.
 
-> Note: The field headings are case sensitive but the order of the columns is not important.  Any additional columns will be ignored by the process.
+| Header       | Mandatory | Description                                               |
+|--------------|-----------|-----------------------------------------------------------|
+| email        | **Yes**   | Email address of user.                                    |
+| firstName    | **Yes**   | First name of user.                                       |
+| lastName     | **Yes**   | Last name of user.                                        |
+| roles        | **Yes**   | A pipe delimited list of roles for the user.              |
+| inviteStatus | (output)  | Status of invite, e.g. `SUCCESS`, `HTTP-404`, etc.  NB: If process is re-run using the output file then it will skip rows that have `inviteStatus == 'SUCCESS'`. |
+| idamResponse | (output)  | JSON response from API.                                   |
+| idamUserJson | (output)  | Copy of JSON submission to API.                           |
+| timestamp    | (output)  | Time of API call for user record.                         |
 
+> Note: The field headings are case sensitive but the order of the columns is not important.  Any additional columns
+  will be ignored by the process.
 
-**Local docker testing setup**
+The import CSV file is renamed by the process to discourage its accidental re-use.  However at the end of the process
+ a copy of the output file is copied to the original input file location.  This new file will contain the additional
+ output fields listed above: these include the *inviteStatus* field which prevents successfully processed fields from
+ being included in a repeat run.
+
+> Note: In the unlikely event the script terminates early; then manual intervention would be required to generate the
+  ‘next’ input file: by combining the unprocessed input records with those already present in the latest output file.
+  **Care should be taken to ensure the CSV data columns copied from the input file are in the same order as those in
+  the output file.**
+
+----
+
+## Local docker testing setup
 
 1. Create a new client using [idam admin web interface](http://localhost:8082)
 
