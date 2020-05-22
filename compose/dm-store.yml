@@ -76,7 +76,7 @@ services:
 
 
   ccd-case-document-am-api:
-    image: "hmctspublic.azurecr.io/ccd/case-document-am-api:pr-195"
+    image: "hmctspublic.azurecr.io/ccd/case-document-am-api:pr-230"
     environment:
       CCD_DOCUMENT_API_IDAM_KEY: "${IDAM_KEY_CASE_DOCUMENT}"
       CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor
