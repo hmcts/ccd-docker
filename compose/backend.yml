@@ -63,7 +63,7 @@ services:
       - ccd-network
 
   ccd-data-store-api:
-    image: "hmctspublic.azurecr.io/ccd/data-store-api:pr-905"
+    image: "hmctspublic.azurecr.io/ccd/data-store-api:pr-922"
     environment:
       DATA_STORE_DB_HOST: ccd-shared-database
       DATA_STORE_DB_PORT: 5432
