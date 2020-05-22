@@ -1,0 +1,17 @@
+---
+version: '2.4'
+
+services:
+
+  manage-case-assignment:
+    image: "${MANAGE_CASE_USE_LOCAL-hmctspublic.azurecr.io/}aac/manage-case-assignment:${MANAGE_CASE_TAG:-latest}"
+    environment:
+      SERVER_PORT: 4454
+    ports:
+      - 4454:4454
+    networks:
+      - ccd-network
+
+networks:
+  ccd-network:
+    external: true

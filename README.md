@@ -125,6 +125,12 @@ The following roles are additionally required for the new automated functional t
     * caseworker-befta_jurisdiction_2-solicitor_2
     * caseworker-befta_jurisdiction_2-solicitor_3
     * caseworker-befta_jurisdiction_3-solicitor 
+    * caseworker-befta_master
+    * caseworker-befta_master-solicitor_1
+    * caseworker-befta_master-solicitor_2
+    * caseworker-befta_master-solicitor_3
+    * caseworker-befta_master-junior
+    * caseworker-befta_master-manager
 
 Don't worry about the *Assignable roles* section when adding roles
 
@@ -526,13 +532,16 @@ Optional compose files will allow other projects to be enabled on demand using t
   * run docker-compose `./ccd compose up -d`
   * verify that ccd-definition-designer-api is up and running by `curl localhost:4544/health`
 
+* To enable **manage-case-assignment**
+  * `./ccd enable backend frontend manage-case-assignment`
+  * run docker-compose `./ccd compose up -d`
+  * verify that manage-case-assignment is up and running by `curl localhost:4454/health`
+ 
 * To enable **ccd-case-document-am-api**
   * `./ccd enable backend frontend dm-store`
   * run docker-compose `./ccd compose up -d`
   * verify that ccd-case-document-am-api is up and running by curl localhost:4455/health
-  
-
-
+    
 ## Under the hood :speedboat:
 
 ### Set
