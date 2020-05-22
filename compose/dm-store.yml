@@ -17,7 +17,7 @@ services:
 
   ccd-data-store-api:
     environment:
-      CCD_DM_DOMAIN: http://localhost:4506
+      CCD_DM_DOMAIN: http://dm-store:8080
       CASE_DOCUMENT_AM_URL: http://ccd-case-document-am-api:4455
 
   service-auth-provider-api:
