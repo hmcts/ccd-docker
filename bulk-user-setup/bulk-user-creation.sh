@@ -25,7 +25,13 @@ function get_idam_token() {
     curl ${CURL_PROXY} -w $"\n%{http_code}" --silent --show-error -X POST "${IDAM_URL}/o/token" \
       -H "accept: application/json" \
       -H "Content-Type: application/x-www-form-urlencoded" \
-      -d "client_id=${CLIENT_ID}&client_secret=${IDAM_CLIENT_SECRET}&grant_type=password&username=${ADMIN_USER}&password=${ADMIN_USER_PWD}&redirect_uri=${REDIRECT_URI}&scope=openid roles create-user"
+      --data-urlencode "client_id=${CLIENT_ID}" \
+      --data-urlencode "client_secret=${IDAM_CLIENT_SECRET}" \
+      --data-urlencode "grant_type=password" \
+      --data-urlencode "username=${ADMIN_USER}" \
+      --data-urlencode "password=${ADMIN_USER_PWD}" \
+      --data-urlencode "redirect_uri=${REDIRECT_URI}" \
+      --data-urlencode "scope=openid roles create-user"
   )
 
   exit_code=$?
