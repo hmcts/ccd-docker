@@ -11,19 +11,18 @@ function get_idam_url() {
     if [ "$ENV" == "prod" ]
     then
       url="https://idam-api.platform.hmcts.net"
-    else if [ "$ENV" == "local" ]
+    elif [ "$ENV" == "local" ]
     then
       url="http://localhost:5000"
     else
       url="https://idam-api.${ENV}.platform.hmcts.net"
-    fi
     fi
     echo "$url"
 }
 
 function get_idam_token() {
   curl_result=$(
-    curl -w $"\n%{http_code}" --silent --show-error -X POST "${IDAM_URL}/o/token" \
+    curl ${CURL_PROXY} -w $"\n%{http_code}" --silent --show-error -X POST "${IDAM_URL}/o/token" \
       -H "accept: application/json" \
       -H "Content-Type: application/x-www-form-urlencoded" \
       -d "client_id=${CLIENT_ID}&client_secret=${IDAM_CLIENT_SECRET}&grant_type=password&username=${ADMIN_USER}&password=${ADMIN_USER_PWD}&redirect_uri=${REDIRECT_URI}&scope=openid roles create-user"
@@ -63,7 +62,7 @@ function submit_user_registation() {
   local USER=$1
 
   curl_result=$(
-    curl -w $"\n%{http_code}" --silent -X POST "${IDAM_URL}/user/registration" -H "accept: application/json" -H "Content-Type: application/json" \
+    curl ${CURL_PROXY} -w $"\n%{http_code}" --silent -X POST "${IDAM_URL}/user/registration" -H "accept: application/json" -H "Content-Type: application/json" \
       -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}" \
       -d "${USER}"
   )
@@ -332,6 +331,8 @@ fi
 REDIRECT_URI="https://create-bulk-user-test/oauth2redirect"
 CLIENT_ID="ccd-bulk-user-register"
 IDAM_URL=$(get_idam_url)
+CURL_PROXY=proxyout.reform.hmcts.net:8080
+if [ "$ENV" == "local" ]; then unset CURL_PROXY; fi
 IDAM_ACCESS_TOKEN=$(get_idam_token)
 check_exit_code_for_error $? "$IDAM_ACCESS_TOKEN"
 
