@@ -22,7 +22,7 @@ function get_idam_url() {
 
 function get_idam_token() {
   curl_result=$(
-    curl ${CURL_PROXY} -w $"\n%{http_code}" --silent --show-error -X POST "${IDAM_URL}/o/token" \
+    curl -w $"\n%{http_code}" --silent --show-error -X POST "${IDAM_URL}/o/token" \
       -H "accept: application/json" \
       -H "Content-Type: application/x-www-form-urlencoded" \
       --data-urlencode "client_id=${CLIENT_ID}" \
@@ -68,7 +68,7 @@ function submit_user_registation() {
   local USER=$1
 
   curl_result=$(
-    curl ${CURL_PROXY} -w $"\n%{http_code}" --silent -X POST "${IDAM_URL}/user/registration" -H "accept: application/json" -H "Content-Type: application/json" \
+    curl -w $"\n%{http_code}" --silent -X POST "${IDAM_URL}/user/registration" -H "accept: application/json" -H "Content-Type: application/json" \
       -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}" \
       -d "${USER}"
   )
@@ -334,11 +334,10 @@ then
   exit 1
 fi
 
+if [ "$ENV" != "local" ]; then export https_proxy=proxyout.reform.hmcts.net:8080; fi
 REDIRECT_URI="https://create-bulk-user-test/oauth2redirect"
 CLIENT_ID="ccd-bulk-user-register"
 IDAM_URL=$(get_idam_url)
-CURL_PROXY="--proxy proxyout.reform.hmcts.net:8080"
-if [ "$ENV" == "local" ]; then unset CURL_PROXY; fi
 IDAM_ACCESS_TOKEN=$(get_idam_token)
 check_exit_code_for_error $? "$IDAM_ACCESS_TOKEN"
 
@@ -351,3 +350,4 @@ fi
 # read csv and call curl in a loop for each record
 TIMEFORMAT="The input file was processed in: %3lR"
 time process_input_file "${CSV_FILE_PATH}"
+unset https_proxy;
