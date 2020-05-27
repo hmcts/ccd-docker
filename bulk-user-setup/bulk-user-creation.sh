@@ -331,7 +331,7 @@ fi
 REDIRECT_URI="https://create-bulk-user-test/oauth2redirect"
 CLIENT_ID="ccd-bulk-user-register"
 IDAM_URL=$(get_idam_url)
-CURL_PROXY=proxyout.reform.hmcts.net:8080
+CURL_PROXY="--proxy proxyout.reform.hmcts.net:8080"
 if [ "$ENV" == "local" ]; then unset CURL_PROXY; fi
 IDAM_ACCESS_TOKEN=$(get_idam_token)
 check_exit_code_for_error $? "$IDAM_ACCESS_TOKEN"
