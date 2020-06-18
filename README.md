@@ -532,11 +532,7 @@ Optional compose files will allow other projects to be enabled on demand using t
   * run docker-compose `./ccd compose up -d`
   * verify that ccd-definition-designer-api is up and running by `curl localhost:4544/health`
 
-* To enable **manage-case-assignment**
-  * `./ccd enable backend frontend manage-case-assignment`
-  * run docker-compose `./ccd compose up -d`
-  * verify that manage-case-assignment is up and running by `curl localhost:4454/health`
-  
+
 ## Under the hood :speedboat:
 
 ### Set

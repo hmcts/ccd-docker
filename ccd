@@ -49,12 +49,6 @@ function project_config() {
             envPrefix="DM_STORE"
             buildCommand="./gradlew installDist assemble"
             ;;
-        manage-case-assignment|manage-case-assignment)
-            name=manage-case-assignment
-            repository="git@github.com:hmcts/aac-manage-case-assignment.git"
-            envPrefix="MANAGE_CASE"
-            buildCommand="./gradlew installDist assemble"
-            ;;
         ccd-test-stubs-service|test-stubs-service)
             name=ccd-test-stubs-service
             repository="git@github.com:hmcts/ccd-test-stubs-service.git"
@@ -68,7 +62,7 @@ function project_config() {
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, ccd-admin-web, dm-store, manage-case-assignment, ccd-definition-designer-api"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, ccd-admin-web, dm-store, ccd-definition-designer-api"
             exit 1 ;;
     esac
     case $config in
