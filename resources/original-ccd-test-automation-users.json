@@ -1,0 +1,20 @@
+[
+	{
+		"forename": "Caseworker 2",
+		"surname": "Befta",
+		"email": "befta.caseworker.2.solicitor.1@gmail.com",
+		"password": "***",
+		"active": true,
+		"roles": [
+			{
+				"code": "caseworker-befta_jurisdiction_2-solicitor_1"
+			},
+			{
+				"code": "caseworker-befta_jurisdiction_2"
+			},
+			{
+				"code": "caseworker"
+			}
+		]
+	}
+]

@@ -1,0 +1,18 @@
+[
+	{
+		"forename": "Sofia",
+		"surname": "Solicington",
+		"email": "befta_master.solicitor.1@gmail.com",
+		"password": "***",
+		"active": true,
+		"roles": [
+			{
+				"code": "caseworker"
+			},
+			{
+				"code": "caseworker-befta_master-solicitor"
+			}
+		]
+	}
+
+]
