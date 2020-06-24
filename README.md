@@ -319,9 +319,11 @@ export IDAM_STUB_LOCALHOST=http://localhost:5555
 unset IDAM_STUB_LOCALHOST
 ```
 
-#### Step 3 - (Optional) Customise Idam roles
+#### Step 3 - (Optional) Customise IDAM roles
 
-Idam Stub comes with a set of default Idam roles. To customise the Idam roles follow the instructions in 'backend.yml' ccd-test-stubs-service
+IDAM Stub comes with a predefined IDAM user.
+To permanently customise the stub user info such as its roles follow the instructions in 'backend.yml' ccd-test-stubs-service
+To modify the user info at runtime, see https://github.com/hmcts/ccd-test-stubs-service#idam-stub
 
 #### Step 4 - Enable stub service dependency
 
