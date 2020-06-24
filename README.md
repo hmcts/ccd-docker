@@ -322,7 +322,7 @@ unset IDAM_STUB_LOCALHOST
 #### Step 3 - (Optional) Customise IDAM roles
 
 IDAM Stub comes with a predefined IDAM user.\
-To permanently customise the stub user info such as its roles follow the instructions in 'backend.yml' ccd-test-stubs-service\
+To permanently customise the stub user info such as its roles follow the instructions in 'backend.yml' -> ccd-test-stubs-service\
 To modify the user info at runtime, see https://github.com/hmcts/ccd-test-stubs-service#idam-stub
 
 #### Step 4 - Enable stub service dependency
