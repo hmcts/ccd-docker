@@ -24,6 +24,7 @@ cd "$parent_path"
 ./ccd-add-role.sh caseworker-befta_jurisdiction_3 PUBLIC
 ./ccd-add-role.sh caseworker-befta_jurisdiction_3-solicitor PUBLIC
 ./ccd-add-role.sh caseworker-befta_master PUBLIC
+./ccd-add-role.sh caseworker-befta_master-solicitor PUBLIC
 ./ccd-add-role.sh caseworker-befta_master-solicitor_1 PUBLIC
 ./ccd-add-role.sh caseworker-befta_master-solicitor_2 PUBLIC
 ./ccd-add-role.sh caseworker-befta_master-solicitor_3 PUBLIC
@@ -63,3 +64,5 @@ cd "$parent_path"
 ./idam-create-caseworker.sh caseworker,caseworker-befta_master,caseworker-befta_master-solicitor_2 master.solicitor.2@gmail.com Pa55word11 befta solc2
 ./idam-create-caseworker.sh caseworker,caseworker-befta_master,caseworker-befta_master-solicitor_3 master.solicitor.3@gmail.com Pa55word11 befta solc3
 ./idam-create-caseworker.sh caseworker,caseworker-caa,caseworker-befta_master,caseworker-befta_jurisdiction_1,caseworker-befta_jurisdiction_2 befta.caseworker.caa@gmail.com Pa55word11
+./idam-create-caseworker.sh caseworker,caseworker-befta_master-solicitor befta_master.solicitor.becky@gmail.com Pa55word11 Solicington Becky
+./idam-create-caseworker.sh caseworker,caseworker-befta_master-solicitor befta_master.solicitor.benjamin@gmail.com Pa55word11 Solicington Benjamin
