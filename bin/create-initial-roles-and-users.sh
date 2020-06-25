@@ -24,6 +24,7 @@ cd "$parent_path"
 ./ccd-add-role.sh caseworker-befta_jurisdiction_3 PUBLIC
 ./ccd-add-role.sh caseworker-befta_jurisdiction_3-solicitor PUBLIC
 ./ccd-add-role.sh caseworker-befta_master PUBLIC
+./ccd-add-role.sh caseworker-befta_master-solicitor PUBLIC
 ./ccd-add-role.sh caseworker-befta_master-solicitor_1 PUBLIC
 ./ccd-add-role.sh caseworker-befta_master-solicitor_2 PUBLIC
 ./ccd-add-role.sh caseworker-befta_master-solicitor_3 PUBLIC
