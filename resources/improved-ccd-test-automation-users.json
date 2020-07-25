@@ -10,6 +10,9 @@
 				"code": "caseworker"
 			},
 			{
+				"code": "caseworker-befta_master"
+			},
+			{
 				"code": "caseworker-befta_master-solicitor"
 			}
 		]
@@ -23,6 +26,9 @@
 		"roles": [
 			{
 				"code": "caseworker"
+			},
+			{
+				"code": "caseworker-befta_master"
 			},
 			{
 				"code": "caseworker-befta_master-solicitor"
