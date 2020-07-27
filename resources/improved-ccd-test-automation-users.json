@@ -76,6 +76,18 @@
 				"code": "caseworker-befta_jurisdiction_3-solicitor"
 			}
 		]
+	},
+	{
+		"forename": "CCD PUI",
+		"surname": "CAA 1",
+		"email": "befta.pui.caa.1@gmail.com",
+		"password": "***",
+		"active": true,
+		"roles": [
+			{
+				"code": "pui-caa"
+			}
+		]
 	}
 ]
 
