@@ -56,6 +56,7 @@ cd "$parent_path"
 ./idam-create-caseworker.sh caseworker,caseworker-befta_jurisdiction_2,caseworker-befta_jurisdiction_2-solicitor_3 befta.caseworker.2.solicitor.3@gmail.com Pa55word11
 ./idam-create-caseworker.sh citizen befta.citizen.2@gmail.com Pa55word11
 ./idam-create-caseworker.sh caseworker,caseworker-befta_jurisdiction_3,caseworker-befta_jurisdiction_3-solicitor befta.solicitor.3@gmail.com Pa55word11
+./idam-create-caseworker.sh caseworker,caseworker-befta_jurisdiction_3,caseworker-befta_jurisdiction_3-solicitor befta.solicitor.4@gmail.com Pa55word11
 ./idam-create-caseworker.sh citizen befta.citizen.3@gmail.com Pa55word11
 ./idam-create-caseworker.sh caseworker,caseworker-befta_jurisdiction_3 befta.caseworker.3@gmail.com Pa55word11
 ./idam-create-caseworker.sh caseworker,caseworker-befta_jurisdiction_1 befta.caseworker.1.noprofile@gmail.com Pa55word11 testsurname testfirstname
