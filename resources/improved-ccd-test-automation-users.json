@@ -158,12 +158,6 @@
 			},
 			{
 				"code": "caseworker-caa"
-			},
-			{
-				"code": "caseworker-befta_master"
-			},
-			{
-				"code": "caseworker-befta_casetype_2_1"
 			}
 		]
 	}
