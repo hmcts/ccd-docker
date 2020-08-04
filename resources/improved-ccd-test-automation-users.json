@@ -1,0 +1,93 @@
+[
+	{
+		"forename": "Becky",
+		"surname": "Solicington",
+		"email": "befta.master.solicitor.becky@gmail.com",
+		"password": "***",
+		"active": true,
+		"roles": [
+			{
+				"code": "caseworker"
+			},
+			{
+				"code": "pui-case-manager"
+			},
+			{
+				"code": "caseworker-befta_master"
+			},
+			{
+				"code": "caseworker-befta_master-solicitor"
+			}
+		]
+	},
+	{
+		"forename": "Benjamin",
+		"surname": "Solicington",
+		"email": "befta.master.solicitor.benjamin@gmail.com",
+		"password": "***",
+		"active": true,
+		"roles": [
+			{
+				"code": "caseworker"
+			},
+			{
+				"code": "pui-case-manager"
+			},
+			{
+				"code": "caseworker-befta_master"
+			},
+			{
+				"code": "caseworker-befta_master-solicitor"
+			}
+		]
+	},
+	{
+		"forename": "CCD Solicitor",
+		"surname": "Jurisdiction3",
+		"email": "befta.solicitor.3@gmail.com",
+		"password": "***",
+		"active": true,
+		"roles": [
+			{
+				"code": "caseworker"
+			},
+			{
+				"code": "caseworker-befta_jurisdiction_3"
+			},
+			{
+				"code": "caseworker-befta_jurisdiction_3-solicitor"
+			}
+		]
+	},
+	{
+		"forename": "CCD Solicitor 4",
+		"surname": "Jurisdiction3",
+		"email": "befta.solicitor.4@gmail.com",
+		"password": "***",
+		"active": true,
+		"roles": [
+			{
+				"code": "caseworker"
+			},
+			{
+				"code": "caseworker-befta_jurisdiction_3"
+			},
+			{
+				"code": "caseworker-befta_jurisdiction_3-solicitor"
+			}
+		]
+	},
+	{
+		"forename": "CCD PUI",
+		"surname": "CAA 1",
+		"email": "befta.pui.caa.1@gmail.com",
+		"password": "***",
+		"active": true,
+		"roles": [
+			{
+				"code": "pui-caa"
+			}
+		]
+	}
+]
+
