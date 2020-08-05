@@ -88,6 +88,78 @@
 				"code": "pui-caa"
 			}
 		]
+	},
+	{
+		"forename": "AutoTest12 CNP",
+		"surname": "Private",
+		"email": "auto.test12.cnp+private@gmail.com",
+		"password": "***",
+		"active": true,
+		"roles": [
+			{
+				"code": "caseworker"
+			},
+			{
+				"code": "caseworker-autotest1"
+			},
+			{
+				"code": "caseworker-autotest1-private"
+			},
+			{
+				"code": "caseworker-autotest2"
+			},
+			{
+				"code": "caseworker-autotest2-private"
+			}
+		]
+	},
+	{
+		"forename": "Befta",
+		"surname": "Caseworker",
+		"email": "befta.caseworker.2@gmail.com",
+		"password": "***",
+		"active": true,
+		"roles": [
+			{
+				"code": "caseworker"
+			},
+			{
+				"code": "caseworker-befta_jurisdiction_2"
+			}
+		]
+	},
+	{
+		"forename": "Autotest",
+		"surname": "CNP Senior",
+		"email": "auto.test.cnp+senior@gmail.com",
+		"password": "***",
+		"active": true,
+		"roles": [
+			{
+				"code": "caseworker"
+			},
+			{
+				"code": "caseworker-autotest1"
+			},
+			{
+				"code": "caseworker-autotest1-senior"
+			}
+		]
+	},
+	{
+		"forename": "Caseworker",
+		"surname": "CAA",
+		"email": "befta.caseworker.caa@gmail.com",
+		"password": "***",
+		"active": true,
+		"roles": [
+			{
+				"code": "caseworker"
+			},
+			{
+				"code": "caseworker-caa"
+			}
+		]
 	}
 ]
 
