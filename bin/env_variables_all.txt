@@ -71,6 +71,7 @@ OAUTH2_CLIENT_CCD_GATEWAY=ccd_gateway_secret
 OAUTH2_CLIENT_ID=ccd_gateway
 OAUTH2_CLIENT_SECRET=ccd_gateway_secret
 OAUTH2_REDIRECT_URI=http://localhost:3451/oauth2redirect
+RD_PROFESSIONAL_API_BASE_URL=http://localhost:5555
 S2S_URL=http://localhost:4502
 TEST_URL=http://localhost:4452
 USER=someuser
