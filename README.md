@@ -21,7 +21,7 @@
 *Memory and CPU allocations may need to be increased for successful execution of ccd applications altogether. (On Preferences / Advanced)*
 
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) - minimum version 2.0.57 
-- [jq Json Processor] (https://stedolan.github.io/jq)
+- [jq Json Processor](https://stedolan.github.io/jq)
 
 *The following documentation assumes that the current directory is `ccd-docker`.*
 
@@ -86,121 +86,105 @@ A prefix 'export' will be required for each of environment variable.
 
 Once the containers are running, CCD's frontend can be accessed at [http://localhost:3451](http://localhost:3451).
 
-However, 6 more steps are required to correctly configure SIDAM and CCD before it can be used:
+---
+**NOTE**
 
-### 1. Configure Oauth2 Client of CCD Gateway on SIDAM
+The `idam-api` container can be slow to start - both the `definition-store-api` and `data-store-api` containers will
+try to connect to the `idam-api` container when they start.
+
+If `idam-api` is not up and running and accepting connections
+you may see errors in the `definition-store-api` and `data-store-api` containers, such as
+
+```bash
+Caused by: org.springframework.web.client.ResourceAccessException: 
+    I/O error on GET request for "http://idam-api:5000/o/.well-known/openid-configuration": Connection refused (Connection refused);
+        nested exception is java.net.ConnectException: Connection refused (Connection refused)
+```
+
+If you the containers fail to start with these error, ensure `idam-api` is running using
+
+ ```bash
+curl http://localhost:5000/health
+ ```
+
+ensuring the response is 
+
+```bash
+{"status":"UP"}
+```
+
+Then restart the `definition-store-api` & `data-store-api` containers
+
+```bash
+./ccd compose restart ccd-definition-store-api ccd-data-store-api
+```
+---
+
+However, some more steps are required to correctly configure SIDAM and CCD before it can be used:
+
+###1. Configure Oauth2 Client of CCD Gateway on SIDAM
 
 An oauth2 client should be configured for ccd-gateway application, on SIDAM Web Admin.
-You need to login to the SIDAM Web Admin with the URL and logic credentials here: https://tools.hmcts.net/confluence/x/eQP3P
 
-Navigate to Home > Manage Services > Add a new Service
+A script is provided that sets up the CCD Gateway client.  Execute the following:
 
-On the **Add Service** screen the following fields are required:
+```bash
+./bin/add-idam-clients.sh
 ```
-label : <any>
-description : <any>
-client_id : ccd_gateway
-client_secret : ccd_gateway_secret
-new redirect_uri (click 'Add URI' before saving) : http://localhost:3451/oauth2redirect
+
+You may verify the service has been added by logging in to the SIDAM Web Admin with the URL and 
+logic credentials here: 
+
+https://tools.hmcts.net/confluence/x/eQP3P
+
+Navigate to 
+
+`Home > Manage Services`
+
+###2. Create Idam roles
+
+Execute the following script to add roles to SIDAM:
+
+```bash
+./bin/add-roles.sh
 ```
-### 2. Create Idam roles
-After defining the above client/service, the following roles must be defined under this client/service (Home > Manage Roles > select your service > Role Label)
-(some of these roles are used in the automated functional test):
 
-    * ccd-import
-    * caseworker
-    * caseworker-autotest1
-    * caseworker-autotest2
-    * caseworker-autotest1-private
-    * caseworker-autotest2-senior
-    * caseworker-autotest2-solicitor
+---
+**NOTE**
 
-The following roles are additionally required for the new automated functional tests.
-    
-    * caseworker-befta_jurisdiction_1
-    * caseworker-befta_jurisdiction_2
-    * caseworker-befta_jurisdiction_3
-    * caseworker-befta_jurisdiction_2-solicitor_1
-    * caseworker-befta_jurisdiction_2-solicitor_2
-    * caseworker-befta_jurisdiction_2-solicitor_3
-    * caseworker-befta_jurisdiction_3-solicitor 
-    * caseworker-befta_master
-    * caseworker-befta_master-solicitor_1
-    * caseworker-befta_master-solicitor_2
-    * caseworker-befta_master-solicitor_3
-    * caseworker-befta_master-junior
-    * caseworker-befta_master-manager
-    * caseworker-caa
+The script adds roles under a _GLOBAL_ namespace and so until the users assigned to these roles are added,
+you cannot verify them using SIDAM Web UI
+--- 
 
-Don't worry about the *Assignable roles* section when adding roles
-
-Once the roles are defined under the client/service, go to the service configuration for the service you created in Step 1 (Home > Manage Services > select your service) and select `ccd-import` role radio option under **Private Beta Role** section
- 
-**Any business-related roles like `caseworker`,`caseworker-<jurisdiction>` etc to be used in CCD later must also be defined under the client configuration at this stage.**
-
-### 3. Create users and roles
-
-#### 3.1 Automated creation
+###3. Create users
 
 A script is provided that sets up some initial users and roles for running functional tests. Execute the following:
 
 ```bash
-./bin/create-initial-roles-and-users.sh
+./bin/add-users.sh
 ```
 
-#### 3.2 Manual creation
-
-##### 3.2.1 Create a Default User with "ccd-import" Role
-
-A user with import role should be created using the following command:
+This script will add the users with associated roles as defined in
 
 ```bash
-./bin/idam-create-caseworker.sh ccd-import ccd.docker.default@hmcts.net Pa55word11 Default CCD_Docker
+bin/users.json
 ```
 
-This call will create a user in SIDAM with ccd-import role. This user will be used to acquire a user token with "ccd-import" role.
+You may verify the service has been added by logging in to the SIDAM Web Admin with the URL and 
+logic credentials here: 
 
+https://tools.hmcts.net/confluence/x/eQP3P
 
-##### 3.2.2 Add Initial Roles
+Navigate to 
 
-Before a definition can be imported, roles referenced in a case definition Authorisation tabs must be defined in CCD using:
+`Home > Manage Users`
 
-```bash
-./bin/ccd-add-role.sh <role> [classification]
-```
+and search for users by email address.
 
-Parameters:
-- `role`: Name of the role, e.g: `caseworker-divorce`.
-- `classification`: Optional. One of `PUBLIC`, `PRIVATE` or `RESTRICTED`. Defaults to `PUBLIC`.
-
-##### 3.2.3 Add Initial Case Worker Users
-
-A caseworker user can be created in IDAM using the following command:
-
-```bash
-./bin/idam-create-caseworker.sh <roles> <email> [password] [surname] [forename]
-```
-
-Parameters:
-- `roles`: a comma-separated list of roles. Roles must be existing IDAM roles for the CCD domain. Every caseworker requires at least it's coarse-grained jurisdiction role (`caseworker-<jurisdiction>`).
-- `email`: Email address used for logging in.
-- `password`: Optional. Password for logging in. Defaults to `Pa55word11`. Weak passwords that do not match the password criteria by SIDAM will cause use creation to fail, and such failure may not be expressly communicated to the user. 
-
-For example:
-
-```bash
-./bin/idam-create-caseworker.sh caseworker-probate,caseworker-probate-solicitor probate@hmcts.net
-```
+###4. Import case definition
 
 #### Note:
-- A. Before running CCD Data Store tests, execute the CCD Definition store test cases first so that case definitions are loaded from CCD_CNP_27.xlsx.
-- B. Set the TEST_URL environment variable to match the service the functional tests should executed against:
-
-          For ccd-definition-store-api functional tests the set TEST_URL=http://localhost:4451
-
-          For ccd-data-store-api functional tests set TEST_URL=http://localhost:4452
-
-### 4. Import case definition
+- A. CCD Data Store tests will automatically import the CCD case definitions using the `befta-fw` test framework.
 
 To reduce impact on performances, case definitions are imported via the command line rather than using CCD's dedicated UI:
 
@@ -211,7 +195,7 @@ To reduce impact on performances, case definitions are imported via the command 
 Parameters:
 - `path_to_definition`: Path to `.xlsx` file containing the case definition.
 
-**Note:** For CCD to work, the definition must contain the caseworker's email address created at [step 1](#1-create-a-caseworker-user).
+**Note:** For CCD to work, the definition must contain the caseworker's email address.
 
 If the import fails with an error of the form:
 
@@ -221,12 +205,12 @@ Validation errors occurred importing the spreadsheet.
 - Invalid IdamRole 'caseworker-cmc-loa1' in AuthorisationCaseField tab, case type 'MoneyClaimCase', case field 'submitterId', crud 'CRUD'
 ```
 
-Then the indicated role, here `caseworker-cmc-loa1`, must be added to CCD (See [4. Add Initial Roles](#4-add-initial-roles)).
+Then the indicated role, here `caseworker-cmc-loa1`, must be added to CCD (See [2. Create Idam roles](#2.-Create-Idam-roles)).
 
 ### Ready for take-off 🛫
 
-Back to [http://localhost:3451](http://localhost:3451), you can now log in with the email and password defined at [5. Add Initial Case Worker Users](#5-add-initial-case-worker-users).
-If you left the password out when creating the caseworker, by default it's set to: `Pa55word11`.
+Back to [http://localhost:3451](http://localhost:3451), you can now log in with any of the email addresses defined when adding users in [3. Create Users](#3.-Create-users).
+All user passwords default to : `Pa55word11`.
 
 If you see only a grey screen after entering your user credentials in the login page, you may need to set profile settings in ccd_user_profile database by adding a single line for the user in the below tables:
 
