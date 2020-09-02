@@ -15,10 +15,6 @@ services:
     depends_on:
       - dm-store
 
-  ccd-data-store-api:
-    environment:
-      CCD_DM_DOMAIN: http://dm-store:8080
-
   service-auth-provider-api:
     environment:
       MICROSERVICE_KEYS_EM_GW: "${IDAM_KEY_DM_STORE}"
