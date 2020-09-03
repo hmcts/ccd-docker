@@ -80,7 +80,7 @@ Mac : `source ./bin/set-environment-variables.sh`
 Note: some users of zsh 'Oh My Zsh' experienced issues. Try switching to bash for this step
 
 To persist the environment variables in Mac, copy the contents of `env_variables_all.txt` file into ~/.bash_profile.
-A prefix 'export' will be required for each of environment variable.
+A prefix 'export' will be required for each environment variable.
 
 ## Using CCD
 
@@ -122,7 +122,33 @@ Then restart the `definition-store-api` & `data-store-api` containers
 
 However, some more steps are required to correctly configure SIDAM and CCD before it can be used:
 
-###1. Configure Oauth2 Client of CCD Gateway on SIDAM
+---
+**NOTE**
+
+All scripts require the following environment variables to be set
+
+```bash
+IDAM_ADMIN_USER
+IDAM_ADMIN_PASSWORD
+```
+
+with the corresponding values from the confluence page at https://tools.hmcts.net/confluence/x/eQP3P
+
+### CCD Quick Start
+
+At this point most users can run the following 3 scripts 
+
+```bash
+./bin/add-idam-clients.sh
+./bin/add-roles.sh
+./bin/add-users.sh
+```
+
+to get their IDAM environment ready and then move on to the [Ready for take-off](###Ready-for-take-off) section.
+
+A more in depth explanation of the scripts is detailed below 
+
+### 1. Configure Oauth2 Client of CCD Gateway on SIDAM
 
 An oauth2 client should be configured for ccd-gateway application, on SIDAM Web Admin.
 
@@ -141,7 +167,46 @@ Navigate to
 
 `Home > Manage Services`
 
-###2. Create Idam roles
+Optionally - to add any further IDAM service clients you can update the 
+
+```bash
+./bin/add-idam-clients.sh
+```
+
+to add a new entry and re-run the script (any entries in this file that already exist are skipped)
+
+`${dir}/utils/idam-create-service.sh LABEL CLIENT_ID CLIENT_SECRET REDIRECT_URL SELF_REGISTRATION SCOPE`
+
+---
+**NOTE**
+
+* SELF_REGISTRATION - a boolean parameter, defaults to a value of "false" if omitted
+* SCOPE - a space delimited string parameter, defaults to a value of "openid profile authorities acr roles search-user" if omitted
+---
+
+#### Manual Configuration steps
+
+Instead of running the above scripts you can add the services manually using the SIDAM Web UI
+
+You need to login to the SIDAM Web Admin with the URL and logic credentials here: https://tools.hmcts.net/confluence/x/eQP3P
+
+Navigate to 
+
+```bash
+Home > Manage Services > Add a new Service
+```
+
+On the **Add Service** screen the following fields are required:
+
+```
+label : <any>
+description : <any>
+client_id : ccd_gateway
+client_secret : ccd_gateway_secret
+new redirect_uri (click 'Add URI' before saving) : http://localhost:3451/oauth2redirect
+```
+
+### 2. Create Idam roles
 
 Execute the following script to add roles to SIDAM:
 
@@ -149,14 +214,65 @@ Execute the following script to add roles to SIDAM:
 ./bin/add-roles.sh
 ```
 
+The script parses `bin/users.json` and loops through a list of unique roles, passing the role to the `idam-add-role.sh` 
+script
+
+To add any further IDAM roles, for example "myNewIdamRole", run the script as follows
+
+```bash
+    ./bin/utils/idam-add-role.sh "myNewIdamRole"
+``` 
+ 
 ---
 **NOTE**
 
 The script adds roles under a _GLOBAL_ namespace and so until the users assigned to these roles are added,
 you cannot verify them using SIDAM Web UI
+
 --- 
 
-###3. Create users
+#### Manual Configuration steps
+
+Any roles should be configured for ccd-gateway client/service, on SIDAM Web Admin.
+
+You need to login to the SIDAM Web Admin with the URL and logic credentials here: https://tools.hmcts.net/confluence/x/eQP3P
+
+`Navigate to Home > Manage Roles > Select Your Service > Role Label`
+
+Don't worry about the *Assignable roles* section when adding roles
+
+Once the roles are defined under the client/service, go to the service configuration for the service you created in 
+Step 1 (`Home > Manage Services > select your service`) and select `ccd-import` role radio option under 
+**Private Beta Role** section
+ 
+**Any business-related roles like `caseworker`,`caseworker-<jurisdiction>` etc to be used in CCD later must also be defined under the client configuration at this stage.**
+
+#### Adding a role to CCD
+
+By default most FTA (Feature test automation) packs load their own roles into CCD via the definition store each time 
+the feature tests are run
+
+To add a further role to CCD (by importing it into the definition store), run the following script
+
+```bash
+./bin/ccd-add-role.sh
+```
+
+supplying the following parameters
+
+```bash
+- role: Name of the role. Must be an existing IDAM role.
+- classification: Classification granted to the role; one of `PUBLIC`,
+        `PRIVATE` or `RESTRICTED`. Default to `PUBLIC`.
+```
+
+For example, to add the `caseworker` role (that must exist in SIDAM) to CCD, use
+
+```bash
+./bin/ccd-add-role.sh caseworker PUBLIC
+``` 
+
+### 3. Create users
 
 A script is provided that sets up some initial users and roles for running functional tests. Execute the following:
 
@@ -170,6 +286,34 @@ This script will add the users with associated roles as defined in
 bin/users.json
 ```
 
+This script runs the checks below, for each user defined in the `users.json`
+
+```bash 
+check roles
+if roles are the same
+    do nothing
+else
+    delete user
+    create user with same id
+``` 
+
+Therefore to 
+ * add a new user - add a new entry to the `users.json`
+ * modify an existing user - modify `users.json` to add/remove a role
+ 
+Alternatively, add a user to SIDAM by using the script
+
+```bash
+./bin/idam-create-caseworker.sh ROLE EMAIL_ADDRESS LAST_NAME FIRST_NAME
+```
+---
+**NOTE**
+LAST_NAME if omitted defaults to `TesterLastName`
+FIRST_NAME if omitted defaults to `TesterFirstname`
+
+Password for each user created by the script defaults to `Pa55word11`
+
+---
 You may verify the service has been added by logging in to the SIDAM Web Admin with the URL and 
 logic credentials here: 
 
@@ -184,9 +328,12 @@ and search for users by email address.
 ###4. Import case definition
 
 #### Note:
-- A. CCD Data Store tests will automatically import the CCD case definitions using the `befta-fw` test framework.
 
-To reduce impact on performances, case definitions are imported via the command line rather than using CCD's dedicated UI:
+CCD Data Store FTA tests will automatically import the CCD case definitions using the `befta-fw` test framework.
+
+Case definitions can be imported using CCD's dedicated UI
+
+Case definitions can also be imported manually via the command line, using the following script
 
 ```bash
 ./bin/ccd-import-definition.sh <path_to_definition>
@@ -205,7 +352,7 @@ Validation errors occurred importing the spreadsheet.
 - Invalid IdamRole 'caseworker-cmc-loa1' in AuthorisationCaseField tab, case type 'MoneyClaimCase', case field 'submitterId', crud 'CRUD'
 ```
 
-Then the indicated role, here `caseworker-cmc-loa1`, must be added to CCD (See [2. Create Idam roles](#2.-Create-Idam-roles)).
+Then the indicated role, here `caseworker-cmc-loa1`, must be added to CCD (See [2. Create Idam roles](2-.-Create-Idam-roles)).
 
 ### Ready for take-off 🛫
 
