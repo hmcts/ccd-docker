@@ -9,7 +9,7 @@ CLIENT_ID=${2}
 CLIENT_SECRET=${3}
 REDIRECT_URL=${4}
 SELF_REGISTRATION=${5:-"false"}
-SCOPE=${6:-"openid profile authorities acr roles search-user"}
+SCOPE=${6:-"openid profile roles"}
 
 apiToken=$(${dir}/idam-authenticate.sh "${IDAM_ADMIN_USER}" "${IDAM_ADMIN_PASSWORD}")
 

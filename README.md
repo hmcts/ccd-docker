@@ -181,7 +181,7 @@ to add a new entry and re-run the script (any entries in this file that already 
 **NOTE**
 
 * SELF_REGISTRATION - a boolean parameter, defaults to a value of "false" if omitted
-* SCOPE - a space delimited string parameter, defaults to a value of "openid profile authorities acr roles search-user" if omitted
+* SCOPE - a space delimited string parameter, defaults to a value of "openid profile roles" if omitted
 ---
 
 #### Manual Configuration steps
