@@ -84,8 +84,8 @@ fi
 
 email=${1}
 rolesStr=${2}
-surname=${3:-"TesterLastname"}
-firstName=${4:-"TesterFirstname"}
+surname=${3:-"Tester"}
+firstName=${4:-${email}}
 
 IFS=',' read -ra roles <<<"${rolesStr}"
 
