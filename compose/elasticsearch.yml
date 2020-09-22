@@ -23,7 +23,7 @@ services:
       - ccd-network
 
   ccd-logstash:
-    image: "hmcts/ccd-logstash:latest"
+    image: "hmctspublic.azurecr.io/ccd/logstash:latest"
     container_name: ccd-logstash
     depends_on:
           - "ccd-elasticsearch"
