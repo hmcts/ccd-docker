@@ -6,7 +6,7 @@
 ##    - classification: Classification granted to the role; one of `PUBLIC`,
 ##        `PRIVATE` or `RESTRICTED`. Default to `PUBLIC`.
 ##
-## Add support for an IDAM role in CCD.
+## Add support for an IDAM role in CCD by adding role to definition store.
 
 role=$1
 classification=${2:-PUBLIC}
@@ -27,8 +27,8 @@ esac
 
 binFolder=$(dirname "$0")
 
-userToken="$(${binFolder}/idam-user-token.sh)"
-serviceToken="$(${binFolder}/idam-service-token.sh ccd_gw)"
+userToken="$(${binFolder}/utils/idam-user-token.sh)"
+serviceToken="$(${binFolder}/utils/lease-service-token.sh ccd_gw)"
 
 curl -XPUT \
   http://localhost:4451/api/user-role \
