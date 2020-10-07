@@ -41,6 +41,9 @@
   {"email": "befta.master.solicitor.benjamin@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor", "lastName": "Solicington", "firstName": "Benjamin"},
   {"email": "befta.master.solicitor.bill@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor", "lastName": "Solicington", "firstName": "Bill"},
   {"email": "befta.master.solicitor.emma@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor", "lastName": "Solicington", "firstName": "Emma"},
+  {"email": "befta.master.solicitor.jane@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor,pui-caa", "lastName": "Solicington", "firstName": "Jane"},
+
+  {"email": "befta.jurisdiction.3.solicitor.alice@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_3,caseworker-befta_jurisdiction_3-solicitor,pui-caa", "lastName": "Solicington", "firstName": "Alice"},
 
   {"email": "befta.caseworker.caa@gmail.com", "roles": "caseworker,caseworker-caa", "lastName": "CAA", "firstName": "Caseworker"}
 ]
