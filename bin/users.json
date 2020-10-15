@@ -43,6 +43,10 @@
   {"email": "befta.master.solicitor.emma@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor", "lastName": "Solicington", "firstName": "Emma"},
   {"email": "befta.master.solicitor.jane@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor,pui-caa", "lastName": "Solicington", "firstName": "Jane"},
 
+  {"email": "befta.master.solicitor.mutlu@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor", "lastName": "Solicington", "firstName": "Mutlu"},
+  {"email": "befta.master.solicitor.richard@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor", "lastName": "Solicington", "firstName": "Richard"},
+  {"email": "befta.master.solicitor.tony@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor", "lastName": "Solicington", "firstName": "Tony"},
+
   {"email": "befta.jurisdiction.3.solicitor.alice@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_3,caseworker-befta_jurisdiction_3-solicitor,pui-caa", "lastName": "Solicington", "firstName": "Alice"},
 
   {"email": "befta.caseworker.caa@gmail.com", "roles": "caseworker,caseworker-caa", "lastName": "CAA", "firstName": "Caseworker"}
