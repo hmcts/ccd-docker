@@ -9,4 +9,5 @@ curl --insecure --fail --show-error --silent -X POST \
   -H "Content-Type: application/json" \
   -d '{
     "microservice": "'${microservice}'"
-  }'
+  }' \
+  -w "\n"
