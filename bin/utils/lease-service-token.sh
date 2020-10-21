@@ -11,3 +11,4 @@ curl --insecure --fail --show-error --silent -X POST \
     "microservice": "'${microservice}'"
   }' \
   -w "\n"
+  
