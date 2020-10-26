@@ -20,6 +20,57 @@ services:
     networks:
       - ccd-network
 
+  xui-manage-cases:
+    image: "${XUI_MANAGE_CASES_USE_LOCAL-hmctspublic.azurecr.io/}xui/webapp:${XUI_MANAGE_CASES_TAG:-latest}"
+    container_name: xui-manage-cases
+    environment:
+      FEATURE_APP_INSIGHTS_ENABLED: "true"
+      FEATURE_SECURE_COOKIE_ENABLED: "false"
+      FEATURE_PROXY_ENABLED: "false"
+      FEATURE_TERMS_AND_CONDITIONS_ENABLED: "false"
+      FEATURE_HELMET_ENABLED: "true"
+      FEATURE_OIDC_ENABLED: "true"
+      MICROSERVICE: xui_webapp
+      PROTOCOL: http
+      XUI_ENV: local
+      NODE_CONFIG_ENV: development
+      SERVICES_CCD_COMPONENT_API: http://localhost:3453
+      SERVICES_CCD_DATA_STORE_API: http://docker.for.mac.localhost:4452
+      SERVICES_IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
+      SERVICES_IDAM_CLIENT_ID: xuiwebapp
+      SERVICES_IDAM_LOGIN_URL: "${IDAM_STUB_LOCALHOST:-http://localhost:3501}"
+      SERVICES_IDAM_INDEX_URL: /
+      SERVICES_IDAM_OAUTH_CALLBACK_URL: /oauth2/callback
+      SERVICES_S2S: http://docker.for.mac.localhost:4502
+      APPINSIGHTS_INSTRUMENTATIONKEY: TESTVAR
+      HEALTH_CCD_COMPONENT_API: http://localhost:3453/health
+      HEALTH_CCD_DATA_API: http://docker.for.mac.localhost:4452/health
+      FEATURE_REDIS_ENABLED: "false"
+      IDAM_SECRET: xuiwebapp_secrect
+      S2S_SECRET: "${BEFTA_S2S_CLIENT_SECRET_OF_XUI_WEBAPP}"
+      REDISCLOUD_URL: http://localhost:6780
+      LAUNCH_DARKLY_CLIENT_ID: 1
+      NOW: "true"
+      DEBUG: xuiNode:*
+    #      HEALTH_DOCUMENTS_API:
+    #      HEALTH_EM_ANNO_API:
+    #      HEALTH_TERMS_AND_CONDITIONS_API:
+    #      SERVICES_IDAM_ISS_URL:
+    #      SERVICES_MARKUP_API:
+    #      SERVICES_PAYMENTS_URL:
+    #      SERVICES_TERMS_AND_CONDITIONS:
+    #      SERVICES_DOCUMENTS_API: https://api-gateway.dev.dm.reform.hmcts.net
+    #      SERVICES_EM_ANNO_API: https://em-anno-aat.service.core-compute-aat.internal
+    ports:
+      - 3455:3000
+    volumes:
+      - /tmp/sessions:/tmp/sessions
+    depends_on:
+      - ccd-api-gateway
+      - ccd-data-store-api
+    networks:
+      - ccd-network
+
   ccd-admin-web:
     image: "${CCD_ADMIN_WEB_USE_LOCAL-hmctspublic.azurecr.io/}ccd/admin-web:${CCD_ADMIN_WEB_TAG:-latest}"
     container_name: ccd-admin-web
