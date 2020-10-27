@@ -216,6 +216,7 @@ description : <xuiwebapp>
 client_id : xuiwebapp
 client_secret : xuiwebapp_secrect
 new redirect_uri (click 'Add URI' before saving) : http://localhost:3455/oauth2/callback
+client scope: profile openid roles manage-user create-user
 ```
 
 
