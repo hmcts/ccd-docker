@@ -240,7 +240,13 @@ function docker_build() {
         buildProject="$buildProject-web"
     fi
     imageName=${buildProject#"ccd-"}
-    (cd $workspace && docker build . -t ccd/$imageName:$tagName || exit $?)
+    if [[ $project == "xui-manage-cases" ]]; then
+      (cd $workspace && docker build . -t xui/webapp:$tagName || exit $?)
+    fi
+
+    if [[ $project != "xui-manage-cases" ]]; then
+      (cd $workspace && docker build . -t ccd/$imageName:$tagName || exit $?)
+    fi
 }
 
 function available_compose_files() {
