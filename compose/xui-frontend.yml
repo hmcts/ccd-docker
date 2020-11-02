@@ -8,19 +8,17 @@ services:
     environment:
       FEATURE_APP_INSIGHTS_ENABLED: "true"
       FEATURE_SECURE_COOKIE_ENABLED: "false"
-      FEATURE_PROXY_ENABLED: "false"
-      FEATURE_TERMS_AND_CONDITIONS_ENABLED: "false"
-      FEATURE_HELMET_ENABLED: "true"
-      FEATURE_OIDC_ENABLED: "false"
       FEATURE_REDIS_ENABLED: "false"
-      jurisdictions: "DIVORCE,PROBATE,AUTOTEST2,AUTOTEST1,BEFTA_JURISDICTION_3,BEFTA_JURISDICTION_2,BEFTA_JURISDICTION_1,IA,TEST,SSCS,BEFTA_MASTER"
+      JURISDICTIONS: "DIVORCE,PROBATE,BEFTA_JURISDICTION_3,BEFTA_JURISDICTION_2,BEFTA_JURISDICTION_1,IA,SSCS,BEFTA_MASTER"
 
       MICROSERVICE: xui_webapp
       PROTOCOL: http
       XUI_ENV: local
-      NODE_CONFIG_ENV: development
 
-      SERVICES_CCD_COMPONENT_API: http://localhost:3453
+      SERVICES_DOCUMENTS_API: http://dm-store:8080
+      SERVICES_PAYMENTS_URL: http://wiremock:8080
+      SERVICES_EM_ANNO_API: http://ccd-api-gateway:3453
+      SERVICES_CCD_COMPONENT_API: http://ccd-api-gateway:3453
       SERVICES_CCD_DATA_STORE_API: http://ccd-data-store-api:4452
       SERVICES_IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       SERVICES_IDAM_CLIENT_ID: xuiwebapp
@@ -30,7 +28,7 @@ services:
       SERVICES_S2S: http://service-auth-provider-api:8080
       REDISCLOUD_URL: http://localhost:6780
 
-      HEALTH_CCD_COMPONENT_API: http://localhost:3453/health
+      HEALTH_CCD_COMPONENT_API: http://ccd-api-gateway:3453/health
       HEALTH_CCD_DATA_API: http://ccd-data-store-api:4452/health
 
       APPINSIGHTS_INSTRUMENTATIONKEY: TESTVAR
@@ -38,21 +36,9 @@ services:
       S2S_SECRET: "${BEFTA_S2S_CLIENT_SECRET_OF_XUI_WEBAPP}"
 
       LAUNCH_DARKLY_CLIENT_ID: 1
-      NOW: "true"
-    #      DEBUG: xuiNode:*
-    #      HEALTH_DOCUMENTS_API:
-    #      HEALTH_EM_ANNO_API:
-    #      HEALTH_TERMS_AND_CONDITIONS_API:
-    #      SERVICES_IDAM_ISS_URL:
-    #      SERVICES_MARKUP_API:
-    #      SERVICES_PAYMENTS_URL:
-    #      SERVICES_TERMS_AND_CONDITIONS:
-    #      SERVICES_DOCUMENTS_API: https://api-gateway.dev.dm.reform.hmcts.net
-    #      SERVICES_EM_ANNO_API: https://em-anno-aat.service.core-compute-aat.internal
+
     ports:
       - 3455:3000
-    volumes:
-      - /tmp/sessions:/tmp/sessions
     depends_on:
       - ccd-api-gateway
       - ccd-data-store-api
