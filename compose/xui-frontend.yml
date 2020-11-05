@@ -21,7 +21,7 @@ services:
       SERVICES_CCD_COMPONENT_API: http://ccd-api-gateway:3453
       SERVICES_CCD_DATA_STORE_API: http://ccd-data-store-api:4452
       SERVICES_IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
-      SERVICES_IDAM_CLIENT_ID: xuiwebapp
+      SERVICES_IDAM_CLIENT_ID: xui_webapp
       SERVICES_IDAM_LOGIN_URL: "${IDAM_STUB_LOCALHOST:-http://localhost:3501}"
       SERVICES_IDAM_INDEX_URL: /
       SERVICES_IDAM_OAUTH_CALLBACK_URL: /oauth2/callback
@@ -32,7 +32,7 @@ services:
       HEALTH_CCD_DATA_API: http://ccd-data-store-api:4452/health
 
       APPINSIGHTS_INSTRUMENTATIONKEY: TESTVAR
-      IDAM_SECRET: xuiwebapp_secrect
+      IDAM_SECRET: xui_webapp_secrect
       S2S_SECRET: "${BEFTA_S2S_CLIENT_SECRET_OF_XUI_WEBAPP}"
 
       LAUNCH_DARKLY_CLIENT_ID: 1

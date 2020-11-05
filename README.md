@@ -211,10 +211,10 @@ Follow below steps to configure XUI Webapp on SIDAM Web Admin
 On the **Add Service** screen the following fields are required:
 
 ```
-label : <xuiwebapp>
-description : <xuiwebapp>
-client_id : xuiwebapp
-client_secret : xuiwebapp_secrect
+label : <xui_webapp>
+description : <xui_webapp>
+client_id : xui_webapp
+client_secret : xui_webapp_secrect
 new redirect_uri (click 'Add URI' before saving) : http://localhost:3455/oauth2/callback
 client scope: profile openid roles manage-user create-user
 ```
