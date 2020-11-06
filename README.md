@@ -206,6 +206,20 @@ client_secret : ccd_gateway_secret
 new redirect_uri (click 'Add URI' before saving) : http://localhost:3451/oauth2redirect
 ```
 
+Follow below steps to configure XUI Webapp on SIDAM Web Admin
+
+On the **Add Service** screen the following fields are required:
+
+```
+label : <xui_webapp>
+description : <xui_webapp>
+client_id : xui_webapp
+client_secret : xui_webapp_secrect
+new redirect_uri (click 'Add URI' before saving) : http://localhost:3455/oauth2/callback
+client scope: profile openid roles manage-user create-user
+```
+
+
 ### 2. Create Idam roles
 
 Execute the following script to add roles to SIDAM:

@@ -55,6 +55,11 @@ function project_config() {
             envPrefix="CCD_TEST_STUBS_SERVICE"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
+        xui-manage-cases)
+            name=xui-manage-cases
+            repository="git@github.com:hmcts/rpx-xui-webapp.git"
+            envPrefix="XUI_MANAGE_CASES"
+            ;;
         ccd-definition-designer-api|definition-designer-api|definition-designer|def-design|designer)
             name=ccd-definition-designer-api
             repository="git@github.com:hmcts/ccd-definition-designer-api.git"
@@ -62,7 +67,7 @@ function project_config() {
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, ccd-admin-web, dm-store, ccd-definition-designer-api"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, xui-manage-cases, ccd-admin-web, dm-store, ccd-definition-designer-api"
             exit 1 ;;
     esac
     case $config in
@@ -235,7 +240,13 @@ function docker_build() {
         buildProject="$buildProject-web"
     fi
     imageName=${buildProject#"ccd-"}
-    (cd $workspace && docker build . -t ccd/$imageName:$tagName || exit $?)
+    if [[ $project == "xui-manage-cases" ]]; then
+      (cd $workspace && docker build . -t xui/webapp:$tagName || exit $?)
+    fi
+
+    if [[ $project != "xui-manage-cases" ]]; then
+      (cd $workspace && docker build . -t ccd/$imageName:$tagName || exit $?)
+    fi
 }
 
 function available_compose_files() {
