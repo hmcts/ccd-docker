@@ -659,6 +659,23 @@ Optional compose files will allow other projects to be enabled on demand using t
   * `./ccd enable elasticsearch` (assuming `backend` is already enabled, otherwise enable it)
   * export ES_ENABLED_DOCKER=true
   * verify that Data Store is able to connect to elasticsearch: `curl localhost:4452/health` 
+  
+* To run **service specific logstash instance**
+  * First build the local log stash instances for all services using instructions on ccd-logstash [ccd-logstash](https://github.com/hmcts/ccd-logstash).
+  * Make sure to set the below two environment variables in `.env` file
+  * By default CCD_LOGSTASH_URL is point to remote repository `hmctspublic.azurecr.io`
+  
+```bash
+    CCD_LOGSTASH_REPOSITORY_URL=hmctspublic.azurecr.io
+    CCD_LOGSTASH_SERVICE=ccd 
+```
+  
+   * For local docker repository please change the values as below
+   
+```bash
+    CCD_LOGSTASH_REPOSITORY_URL=hmcts
+    CCD_LOGSTASH_SERVICE=ccd 
+```
 
 * To enable **ccd-definition-designer-api**
   * `./ccd enable backend ccd-definition-designer-api`

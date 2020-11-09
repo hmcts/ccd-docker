@@ -23,7 +23,7 @@ services:
       - ccd-network
 
   ccd-logstash:
-    image: "hmctspublic.azurecr.io/ccd/logstash:latest"
+    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:${CCD_LOGSTASH_SERVICE:-ccd}-latest"
     container_name: ccd-logstash
     depends_on:
           - "ccd-elasticsearch"
