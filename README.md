@@ -667,14 +667,23 @@ Optional compose files will allow other projects to be enabled on demand using t
   
 ```bash
     CCD_LOGSTASH_REPOSITORY_URL=hmctspublic.azurecr.io
-    CCD_LOGSTASH_SERVICE=ccd 
 ```
   
    * For local docker repository please change the values as below
    
 ```bash
     CCD_LOGSTASH_REPOSITORY_URL=hmcts
-    CCD_LOGSTASH_SERVICE=ccd 
+```
+   * To run service specific instances of logstash, give service names a comma serparated string as below
+   
+```bash
+    export CCD_LOGSTASH_SERVICES=divorce,sscs,ethos,cmc,probate
+```
+
+   * To run all service instances of logstash
+   
+```bash
+    CCD_LOGSTASH_SERVICES=all
 ```
 
 * To enable **ccd-definition-designer-api**
