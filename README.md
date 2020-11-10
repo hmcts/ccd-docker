@@ -664,7 +664,7 @@ Optional compose files will allow other projects to be enabled on demand using t
   * First build the local log stash instances for all services using instructions on ccd-logstash [ccd-logstash](https://github.com/hmcts/ccd-logstash).
   * Make sure to export CCD_LOGSTASH_SERVICES environment variable
   * Make sure to set the below two environment variables in `.env` file
-  * By default CCD_LOGSTASH_URL is point to remote repository `hmctspublic.azurecr.io`, this is defined in `.env` file
+  * By default CCD_LOGSTASH_REPOSITORY_URL is point to remote repository `hmctspublic.azurecr.io`, this is defined in `.env` file
 
 ```bash
     CCD_LOGSTASH_REPOSITORY_URL=hmctspublic.azurecr.io
