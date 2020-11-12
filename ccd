@@ -560,12 +560,12 @@ function ccd_compose_logstash() {
     do
       if [ ${compose_file} == "logstash" ]; then
 
+        var_services="${CCD_LOGSTASH_SERVICES}"
         if [ -z "$CCD_LOGSTASH_SERVICES" ]; then
-          echo "ERROR: Missing CCD_LOGSTASH_SERVICES environment variable. Using default ccd-logstash:latest'."
+          echo "WARNING: Missing CCD_LOGSTASH_SERVICES environment variable. Using default ccd-logstash:latest'."
           var_services="ccd"
         fi
 
-        var_services="${CCD_LOGSTASH_SERVICES}"
         if [ "$CCD_LOGSTASH_SERVICES" == "all" ] || [ "$CCD_LOGSTASH_SERVICES" == "testall" ]; then
           var_services="testall"
         fi
