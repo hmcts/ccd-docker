@@ -660,6 +660,9 @@ Optional compose files will allow other projects to be enabled on demand using t
   * export ES_ENABLED_DOCKER=true
   * verify that Data Store is able to connect to elasticsearch: `curl localhost:4452/health` 
   
+* To enable **logstash**  
+* `./ccd enable logstash` (assuming `elasticsearch` is already enabled, otherwise enable it)
+
 * To run **service specific logstash instance**
   * First build the local log stash instances for all services using instructions on ccd-logstash [ccd-logstash](https://github.com/hmcts/ccd-logstash)
   * Export CCD_LOGSTASH_SERVICES environment variable to use service specific logstash instances
