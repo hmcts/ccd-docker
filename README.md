@@ -661,10 +661,11 @@ Optional compose files will allow other projects to be enabled on demand using t
   * verify that Data Store is able to connect to elasticsearch: `curl localhost:4452/health` 
   
 * To run **service specific logstash instance**
-  * First build the local log stash instances for all services using instructions on ccd-logstash [ccd-logstash](https://github.com/hmcts/ccd-logstash).
-  * Make sure to export CCD_LOGSTASH_SERVICES environment variable
+  * First build the local log stash instances for all services using instructions on ccd-logstash [ccd-logstash](https://github.com/hmcts/ccd-logstash)
+  * Export CCD_LOGSTASH_SERVICES environment variable to use service specific logstash instances
+  * If CCD_LOGSTASH_SERVICES is not exported, then `ccd-logstash:latest` will be used
   * Make sure to set the below two environment variables in `.env` file
-  * By default CCD_LOGSTASH_REPOSITORY_URL is point to remote repository `hmctspublic.azurecr.io`, this is defined in `.env` file
+  * By default CCD_LOGSTASH_REPOSITORY_URL is point to remote repository `hmctspublic.azurecr.io`, this is defined in `.env` file.
 
 ```bash
     CCD_LOGSTASH_REPOSITORY_URL=hmctspublic.azurecr.io
