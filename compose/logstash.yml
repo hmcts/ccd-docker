@@ -10,7 +10,7 @@ services:
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
-      - LAST_MODIFIED_SECONDS_DELAY=2
+      - LAST_MODIFIED_SECONDS_DELAY=5
     networks:
       - ccd-network
 
@@ -23,7 +23,7 @@ services:
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
-      - LAST_MODIFIED_SECONDS_DELAY=2
+      - LAST_MODIFIED_SECONDS_DELAY=5
     networks:
       - ccd-network
 
@@ -36,7 +36,7 @@ services:
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
-      - LAST_MODIFIED_SECONDS_DELAY=2
+      - LAST_MODIFIED_SECONDS_DELAY=5
     networks:
       - ccd-network
 
@@ -49,7 +49,7 @@ services:
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
-      - LAST_MODIFIED_SECONDS_DELAY=2
+      - LAST_MODIFIED_SECONDS_DELAY=5
     networks:
       - ccd-network
 
@@ -62,7 +62,7 @@ services:
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
-      - LAST_MODIFIED_SECONDS_DELAY=2
+      - LAST_MODIFIED_SECONDS_DELAY=5
     networks:
       - ccd-network
 
@@ -75,7 +75,7 @@ services:
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
-      - LAST_MODIFIED_SECONDS_DELAY=2
+      - LAST_MODIFIED_SECONDS_DELAY=5
     networks:
       - ccd-network
 
@@ -88,7 +88,7 @@ services:
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
-      - LAST_MODIFIED_SECONDS_DELAY=2
+      - LAST_MODIFIED_SECONDS_DELAY=5
     networks:
       - ccd-network
 
