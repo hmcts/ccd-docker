@@ -290,7 +290,9 @@ function active_compose_files() {
 function create_compose_file_options() {
     for compose_file in $(active_compose_files)
     do
-            compose_file_options="$compose_file_options -f compose/${compose_file}.yml"
+      if [ ${compose_file} != "logstash" ]; then
+        compose_file_options="$compose_file_options -f compose/${compose_file}.yml"
+      fi
     done
     echo $compose_file_options
 }
@@ -561,6 +563,34 @@ function ccd_compose() {
     echo "Docker compose:"
     echo -e "docker-compose $compose_file_options $options\n"
     docker-compose $compose_file_options $options
+    ccd_compose_logstash $options
+}
+
+function ccd_compose_logstash() {
+    for compose_file in $(active_compose_files)
+    do
+      if [ ${compose_file} == "logstash" ]; then
+
+        var_services="${CCD_LOGSTASH_SERVICES}"
+        if [ -z "$CCD_LOGSTASH_SERVICES" ]; then
+          echo "WARNING: Missing CCD_LOGSTASH_SERVICES environment variable. Using default ccd-logstash:latest'."
+          var_services="ccd"
+        fi
+
+        if [ "$CCD_LOGSTASH_SERVICES" == "all" ] || [ "$CCD_LOGSTASH_SERVICES" == "testall" ]; then
+          var_services="testall"
+        fi
+
+        IFS=','
+        options="$@"
+        read -ra services <<< "${var_services}"
+          for service in "${services[@]}"; do
+            echo -e "docker-compose -p compose -f compose/logstash.yml $options $service-logstash\n"
+            docker-compose -p compose -f compose/logstash.yml "$@" $service-logstash
+          done
+        IFS=' '
+      fi
+    done
 }
 
 function print_warn_on_compose_down_if_idam_enabled {

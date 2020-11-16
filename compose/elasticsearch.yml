@@ -22,20 +22,6 @@ services:
     networks:
       - ccd-network
 
-  ccd-logstash:
-    image: "hmctspublic.azurecr.io/ccd/logstash:latest"
-    container_name: ccd-logstash
-    depends_on:
-          - "ccd-elasticsearch"
-    environment:
-      - XPACK_MONITORING_ENABLED=false
-      - DB_URL=jdbc:postgresql://ccd-shared-database:5432/ccd_data?stringtype=unspecified&ssl=false
-      - DB_USER=ccd
-      - DB_PWD=ccd
-      - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
-    networks:
-      - ccd-network
-
 volumes:
   esdata1:
     driver: local
