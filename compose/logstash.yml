@@ -10,6 +10,7 @@ services:
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
+      - QUEUE_TYPE=persisted
     networks:
       - ccd-network
 
@@ -22,6 +23,7 @@ services:
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
+      - QUEUE_TYPE=persisted
     networks:
       - ccd-network
 
@@ -34,6 +36,7 @@ services:
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
+      - QUEUE_TYPE=persisted
     networks:
       - ccd-network
 
@@ -46,6 +49,7 @@ services:
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
+      - QUEUE_TYPE=persisted
     networks:
       - ccd-network
 
@@ -58,6 +62,7 @@ services:
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
+      - QUEUE_TYPE=persisted
     networks:
       - ccd-network
 
@@ -70,6 +75,7 @@ services:
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
+      - QUEUE_TYPE=persisted
     networks:
       - ccd-network
 
@@ -82,6 +88,7 @@ services:
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
+      - QUEUE_TYPE=persisted
     networks:
       - ccd-network
 
