@@ -582,6 +582,7 @@ Usage of the command is:
   * ccd-api-gateway
   * ccd-case-management-web
   * ccd-test-stubs-service
+  * ccd-message-publisher
 * `<branch>` must be an existing **remote** branch for the selected project.
 * `[file://local_repository_path]` path of the local repository in case you want to switch to a local branch 
 
