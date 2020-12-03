@@ -717,9 +717,9 @@ OR
 
 * To enable **ccd-message-publisher**
   * NOTE: By default the CCD Message Publisher will use an embedded ActiveMQ instance. See [ccd-message-publisher](https://github.com/hmcts/ccd-message-publisher) for more information.
-  * `./ccd enable ccd-message-publisher`
-  * run docker-compose `./ccd compose up -d`
-  * verify that ccd-message-publisher is up and running by `curl localhost:4455/health`
+  * `./ccd enable backend ccd-message-publisher`
+  * Run docker-compose `./ccd compose up -d`
+  * Verify that ccd-message-publisher is up and running by `curl localhost:4455/health`
 
 
 ## Under the hood :speedboat:
