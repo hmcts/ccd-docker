@@ -720,7 +720,7 @@ OR
   * NOTE: By default the CCD Message Publisher will use an embedded ActiveMQ instance. See [ccd-message-publisher](https://github.com/hmcts/ccd-message-publisher) for more information.
   * `./ccd enable backend ccd-message-publisher`
   * Run docker-compose `./ccd compose up -d`
-  * Verify that ccd-message-publisher is up and running by `curl localhost:4455/health`
+  * Verify that ccd-message-publisher is up and running by `curl localhost:4456/health`
 
 
 ## Under the hood :speedboat:
