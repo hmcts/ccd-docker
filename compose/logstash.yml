@@ -2,7 +2,7 @@ version: '2.4'
 services:
 
   ccd-logstash:
-    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-latest"
+    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-logstash-latest"
     container_name: ccd-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
@@ -14,7 +14,7 @@ services:
       - ccd-network
 
   divorce-logstash:
-    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:divorce-latest"
+    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-divorce-logstash-latest"
     container_name: divorce-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
@@ -26,7 +26,7 @@ services:
       - ccd-network
 
   sscs-logstash:
-    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:sscs-latest"
+    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-sscs-logstash-latest"
     container_name: sscs-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
@@ -38,7 +38,7 @@ services:
       - ccd-network
 
   ethos-logstash:
-    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ethos-latest"
+    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-ethos-logstash-latest"
     container_name: ethos-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
@@ -50,7 +50,7 @@ services:
       - ccd-network
 
   cmc-logstash:
-    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:cmc-latest"
+    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-cmc-logstash-latest"
     container_name: cmc-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
@@ -62,7 +62,7 @@ services:
       - ccd-network
 
   probate-logstash:
-    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:probate-latest"
+    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-probate-logstash-latest"
     container_name: probate-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
