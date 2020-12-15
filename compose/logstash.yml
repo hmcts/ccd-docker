@@ -2,7 +2,7 @@ version: '2.4'
 services:
 
   ccd-logstash:
-    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-logstash-latest"
+    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-latest"
     container_name: ccd-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
@@ -63,6 +63,18 @@ services:
 
   probate-logstash:
     image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-probate-logstash-latest"
+    container_name: probate-logstash
+    environment:
+      - XPACK_MONITORING_ENABLED=false
+      - DB_URL=jdbc:postgresql://ccd-shared-database:5432/ccd_data?stringtype=unspecified&ssl=false
+      - DB_USER=ccd
+      - DB_PWD=ccd
+      - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
+    networks:
+      - ccd-network
+
+  sweeper-logstash:
+    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-sweeper-logstash-latest"
     container_name: probate-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false

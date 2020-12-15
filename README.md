@@ -680,7 +680,7 @@ Optional compose files will allow other projects to be enabled on demand using t
 * To run **service specific logstash instance**
   * First build the local log stash instances for all services using instructions on ccd-logstash [ccd-logstash](https://github.com/hmcts/ccd-logstash)
   * Export CCD_LOGSTASH_SERVICES environment variable to use service specific logstash instances
-  * If CCD_LOGSTASH_SERVICES is not exported, then `ccd-logstash:latest` will be used
+  * If CCD_LOGSTASH_SERVICES is not exported, then `ccd-logstash-latest` will be used
   * Make sure to set the below two environment variables in `.env` file
   * By default CCD_LOGSTASH_REPOSITORY_URL is point to remote repository `hmctspublic.azurecr.io`, this is defined in `.env` file.
 
@@ -696,7 +696,7 @@ Optional compose files will allow other projects to be enabled on demand using t
    * To run service specific instances of logstash, give service names a comma serparated string as below
    
 ```bash
-    export CCD_LOGSTASH_SERVICES=divorce,sscs,ethos,cmc,probate
+    export CCD_LOGSTASH_SERVICES=divorce,sscs,ethos,cmc,probate,sweeper
 ```
 
    * To run all service instances of logstash
