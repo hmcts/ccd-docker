@@ -582,6 +582,7 @@ Usage of the command is:
   * ccd-api-gateway
   * ccd-case-management-web
   * ccd-test-stubs-service
+  * ccd-message-publisher
 * `<branch>` must be an existing **remote** branch for the selected project.
 * `[file://local_repository_path]` path of the local repository in case you want to switch to a local branch 
 
@@ -714,6 +715,12 @@ OR
   * `./ccd enable backend ccd-definition-designer-api`
   * run docker-compose `./ccd compose up -d`
   * verify that ccd-definition-designer-api is up and running by `curl localhost:4544/health`
+
+* To enable **ccd-message-publisher**
+  * NOTE: By default the CCD Message Publisher will use an embedded ActiveMQ instance. See [ccd-message-publisher](https://github.com/hmcts/ccd-message-publisher) for more information.
+  * `./ccd enable backend message-publisher`
+  * Run docker-compose `./ccd compose up -d`
+  * Verify that ccd-message-publisher is up and running by `curl localhost:4456/health`
 
 
 ## Under the hood :speedboat:

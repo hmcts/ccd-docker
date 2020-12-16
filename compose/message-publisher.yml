@@ -1,0 +1,29 @@
+---
+version: '2.4'
+
+services:
+  ccd-message-publisher:
+    image: "${CCD_MESSAGE_PUBLISHER_USE_LOCAL-hmctspublic.azurecr.io/}ccd/message-publisher:${CCD_MESSAGE_PUBLISHER_TAG:-latest}"
+    environment:
+      DATA_STORE_DB_HOST: ccd-shared-database
+      DATA_STORE_DB_PORT: 5432
+      DATA_STORE_DB_USERNAME: "${DB_USERNAME}"
+      DATA_STORE_DB_PASSWORD: "${DB_PASSWORD}"
+      CCD_CASE_EVENTS_DESTINATION: ccd-case-events
+      SERVICE_BUS_CONNECTION_STRING: <ServiceBusConnectionString> # Update this value if using Azure Service Bus (see line below)
+      SPRING_PROFILES_ACTIVE: dev # Comment this line to enable Azure Service Bus
+      # Uncomment this line to enable JVM debugging and uncomment the port mapping below
+      # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
+    ports:
+      - 4456:4456
+      # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
+      # - 5005:5005
+    depends_on:
+      ccd-shared-database:
+        condition: service_started
+    networks:
+      - ccd-network
+
+networks:
+  ccd-network:
+    external: true
