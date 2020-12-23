@@ -649,9 +649,9 @@ when branches are in use.
 
 :information_source: *In addition to the `status` command, the current status is also displayed for every `compose` commands.*
 
-## Compose projects
+## Enabling additional projects (ElasticSearch, ExUI,...)
 
-By default, `ccd-docker` runs the most commonly used backend and frontend projects required:
+By default, `ccd-docker` runs the most commonly used backend and frontend projects required by CCD:
 
 * Back-end:
   * **sidam-api**: Strategic identity and access control
@@ -672,13 +672,19 @@ Optional compose files will allow other projects to be enabled on demand using t
   * run docker-compose `./ccd compose up -d`
   * create Blob Store in Azurite `./bin/document-management-store-create-blob-store-container.sh`
 
-* To enable **elastic search**
-  * NOTE: we recommend at lest 6GB of memory for Docker when enabling elasticsearch
+* To enable **ExUI** rather then the CCD UI
+  * `./ccd enable xui-manage-cases`
+  * run docker-compose `./ccd compose up -d`
+  * (optional) stop the CCD UI docker container `ccd-case-management-web`
+  * access ExUI at `https://localhost:3455`
+
+* To enable **ElasticSearch**
+  * NOTE: we recommend at lest 16GB of memory for Docker when enabling elasticsearch
   * `./ccd enable elasticsearch` (assuming `backend` is already enabled, otherwise enable it)
   * export ES_ENABLED_DOCKER=true
   * verify that Data Store is able to connect to elasticsearch: `curl localhost:4452/health`
 
-* To enable **logstash**
+* To enable **Logstash**
 * `./ccd enable logstash` (assuming `elasticsearch` is already enabled, otherwise enable it)
 
 * To run **service specific logstash instance**
