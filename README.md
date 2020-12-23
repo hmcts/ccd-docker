@@ -4,8 +4,8 @@
 - [Quick start](#quick-start)
 - [Using CCD](#using-ccd)
 - [Idam Stub](#idam-stub)
-- [Compose branches](#compose-branches)
-- [Compose projects](#compose-projects)
+- [Running branches](#running-branches)
+- [Enabling additional projects](#enabling-additional-projects)
 - [Under the hood](#under-the-hood-speedboat)
 - [Containers](#containers)
 - [Local development](#local-development)
@@ -649,7 +649,7 @@ when branches are in use.
 
 :information_source: *In addition to the `status` command, the current status is also displayed for every `compose` commands.*
 
-## Enabling additional projects (ElasticSearch, ExUI,...)
+## Enabling additional projects
 
 By default, `ccd-docker` runs the most commonly used backend and frontend projects required by CCD:
 
