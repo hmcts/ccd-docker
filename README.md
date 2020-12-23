@@ -4,8 +4,8 @@
 - [Quick start](#quick-start)
 - [Using CCD](#using-ccd)
 - [Idam Stub](#idam-stub)
-- [Compose branches](#compose-branches)
-- [Compose projects](#compose-projects)
+- [Running branches](#running-branches)
+- [Enabling additional projects](#enabling-additional-projects)
 - [Under the hood](#under-the-hood-speedboat)
 - [Containers](#containers)
 - [Local development](#local-development)
@@ -20,7 +20,7 @@
 
 *Memory and CPU allocations may need to be increased for successful execution of ccd applications altogether. (On Preferences / Advanced)*
 
-- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) - minimum version 2.0.57 
+- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) - minimum version 2.0.57
 - [jq Json Processor](https://stedolan.github.io/jq)
 
 *The following documentation assumes that the current directory is `ccd-docker`.*
@@ -96,7 +96,7 @@ If `idam-api` is not up and running and accepting connections
 you may see errors in the `definition-store-api` and `data-store-api` containers, such as
 
 ```bash
-Caused by: org.springframework.web.client.ResourceAccessException: 
+Caused by: org.springframework.web.client.ResourceAccessException:
     I/O error on GET request for "http://idam-api:5000/o/.well-known/openid-configuration": Connection refused (Connection refused);
         nested exception is java.net.ConnectException: Connection refused (Connection refused)
 ```
@@ -107,7 +107,7 @@ If you the containers fail to start with these error, ensure `idam-api` is runni
 curl http://localhost:5000/health
  ```
 
-ensuring the response is 
+ensuring the response is
 
 ```bash
 {"status":"UP"}
@@ -136,7 +136,7 @@ with the corresponding values from the confluence page at https://tools.hmcts.ne
 
 ### CCD Quick Start
 
-At this point most users can run the following 3 scripts 
+At this point most users can run the following 3 scripts
 
 ```bash
 ./bin/add-idam-clients.sh
@@ -146,7 +146,7 @@ At this point most users can run the following 3 scripts
 
 to get their IDAM environment ready and then move on to the [Ready for take-off](###Ready-for-take-off) section.
 
-A more in depth explanation of the scripts is detailed below 
+A more in depth explanation of the scripts is detailed below
 
 ### 1. Configure Oauth2 Client of CCD Gateway on SIDAM
 
@@ -158,16 +158,16 @@ A script is provided that sets up the CCD Gateway client.  Execute the following
 ./bin/add-idam-clients.sh
 ```
 
-You may verify the service has been added by logging in to the SIDAM Web Admin with the URL and 
-logic credentials here: 
+You may verify the service has been added by logging in to the SIDAM Web Admin with the URL and
+logic credentials here:
 
 https://tools.hmcts.net/confluence/x/eQP3P
 
-Navigate to 
+Navigate to
 
 `Home > Manage Services`
 
-Optionally - to add any further IDAM service clients you can update the 
+Optionally - to add any further IDAM service clients you can update the
 
 ```bash
 ./bin/add-idam-clients.sh
@@ -190,7 +190,7 @@ Instead of running the above scripts you can add the services manually using the
 
 You need to login to the SIDAM Web Admin with the URL and logic credentials here: https://tools.hmcts.net/confluence/x/eQP3P
 
-Navigate to 
+Navigate to
 
 ```bash
 Home > Manage Services > Add a new Service
@@ -228,22 +228,22 @@ Execute the following script to add roles to SIDAM:
 ./bin/add-roles.sh
 ```
 
-The script parses `bin/users.json` and loops through a list of unique roles, passing the role to the `idam-add-role.sh` 
+The script parses `bin/users.json` and loops through a list of unique roles, passing the role to the `idam-add-role.sh`
 script
 
 To add any further IDAM roles, for example "myNewIdamRole", run the script as follows
 
 ```bash
     ./bin/utils/idam-add-role.sh "myNewIdamRole"
-``` 
- 
+```
+
 ---
 **NOTE**
 
 The script adds roles under a _GLOBAL_ namespace and so until the users assigned to these roles are added,
 you cannot verify them using SIDAM Web UI
 
---- 
+---
 
 #### Manual Configuration steps
 
@@ -255,15 +255,15 @@ You need to login to the SIDAM Web Admin with the URL and logic credentials here
 
 Don't worry about the *Assignable roles* section when adding roles
 
-Once the roles are defined under the client/service, go to the service configuration for the service you created in 
-Step 1 (`Home > Manage Services > select your service`) and select `ccd-import` role radio option under 
+Once the roles are defined under the client/service, go to the service configuration for the service you created in
+Step 1 (`Home > Manage Services > select your service`) and select `ccd-import` role radio option under
 **Private Beta Role** section
- 
+
 **Any business-related roles like `caseworker`,`caseworker-<jurisdiction>` etc to be used in CCD later must also be defined under the client configuration at this stage.**
 
 #### Adding a role to CCD
 
-By default most FTA (Feature test automation) packs load their own roles into CCD via the definition store each time 
+By default most FTA (Feature test automation) packs load their own roles into CCD via the definition store each time
 the feature tests are run
 
 To add a further role to CCD (by importing it into the definition store), run the following script
@@ -284,7 +284,7 @@ For example, to add the `caseworker` role (that must exist in SIDAM) to CCD, use
 
 ```bash
 ./bin/ccd-add-role.sh caseworker PUBLIC
-``` 
+```
 
 ### 3. Create users
 
@@ -302,19 +302,19 @@ bin/users.json
 
 This script runs the checks below, for each user defined in the `users.json`
 
-```bash 
+```bash
 check roles
 if roles are the same
     do nothing
 else
     delete user
     create user with same id
-``` 
+```
 
-Therefore to 
+Therefore to
  * add a new user - add a new entry to the `users.json`
  * modify an existing user - modify `users.json` to add/remove a role
- 
+
 Alternatively, add a user to SIDAM by using the script
 
 ```bash
@@ -328,12 +328,12 @@ FIRST_NAME if omitted defaults to `TesterFirstname`
 Password for each user created by the script defaults to `Pa55word11`
 
 ---
-You may verify the service has been added by logging in to the SIDAM Web Admin with the URL and 
-logic credentials here: 
+You may verify the service has been added by logging in to the SIDAM Web Admin with the URL and
+logic credentials here:
 
 https://tools.hmcts.net/confluence/x/eQP3P
 
-Navigate to 
+Navigate to
 
 `Home > Manage Users`
 
@@ -475,13 +475,13 @@ To modify the user info at runtime, see https://github.com/hmcts/ccd-test-stubs-
 Enable ccd-test-stubs-service dependency on ccd-data-store-api and ccd-definition-store-api in 'backend.yml' file.
 
 Uncomment the below lines in 'backend.yml' file
-```yaml 
+```yaml
       #      ccd-test-stubs-service:
       #        condition: service_started
 ```
 
 Comment the below lines in 'backend.yml' file
-```yaml 
+```yaml
       idam-api:
         condition: service_started
 ```
@@ -520,13 +520,13 @@ unset IDAM_STUB_LOCALHOST
 Disable ccd-test-stubs-service dependency on ccd-data-store-api and ccd-definition-store-api in 'backend.yml' file.
 
 Comment the below lines in 'backend.yml' file
-```yaml 
+```yaml
     #   ccd-test-stubs-service:
     #       condition: service_started
 ```
 
 Uncomment the below lines in 'backend.yml' file
-```yaml 
+```yaml
       idam-api:
         condition: service_started
 ```
@@ -561,30 +561,33 @@ enable Idam follwing the steps in 'Revert to Idam'
 
 NOTE: :warning: always use 'compose up' rather than 'compose start' when switching between Idam and Idam Stub to have docker compose pick up env vars changes.
 
-## Compose branches
+## Running branches
 
 By default, all CCD containers are running with the `latest` tag, built from the `master` branch.
 
 ### Switch to a branch
 
-Using the `set` command, branches can be changed per project.
+Using the `set` command, branches can be changed per project. It's possible to switch to remote branches but also to local branches
 
-Usage of the command is:
+To switch to a remote branch the command is:
 
 ```bash
-./ccd set <project> <branch> [file://local_repository_path]
+./ccd set <project> <remote_branch>
 ```
 
-* `<project>` must be one of:
-  * ccd-data-store-api
-  * ccd-definition-store-api
-  * ccd-user-profile-api
-  * ccd-api-gateway
-  * ccd-case-management-web
-  * ccd-test-stubs-service
-  * ccd-message-publisher
-* `<branch>` must be an existing **remote** branch for the selected project.
-* `[file://local_repository_path]` path of the local repository in case you want to switch to a local branch 
+* `<project>` the service name as declared in the compose file, e.g. ccd-data-store-api, ccd-test-stubs-service
+* `<remote_branch>` must be an existing **remote** branch for the selected project.
+
+To switch to a local branch the command is:
+
+```bash
+./ccd set <project> <local_branch> <file://local_repository_path>
+```
+* `<project>` the service name as declared in the compose file, e.g. ccd-data-store-api, ccd-test-stubs-service
+* `<local_branch>` must be an existing **local** branch for the selected project.
+* `<file://local_repository_path>` path to the root of the local project repository
+
+__Note__: when working with local branches, to be able to run any new set of local changes those must first be committed and the `switch to a local branch` and `Apply` procedure repeated.
 
 Branches for a project can be listed using:
 
@@ -646,9 +649,9 @@ when branches are in use.
 
 :information_source: *In addition to the `status` command, the current status is also displayed for every `compose` commands.*
 
-## Compose projects
+## Enabling additional projects
 
-By default, `ccd-docker` runs the most commonly used backend and frontend projects required:
+By default, `ccd-docker` runs the most commonly used backend and frontend projects required by CCD:
 
 * Back-end:
   * **sidam-api**: Strategic identity and access control
@@ -669,13 +672,19 @@ Optional compose files will allow other projects to be enabled on demand using t
   * run docker-compose `./ccd compose up -d`
   * create Blob Store in Azurite `./bin/document-management-store-create-blob-store-container.sh`
 
-* To enable **elastic search**
-  * NOTE: we recommend at lest 6GB of memory for Docker when enabling elasticsearch 
+* To enable **ExUI** rather then the CCD UI
+  * `./ccd enable xui-manage-cases`
+  * run docker-compose `./ccd compose up -d`
+  * (optional) stop the CCD UI docker container `ccd-case-management-web`
+  * access ExUI at `https://localhost:3455`
+
+* To enable **ElasticSearch**
+  * NOTE: we recommend at lest 16GB of memory for Docker when enabling elasticsearch
   * `./ccd enable elasticsearch` (assuming `backend` is already enabled, otherwise enable it)
   * export ES_ENABLED_DOCKER=true
-  * verify that Data Store is able to connect to elasticsearch: `curl localhost:4452/health` 
-  
-* To enable **logstash**  
+  * verify that Data Store is able to connect to elasticsearch: `curl localhost:4452/health`
+
+* To enable **Logstash**
 * `./ccd enable logstash` (assuming `elasticsearch` is already enabled, otherwise enable it)
 
 * To run **service specific logstash instance**
@@ -688,24 +697,24 @@ Optional compose files will allow other projects to be enabled on demand using t
 ```bash
     CCD_LOGSTASH_REPOSITORY_URL=hmctspublic.azurecr.io
 ```
-  
+
    * For local docker repository please change the values as below
-   
+
 ```bash
     CCD_LOGSTASH_REPOSITORY_URL=hmcts
 ```
    * To run service specific instances of logstash, give service names a comma serparated string as below
-   
+
 ```bash
     export CCD_LOGSTASH_SERVICES=divorce,sscs,ethos,cmc,probate
 ```
 
    * To run all service instances of logstash
-   
+
 ```bash
     CCD_LOGSTASH_SERVICES=all
 ```
-OR 
+OR
 
 ```bash
     CCD_LOGSTASH_SERVICES=testall
