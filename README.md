@@ -581,17 +581,13 @@ To switch to a remote branch the command is:
 To switch to a local branch the command is:
 
 ```bash
-./ccd set <project> <local_branch> [file://local_repository_path]
+./ccd set <project> <local_branch> <file://local_repository_path>
 ```
 * `<project>` the service name as declared in the compose file, e.g. ccd-data-store-api, ccd-test-stubs-service
 * `<local_branch>` must be an existing **local** branch for the selected project.
-* `[file://local_repository_path]` path to the root of the local repository
+* `<file://local_repository_path>` path to the root of the local project repository
 
-__Note__: when working with local branches, to be able to run a new set of local changes those must be committed, a local image must be rebuild by running again the `set` command, and a new container must be created from the new image, for example using
-
-```bash
-./ccd compose up -d
-```
+__Note__: when working with local branches, to be able to run any new set of local changes those must first be committed and the `switch to a local branch` and `Apply` procedure repeated.
 
 Branches for a project can be listed using:
 
