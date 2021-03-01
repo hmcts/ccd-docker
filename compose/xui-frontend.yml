@@ -1,0 +1,50 @@
+---
+version: '2.4'
+
+services:
+  xui-manage-cases:
+    image: "${XUI_MANAGE_CASES_USE_LOCAL-hmctspublic.azurecr.io/}xui/webapp:${XUI_MANAGE_CASES_TAG:-latest}"
+    container_name: xui-manage-cases
+    environment:
+      FEATURE_APP_INSIGHTS_ENABLED: "true"
+      FEATURE_SECURE_COOKIE_ENABLED: "false"
+      FEATURE_REDIS_ENABLED: "false"
+      JURISDICTIONS: AUTOTEST1,DIVORCE,PROBATE,BEFTA_JURISDICTION_3,BEFTA_JURISDICTION_2,BEFTA_JURISDICTION_1,IA,SSCS,BEFTA_MASTER
+
+      MICROSERVICE: xui_webapp
+      PROTOCOL: http
+      XUI_ENV: local
+
+      SERVICES_DOCUMENTS_API: http://dm-store:8080
+      SERVICES_PAYMENTS_URL: http://wiremock:8080
+      SERVICES_EM_ANNO_API: http://ccd-api-gateway:3453
+      SERVICES_CCD_COMPONENT_API: http://ccd-api-gateway:3453
+      SERVICES_CCD_DATA_STORE_API: http://ccd-data-store-api:4452
+      SERVICES_IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
+      SERVICES_IDAM_CLIENT_ID: xui_webapp
+      SERVICES_IDAM_LOGIN_URL: "${IDAM_STUB_LOCALHOST:-http://localhost:3501}"
+      SERVICES_IDAM_INDEX_URL: /
+      SERVICES_IDAM_OAUTH_CALLBACK_URL: /oauth2/callback
+      SERVICES_S2S: http://service-auth-provider-api:8080
+      REDISCLOUD_URL: http://localhost:6780
+
+      HEALTH_CCD_COMPONENT_API: http://ccd-api-gateway:3453/health
+      HEALTH_CCD_DATA_API: http://ccd-data-store-api:4452/health
+
+      APPINSIGHTS_INSTRUMENTATIONKEY: TESTVAR
+      IDAM_SECRET: xui_webapp_secrect
+      S2S_SECRET: "${BEFTA_S2S_CLIENT_SECRET_OF_XUI_WEBAPP}"
+
+      LAUNCH_DARKLY_CLIENT_ID: 1
+
+    ports:
+      - 3455:3000
+    depends_on:
+      - ccd-api-gateway
+      - ccd-data-store-api
+    networks:
+      - ccd-network
+
+networks:
+  ccd-network:
+    external: true

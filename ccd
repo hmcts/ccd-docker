@@ -55,16 +55,21 @@ function project_config() {
             envPrefix="DM_STORE"
             buildCommand="./gradlew installDist assemble"
             ;;
-        manage-case-assignment|manage-case-assignment)
-            name=manage-case-assignment
-            repository="git@github.com:hmcts/aac-manage-case-assignment.git"
-            envPrefix="MANAGE_CASE"
-            buildCommand="./gradlew installDist assemble"
-            ;;
         ccd-test-stubs-service|test-stubs-service)
             name=ccd-test-stubs-service
             repository="git@github.com:hmcts/ccd-test-stubs-service.git"
             envPrefix="CCD_TEST_STUBS_SERVICE"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+        xui-manage-cases)
+            name=xui-manage-cases
+            repository="git@github.com:hmcts/rpx-xui-webapp.git"
+            envPrefix="XUI_MANAGE_CASES"
+            ;;
+        ccd-message-publisher|message-publisher)
+            name=ccd-message-publisher
+            repository="git@github.com:hmcts/ccd-message-publisher.git"
+            envPrefix="CCD_MESSAGE_PUBLISHER"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         ccd-definition-designer-api|definition-designer-api|definition-designer|def-design|designer)
@@ -74,7 +79,7 @@ function project_config() {
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, ccd-admin-web, dm-store, manage-case-assignment, ccd-definition-designer-api"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, xui-manage-cases, ccd-message-publisher, ccd-admin-web, dm-store, ccd-definition-designer-api"
             exit 1 ;;
     esac
     case $config in
@@ -247,7 +252,13 @@ function docker_build() {
         buildProject="$buildProject-web"
     fi
     imageName=${buildProject#"ccd-"}
-    (cd $workspace && docker build . -t ccd/$imageName:$tagName || exit $?)
+    if [[ $project == "xui-manage-cases" ]]; then
+      (cd $workspace && docker build . -t xui/webapp:$tagName || exit $?)
+    fi
+
+    if [[ $project != "xui-manage-cases" ]]; then
+      (cd $workspace && docker build . -t ccd/$imageName:$tagName || exit $?)
+    fi
 }
 
 function available_compose_files() {
@@ -291,7 +302,9 @@ function active_compose_files() {
 function create_compose_file_options() {
     for compose_file in $(active_compose_files)
     do
-            compose_file_options="$compose_file_options -f compose/${compose_file}.yml"
+      if [ ${compose_file} != "logstash" ]; then
+        compose_file_options="$compose_file_options -f compose/${compose_file}.yml"
+      fi
     done
     echo $compose_file_options
 }
@@ -562,6 +575,34 @@ function ccd_compose() {
     echo "Docker compose:"
     echo -e "docker-compose $compose_file_options $options\n"
     docker-compose $compose_file_options $options
+    ccd_compose_logstash $options
+}
+
+function ccd_compose_logstash() {
+    for compose_file in $(active_compose_files)
+    do
+      if [ ${compose_file} == "logstash" ]; then
+
+        var_services="${CCD_LOGSTASH_SERVICES}"
+        if [ -z "$CCD_LOGSTASH_SERVICES" ]; then
+          echo "WARNING: Missing CCD_LOGSTASH_SERVICES environment variable. Using default ccd-logstash:latest'."
+          var_services="ccd"
+        fi
+
+        if [ "$CCD_LOGSTASH_SERVICES" == "all" ] || [ "$CCD_LOGSTASH_SERVICES" == "testall" ]; then
+          var_services="testall"
+        fi
+
+        IFS=','
+        options="$@"
+        read -ra services <<< "${var_services}"
+          for service in "${services[@]}"; do
+            echo -e "docker-compose -p compose -f compose/logstash.yml $options $service-logstash\n"
+            docker-compose -p compose -f compose/logstash.yml "$@" $service-logstash
+          done
+        IFS=' '
+      fi
+    done
 }
 
 function print_warn_on_compose_down_if_idam_enabled {

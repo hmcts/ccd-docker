@@ -15,11 +15,6 @@ services:
     depends_on:
       - dm-store
 
-  ccd-data-store-api:
-    environment:
-      CCD_DM_DOMAIN: http://dm-store:8080
-      CASE_DOCUMENT_AM_URL: http://ccd-case-document-am-api:4455
-
   service-auth-provider-api:
     environment:
       MICROSERVICE_KEYS_EM_GW: "${IDAM_KEY_DM_STORE}"
@@ -47,7 +42,7 @@ services:
       LOGGING_LEVEL_UK_GOV_HMCTS_IDAM: DEBUG
       IDAM_USER_BASE_URI: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       IDAM_S2S_BASE_URI: http://service-auth-provider-api:8080
-      S2S_NAMES_WHITELIST: sscs,divorce,ccd,em_gw,document-management-store,ccd_gw,idam-api,fpl_case_service,ccd_case_document_am_api
+      S2S_NAMES_WHITELIST: sscs,divorce,ccd,em_gw,document-management-store,ccd_gw,idam-api,fpl_case_service,xui_webapp,ccd_case_document_am_api
       http_proxy:
       https_proxy:
       no_proxy:
@@ -69,7 +64,7 @@ services:
       - azure-storage-emulator-azurite
     ports:
       - 4506:8080
-    #   debug port exposedF
+    #   debug port exposed
     #   - 5006:5005
     networks:
       - ccd-network
