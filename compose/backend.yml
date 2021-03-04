@@ -6,7 +6,7 @@ services:
   ccd-user-profile-api:
     image: "${CCD_USER_PROFILE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/user-profile-api:${CCD_USER_PROFILE_API_TAG:-latest}"
     environment:
-      USER_PROFILE_DB_HOST: ccd-shared-database
+      USER_PROFILE_DB_HOST: "${CCD_POSTGRES_11:-ccd-shared-database}"
       USER_PROFILE_DB_PORT: 5432
       USER_PROFILE_DB_USERNAME: "${DB_USERNAME}"
       USER_PROFILE_DB_PASSWORD: "${DB_PASSWORD}"
@@ -19,14 +19,14 @@ services:
     ports:
       - 4453:4453
     depends_on:
-      - ccd-shared-database
+      - ${CCD_POSTGRES_11:-ccd-shared-database}
     networks:
       - ccd-network
 
   ccd-definition-store-api:
     image: "${CCD_DEFINITION_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
     environment:
-      DEFINITION_STORE_DB_HOST: ccd-shared-database
+      DEFINITION_STORE_DB_HOST: "${CCD_POSTGRES_11:-ccd-shared-database}"
       DEFINITION_STORE_DB_PORT: 5432
       DEFINITION_STORE_DB_USERNAME: "${DB_USERNAME}"
       DEFINITION_STORE_DB_PASSWORD: "${DB_PASSWORD}"
@@ -65,7 +65,7 @@ services:
   ccd-data-store-api:
     image: "${CCD_DATA_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
     environment:
-      DATA_STORE_DB_HOST: ccd-shared-database
+      DATA_STORE_DB_HOST: "${CCD_POSTGRES_11:-ccd-shared-database}"
       DATA_STORE_DB_PORT: 5432
       DATA_STORE_DB_USERNAME: "${DB_USERNAME}"
       DATA_STORE_DB_PASSWORD: "${DB_PASSWORD}"
@@ -147,6 +147,23 @@ services:
     networks:
       - ccd-network
 
+  ccd-shared-database-v11:
+    build: ../database-v11
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    environment:
+      DB_USERNAME:
+      DB_PASSWORD:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - 5055:5432
+    volumes:
+      - ccd-docker-ccd-shared-database-data-v11:/var/lib/postgresql/data
+    networks:
+      - ccd-network
+
   ccd-test-stubs-service:
     image: "${CCD_TEST_STUBS_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}ccd/test-stubs-service:${CCD_TEST_STUBS_SERVICE_TAG:-latest}"
     environment:
@@ -162,6 +179,7 @@ services:
 
 volumes:
   ccd-docker-ccd-shared-database-data:
+  ccd-docker-ccd-shared-database-data-v11:
   wiremock:
 
 networks:
