@@ -3,6 +3,27 @@
 ##  Pull latest ccd docker
 * Synch all micro-services with the same branch version for instance: develop
 * Start ccd docker and make sure that the new container ccd-shared-database-v11 is up and running.
+* uncomment ccd-shared-database-v11 section in the backend.yml
+````
+#This section should be commented when the pr is merged in master.
+  ccd-shared-database-v11:
+    build: ../database-v11
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    environment:
+      DB_USERNAME:
+      DB_PASSWORD:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - 5055:5432
+    volumes:
+      - ccd-docker-ccd-shared-database-data-v11:/var/lib/postgresql/data
+    networks:
+      - ccd-network
+
+````
 
 ##  Backup all DB containers
 * get your container id for instance: a210d7e11a5b
@@ -43,9 +64,9 @@ SELECT datname FROM pg_database;
 select * from event;
 ````
 ##  Settings
-*) add CCD_POSTGRES_11 in your bash fie
-*) export CCD_POSTGRES_11=ccd-shared-database-v11
-*) uncomment CCD_POSTGRES_11 in your .env file
+* add CCD_POSTGRES_11 in your bash fie
+* export CCD_POSTGRES_11=ccd-shared-database-v11
+* uncomment CCD_POSTGRES_11 in your .env file
 ````
 #Postgres V11
 CCD_POSTGRES_11=ccd-shared-database-v11
