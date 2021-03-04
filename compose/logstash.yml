@@ -6,7 +6,7 @@ services:
     container_name: ccd-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
-      - DB_URL=jdbc:postgresql://ccd-shared-database:5432/ccd_data?stringtype=unspecified&ssl=false
+      - DB_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
@@ -18,7 +18,7 @@ services:
     container_name: divorce-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
-      - DB_URL=jdbc:postgresql://ccd-shared-database:5432/ccd_data?stringtype=unspecified&ssl=false
+      - DB_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
@@ -30,7 +30,7 @@ services:
     container_name: sscs-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
-      - DB_URL=jdbc:postgresql://ccd-shared-database:5432/ccd_data?stringtype=unspecified&ssl=false
+      - DB_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
@@ -42,7 +42,7 @@ services:
     container_name: ethos-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
-      - DB_URL=jdbc:postgresql://ccd-shared-database:5432/ccd_data?stringtype=unspecified&ssl=false
+      - DB_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
@@ -54,7 +54,7 @@ services:
     container_name: cmc-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
-      - DB_URL=jdbc:postgresql://ccd-shared-database:5432/ccd_data?stringtype=unspecified&ssl=false
+      - DB_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
@@ -66,7 +66,7 @@ services:
     container_name: probate-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
-      - DB_URL=jdbc:postgresql://ccd-shared-database:5432/ccd_data?stringtype=unspecified&ssl=false
+      - DB_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
@@ -78,7 +78,7 @@ services:
     container_name: testall-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
-      - DB_URL=jdbc:postgresql://ccd-shared-database:5432/ccd_data?stringtype=unspecified&ssl=false
+      - DB_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
       - DB_USER=ccd
       - DB_PWD=ccd
       - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
