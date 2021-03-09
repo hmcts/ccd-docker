@@ -1,11 +1,10 @@
 ### V11 postgres migration steps
 
 ##  Pull latest ccd docker
-* Synch all micro-services with the same branch version for instance: develop
+* Make sure all micro-services running the same branch, for instance: 'develop'
 * Start ccd docker and make sure that the new container ccd-shared-database-v11 is up and running.
 * uncomment ccd-shared-database-v11 section in the backend.yml
 ````
-#This section should be commented when the pr is merged in master.
   ccd-shared-database-v11:
     build: ../database-v11
     healthcheck:
@@ -85,6 +84,7 @@ docker ps | grep compose_ccd-shared-database
 ```
 docker stop a210d7e11a5b
 ```
+*) comments ccd-shared-database section in the backend.yml
 
 ## Switch back to old DB
 1) unset CCD_POSTGRES_11 value from the terminal
@@ -93,6 +93,8 @@ docker stop a210d7e11a5b
 #Postgres V11
 #CCD_POSTGRES_11=ccd-shared-database-v11
 ````
+*) uncomment ccd-shared-database section in the backend.yml
+
 3) Open a new terminal, make sure that CCD_POSTGRES_11 has been unset.
 4) Stop and start ccd docker again
 

@@ -147,6 +147,7 @@ services:
     networks:
       - ccd-network
 
+#This section should be commented when the pr is merged in master.
   ccd-shared-database-v11:
     build: ../database-v11
     healthcheck:
