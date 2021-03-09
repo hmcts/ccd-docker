@@ -45,23 +45,28 @@ docker cp dumpfile 36a8eb5cccba:/home
 ```
 bash the container
 docker exec -it 36a8eb5cccba bash
-
-change permission to your dumpfile file
+```
+* change permission to your dumpfile file
+```
 chmod 777 /home/dumpfile
-
+```
+* import the file and wait .....
+```$xslt
 su user
 su - postgres
 cd /home/
-
-import the file and wait .....
 psql < dumpfile
 
-Check db data
+```
+* Check db data
+```$xslt
 psql
 SELECT datname FROM pg_database;
 \dt
 select * from event;
-````
+
+```
+
 ##  Settings
 * add CCD_POSTGRES_11 in your bash fie
 * export CCD_POSTGRES_11=ccd-shared-database-v11
@@ -71,20 +76,20 @@ select * from event;
 CCD_POSTGRES_11=ccd-shared-database-v11
 ````
 
-4) Open a new terminal, make sure that CCD_POSTGRES_11 has been set.
-5) Stop and start ccd docker again
-6) Stop old DB container
+1) Open a new terminal, make sure that CCD_POSTGRES_11 has been set.
+2) Stop and start ccd docker again
+3) Stop old DB container
 
-*) get your container id for instance: a210d7e11a5b
+* get your container id for instance: a210d7e11a5b
 ```
 docker ps | grep compose_ccd-shared-database
 ```
 
-*) stop the container
+* stop the container
 ```
 docker stop a210d7e11a5b
 ```
-*) comments ccd-shared-database section in the backend.yml
+* comments ccd-shared-database section in the backend.yml
 
 ## Switch back to old DB
 1) unset CCD_POSTGRES_11 value from the terminal
@@ -93,8 +98,8 @@ docker stop a210d7e11a5b
 #Postgres V11
 #CCD_POSTGRES_11=ccd-shared-database-v11
 ````
-*) uncomment ccd-shared-database section in the backend.yml
+* uncomment ccd-shared-database section in the backend.yml
 
-3) Open a new terminal, make sure that CCD_POSTGRES_11 has been unset.
-4) Stop and start ccd docker again
+1) Open a new terminal, make sure that CCD_POSTGRES_11 has been unset.
+2) Stop and start ccd docker again
 
