@@ -68,8 +68,11 @@ select * from event;
 ```
 
 ##  Settings
-* add CCD_POSTGRES_11 in your bash fie
-* export CCD_POSTGRES_11=ccd-shared-database-v11
+* add CCD_POSTGRES_11 in your local terminal bash file
+* export CCD_POSTGRES_11=ccd-shared-database-v11 in your terminal 
+```$xslt
+ export CCD_POSTGRES_11=ccd-shared-database-v11
+```
 * uncomment CCD_POSTGRES_11 in your .env file
 ````
 #Postgres V11
