@@ -33,7 +33,7 @@ docker ps | grep compose_ccd-shared-database_1
 ```
 docker exec -it a210d7e11a5b  /usr/bin/pg_dumpall -U  postgres  > dumpfile
 ```
-* Get the container id of the V11 DB for instance: 36a8eb5cccba
+* Get the container id of the V11 DB for instance: **36a8eb5cccba**
 ```
 docker ps | grep compose_ccd-shared-database_1-V11
 ````
@@ -43,7 +43,6 @@ docker cp dumpfile 36a8eb5cccba:/home
 ```
 * Import dumpfile in to your new DB V11
 ```
-bash the container
 docker exec -it 36a8eb5cccba bash
 ```
 * Change the permission of dumpfile file
