@@ -90,7 +90,6 @@ services:
       - ccd-user-profile-api
       - ccd-definition-store-api
       - ccd-data-store-api
-      - ccd-case-document-am-api
     networks:
       - ccd-network
 
