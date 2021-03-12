@@ -3,7 +3,7 @@ version: '2.4'
 
 services:
   ccd-case-document-am-api:
-    image: "${CCD_CASE_DOCUMENT_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/case-document-am-api:${CCD_CASE_DOCUMENT_API_TAG:-latest}"
+    image: "${CCD_CASE_DOCUMENT_AM_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/case-document-am-api:${CCD_CASE_DOCUMENT_AM_API_TAG:-latest}"
     environment:
       CCD_DOCUMENT_API_IDAM_KEY: "${IDAM_KEY_CASE_DOCUMENT}"
       CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor
