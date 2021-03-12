@@ -51,7 +51,6 @@ chmod 777 /home/dumpfile
 ```
 * Import the file and wait .....
 ```$xslt
-su user
 su - postgres
 cd /home/
 psql < dumpfile
