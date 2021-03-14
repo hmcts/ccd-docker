@@ -7,7 +7,7 @@
 - [Running branches](#running-branches)
 - [Enabling additional projects](#enabling-additional-projects)
 - [Under the hood](#under-the-hood-speedboat)
-- [Change to Posgres v11 database](/PostgresV11.md)
+- [Change to Postgres v11 database](/PostgresV11.md)
 - [Containers](#containers)
 - [Local development](#local-development)
 - [Troubleshooting](#troubleshooting)
