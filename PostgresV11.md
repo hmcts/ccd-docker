@@ -1,9 +1,10 @@
-# V11 postgres migration steps
+# Postgres v11 migration steps
 
-##  Pull latest ccd docker
-* Make sure all micro-services running the same branch, for instance: 'develop'
-* Start ccd docker and make sure that the new container ccd-shared-database-v11 is up and running.
-* Uncomment ccd-shared-database-v11 section in the backend.yml
+##  Pull latest ccd-docker
+* Make sure all micro-services are running the same branch, for instance: 'develop'
+* Uncomment the ccd-shared-database-v11 section in the backend.yml
+* Start ccd-docker and make sure that the new container ccd-shared-database-v11 is up and running.
+
 ````
   ccd-shared-database-v11:
     build: ../database-v11
@@ -24,39 +25,39 @@
 
 ````
 
-##  Backup all DB containers
-* Get your container id, for instance: a210d7e11a5b
+##  Backup old database. Migrate data to new database.
+* Get your old DB container id, for instance: a210d7e11a5b
 ```
 docker ps | grep compose_ccd-shared-database_1
 ```
-* Backup all Dbs in a dumpfile file
+* Backup all DBs in a dumpfile file
 ```
 docker exec -it a210d7e11a5b  /usr/bin/pg_dumpall -U  postgres  > dumpfile
 ```
-* Get the container id of the V11 DB for instance: **36a8eb5cccba**
+* Get the container id of the v11 DB for instance: **36a8eb5cccba**
 ```
 docker ps | grep compose_ccd-shared-database_1-V11
 ````
-* Copy the dumpfile to the V11 container DB
+* Copy the dumpfile to the v11 DB container
 ```
 docker cp dumpfile 36a8eb5cccba:/home
 ```
-* Import dumpfile in to your new DB V11
+* Open a shell into your v11 DB container
 ```
 docker exec -it 36a8eb5cccba bash
 ```
-* Change the permission of dumpfile file
+* Change the permission of the dumpfile file
 ```
 chmod 777 /home/dumpfile
 ```
-* Import the file and wait .....
+* Import the dumpfile and wait .....
 ```$xslt
 su - postgres
 cd /home/
 psql < dumpfile
 
 ```
-* Check the db data
+* Check the v11 DB data
 ```$xslt
 psql
 SELECT datname FROM pg_database;
@@ -65,7 +66,7 @@ select * from event;
 
 ```
 
-##  Settings for CCD docker
+##  Settings for ccd-docker
 * Add CCD_POSTGRES_11 env var to your local terminal bash file
 * Export CCD_POSTGRES_11=ccd-shared-database-v11 in your terminal 
 ```$xslt
@@ -77,8 +78,8 @@ select * from event;
 CCD_POSTGRES_11=ccd-shared-database-v11
 ````
 
-1) Open a new terminal, make sure that CCD_POSTGRES_11 var has been set.
-2) Stop and start ccd docker again
+1) Open a new terminal, make sure that CCD_POSTGRES_11 environment variable has been set.
+2) Stop and start ccd-docker again (Do NOT do a restart)
 3) Stop old DB container
 
 * Get the old DB container id, for instance: a210d7e11a5b
@@ -90,17 +91,17 @@ docker ps | grep compose_ccd-shared-database
 ```
 docker stop a210d7e11a5b
 ```
-* Comments ccd-shared-database section in the backend.yml
+* Comment out the ccd-shared-database section in backend.yml
 
 ## Switch back to old DB
 1) Unset CCD_POSTGRES_11 value from the terminal
-2) Comment CCD_POSTGRES_11 in your .env file
+2) Comment out CCD_POSTGRES_11 in your .env file
 ```
 #Postgres V11
 #CCD_POSTGRES_11=ccd-shared-database-v11
 ````
 * Uncomment ccd-shared-database (OLD DB) section in the backend.yml
 
-1) Open a new terminal, make sure that CCD_POSTGRES_11 var has been unset.
-2) Stop and start ccd docker again
+1) Open a new terminal, make sure that CCD_POSTGRES_11 environment variable has been unset.
+2) Stop and start ccd docker again (Do NOT do a restart)
 
