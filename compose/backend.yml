@@ -55,7 +55,7 @@ services:
 #       condition: service_started
       idam-api:
         condition: service_started
-      ccd-shared-database:
+      ${CCD_POSTGRES_11:-ccd-shared-database}:
         condition: service_started
       ccd-user-profile-api:
         condition: service_started
@@ -98,7 +98,7 @@ services:
 #       condition: service_started
       idam-api:
         condition: service_started
-      ccd-shared-database:
+      ${CCD_POSTGRES_11:-ccd-shared-database}:
         condition: service_started
       ccd-user-profile-api:
         condition: service_started
