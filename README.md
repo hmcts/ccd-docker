@@ -730,8 +730,12 @@ OR
   * `./ccd enable backend message-publisher`
   * Run docker-compose `./ccd compose up -d`
   * Verify that ccd-message-publisher is up and running by `curl localhost:4456/health`
-
-
+ 
+* To enable **ccd-case-document-am-api**
+  * `./ccd enable backend frontend dm-store case-document-am`
+  * run docker-compose `./ccd compose up -d`
+  * verify that ccd-case-document-am-api is up and running by `curl localhost:4455/health`
+    
 ## Under the hood :speedboat:
 
 ### Set
@@ -1050,6 +1054,7 @@ Here are the important variables exposed in the compose files:
 | AM_DB_USERNAME | Access Management database username |
 | AM_DB_PASSWORD | Access Management database password |
 | WIREMOCK_SERVER_MAPPINGS_PATH | Path to the WireMock mapping files. If not set, it will use the default mappings from the project repository. __Note__: If setting the variable, please keep all WireMock json stub files in a directory named _mappings_ and exclude this directory in the path. For e.g. if you place the _mappings_ in /home/user/mappings then export WIREMOCK_SERVER_MAPPINGS_PATH=/home/user. Stop the service and start service using command `./ccd compose up -d ccd-test-stub-service`. If switching back to repository mappings please unset the variable using command `unset WIREMOCK_SERVER_MAPPINGS_PATH` |
+| IDAM_KEY_CASE_DOCUMENT | IDAM service-to-service secret key for `ccd_case_document_am_api` micro-service (CCD Case Document Am Api), as registered in `service-auth-provider-api` |
 
 ## Remarks
 
