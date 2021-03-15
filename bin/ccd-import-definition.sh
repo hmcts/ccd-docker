@@ -21,7 +21,7 @@ binFolder=$(dirname "$0")
 userToken="$(${binFolder}/utils/idam-user-token.sh)"
 serviceToken="$(${binFolder}/utils/lease-service-token.sh ccd_gw)"
 
-curl -v \
+curl -S --silent \
   http://localhost:4451/import \
   -H "Authorization: Bearer ${userToken}" \
   -H "ServiceAuthorization: ${serviceToken}" \
