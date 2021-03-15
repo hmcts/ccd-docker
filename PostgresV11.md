@@ -3,7 +3,6 @@
 ##  Pull latest ccd-docker
 * Make sure all micro-services are running the same branch, for instance: 'develop'
 * Uncomment the ccd-shared-database-v11 section in the backend.yml
-* Start ccd-docker and make sure that the new container ccd-shared-database-v11 is up and running.
 
 ````
   ccd-shared-database-v11:
@@ -24,6 +23,7 @@
       - ccd-network
 
 ````
+* Start ccd-docker and make sure the new container ccd-shared-database-v11 is up and running.
 
 ##  Backup old database. Migrate data to new database.
 * Get your old DB container id, for instance: a210d7e11a5b
@@ -160,6 +160,47 @@ docker stop a210d7e11a5b
      ccd-shared-database:
         condition: service_started
 ```
+* Uncomment the ccd-shared-database section in backend.yml
+````
+  ccd-shared-database:
+    build: ../database
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    environment:
+      DB_USERNAME:
+      DB_PASSWORD:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - 5050:5432
+    volumes:
+      - ccd-docker-ccd-shared-database-data:/var/lib/postgresql/data
+    networks:
+      - ccd-network
+
+````
+* Comment the ccd-shared-database-v11 section in the backend.yml
+
+````
+  #  ccd-shared-database-v11:
+  #    build: ../database-v11
+  #    healthcheck:
+  #      interval: 10s
+  #      timeout: 10s
+  #      retries: 10
+  #    environment:
+  #      DB_USERNAME:
+  #      DB_PASSWORD:
+  #      POSTGRES_HOST_AUTH_METHOD: trust
+  #    ports:
+  #      - 5055:5432
+  #    volumes:
+  #      - ccd-docker-ccd-shared-database-data-v11:/var/lib/postgresql/data
+  #    networks:
+  #      - ccd-network
+
+````
 
 3- Open a new terminal, make sure that CCD_POSTGRES_11 environment variable has been unset. <br>
 4- Stop and start ccd docker again
