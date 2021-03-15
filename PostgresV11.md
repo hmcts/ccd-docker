@@ -67,6 +67,19 @@ select * from event;
 ```
 
 ##  Settings for ccd-docker
+* Open backend.yml file and uncomment the dependency to ccd-shared-database-v11 for definition-store and data-store  
+```$xslt
+#Uncomment this line to enable ccd ccd-shared-database version 11
+      ccd-shared-database-v11:
+        condition: service_started
+```
+* Comment the dependency to ccd-shared-database for definition-store and data-store
+
+```$xslt
+#      ccd-shared-database:
+#        condition: service_started
+```
+
 * Add CCD_POSTGRES_11 env var to your local terminal bash file
 * Export CCD_POSTGRES_11=ccd-shared-database-v11 in your terminal 
 ```$xslt
@@ -94,14 +107,29 @@ docker stop a210d7e11a5b
 * Comment out the ccd-shared-database section in backend.yml
 
 ## Switch back to old DB
-1) Unset CCD_POSTGRES_11 value from the terminal
-2) Comment out CCD_POSTGRES_11 in your .env file
+
+
+
+1- Unset CCD_POSTGRES_11 value from the terminal <br>
+2- Comment out CCD_POSTGRES_11 in your .env file
 ```
 #Postgres V11
 #CCD_POSTGRES_11=ccd-shared-database-v11
 ````
-* Uncomment ccd-shared-database (OLD DB) section in the backend.yml
 
-1) Open a new terminal, make sure that CCD_POSTGRES_11 environment variable has been unset.
-2) Stop and start ccd docker again (Do NOT do a restart)
+* Open backend.yml file and comment the dependency to ccd-shared-database-v11 for definition-store and data-store  
+```$xslt
+#Uncomment this line to enable ccd ccd-shared-database version 11
+#      ccd-shared-database-v11:
+#        condition: service_started
+```
+* Uncomment the dependency to ccd-shared-database for definition-store and data-store
+
+```$xslt
+     ccd-shared-database:
+        condition: service_started
+```
+
+3- Open a new terminal, make sure that CCD_POSTGRES_11 environment variable has been unset. <br>
+4- Stop and start ccd docker again (Do NOT do a restart)
 
