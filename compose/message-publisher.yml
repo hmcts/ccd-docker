@@ -5,7 +5,7 @@ services:
   ccd-message-publisher:
     image: "${CCD_MESSAGE_PUBLISHER_USE_LOCAL-hmctspublic.azurecr.io/}ccd/message-publisher:${CCD_MESSAGE_PUBLISHER_TAG:-latest}"
     environment:
-      DATA_STORE_DB_HOST: ccd-shared-database
+      DATA_STORE_DB_HOST: "${CCD_POSTGRES_11:-ccd-shared-database}"
       DATA_STORE_DB_PORT: 5432
       DATA_STORE_DB_USERNAME: "${DB_USERNAME}"
       DATA_STORE_DB_PASSWORD: "${DB_PASSWORD}"
@@ -21,6 +21,9 @@ services:
     depends_on:
       ccd-shared-database:
         condition: service_started
+# Uncomment this line to enable ccd-shared-database with Postgres version 11
+#      ccd-shared-database-v11:
+#        condition: service_started
     networks:
       - ccd-network
 
