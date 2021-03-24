@@ -142,8 +142,8 @@ At this point most users can run the following 4 scripts
 ```bash
 ./bin/add-idam-clients.sh
 ./bin/add-idam-roles.sh
-./bin/add-ccd-roles.sh
 ./bin/add-users.sh
+./bin/add-ccd-roles.sh
 ```
 
 to get their IDAM environment ready and then move on to the [Ready for take-off](###Ready-for-take-off) section.
