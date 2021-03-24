@@ -137,11 +137,12 @@ with the corresponding values from the confluence page at https://tools.hmcts.ne
 
 ### CCD Quick Start
 
-At this point most users can run the following 3 scripts
+At this point most users can run the following 4 scripts
 
 ```bash
 ./bin/add-idam-clients.sh
-./bin/add-roles.sh
+./bin/add-idam-roles.sh
+./bin/add-ccd-roles.sh
 ./bin/add-users.sh
 ```
 
@@ -226,7 +227,7 @@ client scope: profile openid roles manage-user create-user
 Execute the following script to add roles to SIDAM:
 
 ```bash
-./bin/add-roles.sh
+./bin/add-idam-roles.sh
 ```
 
 The script parses `bin/users.json` and loops through a list of unique roles, passing the role to the `idam-add-role.sh`
@@ -263,6 +264,14 @@ Step 1 (`Home > Manage Services > select your service`) and select `ccd-import` 
 **Any business-related roles like `caseworker`,`caseworker-<jurisdiction>` etc to be used in CCD later must also be defined under the client configuration at this stage.**
 
 #### Adding a role to CCD
+
+Execute the following script to add roles to CCD:
+
+```bash
+./bin/add-ccd-roles.sh
+```
+
+The script parses `bin/ccd-roles.json` and loops through a list of roles and their security classifications, passing the values to the `ccd-add-role.sh` script.
 
 By default most FTA (Feature test automation) packs load their own roles into CCD via the definition store each time
 the feature tests are run
