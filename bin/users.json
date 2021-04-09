@@ -49,5 +49,20 @@
 
   {"email": "befta.jurisdiction.3.solicitor.alice@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_3,caseworker-befta_jurisdiction_3-solicitor,pui-caa", "lastName": "Solicington", "firstName": "Alice"},
 
-  {"email": "befta.caseworker.caa@gmail.com", "roles": "caseworker,caseworker-caa", "lastName": "CAA", "firstName": "Caseworker"}
+  {"email": "befta.caseworker.caa@gmail.com", "roles": "caseworker,caseworker-caa", "lastName": "CAA", "firstName": "Caseworker"},
+
+  {"email": "ccd.docker.default@hmcts.net", "roles": "ccd-import", "lastName": "Default CCD_Docker"},
+  {"email": "auto.test.cnp@gmail.com", "roles": "caseworker-divorce", "lastName": "testsurname"},
+  {"email": "divorce_cw@hmcts.net", "roles": "caseworker,caseworker-autotest1,caseworker-autotest1-private"},
+  {"email": "TEST_CASE_WORKER_USER@mailinator.com", "roles": "caseworker,caseworker-divorce,caseworker-divorce-courtadmin,caseworker-divorce-superuser,caseworker-divorce-courtadmin_beta"},
+  {"email": " TEST_CASE_WORKER_SUPERUSER@mailinator.com", "roles": "caseworker,caseworker-divorce,caseworker-divorce-courtadmin,caseworker-divorce-superuser,caseworker-divorce-courtadmin_beta"},
+  {"email": "divorce_as_caseworker_solicitor@mailinator.com", "roles": "caseworker,caseworker-divorce,caseworker-divorce-courtadmin,caseworker-divorce-courtadmin_beta"},
+  {"email": "divorce_as_caseworker_superuser@mailinator.com", "roles": "caseworker,caseworker-divorce,caseworker-divorce-courtadmin,caseworker-divorce-superuser"},
+  {"email": "divorce_as_caseworker_la@mailinator.com", "roles": "caseworker,caseworker-divorce,caseworker-divorce-courtadmin"},
+  {"email": "divorce_as_caseworker_admin@mailinator.com", "roles": "caseworker,caseworker-divorce,caseworker-divorce-courtadmin"},
+  {"email": "TEST_SOLICITOR@mailinator.com", "roles": "caseworker,caseworker-divorce,caseworker-divorce-courtadmin"},
+  {"email": "testusername@test.com", "roles": "citizen"},
+  {"email": "befta.citizen.2@gmail.com", "roles": "citizen"},
+  {"email": "befta.citizen.3@gmail.com", "roles": "citizen"}
 ]
+

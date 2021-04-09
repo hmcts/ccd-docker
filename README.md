@@ -38,6 +38,11 @@ Login to the Azure Container registry:
 ```bash
 ./ccd login
 ```
+```bash
+az acr login --name hmctspublic 
+az acr login --name hmctsprivate
+```
+```
 Note:
 if you experience any error with the above command, try `az login` first
 
@@ -73,7 +78,7 @@ Usage and commands available:
 ## Setting up environment variables
 Environment variables for CCD Data Store API and CCD Definition Store API can be done by executing the following script.
 
-Windows : `./bin/set-environment-variables.sh`
+Windows : `./bin/set-environment-variables.sh` 
 
 Mac : `source ./bin/set-environment-variables.sh`
 
@@ -142,6 +147,7 @@ At this point most users can run the following 3 scripts
 ./bin/add-idam-clients.sh
 ./bin/add-roles.sh
 ./bin/add-users.sh
+./bin/add-all-div-roles.sh
 ```
 
 to get their IDAM environment ready and then move on to the [Ready for take-off](###Ready-for-take-off) section.
@@ -350,7 +356,7 @@ Case definitions can be imported using CCD's dedicated UI
 Case definitions can also be imported manually via the command line, using the following script
 
 ```bash
-./bin/ccd-import-definition.sh <path_to_definition>
+./bin/ccd-import-definition.sh /Users/rubanmahendran/IdeaProjects/div-ccd-definitions/definitions/divorce/xlsx/ccd-config-local.xlsx
 ```
 
 Parameters:

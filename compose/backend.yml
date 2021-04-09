@@ -72,7 +72,7 @@ services:
       DATA_STORE_DB_USE_SSL: "${DB_USE_SSL}"
       DATA_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DATA_STORE}"
       DATA_STORE_TOKEN_SECRET: iuasbcuasdcbasdgcasdgcuysachjsacyasdgjcgasdj
-      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps,aac_manage_case_assignment,xui_webapp
+      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps,aac_manage_case_assignment,xui_webapp,ccd_case_document_am_api,divorce_ccd_submission
       DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
       IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
@@ -85,6 +85,7 @@ services:
       ELASTIC_SEARCH_HOSTS: ccd-elasticsearch:9200
       ELASTIC_SEARCH_DATA_NODES_HOSTS: "http://ccd-elasticsearch:9200"
       CCD_DEFAULTPRINTURL: https://return-case-doc-ccd.nonprod.platform.hmcts.net/jurisdictions/:jid/case-types/:ctid/cases/:cid
+      DATA_STORE_DEFAULT_LOG_LEVEL: DEBUG
       CCD_DM_DOMAIN: "${CCD_DM_DOMAIN}"
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
       # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
@@ -126,6 +127,13 @@ services:
       MICROSERVICEKEYS_CCD_PS: "${IDAM_KEY_CCD_PS}"
       MICROSERVICEKEYS_FPL_CASE_SERVICE: "${IDAM_KEY_FPL_CASE_SERVICE}"
       MICROSERVICEKEYS_XUI_WEBAPP: "${BEFTA_S2S_CLIENT_SECRET_OF_XUI_WEBAPP}"
+      MICROSERVICEKEYS_CCD_CASE_DOCUMENT_AM_API : "${IDAM_KEY_CASE_DOCUMENT}"
+      MICROSERVICEKEYS_BULK_SCAN_PROCESSOR: "${IDAM_KEY_BULK_SCAN_PROCESSOR}"
+      MICROSERVICEKEYS_DIVORCE_BACKEND: "AAAAAAAAAAAAAAAA"
+      MICROSERVICEKEYS_DIVORCE_FRONTEND: "AAAAAAAAAAAAAAAA"
+      MICROSERVICEKEYS_SSCS: "AAAAAAAAAAAAAAAA"
+      MICROSERVICEKEYS_EM_GW: "AAAAAAAAAAAAAAAA"
+      MICROSERVICEKEYS_DIVORCE_CCD_SUBMISSION: "AZBYCXDWEVFUGTHS"
       TESTING_SUPPORT_ENABLED: "true"
     networks:
       - ccd-network
@@ -159,6 +167,128 @@ services:
     #uncomment and add the desired roles to idam_stub_get_details_custom.json. Then restart the Stub Service
 #    volumes:
 #      - ${PWD}/resources/idam_stub_get_details_custom.json:/opt/app/wiremock/mappings/idam_get_details.json
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+
+  draft-store-api:
+    image: hmctspublic.azurecr.io/draft-store/service:${DRAFT_STORE_API_VERSION:-latest}
+    healthcheck:
+      retries: 40
+    environment:
+      - JAVA_OPTS=-Xms8m -Xmx256m -Djava.security.egd=file:/dev/./urandom -XX:MaxMetaspaceSize=128m
+      - DRAFT_STORE_DB_HOST=ccd-shared-database
+      - DRAFT_STORE_DB_PASSWORD=draftstore
+      - IDAM_URL=http://idam-api:5000
+      - S2S_URL=http://service-auth-provider-api:8080
+      - ROOT_APPENDER
+      - JSON_CONSOLE_PRETTY_PRINT
+      - ROOT_LOGGING_LEVEL
+    mem_limit: 512m
+    memswap_limit: 0
+    depends_on:
+      ccd-shared-database:
+        condition: service_healthy
+      service-auth-provider-api:
+        condition: service_started
+    ports:
+      - 8800:8800
+    networks:
+      - ccd-network
+
+  pdf-service-api:
+    image: hmctspublic.azurecr.io/cmc/pdf-service:latest
+    container_name: pdf-service-api
+    environment:
+      - JAVA_OPTS=-Xms8m -Xmx256m -Djava.security.egd=file:/dev/./urandom -XX:MaxMetaspaceSize=128m
+      - AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY=fake-key
+      - S2S_URL=http://service-auth-provider-api:8080
+      - ROOT_APPENDER
+      - JSON_CONSOLE_PRETTY_PRINT
+      - ROOT_LOGGING_LEVEL
+      - REFORM_SERVICE_NAME=pdf-service
+      - REFORM_TEAM
+      - REFORM_ENVIRONMENT
+    ports:
+      - 5500:5500
+    networks:
+      - ccd-network
+
+#  dm-store:
+#    image: "${DM_STORE_USE_LOCAL-hmctspublic.azurecr.io/}dm/store:${DM_STORE_TAG:-latest}"
+#    healthcheck:
+#      disable: true
+#    environment:
+#      SERVER_PORT: 8080
+#      IDAM_SUPERUSER_EMAIL:
+#      IDAM_SECRET_KEY: "${IDAM_KEY_DM_STORE}"
+#      GOV_NOTIFY_API_KEY:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://ccd-shared-database:5432/evidence
+#      SPRING_DATASOURCE_USERNAME: "${DB_USERNAME}"
+#      SPRING_DATASOURCE_PASSWORD: "${DB_PASSWORD}"
+#      ENABLE_AZURE_STORAGE_CONTAINER: "true"
+#      ENABLE_POSTGRES_BLOB_STORAGE: "false"
+#      STORAGEACCOUNT_PRIMARY_CONNECTION_STRING: "${STORAGEACCOUNT_PRIMARY_CONNECTION_STRING:-DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azure-storage-emulator-azurite:10000/devstoreaccount1}"
+#      STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME: "${STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME:-hmctstestcontainer}"
+#      BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY_REQUIRED: "${BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY_REQUIRED:-false}"
+#      BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY: "${BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY:-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDiQ//gc/G53d9dLCtf123fIYo49gUySuJuxOcw2GtieWTMSy+O7RNtsAIjVf3mCOdDNuN69tZNPEWMdaW8n11s9MwYFahtxDecyn0KIP9MvPsfSMSbxhp/f7kfbdB/H/S5eYea66JTyeJS6uNd76RdHttx0mLO30ZkRcXB25c2SIXhRYsdoeKS5GXHDdNejkQM0S/Ev94x2UunApmYHjWN1XcDhsEsAeF4WHnvYh2XiMn9vHY44AqvbWLlAmCgzaXpz8Xhl0fO7jDKSeReDyuM3UTMaiFFaxuvliGol7aIXq/aVe/miiD2SLxHZ6RxAPW80bhXrzJMTLTCqhCEhzfv someone@somewhere.sometime}"
+#      SPRING_PROFILES_ACTIVE: dev
+#      IDAM_TESTING_SUPPORT_ENABLED: "true"
+#      LOGGING_LEVEL_UK_GOV_HMCTS_IDAM: DEBUG
+#      IDAM_USER_BASE_URI: http://idam-api:5000
+#      IDAM_S2S_BASE_URI: http://service-auth-provider-api:8080
+#      S2S_NAMES_WHITELIST: sscs,divorce,divorce_backend,divorce_frontend,ccd,ccd_gateway,em_gw,document-management-store,ccd_gw,idam-api,fpl_case_service,ccd_data,probate_backend,probate_frontend,bulk_scan_orchestrator,bulk_scan_processor
+#      http_proxy:
+#      https_proxy:
+#      no_proxy:
+#      #      logging env vars
+#      #ROOT_APPENDER: JSON_CONSOLE
+#      JSON_CONSOLE_PRETTY_PRINT: "true"
+#      REFORM_SERVICE_TYPE: java
+#      REFORM_SERVICE_NAME: document-management-store
+#      REFORM_TEAM: cc
+#      REFORM_ENVIRONMENT: docker
+#      #      healthcheck env vars
+#      PACKAGES_ENVIRONMENT: docker
+#      PACKAGES_PROJECT: evidence
+#      PACKAGES_NAME: document-management-store
+#      PACKAGES_VERSION: unknown
+#    #      debug mode
+#    #    JAVA_OPTS: -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+#    links:
+#      - ccd-shared-database
+#      - idam-api
+#      - service-auth-provider-api
+#    depends_on:
+#      - ccd-shared-database
+#      - idam-api
+#      - service-auth-provider-api
+#      - azure-storage-emulator-azurite
+#    ports:
+#      - 4603:8080
+#    #   debug port exposed
+#    #   - 5006:5005
+#    networks:
+#      - ccd-network
+#
+#  azure-storage-emulator-azurite:
+#    image: arafato/azurite
+#    ports:
+#      - 10000:10000
+#    environment:
+#      executable: "blob"
+#    networks:
+#      - ccd-network
+#    volumes:
+#      - ccd-docker-azure-blob-data:/opt/azurite/folder
+
 
 volumes:
   ccd-docker-ccd-shared-database-data:

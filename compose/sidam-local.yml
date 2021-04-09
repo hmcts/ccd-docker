@@ -17,7 +17,7 @@ services:
       - 9010:9010
   shared-db:
     ports:
-      - 5432:5432
+      - 5430:5432
   smtp-server:
     ports:
       - 1025:1025
@@ -39,6 +39,7 @@ services:
       - SECURITY_OAUTH2_CLIENT_CLIENTSECRET=password
       - SECURITY_OAUTH2_CLIENT_PRE_ESTABLISHED_REDIRECT_URI=http://idam-web-public:9002/login
       - SECURITY_OAUTH2_CLIENT_REGISTERED_REDIRECT_URI=http://idam-web-public:9002/login
+      - SPRING_MAIL_HOST=smtp-server
       - IDAM_SPI_FORGEROCK_AM_ROOT=http://fr-am:8080/openam
       - IDAM_SPI_FORGEROCK_AM_TOPLEVELHOST=fr-am
       - IDAM_SPI_FORGEROCK_AM_USERNAME=amadmin

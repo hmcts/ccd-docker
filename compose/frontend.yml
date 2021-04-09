@@ -13,6 +13,8 @@ services:
       PRINT_SERVICE_URL_REMOTE: https://return-case-doc-ccd.nonprod.platform.hmcts.net
       DM_GATEWAY_BASE_URL: https://api-gateway.dev.dm.reform.hmcts.net
       OAUTH2_CLIENT_ID: ccd_gateway
+      DM_URL: http://localhost:4007/test/documents
+      DM_URL_REMOTE: http://localhost:4007/test/documents
     ports:
       - 3451:3451
     depends_on:
@@ -83,6 +85,7 @@ services:
       PROXY_DEFINITION_IMPORT: http://ccd-definition-store-api:4451
       PROXY_DEFINITION_DATA: http://ccd-definition-store-api:4451/api/data
       PROXY_DEFINITION_DISPLAY: http://ccd-definition-store-api:4451/api/display
+      PROXY_DOCUMENT_MANAGEMENT: http://localhost:4007
       APPINSIGHTS_INSTRUMENTATIONKEY: key
     ports:
       - 3453:3453

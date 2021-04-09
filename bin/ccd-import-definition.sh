@@ -19,6 +19,9 @@ fi
 binFolder=$(dirname "$0")
 
 userToken="$(${binFolder}/utils/idam-user-token.sh)"
+
+echo "$userToken"
+
 serviceToken="$(${binFolder}/utils/lease-service-token.sh ccd_gw)"
 
 curl -S --silent \
