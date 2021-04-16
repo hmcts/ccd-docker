@@ -50,6 +50,9 @@ Pulling latest Docker images:
 ./ccd compose pull
 ```
 
+Add Postgres V11 DB settings
+- [Change to Postgres v11 database](/PostgresV11-prerequisites.md)
+
 Running initialisation steps:
 
 Note:
