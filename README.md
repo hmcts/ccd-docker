@@ -140,12 +140,13 @@ with the corresponding values from the confluence page at https://tools.hmcts.ne
 
 ### CCD Quick Start
 
-At this point most users can run the following 3 scripts
+At this point most users can run the following 4 scripts
 
 ```bash
 ./bin/add-idam-clients.sh
-./bin/add-roles.sh
+./bin/add-idam-roles.sh
 ./bin/add-users.sh
+./bin/add-ccd-roles.sh
 ```
 
 to get their IDAM environment ready and then move on to the [Ready for take-off](###Ready-for-take-off) section.
@@ -229,7 +230,7 @@ client scope: profile openid roles manage-user create-user
 Execute the following script to add roles to SIDAM:
 
 ```bash
-./bin/add-roles.sh
+./bin/add-idam-roles.sh
 ```
 
 The script parses `bin/users.json` and loops through a list of unique roles, passing the role to the `idam-add-role.sh`
@@ -266,6 +267,14 @@ Step 1 (`Home > Manage Services > select your service`) and select `ccd-import` 
 **Any business-related roles like `caseworker`,`caseworker-<jurisdiction>` etc to be used in CCD later must also be defined under the client configuration at this stage.**
 
 #### Adding a role to CCD
+
+Execute the following script to add roles to CCD:
+
+```bash
+./bin/add-ccd-roles.sh
+```
+
+The script parses `bin/ccd-roles.json` and loops through a list of roles and their security classifications, passing the values to the `ccd-add-role.sh` script.
 
 By default most FTA (Feature test automation) packs load their own roles into CCD via the definition store each time
 the feature tests are run
@@ -734,8 +743,12 @@ OR
   * `./ccd enable backend message-publisher`
   * Run docker-compose `./ccd compose up -d`
   * Verify that ccd-message-publisher is up and running by `curl localhost:4456/health`
-
-
+ 
+* To enable **ccd-case-document-am-api**
+  * `./ccd enable backend frontend dm-store case-document-am`
+  * run docker-compose `./ccd compose up -d`
+  * verify that ccd-case-document-am-api is up and running by `curl localhost:4455/health`
+    
 ## Under the hood :speedboat:
 
 ### Set
@@ -1054,6 +1067,7 @@ Here are the important variables exposed in the compose files:
 | AM_DB_USERNAME | Access Management database username |
 | AM_DB_PASSWORD | Access Management database password |
 | WIREMOCK_SERVER_MAPPINGS_PATH | Path to the WireMock mapping files. If not set, it will use the default mappings from the project repository. __Note__: If setting the variable, please keep all WireMock json stub files in a directory named _mappings_ and exclude this directory in the path. For e.g. if you place the _mappings_ in /home/user/mappings then export WIREMOCK_SERVER_MAPPINGS_PATH=/home/user. Stop the service and start service using command `./ccd compose up -d ccd-test-stub-service`. If switching back to repository mappings please unset the variable using command `unset WIREMOCK_SERVER_MAPPINGS_PATH` |
+| IDAM_KEY_CASE_DOCUMENT | IDAM service-to-service secret key for `ccd_case_document_am_api` micro-service (CCD Case Document Am Api), as registered in `service-auth-provider-api` |
 
 ## Remarks
 
