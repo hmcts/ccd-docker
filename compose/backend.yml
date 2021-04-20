@@ -178,31 +178,6 @@ services:
       timeout: 10s
       retries: 3
 
-#  draft-store-api:
-#    image: hmctspublic.azurecr.io/draft-store/service:${DRAFT_STORE_API_VERSION:-latest}
-#    healthcheck:
-#      retries: 40
-#    environment:
-#      - JAVA_OPTS=-Xms8m -Xmx256m -Djava.security.egd=file:/dev/./urandom -XX:MaxMetaspaceSize=128m
-#      - DRAFT_STORE_DB_HOST=ccd-shared-database
-#      - DRAFT_STORE_DB_PASSWORD=draftstore
-#      - IDAM_URL=http://idam-api:5000
-#      - S2S_URL=http://service-auth-provider-api:8080
-#      - ROOT_APPENDER
-#      - JSON_CONSOLE_PRETTY_PRINT
-#      - ROOT_LOGGING_LEVEL
-#    mem_limit: 512m
-#    memswap_limit: 0
-#    depends_on:
-#      ccd-shared-database:
-#        condition: service_healthy
-#      service-auth-provider-api:
-#        condition: service_started
-#    ports:
-#      - 8800:8800
-#    networks:
-#      - ccd-network
-
   pdf-service-api:
     image: hmctspublic.azurecr.io/cmc/pdf-service:latest
     container_name: pdf-service-api

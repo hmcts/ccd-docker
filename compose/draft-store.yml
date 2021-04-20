@@ -1,0 +1,52 @@
+---
+version: '2.4'
+#only add core CCD services here. Side services should be added to others.yaml
+
+services:
+  draft-store-api:
+    build:
+      context: .
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: hmctspublic.azurecr.io/draft-store/service
+    environment:
+      - DRAFT_STORE_DB_HOST=draft-store-database
+      - DRAFT_STORE_DB_PASSWORD=draftstore
+      - ROOT_APPENDER
+      - JSON_CONSOLE_PRETTY_PRINT
+      - ROOT_LOGGING_LEVEL
+      - REFORM_SERVICE_NAME
+      - REFORM_TEAM
+      - REFORM_ENVIRONMENT
+      - IDAM_USE_STUB
+      - S2S_USER_STUB
+      - RUN_DB_MIGRATION_ON_STARTUP
+      - AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY
+    ports:
+      - 8800:8800
+    networks:
+      - ccd-network
+    depends_on:
+      draft-store-database:
+        condition: service_healthy
+  draft-store-database:
+    build: ../database/draftstore
+    image: hmcts/draft-store-database
+    environment:
+      - DRAFT_STORE_DB_PASSWORD=draftstore
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=draftstore
+    ports:
+      - 5429:5432
+    volumes:
+      - draft-store-database-data:/var/lib/postgresql/data
+    networks:
+      - ccd-network
+
+networks:
+  ccd-network:
+    external: true
+volumes:
+  draft-store-database-data:

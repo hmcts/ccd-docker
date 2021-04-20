@@ -55,7 +55,7 @@
   {"email": "auto.test.cnp@gmail.com", "roles": "caseworker-divorce", "lastName": "testsurname"},
   {"email": "divorce_cw@hmcts.net", "roles": "caseworker,caseworker-autotest1,caseworker-autotest1-private"},
   {"email": "TEST_CASE_WORKER_USER@mailinator.com", "roles": "caseworker,caseworker-divorce,caseworker-divorce-courtadmin,caseworker-divorce-superuser,caseworker-divorce-courtadmin_beta"},
-  {"email": " TEST_CASE_WORKER_SUPERUSER@mailinator.com", "roles": "caseworker,caseworker-divorce,caseworker-divorce-courtadmin,caseworker-divorce-superuser,caseworker-divorce-courtadmin_beta"},
+  {"email": "TEST_CASE_WORKER_SUPERUSER@mailinator.com", "roles": "caseworker,caseworker-divorce,caseworker-divorce-courtadmin,caseworker-divorce-superuser,caseworker-divorce-courtadmin_beta"},
   {"email": "divorce_as_caseworker_solicitor@mailinator.com", "roles": "caseworker,caseworker-divorce,caseworker-divorce-courtadmin,caseworker-divorce-courtadmin_beta"},
   {"email": "divorce_as_caseworker_superuser@mailinator.com", "roles": "caseworker,caseworker-divorce,caseworker-divorce-courtadmin,caseworker-divorce-superuser"},
   {"email": "divorce_as_caseworker_la@mailinator.com", "roles": "caseworker,caseworker-divorce,caseworker-divorce-courtadmin"},

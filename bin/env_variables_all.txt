@@ -126,3 +126,4 @@ DB_USE_SSL=false
 MY_IP=docker.for.mac.localhost
 IDAM_ADMIN_USER=idamOwner@hmcts.net
 IDAM_ADMIN_PASSWORD=Ref0rmIsFun
+IDAM_KEY_CCD_PS=AAAAAAAAAAAA
