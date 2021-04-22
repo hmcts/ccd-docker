@@ -27,6 +27,8 @@ services:
       SERVICES_IDAM_OAUTH_CALLBACK_URL: /oauth2/callback
       SERVICES_S2S: http://service-auth-provider-api:8080
       REDISCLOUD_URL: http://localhost:6780
+      SYSTEM_USER_NAME: "dummy"
+      SYSTEM_USER_PASSWORD: "dummy"
 
       HEALTH_CCD_COMPONENT_API: http://ccd-api-gateway:3453/health
       HEALTH_CCD_DATA_API: http://ccd-data-store-api:4452/health

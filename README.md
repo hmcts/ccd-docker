@@ -683,10 +683,10 @@ Optional compose files will allow other projects to be enabled on demand using t
   * create Blob Store in Azurite `./bin/document-management-store-create-blob-store-container.sh`
 
 * To enable **ExUI** rather then the CCD UI
-  * `./ccd enable xui-manage-cases`
+  * `./ccd enable xui-frontend`
   * run docker-compose `./ccd compose up -d`
   * (optional) stop the CCD UI docker container `ccd-case-management-web`
-  * access ExUI at `https://localhost:3455`
+  * access ExUI at `http://localhost:3455`
 
 * To enable **ElasticSearch**
   * NOTE: we recommend at lest 16GB of memory for Docker when enabling elasticsearch
