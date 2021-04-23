@@ -147,6 +147,16 @@ docker stop a210d7e11a5b
 
 ````
 
+In case you decied to not use the back up from old DB  Step 2, you have to set up CCD users again. following the steps of the main guideline 
+steps: 
+* CCD Quick Start
+```
+./bin/add-idam-clients.sh
+./bin/add-idam-roles.sh
+./bin/add-users.sh
+./bin/add-ccd-roles.sh
+```
+
 ## Switch back to old DB
 
 1- Unset CCD_POSTGRES_11 value from the terminal <br>
