@@ -147,7 +147,7 @@ docker stop a210d7e11a5b
 
 ````
 
-In case you decied to not use the back up from old DB  Step 2, you have to set up CCD users again. following the steps of the main guideline 
+In case you decided to not use the back up from old DB  (Optional Step 2), you have to set up CCD users again. following the steps of the main guideline 
 steps: 
 * CCD Quick Start
 ```
