@@ -4,8 +4,8 @@
 
 **This has to be in place to be able to create the new postgres V11 DB container.**
 
-* Make sure all micro-services are running the same branch, for instance: 'develop'
-* Uncomment the ccd-shared-database-v11 section in the backend.yml
+* Make sure all micro-services are running the same branch, for instance: 'develop'.
+* Uncomment the ccd-shared-database-v11 section in the backend.yml.
 
 ````
   ccd-shared-database-v11:
@@ -81,36 +81,36 @@ select * from event;
 
 **The following steps should be done to define the micro-services dependency to the new V11 DB container**
 
-* Open backend.yml file and uncomment the dependency to ccd-shared-database-v11 for 'definition-store' and 'data-store' 
+* Open backend.yml file and uncomment the dependency to ccd-shared-database-v11 for 'definition-store' and 'data-store'. 
 ```$xslt
 #Uncomment this line to enable ccd-shared-database with Postgres version 11
       ccd-shared-database-v11:
         condition: service_started
 ```
-* Comment the dependency to ccd-shared-database for 'definition-store' and 'data-store' on backend.yml file
+* Comment the dependency to ccd-shared-database for 'definition-store' and 'data-store' on backend.yml file.
 ```$xslt
 #      ccd-shared-database:
 #        condition: service_started
 ```
-* Open message-publisher.yml file and uncomment the dependency to ccd-shared-database-v11  
+* Open message-publisher.yml file and uncomment the dependency to ccd-shared-database-v11.  
 ```$xslt
 #Uncomment this line to enable ccd-shared-database with Postgres version 11
       ccd-shared-database-v11:
         condition: service_started
 ```
-* Comment the dependency to ccd-shared-database on message-publisher.yml file
+* Comment the dependency to ccd-shared-database on message-publisher.yml file.
 ```$xslt
 #      ccd-shared-database:
 #        condition: service_started
 ```
 
-* Add CCD_POSTGRES_11 env var to your local terminal bash file
+* Add CCD_POSTGRES_11 env var to your local terminal bash file.
 
-* Export CCD_POSTGRES_11=ccd-shared-database-v11 in your terminal 
+* Export CCD_POSTGRES_11=ccd-shared-database-v11 in your terminal. 
 ```$xslt
  export CCD_POSTGRES_11=ccd-shared-database-v11
 ```
-* Uncomment CCD_POSTGRES_11 in your .env file
+* Uncomment CCD_POSTGRES_11 in your .env file.
 ````
 #Postgres V11
 CCD_POSTGRES_11=ccd-shared-database-v11
@@ -120,25 +120,25 @@ CCD_POSTGRES_11=ccd-shared-database-v11
 ```
 env | grep CCD_POSTGRES_11
 ```
-2) Stop and re-start the ccd-docker
+2) Stop and re-start the ccd-docker.
    
-   Steps to stop the old DB container
+   Steps to stop the old DB container.
 
-* Get the old DB container id, for instance: a210d7e11a5b
+* Get the old DB container id, for instance: a210d7e11a5b.
 ```
 docker ps | grep compose_ccd-shared-database
 ```
 
-* Stop the container
+* Stop the container.
 ```
 docker stop a210d7e11a5b
 ```
-* Restart the ccd-docker container 
+* Restart the ccd-docker container. 
 ```
 ./ccd compose up -d
 ```  
 
-* Comment the ccd-shared-database section in backend.yml
+* Comment the ccd-shared-database section in backend.yml.
 ````
   #  ccd-shared-database:
   #    build: ../database
@@ -171,29 +171,29 @@ steps shown below:
 
 ## Switch back to the old DB
 
-1- Unset CCD_POSTGRES_11 value from the terminal <br>
+1- Unset CCD_POSTGRES_11 value from the terminal <br>.
 ```
 unset CCD_POSTGRES_11 
 ```
-2- Comment CCD_POSTGRES_11 in your .env file
+2- Comment CCD_POSTGRES_11 in your .env file.
 ```
 #Postgres V11
 #CCD_POSTGRES_11=ccd-shared-database-v11
 ````
 
-* Open backend.yml file and comment the dependency to ccd-shared-database-v11 for 'definition-store' and 'data-store'  
+* Open backend.yml file and comment the dependency to ccd-shared-database-v11 for 'definition-store' and 'data-store'.  
 ```$xslt
 #Uncomment this line to enable ccd ccd-shared-database with Postgres version 11
 #      ccd-shared-database-v11:
 #        condition: service_started
 ```
-* Uncomment the dependency to ccd-shared-database for 'definition-store' and 'data-store'
+* Uncomment the dependency to ccd-shared-database for 'definition-store' and 'data-store'.
 
 ```$xslt
      ccd-shared-database:
         condition: service_started
 ```
-* Uncomment the ccd-shared-database section in backend.yml
+* Uncomment the ccd-shared-database section in backend.yml.
 ````
   ccd-shared-database:
     build: ../database
@@ -213,7 +213,7 @@ unset CCD_POSTGRES_11
       - ccd-network
 
 ````
-* Comment the ccd-shared-database-v11 section in the backend.yml
+* Comment the ccd-shared-database-v11 section in the backend.yml.
 
 ````
   #  ccd-shared-database-v11:
@@ -234,7 +234,7 @@ unset CCD_POSTGRES_11
   #      - ccd-network
 
 ````
-* Open message-publisher.yml file and comment the dependency to ccd-shared-database-v11  
+* Open message-publisher.yml file and comment the dependency to ccd-shared-database-v11.  
 ```$xslt
 #Uncomment this line to enable ccd-shared-database with Postgres version 11
       ccd-shared-database-v11:
@@ -253,11 +253,11 @@ env | grep CCD_POSTGRES_11
 ```
 docker ps | grep compose_ccd-shared-database-v11
 ```
-* Stop the container
+* Stop the container.
 ```
 docker stop a210d7e11a5b
 ```
-* Restart the ccd-docker container 
+* Restart the ccd-docker container. 
 ```
 ./ccd compose up -d
 ```  
