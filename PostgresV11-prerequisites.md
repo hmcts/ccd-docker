@@ -4,7 +4,7 @@
 
 **This has to be one in order to be able to create the new postgres V11 DB container.**
 
-* Uncomment the ccd-shared-database-v11 section in the backend.yml
+* Uncomment the ccd-shared-database-v11 section in the backend.yml.
 
 ````
   ccd-shared-database-v11:
@@ -30,45 +30,46 @@
 
 **The following steps should be done with the aim to define the micro-services dependencies to the new V11 DB container **
 
-* Open backend.yml file and uncomment the dependency to ccd-shared-database-v11 for definition-store and data-store  
+* Open backend.yml file and uncomment the dependency to ccd-shared-database-v11 for 'definition-store' and 'data-store'.  
 ```$xslt
 #Uncomment this line to enable ccd-shared-database with Postgres version 11
       ccd-shared-database-v11:
         condition: service_started
 ```
-* Comment the dependency to ccd-shared-database for definition-store and data-store
+* Comment the dependency to ccd-shared-database for 'definition-store' and 'data-store'.
 
 ```$xslt
 #      ccd-shared-database:
 #        condition: service_started
 ```
-* Open message-publisher.yml file and uncomment the dependency to ccd-shared-database-v11  
+* Open message-publisher.yml file and uncomment the dependency to ccd-shared-database-v11.  
 ```$xslt
 #Uncomment this line to enable ccd-shared-database with Postgres version 11
       ccd-shared-database-v11:
         condition: service_started
 ```
-* Comment the dependency to ccd-shared-database for definition-store and data-store and message-publisher.yml
-
+* Comment the dependency to ccd-shared-database on the message-publisher.yml file.
 ```$xslt
 #      ccd-shared-database:
 #        condition: service_started
 ```
 
-* Add CCD_POSTGRES_11 env var to your local terminal bash file
-* Export CCD_POSTGRES_11=ccd-shared-database-v11 in your terminal 
+* Add CCD_POSTGRES_11 env var to your local terminal bash file.
+* Export CCD_POSTGRES_11=ccd-shared-database-v11 in your terminal. 
 ```$xslt
  export CCD_POSTGRES_11=ccd-shared-database-v11
 ```
-* Uncomment CCD_POSTGRES_11 in your .env file
+* Uncomment CCD_POSTGRES_11 in your .env file.
 ````
 #Postgres V11
 CCD_POSTGRES_11=ccd-shared-database-v11
 ````
 
 * Open a new terminal, make sure that CCD_POSTGRES_11 environment variable has been set.
-
-* Comment the old DB container ccd-shared-database section in backend.yml
+```
+env | grep CCD_POSTGRES_11
+```
+* Comment the old DB container ccd-shared-database section in backend.yml.
 ````
   #  ccd-shared-database:
   #    build: ../database
