@@ -2,7 +2,7 @@
 
 ##  1 Pull latest ccd-docker (Mandatory)
 
-**This has to be in order to be able to create the new postgres V11 DB container.**
+**This has to be in place to be able to create the new postgres V11 DB container.**
 
 * Make sure all micro-services are running the same branch, for instance: 'develop'
 * Uncomment the ccd-shared-database-v11 section in the backend.yml
@@ -32,9 +32,9 @@
 ```
 
 
-## 2  Backup old database. Migrate data to new database. (Optional step)
+## 2  Backup old database. Migrate data to the new database. (Optional step)
 
-**The following steps describe the process of backing up the old DB in to new DB.
+**The following steps describe the process of backing up the old DB in to the new DB.
 These steps can be ignored in the case of building a new environment from scratch**
 
 * Get your old DB container id, for instance: a210d7e11a5b
@@ -79,7 +79,7 @@ select * from event;
 
 ##  3 Settings for ccd-docker (Mandatory)
 
-**The following steps should be done with an aim to define the micro-services dependencies to the new V11 DB container **
+**The following steps should be done to define the micro-services dependency to the new V11 DB container**
 
 * Open backend.yml file and uncomment the dependency to ccd-shared-database-v11 for 'definition-store' and 'data-store' 
 ```$xslt
@@ -169,7 +169,7 @@ steps shown below:
 ./bin/add-ccd-roles.sh
 ```
 
-## Switch back to old DB
+## Switch back to the old DB
 
 1- Unset CCD_POSTGRES_11 value from the terminal <br>
 ```
