@@ -2,7 +2,7 @@
 
 ##  1 Activate Postgres v11
 
-**This has to be one in order to be able to create the new postgres V11 DB container.**
+**This has to be done to be able to create the new postgres V11 DB container.**
 
 * Uncomment the ccd-shared-database-v11 section in the backend.yml.
 
@@ -28,7 +28,7 @@
 
 ##  2 Settings for ccd-docker
 
-**The following steps should be done with the aim to define the micro-services dependencies to the new V11 DB container **
+**The following steps should be done to define the micro-services dependencies to the new V11 DB container**
 
 * Open backend.yml file and uncomment the dependency to ccd-shared-database-v11 for 'definition-store' and 'data-store'.  
 ```$xslt
@@ -55,6 +55,7 @@
 ```
 
 * Add CCD_POSTGRES_11 env var to your local terminal bash file.
+
 * Export CCD_POSTGRES_11=ccd-shared-database-v11 in your terminal. 
 ```$xslt
  export CCD_POSTGRES_11=ccd-shared-database-v11
