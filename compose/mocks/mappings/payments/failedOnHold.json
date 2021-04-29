@@ -1,0 +1,22 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/credit-account-payments",
+        "bodyPatterns": [
+          {
+            "contains": "\"PBA0078094\""
+          }
+        ]
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "bodyFileName": "payment/accountOnHoldResponse.json"
+      }
+    }
+  ]
+}

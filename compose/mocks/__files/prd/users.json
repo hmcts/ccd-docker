@@ -1,0 +1,19 @@
+{
+  "users": [
+    {
+      "userIdentifier": "",
+      "firstName": "Example",
+      "lastName": "Solicitor",
+      "email": "solicitor@example.com",
+      "idamStatus": "ACTIVE"
+    },
+    {
+      "userIdentifier": "",
+      "firstName": "Org",
+      "lastName": "Manager",
+      "email": "organisation-manager@mailnesia.com",
+      "idamStatus": "ACTIVE"
+    }
+  ],
+  "organisationIdentifier": "62LYJRF"
+}

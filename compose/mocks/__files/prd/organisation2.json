@@ -1,0 +1,27 @@
+{
+  "name": "Civil Damages Claims - Organisation 2",
+  "organisationIdentifier": "N5AFUXG",
+  "contactInformation": [
+    {
+      "addressLine1": "29, SEATON DRIVE",
+      "addressLine2": null,
+      "addressLine3": null,
+      "townCity": "NORTHAMPTON",
+      "county": null,
+      "country": null,
+      "postCode": "NN3 9SS",
+      "dxAddress": []
+    }
+  ],
+  "status": "ACTIVE",
+  "sraRegulated": false,
+  "superUser": {
+    "firstName": "Civil Damages Claims",
+    "lastName": "Organisation 2",
+    "email": "civil.damages.claims+organisation.2.superuser@gmail.com"
+  },
+  "paymentAccount": [
+    "PBA1234999"
+  ]
+}
+

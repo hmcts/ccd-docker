@@ -20,7 +20,8 @@ services:
       - REFORM_SERVICE_NAME
       - REFORM_TEAM
       - REFORM_ENVIRONMENT
-      - IDAM_USE_STUB
+      - IDAM_URL=http://idam-api:5000
+      - S2S_URL=http://service-auth-provider-api:8080
       - S2S_USER_STUB
       - RUN_DB_MIGRATION_ON_STARTUP
       - AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY

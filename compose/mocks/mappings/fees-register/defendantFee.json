@@ -1,0 +1,33 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/fees-register/fees/lookup",
+    "queryParameters": {
+      "service": {
+        "equalTo": "other"
+      },
+      "jurisdiction1": {
+        "equalTo": "family"
+      },
+      "jurisdiction2": {
+        "equalTo": "family court"
+      },
+      "channel": {
+        "equalTo": "default"
+      },
+      "event": {
+        "equalTo": "issue"
+      },
+      "keyword": {
+        "equalTo": "PQR"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\"code\": \"FEE0388\", \"description\": \"Originating proceedings where no other fee is specified\", \"version\": 1, \"fee_amount\": 245.00}"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/credit-account-payments",
+        "bodyPatterns": [
+          {
+            "contains": "\"PBA0079005\""
+          }
+        ]
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "Account information could not be found"
+      }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/fees-register/fees/lookup",
+    "queryParameters": {
+      "service": {
+        "equalTo": "civil money claims"
+      },
+      "jurisdiction1": {
+        "equalTo": "civil"
+      },
+      "jurisdiction2": {
+        "equalTo": "county court"
+      },
+      "channel": {
+        "equalTo": "default"
+      },
+      "event": {
+        "equalTo": "issue"
+      },
+      "amount_or_volume": {
+        "matches": "([0-9]|[1-8][0-9]|9[0-9]|[12][0-9]{2}|300)\\.\\d{2}"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\"code\": \"FEE0202\", \"description\": \"Civil Court fees - Money Claims - Claim Amount - 0.01 up to 300 GBP\", \"version\": 4, \"fee_amount\": 35.00}"
+  }
+}

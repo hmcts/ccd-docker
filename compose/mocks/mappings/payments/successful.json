@@ -1,0 +1,22 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/credit-account-payments",
+        "bodyPatterns": [
+          {
+            "contains": "\"PBA0077597\""
+          }
+        ]
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "bodyFileName": "payment/successResponse.json"
+      }
+    }
+  ]
+}

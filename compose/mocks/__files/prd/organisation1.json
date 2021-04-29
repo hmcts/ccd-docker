@@ -1,0 +1,28 @@
+{
+  "name": "Civil Damages Claims - Organisation 1",
+  "organisationIdentifier": "0FA7S8S",
+  "contactInformation": [
+    {
+      "addressLine1": "38 Delisle Road",
+      "addressLine2": null,
+      "addressLine3": null,
+      "townCity": "London",
+      "county": "London",
+      "country": null,
+      "postCode": "SE28 0JE",
+      "dxAddress": []
+    }
+  ],
+  "status": "ACTIVE",
+  "sraRegulated": false,
+  "superUser": {
+    "firstName": "Civil Damages Claims",
+    "lastName": "Organisation 1",
+    "email": "civil.damages.claims+organisation.1.superuser@gmail.com"
+  },
+  "paymentAccount": [
+    "PBA0077597",
+    "PBA0078094"
+  ]
+}
+

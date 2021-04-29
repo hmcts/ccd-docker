@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/refdata/internal/v1/organisations",
+    "queryParameters": {
+      "id": {
+        "equalTo": "0FA7S8S"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "bodyFileName": "prd/organisation1.json"
+  }
+}
