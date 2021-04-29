@@ -176,7 +176,7 @@ steps shown below:
 
 ## Switch back to the old DB
 
-1- Unset CCD_POSTGRES_11 value from the terminal <br>.
+1- Unset CCD_POSTGRES_11 value from the terminal. <br>
 ```
 unset CCD_POSTGRES_11 
 ```
