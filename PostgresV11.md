@@ -31,6 +31,9 @@
 ./ccd compose up -d
 ```
 
+**NB:** If you do not need your current DB data and want to destroy your old data, please skip **Step 2** and continue with **Step 3** instructions to create the v11 DB.
+
+
 
 ## 2  Backup old database. Migrate data to the new database. (Optional step)
 
@@ -76,6 +79,7 @@ SELECT datname FROM pg_database;
 select * from event;
 
 ```
+
 
 ##  3 Settings for ccd-docker (Mandatory)
 
@@ -168,6 +172,7 @@ steps shown below:
 ./bin/add-users.sh
 ./bin/add-ccd-roles.sh
 ```
+
 
 ## Switch back to the old DB
 
