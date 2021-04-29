@@ -31,7 +31,7 @@
 ./ccd compose up -d
 ```
 
-**NB:** If you do not need your current DB data and want to destroy your old data, please skip **Step 2** and continue with **Step 3** instructions to create the v11 DB.
+**NB:** If you do not need your current DB data and want to destroy your data, please skip **Step 2** and continue with **Step 3** instructions to create the v11 DB.
 
 
 
