@@ -7,10 +7,10 @@
 - [Running branches](#running-branches)
 - [Enabling additional projects](#enabling-additional-projects)
 - [Under the hood](#under-the-hood-speedboat)
-- [Change to Postgres v11 database](/PostgresV11.md)
 - [Containers](#containers)
 - [Local development](#local-development)
 - [Troubleshooting](#troubleshooting)
+- [Migrate existing v9.6 PostgreSQL database to v11](/PostgresV11.md)
 - [Variables](#variables)
 - [Remarks](#remarks)
 - [License](#license)
@@ -44,12 +44,18 @@ if you experience any error with the above command, try `az login` first
 
 For [Azure Authentication for pulling latest docker images](#azure-authentication-for-pulling-latest-docker-images)
 
+
+
+Add Postgres V11 DB settings
+- [Postgres v11 database set-up](/PostgresV11-prerequisites.md)
+
+
+
 Pulling latest Docker images:
 
 ```bash
 ./ccd compose pull
 ```
-
 Running initialisation steps:
 
 Note:
