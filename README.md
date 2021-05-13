@@ -17,83 +17,87 @@
 
 ## Prerequisites
 
+- [JDK 11](https://openjdk.java.net/projects/jdk/11/)
 - [Docker](https://www.docker.com)
 
-*Memory and CPU allocations may need to be increased for successful execution of ccd applications altogether. (On Preferences / Advanced)*
+**Note:** *once docker is installed, increase the memory and CPU allocations (Docker -> Preferences -> Advanced) to the following minimum values for successful execution of ccd applications altogether:*
+
+| Memory   | CPU   |
+| :------: | :---: |
+| 12+ GB   | 6+    |
 
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) - minimum version 2.0.57
 - [jq Json Processor](https://stedolan.github.io/jq)
+- Mac users, set your default shell to bash `chsh -s /bin/bash`
 
 *The following documentation assumes that the current directory is `ccd-docker`.*
 
 ## Quick start
 
-Checkout `ccd-docker` project:
+1. Checkout `ccd-docker` and `ccd-definition-store-api` projects:
 
 ```bash
 git clone git@github.com:hmcts/ccd-docker.git
 ```
 
-Login to the Azure Container registry:
+2. Login to the Azure Container registry:
 
 ```bash
 ./ccd login
 ```
 Note:
-if you experience any error with the above command, try `az login` first
-
-For [Azure Authentication for pulling latest docker images](#azure-authentication-for-pulling-latest-docker-images)
+if you experience any error with the above command, try `az login` first for [Azure Authentication for pulling latest docker images](#azure-authentication-for-pulling-latest-docker-images)
 
 
 
-Add Postgres V11 DB settings
+3. Add Postgres V11 DB settings - **THIS STEP IS ONLY REQUIRED IF YOU NEED TO MIGRATE TO POSTGRES V11**
 - [Postgres v11 database set-up](/PostgresV11-prerequisites.md)
 
 
 
-Pulling latest Docker images:
+4. Pull latest Docker images:
 
 ```bash
 ./ccd compose pull
 ```
-Running initialisation steps:
+
+
+5. Set up environment: 
 
 Note:
 required only on the first run. Once executed, it doesn't need to be executed again
 
-```bash
-./ccd init
-```
+  a. Create docker network
+  ```bash
+  ./ccd init
+  ```
+  
+  b. Export environment variables
 
-Creating and starting the containers:
+  CCD Data Store API and CCD Definition Store API require a set of environment variables which can be set up by executing the following script.
+  
+  Windows : `./bin/set-environment-variables.sh`
+  
+  Linux/Mac : `source ./bin/set-environment-variables.sh`
+  
+  Note: some users of zsh 'Oh My Zsh' experienced issues. Try switching to bash
+  
+  To persist the environment variables in Linux/Mac, copy the contents of `env_variables_all.txt` file into ~/.bash_profile.
+  A prefix 'export' will be required for each environment variable.
+
+  Additionally, export these environment variables to disable ElasticSearch
+
+  ```bash
+  export ELASTIC_SEARCH_ENABLED=false
+  export ES_ENABLED_DOCKER=false
+  ```
+
+6. Creating and starting the containers:
 
 ```bash
 ./ccd compose up -d
 ```
 
-Usage and commands available:
-
-```bash
-./ccd
-```
-
-## Setting up environment variables
-Environment variables for CCD Data Store API and CCD Definition Store API can be done by executing the following script.
-
-Windows : `./bin/set-environment-variables.sh`
-
-Mac : `source ./bin/set-environment-variables.sh`
-
-Note: some users of zsh 'Oh My Zsh' experienced issues. Try switching to bash for this step
-
-To persist the environment variables in Mac, copy the contents of `env_variables_all.txt` file into ~/.bash_profile.
-A prefix 'export' will be required for each environment variable.
-
-## Using CCD
-
-Once the containers are running, CCD's frontend can be accessed at [http://localhost:3451](http://localhost:3451).
-
----
 **NOTE**
 
 The `idam-api` container can be slow to start - both the `definition-store-api` and `data-store-api` containers will
@@ -127,6 +131,18 @@ Then restart the `definition-store-api` & `data-store-api` containers
 ```
 ---
 
+
+Usage and commands available:
+
+```bash
+./ccd
+```
+
+
+## Using CCD
+
+Once the containers are running, CCD's frontend can be accessed at [http://localhost:3451](http://localhost:3451).
+
 However, some more steps are required to correctly configure SIDAM and CCD before it can be used:
 
 ---
@@ -135,8 +151,8 @@ However, some more steps are required to correctly configure SIDAM and CCD befor
 All scripts require the following environment variables to be set
 
 ```bash
-IDAM_ADMIN_USER
-IDAM_ADMIN_PASSWORD
+export IDAM_ADMIN_USER=<value of Username>
+export IDAM_ADMIN_PASSWORD=<value of Password>
 ```
 
 with the corresponding values from the confluence page at https://tools.hmcts.net/confluence/x/eQP3P
@@ -152,8 +168,27 @@ At this point most users can run the following 4 scripts
 ./bin/add-ccd-roles.sh
 ```
 
-to get their IDAM environment ready and then move on to the [Ready for take-off](###Ready-for-take-off) section.
 
+Create IDAM users and roles
+
+a. Clone `ccd-definition-store-api` if not already checked out `git clone git@github.com:hmcts/ccd-definition-store-api.git`
+and navigate to the `ccd-definition-store-api`. 
+
+b. Run smoke tests to set up IDAM.
+
+```bash
+export TEST_URL=http://localhost:3451
+
+./gradlew clean smoke
+```
+
+The smoke tests creates a file `/aat/befta_recent_executions_info.json`, delete this file after running the tests.
+
+---
+
+Move on to the [Ready for take-off](###Ready-for-take-off) section.
+
+---
 A more in depth explanation of the scripts is detailed below
 
 ### 1. Configure Oauth2 Client of CCD Gateway on SIDAM
