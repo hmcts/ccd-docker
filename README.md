@@ -74,7 +74,7 @@ required only on the first run. Once executed, it doesn't need to be executed ag
   
   b. Export environment variables
 
-  CCD Data Store API and CCD Definition Store API require a set of environment variables which can be set up by executing the following script.
+  CDM apps require a set of environment variables which can be set up by executing the following script.
   
   Windows : `./bin/set-environment-variables.sh`
   
@@ -169,12 +169,12 @@ At this point most users can run the following 4 scripts
 ```
 
 
-Create IDAM users and roles
+Create CCD users and roles
 
 a. Clone `ccd-definition-store-api` if not already checked out `git clone git@github.com:hmcts/ccd-definition-store-api.git`
 and navigate to the `ccd-definition-store-api`. 
 
-b. Run smoke tests to set up IDAM.
+b. Run smoke tests to set up user and roles.
 
 ```bash
 export TEST_URL=http://localhost:3451
