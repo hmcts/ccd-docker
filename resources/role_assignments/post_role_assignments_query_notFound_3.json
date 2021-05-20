@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPattern": "/am/role-assignments/query",
+    "bodyPatterns": [
+      {
+        "contains":"\"actorId\":[\"0359819a-aab6-477e-9d9c-24afdf4573b7\"]",
+        "contains":"\"roleType\":[\"CASE\"]",
+        "contains":"\"attributes\":[{\"caseId\":[\"1575633034594367\"]}]"
+      }
+    ]
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
