@@ -16,6 +16,12 @@ function project_config() {
             envPrefix="CCD_DATA_STORE_API"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
+        ccd-case-document-am-api|case-document-api|document-api|case-document)
+            name=ccd-ccd-case-document-am-api
+            repository="git@github.com:hmcts/ccd-case-document-am-api.git"
+            envPrefix="CCD_CASE_DOCUMENT_AM_API"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
         ccd-definition-store-api|definition-store-api|definition-store|def-store|defstore)
             name=ccd-definition-store-api
             repository="git@github.com:hmcts/ccd-definition-store-api.git"
@@ -73,7 +79,7 @@ function project_config() {
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, xui-manage-cases, ccd-message-publisher, ccd-admin-web, dm-store, ccd-definition-designer-api"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, xui-manage-cases, ccd-message-publisher, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api"
             exit 1 ;;
     esac
     case $config in

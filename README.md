@@ -7,10 +7,10 @@
 - [Running branches](#running-branches)
 - [Enabling additional projects](#enabling-additional-projects)
 - [Under the hood](#under-the-hood-speedboat)
-- [Change to Postgres v11 database](/PostgresV11.md)
 - [Containers](#containers)
 - [Local development](#local-development)
 - [Troubleshooting](#troubleshooting)
+- [Migrate existing v9.6 PostgreSQL database to v11](/PostgresV11.md)
 - [Variables](#variables)
 - [Remarks](#remarks)
 - [License](#license)
@@ -44,15 +44,18 @@ if you experience any error with the above command, try `az login` first
 
 For [Azure Authentication for pulling latest docker images](#azure-authentication-for-pulling-latest-docker-images)
 
+
+
+Add Postgres V11 DB settings
+- [Postgres v11 database set-up](/PostgresV11-prerequisites.md)
+
+
+
 Pulling latest Docker images:
 
 ```bash
 ./ccd compose pull
 ```
-
-Add Postgres V11 DB settings
-- [Change to Postgres v11 database](/PostgresV11-prerequisites.md)
-
 Running initialisation steps:
 
 Note:
@@ -140,12 +143,13 @@ with the corresponding values from the confluence page at https://tools.hmcts.ne
 
 ### CCD Quick Start
 
-At this point most users can run the following 3 scripts
+At this point most users can run the following 4 scripts
 
 ```bash
 ./bin/add-idam-clients.sh
-./bin/add-roles.sh
+./bin/add-idam-roles.sh
 ./bin/add-users.sh
+./bin/add-ccd-roles.sh
 ```
 
 to get their IDAM environment ready and then move on to the [Ready for take-off](###Ready-for-take-off) section.
@@ -229,7 +233,7 @@ client scope: profile openid roles manage-user create-user
 Execute the following script to add roles to SIDAM:
 
 ```bash
-./bin/add-roles.sh
+./bin/add-idam-roles.sh
 ```
 
 The script parses `bin/users.json` and loops through a list of unique roles, passing the role to the `idam-add-role.sh`
@@ -266,6 +270,14 @@ Step 1 (`Home > Manage Services > select your service`) and select `ccd-import` 
 **Any business-related roles like `caseworker`,`caseworker-<jurisdiction>` etc to be used in CCD later must also be defined under the client configuration at this stage.**
 
 #### Adding a role to CCD
+
+Execute the following script to add roles to CCD:
+
+```bash
+./bin/add-ccd-roles.sh
+```
+
+The script parses `bin/ccd-roles.json` and loops through a list of roles and their security classifications, passing the values to the `ccd-add-role.sh` script.
 
 By default most FTA (Feature test automation) packs load their own roles into CCD via the definition store each time
 the feature tests are run
@@ -677,10 +689,10 @@ Optional compose files will allow other projects to be enabled on demand using t
   * create Blob Store in Azurite `./bin/document-management-store-create-blob-store-container.sh`
 
 * To enable **ExUI** rather then the CCD UI
-  * `./ccd enable xui-manage-cases`
+  * `./ccd enable xui-frontend`
   * run docker-compose `./ccd compose up -d`
   * (optional) stop the CCD UI docker container `ccd-case-management-web`
-  * access ExUI at `https://localhost:3455`
+  * access ExUI at `http://localhost:3455`
 
 * To enable **ElasticSearch**
   * NOTE: we recommend at lest 16GB of memory for Docker when enabling elasticsearch
@@ -734,8 +746,12 @@ OR
   * `./ccd enable backend message-publisher`
   * Run docker-compose `./ccd compose up -d`
   * Verify that ccd-message-publisher is up and running by `curl localhost:4456/health`
-
-
+ 
+* To enable **ccd-case-document-am-api**
+  * `./ccd enable backend frontend dm-store case-document-am`
+  * run docker-compose `./ccd compose up -d`
+  * verify that ccd-case-document-am-api is up and running by `curl localhost:4455/health`
+    
 ## Under the hood :speedboat:
 
 ### Set
@@ -1054,6 +1070,7 @@ Here are the important variables exposed in the compose files:
 | AM_DB_USERNAME | Access Management database username |
 | AM_DB_PASSWORD | Access Management database password |
 | WIREMOCK_SERVER_MAPPINGS_PATH | Path to the WireMock mapping files. If not set, it will use the default mappings from the project repository. __Note__: If setting the variable, please keep all WireMock json stub files in a directory named _mappings_ and exclude this directory in the path. For e.g. if you place the _mappings_ in /home/user/mappings then export WIREMOCK_SERVER_MAPPINGS_PATH=/home/user. Stop the service and start service using command `./ccd compose up -d ccd-test-stub-service`. If switching back to repository mappings please unset the variable using command `unset WIREMOCK_SERVER_MAPPINGS_PATH` |
+| IDAM_KEY_CASE_DOCUMENT | IDAM service-to-service secret key for `ccd_case_document_am_api` micro-service (CCD Case Document Am Api), as registered in `service-auth-provider-api` |
 
 ## Remarks
 
