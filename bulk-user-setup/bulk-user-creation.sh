@@ -104,6 +104,84 @@ ERROR: User registration request has failed with curl exit code: ${exit_code}"
   echo "$response"
 }
 
+function update_user_roles() {
+  local ROLES=$1
+  local USER=$2
+
+  curl_result=$(
+    curl -w $"\n%{http_code}" --silent -X PATCH "${IDAM_URL}/api/v1/users/${USER}/roles" -H "accept: application/json" -H "Content-Type: application/json" \
+      -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}" \
+      -d "${ROLES}"
+  )
+
+  exit_code=$?
+  if [ $exit_code -eq 0 ]; then
+    # seperate body and status into an array
+    IFS=$'\n' response_array=($curl_result)
+
+    array_length=${#response_array[@]}
+    if [ $array_length -eq 1 ]; then
+      response_body='' # clear body
+      response_status=${response_array[0]}
+    else
+      response_body=${response_array[0]}
+      response_status=${response_array[${array_length}-1]}
+    fi
+
+    if [ $(( response_status )) -gt 199 ] && [ $(( response_status )) -lt 300 ]; then
+      # SUCCESS:
+      response="SUCCESS
+${response_body}"
+    else
+      # FAIL:
+      response="HTTP-${response_status}
+${response_body}"
+    fi
+  else
+    # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
+    response="CURL-${exit_code}
+ERROR: User ${USER} role update request has failed with curl exit code: ${exit_code}"
+  fi
+  echo "$response"
+}
+
+function get_user() {
+  local EMAIL=$1
+
+  curl_result=$(
+    curl -w $"\n%{http_code}" --silent -X GET "${IDAM_URL}/users?email=${EMAIL}" -H "accept: */*" -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
+  )
+
+  exit_code=$?
+  if [ $exit_code -eq 0 ]; then
+    # seperate body and status into an array
+    IFS=$'\n' response_array=($curl_result)
+
+    array_length=${#response_array[@]}
+    if [ $array_length -eq 1 ]; then
+      response_body='' # clear body
+      response_status=${response_array[0]}
+    else
+      response_body=${response_array[0]}
+      response_status=${response_array[${array_length}-1]}
+    fi
+
+    if [ $(( response_status )) -gt 199 ] && [ $(( response_status )) -lt 300 ]; then
+      # SUCCESS:
+      response=${response_body}
+    else
+      # FAIL:
+      response="HTTP-${response_status}
+${response_body}"
+    fi
+  else
+    # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
+    response="CURL-${exit_code}
+ERROR: Request for UserID with email address ${EMAIL} failed with curl exit code: ${exit_code}"
+  fi
+  echo "$response"
+}
+
 function read_password_with_asterisk() {
     unset password
     prompt=$1
@@ -197,6 +275,7 @@ function convert_input_file_to_json() {
   verify_json_format_includes_field "${raw_csv_as_json}" "firstName"
   verify_json_format_includes_field "${raw_csv_as_json}" "lastName"
   verify_json_format_includes_field "${raw_csv_as_json}" "roles"
+  verify_json_format_includes_field "${raw_csv_as_json}" "operation"
 
   # then reformat JSON using JQ
   local input_as_json=$(echo $raw_csv_as_json \
@@ -205,9 +284,12 @@ function convert_input_file_to_json() {
           "email": .email,
           "firstName": .firstName,
           "lastName": .lastName,
-          "roles": (try(.roles | split("|")) // null)
+          "roles": (try(.roles | split("|")) // null),
+          "rolesToAdd": (try(.rolesToAdd | split("|")) // null),
+          "rolesToRemove": (try(.rolesToRemove | split("|")) // null)
         },
         "extraCsvData": {
+          "operation": .operation,
           "roles": .roles,
           "inviteStatus": .inviteStatus,
           "idamResponse": .idamResponse,
@@ -242,7 +324,7 @@ function process_input_file() {
   fi
 
   # write headers to output file
-  echo "email,firstName,lastName,roles,inviteStatus,idamResponse,idamUserJson,timestamp" >> "$filepath_output_newpath"
+  echo "operation,email,firstName,lastName,roles,inviteStatus,idamResponse,idamUserJson,timestamp" >> "$filepath_output_newpath"
 
   # strip JSON into individual items then process in a while loop
   echo $json | jq -r -c '.[]' \
@@ -254,20 +336,49 @@ function process_input_file() {
       # extract CSV fields from json to use in output
       local email=$(echo $user | jq --raw-output '.idamUser.email')
       local inviteStatus=$(echo $user | jq --raw-output '.extraCsvData.inviteStatus')
-
+      local operation=$(echo $user | jq --raw-output '.extraCsvData.operation')
+      local rolesToAdd=$(echo $user | jq --raw-output '.idamUser.rolesToAdd')
+      local rolesToRemove=$(echo $user | jq --raw-output '.idamUser.rolesToRemove')
+      echo "created local variables"
       if [ "$inviteStatus" != "SUCCESS" ]; then
+        
         # load formatted user JSON ready to send to IDAM 
         idamUserJson=$(echo $user | jq -c --raw-output '.idamUser')
+        if [ "$operation" == "add" ]; then
+          # make call to IDAM to add user
+          submit_response=$(submit_user_registation "$idamUserJson")
+        elif [ "$operation" == "update" ]; then
+          # get user id and roles from IDAM
+          local rawReturnedValue=$(get_user "$email")
+          local userId=$(echo $rawReturnedValue | jq --raw-output '.id')
+          echo "User ID: $userId"
+          local currentRoles=$(echo $rawReturnedValue | jq --raw-output '.roles')
+          echo "Current User Roles: $currentRoles"
 
-        # make call to IDAM
-        submit_response=$(submit_user_registation "$idamUserJson")
+          # combine current roles and roles to add
+          if [ "${rolesToAdd}" != "null" ]; then
+              combinedRoles=$(echo $currentRoles $rolesToAdd | jq '.[]' | jq -s)
+            echo "Combined role list after add: $combinedRoles"
+          fi
+          echo "Roles to Remove: $rolesToRemove"
 
+          # remove roles to remove from the combined role list
+          if [ "${rolesToRemove}" != "null" ]; then
+            for role in ${rolesToRemove[@]}; do
+              combinedRoles=( "${combinedRoles[@]/$role}" )
+            done
+            echo "Combined role list after remove: $combinedRoles"
+          fi
+          
+          echo "Final role list: $combinedRoles"
+          # make call to IDAM to update roles for existing user
+          submit_response=$(update_user_roles "$combinedRoles" "$userId")
+        fi
         # seperate submit_user_registation reponse
         IFS=$'\n'
         local response_array=($submit_response)
         local inviteStatus=${response_array[0]}
         local idamResponse=${response_array[1]}
-
         if [ $inviteStatus == "SUCCESS" ]; then
           # SUCCESS:
           success_counter=$((success_counter+1))
@@ -279,7 +390,7 @@ function process_input_file() {
         fi
 
         # prepare output (NB: escape generated values for CSV)
-        input_csv=$(echo $user | jq -r '[.idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+        input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
         timestamp=$(date -u +"%FT%H:%M:%SZ")
         output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
       else
@@ -288,9 +399,9 @@ function process_input_file() {
         echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: inviteStatus == ${GREEN}${inviteStatus}${NORMAL}"
 
         # prepare output
-        output_csv=$(echo $user | jq -r '[.idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles, .extraCsvData.inviteStatus, .extraCsvData.idamResponse // "", .extraCsvData.idamUserJson, '.extraCsvData.timestamp'] | @csv')
-      fi
+        output_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles, .extraCsvData.inviteStatus, .extraCsvData.idamResponse // "", .extraCsvData.idamUserJson, '.extraCsvData.timestamp'] | @csv')
 
+      fi
       # record log of action in output file (NB: escape values for CSV)
       echo "$output_csv" >> "$filepath_output_newpath"
     done
