@@ -24,7 +24,7 @@ The CSV input file must contain the following *mandatory* elements, including a 
 
 | Header       | Mandatory | Description                                               |
 |--------------|-----------|-----------------------------------------------------------|
-| operation    | **Yes**   | Either `add` or `update`                                  |
+| operation    | **Yes**   | Either `create` or `update`                                  |
 | email        | **Yes**   | Email address of user.                                    |
 | firstName    | **Yes**   | First name of user.                                       |
 | lastName     | **Yes**   | Last name of user.                                        |
