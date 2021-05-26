@@ -31,7 +31,7 @@ function get_idam_token() {
       --data-urlencode "username=${ADMIN_USER}" \
       --data-urlencode "password=${ADMIN_USER_PWD}" \
       --data-urlencode "redirect_uri=${REDIRECT_URI}" \
-      --data-urlencode "scope=openid roles create-user"
+      --data-urlencode "scope=openid roles create-user manage-user"
   )
 
   exit_code=$?
@@ -109,7 +109,7 @@ function update_user_roles() {
   local USER=$2
 
   curl_result=$(
-    curl -w $"\n%{http_code}" --silent -X PATCH "${IDAM_URL}/api/v1/users/${USER}/roles" -H "accept: application/json" -H "Content-Type: application/json" \
+    curl -w $"\n%{http_code}" --silent -X PUT "${IDAM_URL}/api/v1/users/${USER}/roles" -H "accept: application/json" -H "Content-Type: application/json" \
       -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}" \
       -d "${ROLES}"
   )
@@ -351,28 +351,26 @@ function process_input_file() {
           # get user id and roles from IDAM
           local rawReturnedValue=$(get_user "$email")
           local userId=$(echo $rawReturnedValue | jq --raw-output '.id')
-          echo "User ID: $userId"
           local currentRoles=$(echo $rawReturnedValue | jq --raw-output '.roles')
-          echo "Current User Roles: $currentRoles"
 
           # combine current roles and roles to add
           if [ "${rolesToAdd}" != "null" ]; then
               combinedRoles=$(echo $currentRoles $rolesToAdd | jq '.[]' | jq -s)
-            echo "Combined role list after add: $combinedRoles"
           fi
-          echo "Roles to Remove: $rolesToRemove"
 
+          # functionality flakey, removing for now
           # remove roles to remove from the combined role list
-          if [ "${rolesToRemove}" != "null" ]; then
-            for role in ${rolesToRemove[@]}; do
-              combinedRoles=( "${combinedRoles[@]/$role}" )
-            done
-            echo "Combined role list after remove: $combinedRoles"
-          fi
+          # if [ "${rolesToRemove}" != "null" ]; then
+          #   for role in ${rolesToRemove[@]}; do
+          #     combinedRoles=( "${combinedRoles[@]/$role}" )
+          #   done
+          # fi
           
-          echo "Final role list: $combinedRoles"
+          # convert roles to JSON ready to send to IDAM
+          combinedRolesJson=$(echo $combinedRoles | jq 'map( {"name" : . } )')
+
           # make call to IDAM to update roles for existing user
-          submit_response=$(update_user_roles "$combinedRoles" "$userId")
+          submit_response=$(update_user_roles "$combinedRolesJson" "$userId")
         fi
         # seperate submit_user_registation reponse
         IFS=$'\n'
