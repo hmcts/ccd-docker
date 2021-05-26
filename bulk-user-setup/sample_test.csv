@@ -1,6 +1,6 @@
-email,firstName,lastName,roles
-rejum@tedek.by,Sophie,Owen,caseworker|caseworker-autotest1|caseworker-autotest1-private
-cepumo@gopwisu.tp,Matilda,Reynolds,caseworker|caseworker-autotest1
-ejeso@men.ci,Adele,Norris,caseworker|caseworker-autotest1|caseworker-autotest1-private
-fobip@fic.va,Alexander,Wagner,caseworker
-luazfi@nihisasi.mx,Eugenia,Hardy,caseworker
+operation,email,firstName,lastName,roles
+create,rejum@tedek.by,Sophie,Owen,caseworker|caseworker-autotest1|caseworker-autotest1-private
+create,cepumo@gopwisu.tp,Matilda,Reynolds,caseworker|caseworker-autotest1
+create,ejeso@men.ci,Adele,Norris,caseworker|caseworker-autotest1|caseworker-autotest1-private
+create,fobip@fic.va,Alexander,Wagner,caseworker
+create,luazfi@nihisasi.mx,Eugenia,Hardy,caseworker

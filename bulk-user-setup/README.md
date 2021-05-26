@@ -24,10 +24,13 @@ The CSV input file must contain the following *mandatory* elements, including a 
 
 | Header       | Mandatory | Description                                               |
 |--------------|-----------|-----------------------------------------------------------|
+| operation    | **Yes**   | Either `create` or `update`                                  |
 | email        | **Yes**   | Email address of user.                                    |
 | firstName    | **Yes**   | First name of user.                                       |
 | lastName     | **Yes**   | Last name of user.                                        |
 | roles        | **Yes**   | A pipe delimited list of roles for the user.              |
+| rolesToAdd   | no        | A pipe delimited list of roles to add for the user.       |
+| rolesToRemove| no        | A pipe delimited list of roles to remove for the user.    |
 | inviteStatus | (output)  | Status of invite, e.g. `SUCCESS`, `HTTP-404`, etc.  NB: If process is re-run using the output file then it will skip rows that have `inviteStatus == 'SUCCESS'`. |
 | idamResponse | (output)  | JSON response from API.                                   |
 | idamUserJson | (output)  | Copy of JSON submission to API.                           |
@@ -55,7 +58,7 @@ The import CSV file is renamed by the process to discourage its accidental re-us
     * Client-id / label to  =>  "ccd-bulk-user-register"
     * Client description to  =>   "CCD bulk user register"
     * Client secret => anything
-    * Scope => "create-user"
+    * Scope => "create-user manage-user"
     * Redirect-uri => https://create-bulk-user-test/oauth2redirect
 
 2. You need to use ccd admin user ideally rather than idam super admin for this activity.
