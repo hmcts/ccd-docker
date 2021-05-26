@@ -339,7 +339,7 @@ function process_input_file() {
       local operation=$(echo $user | jq --raw-output '.extraCsvData.operation')
       local rolesToAdd=$(echo $user | jq --raw-output '.idamUser.rolesToAdd')
       local rolesToRemove=$(echo $user | jq --raw-output '.idamUser.rolesToRemove')
-      echo "created local variables"
+
       if [ "$inviteStatus" != "SUCCESS" ]; then
         
         # load formatted user JSON ready to send to IDAM 
