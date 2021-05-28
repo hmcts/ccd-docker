@@ -173,11 +173,52 @@ function get_user() {
       # FAIL:
       response="HTTP-${response_status}
 ${response_body}"
+      echo "HTTP-${response_status}
+ERROR: Request for UserID with email address ${EMAIL} failed with http response: HTTP-${response_status}"
     fi
   else
     # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
     response="CURL-${exit_code}
 ERROR: Request for UserID with email address ${EMAIL} failed with curl exit code: ${exit_code}"
+  fi
+  echo "$response"
+}
+
+function get_user_roles() {
+  local USERID=$1
+
+  curl_result=$(
+    curl -w $"\n%{http_code}" --silent -X GET "${IDAM_URL}/api/v1/users/${USERID}" -H "accept: */*" -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
+  )
+
+  exit_code=$?
+  if [ $exit_code -eq 0 ]; then
+    # seperate body and status into an array
+    IFS=$'\n' response_array=($curl_result)
+
+    array_length=${#response_array[@]}
+    if [ $array_length -eq 1 ]; then
+      response_body='' # clear body
+      response_status=${response_array[0]}
+    else
+      response_body=${response_array[0]}
+      response_status=${response_array[${array_length}-1]}
+    fi
+
+    if [ $(( response_status )) -gt 199 ] && [ $(( response_status )) -lt 300 ]; then
+      # SUCCESS:
+      response=${response_body}
+    else
+      # FAIL:
+      response="HTTP-${response_status}
+${response_body}"
+      echo "HTTP-${response_status}
+ERROR: Request for roles of user UserID ${USERID} failed with http response: HTTP-${response_status}"
+    fi
+  else
+    # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
+    response="CURL-${exit_code}
+ERROR: Request for roles of user UserID ${USERID} failed with curl exit code: ${exit_code}"
   fi
   echo "$response"
 }
@@ -350,27 +391,42 @@ function process_input_file() {
         elif [ "$operation" == "update" ]; then
           # get user id and roles from IDAM
           local rawReturnedValue=$(get_user "$email")
-          local userId=$(echo $rawReturnedValue | jq --raw-output '.id')
-          local currentRoles=$(echo $rawReturnedValue | jq --raw-output '.roles')
+          submit_response=$rawReturnedValue
 
-          # combine current roles and roles to add
-          if [ "${rolesToAdd}" != "null" ]; then
-              combinedRoles=$(echo $currentRoles $rolesToAdd | jq '.[]' | jq -s)
+          # Prevent further API calls if User ID cannot be returned
+          if [[ $rawReturnedValue != *"HTTP-"* ]]; then 
+            local userId=$(echo $rawReturnedValue | jq --raw-output '.id')
+            local rawUser=$(get_user_roles "$userId" )
+            local currentRoles=$(echo $rawUser | jq --raw-output '.roles')
+
+            # Logic test to confirm current roles are returned
+            # to prevent data loss
+            if [ "${currentRoles}" != "[]" ]; then
+              # combine current roles and roles to add
+              if [ "${rolesToAdd}" != "null" ]; then
+                  combinedRoles=$(echo $currentRoles $rolesToAdd | jq '.[]' | jq -s)
+              fi
+
+              # functionality flakey, removing for now
+              # remove roles to remove from the combined role list
+              # if [ "${rolesToRemove}" != "null" ]; then
+              #   for role in ${rolesToRemove[@]}; do
+              #     combinedRoles=( "${combinedRoles[@]/$role}" )
+              #   done
+              # fi
+              
+              # convert roles to JSON ready to send to IDAM
+              combinedRolesJson=$(echo $combinedRoles | jq 'map( {"name" : . } )')
+
+              # make call to IDAM to update roles for existing user
+              submit_response=$(update_user_roles "$combinedRolesJson" "$userId")
+            else
+              # Update response showing why user was skipped
+              submit_response=$(echo skiping $email as no current roles have been returned)
+            fi  
+          else
+            submit_response=$(echo "$rawReturnedValue")
           fi
-
-          # functionality flakey, removing for now
-          # remove roles to remove from the combined role list
-          # if [ "${rolesToRemove}" != "null" ]; then
-          #   for role in ${rolesToRemove[@]}; do
-          #     combinedRoles=( "${combinedRoles[@]/$role}" )
-          #   done
-          # fi
-          
-          # convert roles to JSON ready to send to IDAM
-          combinedRolesJson=$(echo $combinedRoles | jq 'map( {"name" : . } )')
-
-          # make call to IDAM to update roles for existing user
-          submit_response=$(update_user_roles "$combinedRolesJson" "$userId")
         fi
         # seperate submit_user_registation reponse
         IFS=$'\n'
