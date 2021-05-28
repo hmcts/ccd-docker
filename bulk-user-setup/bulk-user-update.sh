@@ -173,7 +173,8 @@ function get_user() {
       # FAIL:
       response="HTTP-${response_status}
 ${response_body}"
-      echo "ERROR: Request for UserID with email address ${EMAIL} failed with http response: HTTP-${response_status}"
+      echo "HTTP-${response_status}
+ERROR: Request for UserID with email address ${EMAIL} failed with http response: HTTP-${response_status}"
     fi
   else
     # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
@@ -211,7 +212,8 @@ function get_user_roles() {
       # FAIL:
       response="HTTP-${response_status}
 ${response_body}"
-      echo "ERROR: Request for roles of user UserID ${USERID} failed with http response: HTTP-${response_status}"
+      echo "HTTP-${response_status}
+ERROR: Request for roles of user UserID ${USERID} failed with http response: HTTP-${response_status}"
     fi
   else
     # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
