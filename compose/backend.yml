@@ -186,16 +186,11 @@ services:
       - 5555:5555
     networks:
       - ccd-network
-    #provide custom Idam roles when using Idam Stub.
-    #uncomment and add the desired roles to idam_stub_get_details_custom.json. Then restart the Stub Service
-    volumes:
-      - ${PWD}/resources/role_assignments/get_role_assignments.json:/opt/app/wiremock/mappings/get_role_assignments.json
-      - ${PWD}/resources/role_assignments/get_role_assignments_not_found.json:/opt/app/wiremock/mappings/get_role_assignments_not_found.json
-      - ${PWD}/resources/role_assignments/get_role_assignments_with_expired_results.json:/opt/app/wiremock/mappings/get_role_assignments_with_expired_results.json
-      - ${PWD}/resources/role_assignments/post_role_assignments_2_record.json:/opt/app/wiremock/mappings/post_role_assignments_2_record.json
-      - ${PWD}/resources/role_assignments/post_role_assignments_one_record.json:/opt/app/wiremock/mappings/post_role_assignments_one_record.json
-      - ${PWD}/resources/role_assignments/post_role_assignments_query_expired.json:/opt/app/wiremock/mappings/post_role_assignments_query_expired.json
-      - ${PWD}/resources/role_assignments/post_role_assignments_query_notFound_3.json:/opt/app/wiremock/mappings/post_role_assignments_query_notFound_3.json
+# provide custom Idam roles when using Idam Stub.
+# uncomment and add the desired roles to idam_stub_get_details_custom.json. Then restart the Stub Service
+#    volumes:
+#      - ${PWD}/resources/idam_stub_get_details_custom.json:/opt/app/wiremock/mappings/idam_get_details.json
+
 volumes:
   ccd-docker-ccd-shared-database-data:
   ccd-docker-ccd-shared-database-data-v11:
