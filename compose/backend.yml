@@ -89,6 +89,10 @@ services:
       ELASTIC_SEARCH_DATA_NODES_HOSTS: "http://ccd-elasticsearch:9200"
       CCD_DEFAULTPRINTURL: https://return-case-doc-ccd.nonprod.platform.hmcts.net/jurisdictions/:jid/case-types/:ctid/cases/:cid
       CCD_DOCUMENT_URL_PATTERN: "${CCD_DOCUMENT_URL_PATTERN}"
+      ENABLE_ATTRIBUTE_BASED_ACCESS_CONTROL: "${ENABLE_ATTRIBUTE_BASED_ACCESS_CONTROL:-false}"
+      ENABLE_PSEUDO_ROLE_ASSIGNMENTS_GENERATION: "${ENABLE_PSEUDO_ROLE_ASSIGNMENTS_GENERATION:-false}"
+      ENABLE_PSEUDO_ACCESS_PROFILES_GENERATION: "${ENABLE_PSEUDO_ACCESS_PROFILES_GENERATION:-false}"
+      ROLE_ASSIGNMENT_URL: "${ROLE_ASSIGNMENT_URL:-http://ccd-test-stubs-service:5555}"
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
       # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
     ports:
@@ -184,9 +188,14 @@ services:
       - ccd-network
     #provide custom Idam roles when using Idam Stub.
     #uncomment and add the desired roles to idam_stub_get_details_custom.json. Then restart the Stub Service
-#    volumes:
-#      - ${PWD}/resources/idam_stub_get_details_custom.json:/opt/app/wiremock/mappings/idam_get_details.json
-
+    volumes:
+      - ${PWD}/resources/role_assignments/get_role_assignments.json:/opt/app/wiremock/mappings/get_role_assignments.json
+      - ${PWD}/resources/role_assignments/get_role_assignments_not_found.json:/opt/app/wiremock/mappings/get_role_assignments_not_found.json
+      - ${PWD}/resources/role_assignments/get_role_assignments_with_expired_results.json:/opt/app/wiremock/mappings/get_role_assignments_with_expired_results.json
+      - ${PWD}/resources/role_assignments/post_role_assignments_2_record.json:/opt/app/wiremock/mappings/post_role_assignments_2_record.json
+      - ${PWD}/resources/role_assignments/post_role_assignments_one_record.json:/opt/app/wiremock/mappings/post_role_assignments_one_record.json
+      - ${PWD}/resources/role_assignments/post_role_assignments_query_expired.json:/opt/app/wiremock/mappings/post_role_assignments_query_expired.json
+      - ${PWD}/resources/role_assignments/post_role_assignments_query_notFound_3.json:/opt/app/wiremock/mappings/post_role_assignments_query_notFound_3.json
 volumes:
   ccd-docker-ccd-shared-database-data:
   ccd-docker-ccd-shared-database-data-v11:
