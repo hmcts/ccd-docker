@@ -2,7 +2,7 @@ version: '2.4'
 services:
 
   ccd-logstash:
-    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-latest"
+    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-logstash-latest"
     container_name: ccd-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
