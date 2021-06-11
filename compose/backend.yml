@@ -68,6 +68,7 @@ services:
   ccd-data-store-api:
     image: "${CCD_DATA_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
     environment:
+      CASE_DOCUMENT_AM_URL: http://ccd-case-document-am-api:4455
       DATA_STORE_DB_HOST: "${CCD_POSTGRES_11:-ccd-shared-database}"
       DATA_STORE_DB_PORT: 5432
       DATA_STORE_DB_USERNAME: "${DB_USERNAME}"
