@@ -676,6 +676,7 @@ By default, `ccd-docker` runs the most commonly used backend and frontend projec
   * **ccd-definition-store-api**: CCD's dynamic case definition repository
   * **ccd-data-store-api**: CCD's cases repository
   * **ccd-test-stubs-service**: CCD's testing support for stubbing http calls (service callbacks etc)
+  * **am-role-assignment-service**: Users' role assignments for access management
 * Front-end:
   * **idam-web-public**: SIDAM's login UI
   * **ccd-api-gateway**: Proxy with SIDAM and S2S integration
