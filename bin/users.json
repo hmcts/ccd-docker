@@ -50,5 +50,7 @@
 
   {"email": "befta.jurisdiction.3.solicitor.alice@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_3,caseworker-befta_jurisdiction_3-solicitor,pui-caa", "lastName": "Solicington", "firstName": "Alice"},
 
-  {"email": "befta.caseworker.caa@gmail.com", "roles": "caseworker,caseworker-caa", "lastName": "CAA", "firstName": "Caseworker"}
+  {"email": "befta.caseworker.caa@gmail.com", "roles": "caseworker,caseworker-caa", "lastName": "CAA", "firstName": "Caseworker"},
+
+  {"email": "role.assignment.admin@gmail.com", "roles": "caseworker", "lastName": "RA", "firstName": "Admin"}
 ]
