@@ -1,0 +1,28 @@
+[
+  {
+    "email": "auto.test.cnp@gmail.com", 
+    "roleAssignments": [
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "staff",
+        "grantType": "STANDARD",
+        "roleCategory": "LEGAL_OPERATIONS",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": { "caseType": "AAT", "jurisdiction": "AUTOTEST1" },
+        "authorisations": []
+      },
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "staff",
+        "grantType": "STANDARD",
+        "roleCategory": "LEGAL_OPERATIONS",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": { "caseType": "MAPPER", "jurisdiction": "AUTOTEST1" },
+        "authorisations": []
+      }
+    ], 
+    "overrideAll": true 
+  }
+]
