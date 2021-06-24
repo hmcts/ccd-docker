@@ -166,6 +166,7 @@ At this point most users can run the following 4 scripts
 ./bin/add-idam-roles.sh
 ./bin/add-users.sh
 ./bin/add-ccd-roles.sh
+./bin/add-role-assignments.sh
 ```
 
 
@@ -390,7 +391,37 @@ Navigate to
 
 and search for users by email address.
 
-###4. Import case definition
+### 4. Create role assignments
+
+A script is provided that sets up some initial role assignments for users. Execute the following:
+
+```bash
+./bin/add-role-assignments.sh
+```
+
+This script will add role assignments for the associated users as defined in
+
+```bash
+bin/am-role-assignments.json
+```
+
+This script runs the checks below, for each user defined in the `am-role-assignments.json`
+
+```bash
+if overrideAll flag is true
+    delete any existing role assignments for the user
+else 
+    do nothing
+
+then 
+    create all user's assignments
+```
+
+Note that currently the role assignments are created in the role assignment database directly due to restrictions in the rules engine of the Role Assignment Service APIs.
+
+The `am-role-assignments.json` can be modified to add further role assignments to users.
+
+### 5. Import case definition
 
 #### Note:
 
@@ -418,7 +449,6 @@ Validation errors occurred importing the spreadsheet.
 ```
 
 Then the indicated role, here `caseworker-cmc-loa1`, must be added to CCD (See [2. Create Idam roles](2-.-Create-Idam-roles)).
-
 ### Ready for take-off 🛫
 
 Back to [http://localhost:3451](http://localhost:3451), you can now log in with any of the email addresses defined when adding users in [3. Create Users](#3.-Create-users).
@@ -711,6 +741,7 @@ By default, `ccd-docker` runs the most commonly used backend and frontend projec
   * **ccd-definition-store-api**: CCD's dynamic case definition repository
   * **ccd-data-store-api**: CCD's cases repository
   * **ccd-test-stubs-service**: CCD's testing support for stubbing http calls (service callbacks etc)
+  * **am-role-assignment-service**: Users' role assignments for access management
 * Front-end:
   * **idam-web-public**: SIDAM's login UI
   * **ccd-api-gateway**: Proxy with SIDAM and S2S integration
