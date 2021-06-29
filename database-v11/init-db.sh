@@ -17,7 +17,7 @@ for service in idam ccd_user_profile ccd_definition ccd_data evidence ccd_defini
 psql -v ON_ERROR_STOP=1 --username postgres --set USERNAME=$DB_USERNAME --set PASSWORD=$DB_PASSWORD --set DATABASE=$service <<-EOSQL
   CREATE DATABASE :DATABASE
     WITH OWNER = :USERNAME
-    ENCODING = 'UTF-8'
+    ENCODING = 'UTF8'
     CONNECTION LIMIT = -1;
 EOSQL
   echo "Database $service: Created"
