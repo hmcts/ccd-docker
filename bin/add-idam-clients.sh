@@ -11,3 +11,5 @@ ${dir}/utils/idam-create-service.sh "xui_webapp" "xui_webapp" "xui_webapp_secrec
 ${dir}/utils/idam-create-service.sh "ccd_admin" "ccd_admin" "ccd_admin_secret" "https://localhost:3100/oauth2redirect" "false" "profile openid roles"
 
 ${dir}/utils/idam-create-service.sh "am_role_assignment" "am_role_assignment" "am_role_assignment_secret" "http://localhost:4096/oauth2redirect" "false" "profile openid roles search-user"
+
+${dir}/utils/idam-create-service.sh "ccd_data_store_api" "ccd_data_store_api" "ccd_data_store_api_secrect" "http://localhost:3455/oauth2/callback" "false" "profile openid roles manage-user"
