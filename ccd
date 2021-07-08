@@ -72,6 +72,12 @@ function project_config() {
             envPrefix="CCD_MESSAGE_PUBLISHER"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
+        am-role-assignment-service|role-assignment-service|ras)
+            name=am-role-assignment-service
+            repository="git@github.com:hmcts/am-role-assignment-service.git"
+            envPrefix="AM_ROLE_ASSIGNMENT_SERVICE"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
         ccd-definition-designer-api|definition-designer-api|definition-designer|def-design|designer)
             name=ccd-definition-designer-api
             repository="git@github.com:hmcts/ccd-definition-designer-api.git"
@@ -254,6 +260,9 @@ function docker_build() {
     imageName=${buildProject#"ccd-"}
     if [[ $project == "xui-manage-cases" ]]; then
       (cd $workspace && docker build . -t xui/webapp:$tagName || exit $?)
+    fi
+    if [[ $project == "am-role-assignment-service" ]]; then
+      (cd $workspace && docker build . -t am/role-assignment-service:$tagName || exit $?)
     fi
 
     if [[ $project != "xui-manage-cases" ]]; then
@@ -620,6 +629,7 @@ function print_warn_on_compose_down_if_idam_enabled {
 function ccd_login() {
     #docker logout hmctspublic.azurecr.io &>/dev/null
     az acr login --name hmctsprivate --subscription 8999dec3-0104-4a27-94ee-6588559729d1
+    az acr login --name hmctspublic --subscription 8999dec3-0104-4a27-94ee-6588559729d1
 }
 
 if [ $# -lt 1 ]; then
