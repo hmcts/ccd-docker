@@ -143,7 +143,7 @@ services:
        ROLE_ASSIGNMENT_IDAM_CLIENT_SECRET: am_role_assignment_secret
        ROLE_ASSIGNMENT_IDAM_ADMIN_USERID: role.assignment.admin@gmail.com
        ROLE_ASSIGNMENT_IDAM_ADMIN_PASSWORD: "${AM_ROLE_AADMINGMENT_ADMIN_PWD:-Pa55word11}"
-       ROLE_ASSIGNMENT_IDAM_ADMIN_SCOPE: search-user
+       ROLE_ASSIGNMENT_IDAM_ADMIN_SCOPE: profile openid roles search-user
        CCD_DATA_STORE_URL: http://ccd-data-store-api:4452
        AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY:
        REFORM_SERVICE_NAME: am-role-assignment-service
@@ -193,7 +193,7 @@ services:
       MICROSERVICEKEYS_PAYMENT_APP: "${BEFTA_S2S_CLIENT_SECRET_OF_PAYMENT_APP}"
       MICROSERVICEKEYS_CCD_CASE_DOCUMENT_AM_API : "${IDAM_KEY_CASE_DOCUMENT}"
       MICROSERVICEKEYS_BULK_SCAN_PROCESSOR: "${IDAM_KEY_BULK_SCAN_PROCESSOR}"
-      MICROSERVICEKEYS_AM_ROLE_ASSIGNMENT: "${IDAM_KEY_AM_ROLE_ASSIGNMENT}"
+      MICROSERVICEKEYS_AM_ROLE_ASSIGNMENT_SERVICE: "${IDAM_KEY_AM_ROLE_ASSIGNMENT}"
       TESTING_SUPPORT_ENABLED: "true"
     networks:
       - ccd-network
@@ -216,22 +216,22 @@ services:
       - ccd-network
 
 # Uncomment this section to enable ccd-shared-database with Postgres version 11.
-#  ccd-shared-database-v11:
-#    build: ../database-v11
-#    healthcheck:
-#      interval: 10s
-#      timeout: 10s
-#      retries: 10
-#    environment:
-#      DB_USERNAME:
-#      DB_PASSWORD:
-#      POSTGRES_HOST_AUTH_METHOD: trust
-#    ports:
-#      - 5055:5432
-#    volumes:
-#      - ccd-docker-ccd-shared-database-data-v11:/var/lib/postgresql/data
-#    networks:
-#      - ccd-network
+  #  ccd-shared-database-v11:
+  #    build: ../database-v11
+  #    healthcheck:
+  #      interval: 10s
+  #      timeout: 10s
+  #      retries: 10
+  #    environment:
+  #      DB_USERNAME:
+  #      DB_PASSWORD:
+  #      POSTGRES_HOST_AUTH_METHOD: trust
+  #    ports:
+  #      - 5055:5432
+  #    volumes:
+  #      - ccd-docker-ccd-shared-database-data-v11:/var/lib/postgresql/data
+  #    networks:
+  #      - ccd-network
 
   ccd-test-stubs-service:
     image: "${CCD_TEST_STUBS_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}ccd/test-stubs-service:${CCD_TEST_STUBS_SERVICE_TAG:-latest}"
