@@ -14,7 +14,6 @@ services:
       MICROSERVICE: xui_webapp
       PROTOCOL: http
       XUI_ENV: local
-
       SERVICES_DOCUMENTS_API: http://dm-store:8080
       SERVICES_PAYMENTS_URL: http://wiremock:8080
       SERVICES_EM_ANNO_API: http://ccd-api-gateway:3453
@@ -26,11 +25,11 @@ services:
       SERVICES_IDAM_INDEX_URL: /
       SERVICES_IDAM_OAUTH_CALLBACK_URL: /oauth2/callback
       SERVICES_S2S: http://service-auth-provider-api:8080
+      SYSTEM_USER_NAME: "${XUI_SYSTEM_USER_NAME}"
+      SYSTEM_USER_PASSWORD: Pa55word11
       REDISCLOUD_URL: http://localhost:6780
-
       HEALTH_CCD_COMPONENT_API: http://ccd-api-gateway:3453/health
       HEALTH_CCD_DATA_API: http://ccd-data-store-api:4452/health
-
       APPINSIGHTS_INSTRUMENTATIONKEY: TESTVAR
       IDAM_SECRET: xui_webapp_secrect
       S2S_SECRET: "${BEFTA_S2S_CLIENT_SECRET_OF_XUI_WEBAPP}"
@@ -39,12 +38,48 @@ services:
 
     ports:
       - 3455:3000
-    depends_on:
-      - ccd-api-gateway
-      - ccd-data-store-api
     networks:
       - ccd-network
 
 networks:
+  #
+  #  xui-manage-cases:
+  #    image: "${XUI_MANAGE_CASES_USE_LOCAL-hmctspublic.azurecr.io/}xui/webapp:${XUI_MANAGE_CASES_TAG:-latest}"
+  #    environment:
+  #      FEATURE_APP_INSIGHTS_ENABLED: "true"
+  #      FEATURE_SECURE_COOKIE_ENABLED: "false"
+  #      FEATURE_REDIS_ENABLED: "false"
+  #      JURISDICTIONS: DIVORCE
+  #      MICROSERVICE: xui_webapp
+  #      PROTOCOL: http
+  #      XUI_ENV: local
+  #      SERVICES_DOCUMENTS_API: http://dm-store-aat.service.core-compute-aat.internal
+  #      SERVICES_PAYMENTS_URL: http://payments-api:8080
+  #      SERVICES_EM_ANNO_API: http://ccd-api-gateway:3453
+  #      SERVICES_CCD_COMPONENT_API: http://ccd-api-gateway:3453
+  #      SERVICES_CCD_DATA_STORE_API: http://ccd-data-store-api:4452
+  #      SERVICES_IDAM_API_URL: http://idam-api:5000
+  #      SERVICES_IDAM_CLIENT_ID: xuiwebapp
+  #      SERVICES_IDAM_LOGIN_URL: http://localhost:3501
+  #      SERVICES_IDAM_INDEX_URL: /
+  #      SERVICES_IDAM_OAUTH_CALLBACK_URL: /oauth2/callback
+  #      SERVICES_S2S: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
+  #      SYSTEM_USER_NAME: "${XUI_SYSTEM_USER_NAME}"
+  #      SYSTEM_USER_PASSWORD: "${XUI_SYSTEM_USER_PASSWORD}"
+  #      REDISCLOUD_URL: http://localhost:6780
+  #      HEALTH_CCD_COMPONENT_API: http://ccd-api-gateway:3453/health
+  #      HEALTH_CCD_DATA_API: http://ccd-data-store-api:4452/health
+  #      SERVICES_PRD_API: http://mock-rd-professional-api:8080
+  #      APPINSIGHTS_INSTRUMENTATIONKEY: TESTVAR
+  #      IDAM_SECRET: "${OAUTH2_CLIENT_SECRET}"
+  #      S2S_SECRET: "${XUI_SERVICE_KEY}"
+  #      LAUNCH_DARKLY_CLIENT_ID: "${XUI_LD_ID}"
+  #    ports:
+  #      - 3000:3000
+  #    depends_on:
+  #      - ccd-api-gateway
+  #      - ccd-data-store-api
+  #      - idam-api
   ccd-network:
     external: true
+#
