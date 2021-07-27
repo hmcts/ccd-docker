@@ -1,0 +1,18 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/card-payments"
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{\"id\": 1, \"amount\": 550, \"status\": \"created\", \"external_reference\": \"123\", \"reference\": \"a65-f836-4f61-a628-727199ef6c20\", \"date_created\": 1519116121848, \"_links\": { \"next_url\": { \"href\": \"gov-pay-stub\" }}}"
+
+      }
+    }
+  ]
+}
