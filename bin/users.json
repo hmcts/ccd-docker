@@ -1,3 +1,56 @@
 [
-  {"email": "RDM-7956-03@ccd.example.com", "roles": "caseworker,caseworker-rdm7956,caseworker-rdm7956-perm1", "lastName": "test", "firstName": "rdm-7956-03"}
+  {"email": "befta.pui.caa.1@gmail.com", "roles": "pui-caa", "lastName": "CAA", "firstName": "Pui"},
+  {"email": "ccd.docker.default@hmcts.net", "roles": "ccd-import", "lastName": "Default CCD_Docker"},
+
+  {"email": "auto.test.cnp@gmail.com", "roles": "caseworker,caseworker-autotest1,ccd-import", "lastName": "testsurname"},
+  {"email": "auto.test.cnp+private@gmail.com", "roles": "caseworker,caseworker-autotest1,caseworker-autotest1-private"},
+  {"email": "auto.test.cnp+senior@gmail.com", "roles": "caseworker,caseworker-autotest1,caseworker-autotest1-senior"},
+  {"email": "auto.test.cnp+solc@gmail.com", "roles": "caseworker,caseworker-autotest1,caseworker-autotest1-solicitor"},
+  {"email": "auto.test2.cnp@gmail.com", "roles": "caseworker,caseworker-autotest2"},
+  {"email": "auto.test2.cnp+private@gmail.com", "roles": "caseworker,caseworker-autotest2,caseworker-autotest2-private"},
+  {"email": "auto.test2.cnp+senior@gmail.com", "roles": "caseworker,caseworker-autotest2,caseworker-autotest2-senior"},
+  {"email": "auto.test2.cnp+solc@gmail.com", "roles": "caseworker,caseworker-autotest2,caseworker-autotest2-solicitor"},
+  {"email": "auto.test12.cnp@gmail.com", "roles": "caseworker,caseworker-autotest1,caseworker-autotest2"},
+  {"email": "auto.test12.cnp+private@gmail.com", "roles": "caseworker,caseworker-autotest1,caseworker-autotest1-private,caseworker-autotest2,caseworker-autotest2-private"},
+  {"email": "auto.test12.cnp+solc@gmail.com", "roles": "caseworker,caseworker-autotest1,caseworker-autotest1-solicitor,caseworker-autotest2,caseworker-autotest2-solicitor"},
+  {"email": "auto.test12.cnp+senior@gmail.com", "roles": "caseworker,caseworker-autotest1,caseworker-autotest1-senior,caseworker-autotest2,caseworker-autotest2-senior"},
+  {"email": "ccdimportdomain@gmail.com", "roles": "caseworker,caseworker-autotest1,caseworker-autotest1-senior"},
+
+  {"email": "befta.citizen.2@gmail.com", "roles": "citizen"},
+  {"email": "befta.citizen.3@gmail.com", "roles": "citizen"},
+
+  {"email": "befta.caseworker.1@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_1"},
+  {"email": "befta.caseworker.1.noprofile@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_1", "lastName": "testsurname", "firstName": "testfirstname"},
+
+  {"email": "befta.caseworker.2@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_2"},
+  {"email": "befta.caseworker.2.solicitor.1@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_2,caseworker-befta_jurisdiction_2-solicitor_1"},
+  {"email": "befta.caseworker.2.solicitor.2@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_2,caseworker-befta_jurisdiction_2-solicitor_2"},
+  {"email": "befta.caseworker.2.solicitor.3@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_2,caseworker-befta_jurisdiction_2-solicitor_3"},
+
+  {"email": "befta.caseworker.3@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_3"},
+  {"email": "befta.solicitor.3@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_3,caseworker-befta_jurisdiction_3-solicitor"},
+  {"email": "befta.solicitor.4@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_3,caseworker-befta_jurisdiction_3-solicitor"},
+
+  {"email": "master.caseworker@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "befta", "firstName": "master"},
+
+  {"email": "master.solicitor.1@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor_1", "lastName": "befta", "firstName": "solicitor1"},
+  {"email": "master.solicitor.2@gmail.com","roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor_2", "lastName": "befta", "firstName": "solicitor2"},
+  {"email": "master.solicitor.3@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor_3", "lastName": "befta", "firstName": "solicitor3"},
+
+  {"email": "befta.master.solicitor.becky@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor", "lastName": "Solicington", "firstName": "Becky"},
+  {"email": "befta.master.solicitor.benjamin@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor", "lastName": "Solicington", "firstName": "Benjamin"},
+  {"email": "befta.master.solicitor.bill@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor", "lastName": "Solicington", "firstName": "Bill"},
+  {"email": "befta.master.solicitor.emma@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor", "lastName": "Solicington", "firstName": "Emma"},
+  {"email": "befta.master.solicitor.jane@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor,pui-caa", "lastName": "Solicington", "firstName": "Jane"},
+  {"email": "befta.master.solicitor.david@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solici", "lastName": "Solicington", "firstName": "David"},
+
+  {"email": "befta.master.solicitor.mutlu@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor", "lastName": "Solicington", "firstName": "Mutlu"},
+  {"email": "befta.master.solicitor.richard@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor", "lastName": "Solicington", "firstName": "Richard"},
+  {"email": "befta.master.solicitor.tony@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor", "lastName": "Solicington", "firstName": "Tony"},
+
+  {"email": "befta.jurisdiction.3.solicitor.alice@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_3,caseworker-befta_jurisdiction_3-solicitor,pui-caa", "lastName": "Solicington", "firstName": "Alice"},
+
+  {"email": "befta.caseworker.caa@gmail.com", "roles": "caseworker,caseworker-caa", "lastName": "CAA", "firstName": "Caseworker"},
+
+  {"email": "role.assignment.admin@gmail.com", "roles": "caseworker", "lastName": "RA", "firstName": "Admin"}
 ]
