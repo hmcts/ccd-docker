@@ -347,10 +347,8 @@ function process_input_file() {
   local datestamp=$(date -u +"%FT%H%M%SZ")
   local filepath_input_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "${datestamp}_INPUT")
   local filepath_output_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "${datestamp}_OUTPUT")
-  local caseworker_civil=$(get_role_id "caseworker-civil")
-  local caseworker_civil_id=$(echo $caseworker_civil | jq --raw-output '.id')
-  local caseworker_civil_solicitor=$(get_role_id "caseworker-civil-solicitor")
-  local caseworker_civil_solicitor_id=$(echo $caseworker_civil_solicitor | jq --raw-output '.id')
+  local payments=$(get_role_id "payments")
+  local payments_id=$(echo $payments | jq --raw-output '.id')
 
   # convert input file to json
   json=$(convert_input_file_to_json "${filepath_input_original}")
@@ -367,7 +365,7 @@ function process_input_file() {
   fi
 
   # write headers to output file
-  echo "operation,email,firstName,lastName,roles,inviteStatus,idamResponse,idamUserJson,timestamp" >> "$filepath_output_newpath"
+  echo "operation,email,firstName,lastName,roles,rolesToAdd,rolesToRemove,inviteStatus,idamResponse,idamUserJson,timestamp" >> "$filepath_output_newpath"
 
   # strip JSON into individual items then process in a while loop
   echo $json | jq -r -c '.[]' \
@@ -400,10 +398,7 @@ function process_input_file() {
             local userId=$(echo $rawReturnedValue | jq --raw-output '.id')
 
             # make call to IDAM to update roles for existing user
-            submit_response=$(add_user_role "$userId" "$caseworker_civil_id")
-            if [[ $submit_response != *"HTTP-"* ]]; then 
-              submit_response=$(add_user_role "$userId" "$caseworker_civil_solicitor_id")
-            fi
+            submit_response=$(add_user_role "$userId" "$payments_id")
           else
             submit_response=$(echo "$rawReturnedValue")
           fi
@@ -424,7 +419,7 @@ function process_input_file() {
         fi
 
         # prepare output (NB: escape generated values for CSV)
-        input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+        input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles, .idamUser.rolesToAdd, .idamUser.rolesToRemove] | @csv')
         timestamp=$(date -u +"%FT%H:%M:%SZ")
         output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
       else
@@ -433,7 +428,7 @@ function process_input_file() {
         echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: inviteStatus == ${GREEN}${inviteStatus}${NORMAL}"
 
         # prepare output
-        output_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles, .extraCsvData.inviteStatus, .extraCsvData.idamResponse // "", .extraCsvData.idamUserJson, '.extraCsvData.timestamp'] | @csv')
+        output_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles, .idamUser.rolesToAdd, .idamUser.rolesToRemove, .extraCsvData.inviteStatus, .extraCsvData.idamResponse // "", .extraCsvData.idamUserJson, '.extraCsvData.timestamp'] | @csv')
 
       fi
       # record log of action in output file (NB: escape values for CSV)
