@@ -9,7 +9,7 @@ services:
       - cluster.name=ccd-docker-es-cluster
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - action.auto_create_index=.security*,.watches,.triggered_watches,.watcher-history-*,.logstash_dead_letter,.ml*
+      - action.auto_create_index=.security*,.watches,.triggered_watches,.watcher-history-*,.logstash_dead_letter,.ml*,*_global_cases
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
