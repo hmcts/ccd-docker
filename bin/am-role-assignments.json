@@ -24,5 +24,119 @@
       }
     ], 
     "overrideAll": true 
+  },
+    {
+    "email": "ccd.ac.superuser@gmail.com", 
+    "roleAssignments": [
+      {
+       "roleType": "ORGANISATION",
+        "roleName": "Solicitor",
+        "grantType": "STANDARD",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "RESTRICTED",
+        "readOnly": false,
+        "attributes": { "jurisdiction":"J1", "caseType":"CT2" },
+        "authorisations": []
+      }
+    ], 
+    "overrideAll": true 
+  },
+
+  {
+    "email": "ccd.ac.solicitor1@gmail.com", 
+    "roleAssignments": [
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "Solicitor",
+        "grantType": "STANDARD",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": { "jurisdiction":"J1", "caseType":"CT1" },
+        "authorisations": []
+      },
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "Solicitor",
+        "grantType": "STANDARD",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": { "jurisdiction":"J1", "caseType":"CT2" },
+        "authorisations": []
+      },
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "Solicitor",
+        "grantType": "STANDARD",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": true,
+        "attributes": { "jurisdiction":"J1", "caseType":"CT4" },
+        "authorisations": []
+      },
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "Solicitor",
+        "grantType": "STANDARD",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": { "jurisdiction":"J1", "caseType":"CT5" },
+        "authorisations": []
+      },
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "Solicitor",
+        "grantType": "STANDARD",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": true,
+        "attributes": { "jurisdiction":"J1", "caseType":"CT6" },
+        "authorisations": []
+      },
+
+      {
+        "roleType": "CASE",
+        "roleName": "Appellant",
+        "grantType": "SPECIFIC",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": { "jurisdiction":"J1", "caseType":"CT2", "CaseId" : "J1-CT2-01" },
+        "authorisations": []
+      },
+      {
+        "roleType": "CASE",
+        "roleName": "Appellant",
+        "grantType": "SPECIFIC",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PRIVATE",
+        "readOnly": false,
+        "attributes": { "jurisdiction":"J1", "caseType":"CT2", "CaseId" : "J1-CT2-02" },
+        "authorisations": []
+      },
+      {
+        "roleType": "CASE",
+        "roleName": "Appellant",
+        "grantType": "SPECIFIC",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": { "jurisdiction":"J1", "caseType":"CT1", "CaseId" : "J1-CT1-02" },
+        "authorisations": []
+      },
+      {
+        "roleType": "CASE",
+        "roleName": "[CREATOR]",
+        "grantType": "SPECIFIC",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": { "jurisdiction":"J1", "caseType":"CT7", "CaseId" : "J1-CT7-01" },
+        "authorisations": []
+      }
+    ],
+    "overrideAll": true 
   }
 ]
