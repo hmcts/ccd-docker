@@ -53,8 +53,8 @@
   {"email": "befta.caseworker.caa@gmail.com", "roles": "caseworker,caseworker-caa", "lastName": "CAA", "firstName": "Caseworker"},
 
   {"email": "role.assignment.admin@gmail.com", "roles": "caseworker", "lastName": "RA", "firstName": "Admin"},
-  {"email": "data.store.idam.system.user@gmail.com", "roles": "", "lastName": "System User", "firstName": "Data Store"}
+  {"email": "data.store.idam.system.user@gmail.com", "roles": "", "lastName": "System User", "firstName": "Data Store"},
 
-  {"email": "ccd.ac.superuser@gmail.com", "roles": "caseworker", "lastName": "AC System User", "firstName": "Data Store"}
+  {"email": "ccd.ac.superuser@gmail.com", "roles": "caseworker", "lastName": "AC System User", "firstName": "Data Store"},
   {"email": "ccd.ac.solicitor1@gmail.com", "roles": "caseworker", "lastName": "AC Solicitor1", "firstName": "Data Store"}
 ]
