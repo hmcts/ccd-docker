@@ -56,5 +56,9 @@
   {"email": "data.store.idam.system.user@gmail.com", "roles": "", "lastName": "System User", "firstName": "Data Store"},
 
   {"email": "ccd.ac.superuser@gmail.com", "roles": "caseworker", "lastName": "AC System User", "firstName": "Data Store"},
-  {"email": "ccd.ac.solicitor1@gmail.com", "roles": "caseworker", "lastName": "AC Solicitor1", "firstName": "Data Store"}
+  {"email": "ccd.ac.solicitor1@gmail.com", "roles": "caseworker", "lastName": "AC Solicitor1", "firstName": "Data Store"},
+  {"email": "ccd.ac.staff1@gmail.com", "roles": "caseworker", "lastName": "AC Staff1", "firstName": "Data Store"},
+  {"email": "ccd.ac.staff2@gmail.com", "roles": "caseworker", "lastName": "AC Staff2", "firstName": "Data Store"}
+
+
 ]
