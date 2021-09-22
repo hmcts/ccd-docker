@@ -33,7 +33,7 @@ services:
       IDAM_LOGOUT_URL: "${IDAM_STUB_LOCALHOST:-http://localhost:3501}/login"
       IDAM_OAUTH2_TOKEN_ENDPOINT: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}/oauth2/token"
       IDAM_OAUTH2_LOGOUT_ENDPOINT: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}/session/:token"
-      IDAM_OAUTH2_AW_CLIENT_SECRET: IIIIIIIIIIIIIIII
+      IDAM_OAUTH2_AW_CLIENT_SECRET: ccd_admin_secret
       IDAM_SERVICE_NAME: ccd_admin
       IDAM_OAUTH2_CLIENT_ID : ccd_admin
       ADMINWEB_LOGIN_URL: "${IDAM_STUB_LOCALHOST:-http://localhost:3501}/login"
