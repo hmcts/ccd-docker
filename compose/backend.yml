@@ -134,7 +134,7 @@ services:
        LD_SDK_KEY:
        ROLE_ASSIGNMENT_IDAM_KEY:
        ROLE_ASSIGNMENT_TOKEN_SECRET:
-       ROLE_ASSIGNMENT_S2S_AUTHORISED_SERVICES: ccd_gw,am_role_assignment_service,am_org_role_mapping_service,wa_task_management_api,xui_webapp,ccd_data
+       ROLE_ASSIGNMENT_S2S_AUTHORISED_SERVICES: ccd_gw,am_role_assignment_service,am_org_role_mapping_service,wa_task_management_api,xui_webapp,ccd_data,aac_manage_case_assignment
        IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
        IDAM_S2S_URL: http://service-auth-provider-api:8080
        OPEN_ID_API_BASE_URI: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}/o"
@@ -149,7 +149,8 @@ services:
        REFORM_SERVICE_NAME: am-role-assignment-service
        REFORM_TEAM: am
        REFORM_ENVIRONMENT: local
-       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
+       BYPASS_ORG_DROOL_RULE: "true"
+      # Uncomment this line to enable JVM debugging and uncomment the port mapping below
       #  JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
     ports:
       - 4096:4096
