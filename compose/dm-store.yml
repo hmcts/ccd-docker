@@ -60,7 +60,7 @@ services:
       PACKAGES_NAME: document-management-store
       PACKAGES_VERSION: unknown
       ENABLE_DB_MIGRATE: "true"
-      ENABLE_TTL: "true"
+      ENABLE_TTL: "${ENABLE_TTL}"
     #      debug mode
     #    JAVA_OPTS: -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
     depends_on:
