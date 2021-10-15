@@ -6,7 +6,7 @@ services:
     image: "${CCD_CASE_DOCUMENT_AM_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/case-document-am-api:${CCD_CASE_DOCUMENT_AM_API_TAG:-latest}"
     environment:
       CASE_DOCUMENT_AM_API_S2S_SECRET: "${IDAM_KEY_CASE_DOCUMENT}"
-      CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor
+      CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor,bulk_scan_orchestrator
       IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       IDAM_OIDC_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       S2S_URL: http://service-auth-provider-api:8080
