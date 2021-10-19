@@ -56,17 +56,17 @@
   {"email": "data.store.idam.system.user@gmail.com", "roles": "", "lastName": "System User", "firstName": "Data Store"},
 
   {"email": "ccd.ac.superuser@gmail.com", "roles": "caseworker", "lastName": "AC System User", "firstName": "Data Store"},
-  {"email": "ccd.ac.solicitor1@gmail.com", "roles": "caseworker", "lastName": "AC Solicitor1", "firstName": "Data Store"},
-  {"email": "ccd.ac.solicitor2@gmail.com", "roles": "caseworker", "lastName": "AC Solicitor2", "firstName": "Data Store"},
-  {"email": "ccd.ac.solicitor3@gmail.com", "roles": "caseworker", "lastName": "AC Solicitor3", "firstName": "Data Store"},
-  {"email": "ccd.ac.staff1@gmail.com", "roles": "caseworker", "lastName": "AC Staff1", "firstName": "Data Store"},
-  {"email": "ccd.ac.staff2@gmail.com", "roles": "caseworker", "lastName": "AC Staff2", "firstName": "Data Store"},
-  {"email": "ccd.ac.staff3@gmail.com", "roles": "caseworker", "lastName": "AC Staff3", "firstName": "Data Store"},
-  {"email": "ccd.ac.staff4@gmail.com", "roles": "caseworker", "lastName": "AC Staff3", "firstName": "Data Store"},
-  {"email": "ccd.ac.staff5@gmail.com", "roles": "caseworker", "lastName": "AC Staff5", "firstName": "Data Store"},
-  {"email": "ccd.ac.staff6@gmail.com", "roles": "caseworker", "lastName": "AC Staff6", "firstName": "Data Store"},
-  {"email": "ccd.ac.staff7@gmail.com", "roles": "caseworker", "lastName": "AC Staff7", "firstName": "Data Store"},
-  {"email": "ccd.ac.staff8@gmail.com", "roles": "caseworker", "lastName": "AC Staff8", "firstName": "Data Store"},
-  {"email": "ccd.ac.other1@gmail.com", "roles": "caseworker", "lastName": "AC Other1", "firstName": "Data Store"}
+  {"email": "ccd.ac.solicitor1@gmail.com", "roles": "caseworker,caseworker-J1-solicitor", "lastName": "AC Solicitor1", "firstName": "Data Store"},
+  {"email": "ccd.ac.solicitor2@gmail.com", "roles": "caseworker,caseworker-J1-solicitor", "lastName": "AC Solicitor2", "firstName": "Data Store"},
+  {"email": "ccd.ac.solicitor3@gmail.com", "roles": "caseworker,caseworker-J1-solicitor", "lastName": "AC Solicitor3", "firstName": "Data Store"},
+  {"email": "ccd.ac.staff1@gmail.com", "roles": "caseworker,caseworker-J1", "lastName": "AC Staff1", "firstName": "Data Store"},
+  {"email": "ccd.ac.staff2@gmail.com", "roles": "caseworker,caseworker-J1", "lastName": "AC Staff2", "firstName": "Data Store"},
+  {"email": "ccd.ac.staff3@gmail.com", "roles": "caseworker,caseworker-J1", "lastName": "AC Staff3", "firstName": "Data Store"},
+  {"email": "ccd.ac.staff4@gmail.com", "roles": "caseworker,caseworker-J1", "lastName": "AC Staff3", "firstName": "Data Store"},
+  {"email": "ccd.ac.staff5@gmail.com", "roles": "caseworker,caseworker-J1", "lastName": "AC Staff5", "firstName": "Data Store"},
+  {"email": "ccd.ac.staff6@gmail.com", "roles": "caseworker,caseworker-J1", "lastName": "AC Staff6", "firstName": "Data Store"},
+  {"email": "ccd.ac.staff7@gmail.com", "roles": "caseworker,caseworker-J1", "lastName": "AC Staff7", "firstName": "Data Store"},
+  {"email": "ccd.ac.staff8@gmail.com", "roles": "caseworker,caseworker-J1", "lastName": "AC Staff8", "firstName": "Data Store"},
+  {"email": "ccd.ac.other1@gmail.com", "roles": "caseworker,caseworker-J1", "lastName": "AC Other1", "firstName": "Data Store"}
 
 ]

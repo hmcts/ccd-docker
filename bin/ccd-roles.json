@@ -26,5 +26,7 @@
   { "role": "caseworker-caa", "security_classification": "PUBLIC" },
   { "role": "ccd-import", "security_classification": "PUBLIC" },
   { "role": "citizen", "security_classification": "PUBLIC" },
+  { "role": "caseworker-J1-solicitor", "security_classification": "PUBLIC" },
+  { "role": "caseworker-J1", "security_classification": "PUBLIC" },
   { "role": "pui-caa", "security_classification": "PUBLIC" }
 ]
