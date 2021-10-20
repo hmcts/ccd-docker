@@ -124,10 +124,10 @@ ensuring the response is
 {"status":"UP"}
 ```
 
-Then restart the `definition-store-api` & `data-store-api` containers
+Then restart any dependent containers by bringing up again (compose will automatically bring up just the ones which ones have failed)
 
 ```bash
-./ccd compose restart ccd-definition-store-api ccd-data-store-api
+./ccd compose up -d
 ```
 ---
 
@@ -178,7 +178,7 @@ and navigate to the `ccd-definition-store-api`.
 b. Run smoke tests to set up user and roles.
 
 ```bash
-export TEST_URL=http://localhost:3451
+export TEST_URL=http://localhost:4451
 
 ./gradlew clean smoke
 ```
