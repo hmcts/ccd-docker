@@ -816,7 +816,6 @@ OR
 * To enable **ccd-case-disposer**
   * `./ccd enable backend case-disposer`
   * Run docker-compose `./ccd compose up -d`
-  * Verify that ccd-case-disposer is up and running by `curl localhost:4458/health`
  
 * To enable **ccd-case-document-am-api**
   * `./ccd enable backend frontend dm-store case-document-am`
