@@ -172,7 +172,26 @@ services:
         condition: service_started
     networks:
       - ccd-network
-  
+
+  ccd-case-disposer:
+    image: "${CCD_CASE_DISPOSER_USE_LOCAL-hmctspublic.azurecr.io/}ccd/case-disposer:${CCD_CASE_DISPOSER_TAG:-latest}"
+    environment:
+      DATA_STORE_DB_HOST: "${CCD_POSTGRES_11:-ccd-shared-database}"
+      DATA_STORE_DB_PORT: 5432
+      DATA_STORE_DB_USERNAME: "${DB_USERNAME}"
+      DATA_STORE_DB_PASSWORD: "${DB_PASSWORD}"
+      # Uncomment this line to enable JVM debugging and uncomment the port mapping below
+      #  JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
+    ports:
+      - 4458:4458
+      # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
+      # - 5005:5005
+    depends_on:
+      ccd-data-store-api:
+        condition: service_started
+    networks:
+      - ccd-network
+
   service-auth-provider-api:
     image: "hmctspublic.azurecr.io/rpe/service-auth-provider:latest"
     healthcheck:
