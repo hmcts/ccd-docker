@@ -172,7 +172,7 @@ services:
         condition: service_started
     networks:
       - ccd-network
-  
+
   service-auth-provider-api:
     image: "hmctspublic.azurecr.io/rpe/service-auth-provider:latest"
     healthcheck:

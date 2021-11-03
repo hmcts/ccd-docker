@@ -812,6 +812,10 @@ OR
   * `./ccd enable backend message-publisher`
   * Run docker-compose `./ccd compose up -d`
   * Verify that ccd-message-publisher is up and running by `curl localhost:4456/health`
+
+* To enable **ccd-case-disposer**
+  * `./ccd enable backend case-disposer`
+  * Run docker-compose `./ccd compose up -d`
  
 * To enable **ccd-case-document-am-api**
   * `./ccd enable backend frontend dm-store case-document-am`
