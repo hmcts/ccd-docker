@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/details"
+    "urlPath": "/o/userinfo"
   },
   "response": {
     "status": 200,
@@ -9,16 +9,16 @@
       "Content-Type": "application/json"
     },
     "jsonBody": {
-      "sub": "auto.test.cnp@gmail.com",
-      "uid": "123456",
+      "email": "auto.test.cnp@gmail.com",
       "roles": [
         "caseworker-autotest1",
         "caseworker-autotest2",
         "caseworker",
-        "ccd-import",
-        "caseworker-divorce"
+        "ccd-import"
       ],
-      "name": "CCD",
+      "sub": "auto.test.cnp@gmail.com",
+      "uid": "7689",
+      "name": "CCD Auto Test (Stub)",
       "given_name": "CCD",
       "family_name": "Auto Test (Stub)"
     }
