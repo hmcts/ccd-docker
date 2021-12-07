@@ -72,6 +72,12 @@ function project_config() {
             envPrefix="CCD_MESSAGE_PUBLISHER"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
+        ccd-case-disposer|case-disposer)
+            name=ccd-case-disposer
+            repository="git@github.com:hmcts/ccd-case-disposer.git"
+            envPrefix="CCD_CASE_DISPOSER"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
         am-role-assignment-service|role-assignment-service|ras)
             name=am-role-assignment-service
             repository="git@github.com:hmcts/am-role-assignment-service.git"
@@ -85,7 +91,7 @@ function project_config() {
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, xui-manage-cases, ccd-message-publisher, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api"
             exit 1 ;;
     esac
     case $config in
@@ -628,8 +634,8 @@ function print_warn_on_compose_down_if_idam_enabled {
 
 function ccd_login() {
     #docker logout hmctspublic.azurecr.io &>/dev/null
-    az acr login --name hmctsprivate --subscription 8999dec3-0104-4a27-94ee-6588559729d1
-    az acr login --name hmctspublic --subscription 8999dec3-0104-4a27-94ee-6588559729d1
+    az acr login --name hmctspublic --subscription DCD-CNP-Prod
+    az acr login --name hmctsprivate --subscription DCD-CNP-Prod
 }
 
 if [ $# -lt 1 ]; then

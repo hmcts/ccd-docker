@@ -124,10 +124,10 @@ ensuring the response is
 {"status":"UP"}
 ```
 
-Then restart the `definition-store-api` & `data-store-api` containers
+Then restart any dependent containers by bringing up again (compose will automatically bring up just the ones which ones have failed)
 
 ```bash
-./ccd compose restart ccd-definition-store-api ccd-data-store-api
+./ccd compose up -d
 ```
 ---
 
@@ -178,7 +178,7 @@ and navigate to the `ccd-definition-store-api`.
 b. Run smoke tests to set up user and roles.
 
 ```bash
-export TEST_URL=http://localhost:3451
+export TEST_URL=http://localhost:4451
 
 ./gradlew clean smoke
 ```
@@ -812,6 +812,10 @@ OR
   * `./ccd enable backend message-publisher`
   * Run docker-compose `./ccd compose up -d`
   * Verify that ccd-message-publisher is up and running by `curl localhost:4456/health`
+
+* To enable **ccd-case-disposer**
+  * `./ccd enable backend case-disposer`
+  * Run docker-compose `./ccd compose up -d`
  
 * To enable **ccd-case-document-am-api**
   * `./ccd enable backend frontend dm-store case-document-am`
