@@ -767,40 +767,8 @@ Optional compose files will allow other projects to be enabled on demand using t
   * verify that Data Store is able to connect to elasticsearch: `curl localhost:4452/health`
 
 * To enable **Logstash**
-* `./ccd enable logstash` (assuming `elasticsearch` is already enabled, otherwise enable it)
-
-* To run **service specific logstash instance**
-  * First build the local log stash instances for all services using instructions on ccd-logstash [ccd-logstash](https://github.com/hmcts/ccd-logstash)
-  * Export CCD_LOGSTASH_SERVICES environment variable to use service specific logstash instances
-  * If CCD_LOGSTASH_SERVICES is not exported, then `ccd-logstash:latest` will be used
-  * Make sure to set the below two environment variables in `.env` file
-  * By default CCD_LOGSTASH_REPOSITORY_URL is point to remote repository `hmctspublic.azurecr.io`, this is defined in `.env` file.
-
-```bash
-    CCD_LOGSTASH_REPOSITORY_URL=hmctspublic.azurecr.io
-```
-
-   * For local docker repository please change the values as below
-
-```bash
-    CCD_LOGSTASH_REPOSITORY_URL=hmcts
-```
-   * To run service specific instances of logstash, give service names a comma serparated string as below
-
-```bash
-    export CCD_LOGSTASH_SERVICES=divorce,sscs,ethos,cmc,probate
-```
-
-   * To run all service instances of logstash
-
-```bash
-    CCD_LOGSTASH_SERVICES=all
-```
-OR
-
-```bash
-    CCD_LOGSTASH_SERVICES=testall
-```
+  * `./ccd enable logstash` (assuming `elasticsearch` is already enabled, otherwise enable it)
+  * Note that the config for Logstash is contained within the [logstash directory](logstash)
 
 * To enable **ccd-definition-designer-api**
   * `./ccd enable backend ccd-definition-designer-api`
