@@ -1,6 +1,5 @@
 dead_letter_queue.enable: true
 http.host: 0.0.0.0
 queue.type: persisted
-xpack.monitoring.elasticsearch.hosts:
-- ${ES_HOSTS}
+xpack.monitoring.elasticsearch.hosts: ["${ES_HOSTS}"]
 xpack.monitoring.enabled: false
