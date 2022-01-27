@@ -2,24 +2,6 @@
 version: '2.4'
 
 services:
-  ccd-case-management-web:
-    image: "${CCD_CASE_MANAGEMENT_WEB_USE_LOCAL-hmctspublic.azurecr.io/}ccd/case-management-web:${CCD_CASE_MANAGEMENT_WEB_TAG:-latest}"
-    container_name: ccd-case-management-web
-    environment:
-      IDAM_LOGIN_URL: "${IDAM_STUB_LOCALHOST:-http://localhost:3501}/login"
-      CCD_GATEWAY_BASE_URL: http://localhost:3453
-      CCD_ACTIVITY_URL: http://localhost:3453/activity
-      PRINT_SERVICE_URL: http://localhost:3453/print
-      PRINT_SERVICE_URL_REMOTE: https://return-case-doc-ccd.nonprod.platform.hmcts.net
-      DM_GATEWAY_BASE_URL: https://api-gateway.dev.dm.reform.hmcts.net
-      OAUTH2_CLIENT_ID: ccd_gateway
-    ports:
-      - 3451:3451
-    depends_on:
-      - ccd-api-gateway
-    networks:
-      - ccd-network
-
   ccd-admin-web:
     image: "${CCD_ADMIN_WEB_USE_LOCAL-hmctspublic.azurecr.io/}ccd/admin-web:${CCD_ADMIN_WEB_TAG:-latest}"
     container_name: ccd-admin-web
