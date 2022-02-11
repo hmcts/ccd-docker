@@ -755,6 +755,7 @@ Optional compose files will allow other projects to be enabled on demand using t
 
 * To enable **ExUI** rather then the CCD UI
   * `./ccd enable xui-frontend`
+  * export XUI_LAUNCH_DARKLY_CLIENT_ID to value mentioned in xui web app preview template yaml file. 
   * run docker-compose `./ccd compose up -d`
   * access ExUI at `http://localhost:3455`
 
