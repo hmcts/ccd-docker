@@ -109,6 +109,7 @@ OAUTH2_CLIENT_CCD_GATEWAY=ccd_gateway_secret
 OAUTH2_CLIENT_ID=ccd_gateway
 OAUTH2_CLIENT_SECRET=ccd_gateway_secret
 OAUTH2_REDIRECT_URI=http://localhost:3451/oauth2redirect
+RD_LOCATION_REF_API_BASE_URL=http://localhost:5555
 RD_PROFESSIONAL_API_BASE_URL=http://localhost:5555
 ROLE_ASSIGNMENT_USER_EMAIL=ccd.ac.solicitor1@gmail.com
 ROLE_ASSIGNMENT_USER_PASSWORD=Pa55word11
