@@ -724,7 +724,7 @@ The output can either be of the form:
 when no branches are used; or:
 
 > Current overrides:
-> ccd-case-management-web branch:RDM-2414 hash:ced648d
+> ccd-admin-web branch:RDM-2414 hash:ced648d
 
 when branches are in use.
 
@@ -745,7 +745,6 @@ By default, `ccd-docker` runs the most commonly used backend and frontend projec
 * Front-end:
   * **idam-web-public**: SIDAM's login UI
   * **ccd-api-gateway**: Proxy with SIDAM and S2S integration
-  * **ccd-case-management-web**: Caseworker UI
 
 Optional compose files will allow other projects to be enabled on demand using the `enable` and `disable` commands.
 
@@ -756,8 +755,8 @@ Optional compose files will allow other projects to be enabled on demand using t
 
 * To enable **ExUI** rather then the CCD UI
   * `./ccd enable xui-frontend`
+  * export XUI_LAUNCH_DARKLY_CLIENT_ID to value mentioned in xui web app preview template yaml file. 
   * run docker-compose `./ccd compose up -d`
-  * (optional) stop the CCD UI docker container `ccd-case-management-web`
   * access ExUI at `http://localhost:3455`
 
 * To enable **ElasticSearch**
@@ -960,11 +959,7 @@ Currently used for:
 
 #### ccd-api-gateway
 
-API gateway securing interactions between `ccd-case-management-web` and the back-end services.
-
-#### ccd-case-management-web
-
-Caseworker frontend, exposed on port `3451`.
+Secured API Gateway integrating with IDAM
 
 ## Local development
 
