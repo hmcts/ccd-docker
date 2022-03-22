@@ -2,88 +2,24 @@ version: '2.4'
 services:
 
   ccd-logstash:
-    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-logstash-latest"
+    image: "logstash:7.16.3"
     container_name: ccd-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
-      - DB_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
-      - DB_USER=ccd
-      - DB_PWD=ccd
-      - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
+      - DATA_STORE_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
+      - DATA_STORE_USER=ccd
+      - DATA_STORE_PASS=ccd
+      - ES_HOSTS=http://ccd-elasticsearch:9200
     networks:
       - ccd-network
-
-  divorce-logstash:
-    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-divorce-logstash-latest"
-    container_name: divorce-logstash
-    environment:
-      - XPACK_MONITORING_ENABLED=false
-      - DB_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
-      - DB_USER=ccd
-      - DB_PWD=ccd
-      - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
-    networks:
-      - ccd-network
-
-  sscs-logstash:
-    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-sscs-logstash-latest"
-    container_name: sscs-logstash
-    environment:
-      - XPACK_MONITORING_ENABLED=false
-      - DB_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
-      - DB_USER=ccd
-      - DB_PWD=ccd
-      - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
-    networks:
-      - ccd-network
-
-  ethos-logstash:
-    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-ethos-logstash-latest"
-    container_name: ethos-logstash
-    environment:
-      - XPACK_MONITORING_ENABLED=false
-      - DB_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
-      - DB_USER=ccd
-      - DB_PWD=ccd
-      - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
-    networks:
-      - ccd-network
-
-  cmc-logstash:
-    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-cmc-logstash-latest"
-    container_name: cmc-logstash
-    environment:
-      - XPACK_MONITORING_ENABLED=false
-      - DB_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
-      - DB_USER=ccd
-      - DB_PWD=ccd
-      - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
-    networks:
-      - ccd-network
-
-  probate-logstash:
-    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:ccd-probate-logstash-latest"
-    container_name: probate-logstash
-    environment:
-      - XPACK_MONITORING_ENABLED=false
-      - DB_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
-      - DB_USER=ccd
-      - DB_PWD=ccd
-      - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
-    networks:
-      - ccd-network
-
-  testall-logstash:
-    image: "${CCD_LOGSTASH_REPOSITORY_URL:-hmctspublic.azurecr.io}/ccd/logstash:testall-latest"
-    container_name: testall-logstash
-    environment:
-      - XPACK_MONITORING_ENABLED=false
-      - DB_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
-      - DB_USER=ccd
-      - DB_PWD=ccd
-      - ES_DATA_NODES_URL=http://ccd-elasticsearch:9200
-    networks:
-      - ccd-network
+    volumes:
+      - ${PWD}/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ${PWD}/logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml
+      - ${PWD}/logstash/pipeline/01_input.conf:/usr/share/logstash/pipeline/01_input.conf
+      - ${PWD}/logstash/pipeline/02_filter.conf:/usr/share/logstash/pipeline/02_filter.conf
+      - ${PWD}/logstash/pipeline/03_output.conf:/usr/share/logstash/pipeline/03_output.conf
+      - ${PWD}/logstash/pipeline/dead_letter_indexing_pipeline.conf:/usr/share/logstash/pipeline/dead_letter_indexing_pipeline.conf
+      - ${PWD}/logstash/lib/postgresql-42.2.18.jar:/usr/share/logstash/ccd/postgresql.jar
 
 networks:
   ccd-network:
