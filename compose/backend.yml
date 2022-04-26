@@ -32,7 +32,7 @@ services:
       DEFINITION_STORE_DB_PASSWORD: "${DB_PASSWORD}"
       DEFINITION_STORE_DB_USE_SSL: "${DB_USE_SSL}"
       DEFINITION_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DEFINITION_STORE}"
-      DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin,aac_manage_case_assignment
+      DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin,aac_manage_case_assignment,ccd_case_disposer
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
       IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       IDAM_S2S_URL: http://service-auth-provider-api:8080
@@ -199,6 +199,7 @@ services:
       MICROSERVICEKEYS_AM_ROLE_ASSIGNMENT_SERVICE: "${IDAM_KEY_AM_ROLE_ASSIGNMENT}"
       MICROSERVICEKEYS_API_GW: "${IDAM_KEY_API_GW}"
       MICROSERVICEKEYS_HMC_HMI_INBOUND_ADAPTER: "${IDAM_KEY_API_HMI_INBOUND_ADAPTER}"
+      MICROSERVICEKEYS_CCD_CASE_DISPOSER: "${IDAM_KEY_CCD_CASE_DISPOSER}"
       TESTING_SUPPORT_ENABLED: "true"
     networks:
       - ccd-network
