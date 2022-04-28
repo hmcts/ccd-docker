@@ -65,6 +65,7 @@
   {"email": "ccd.ac.staff6@gmail.com", "roles": "caseworker", "lastName": "AC Staff6", "firstName": "Data Store"},
   {"email": "ccd.ac.staff7@gmail.com", "roles": "caseworker", "lastName": "AC Staff7", "firstName": "Data Store"},
   {"email": "ccd.ac.staff8@gmail.com", "roles": "caseworker", "lastName": "AC Staff8", "firstName": "Data Store"},
-  {"email": "ccd.ac.other1@gmail.com", "roles": "caseworker", "lastName": "AC Other1", "firstName": "Data Store"}
+  {"email": "ccd.ac.other1@gmail.com", "roles": "caseworker", "lastName": "AC Other1", "firstName": "Data Store"},
+  {"email": "case.disposer.idam.system.user@gmail.com", "roles": "caseworker", "lastName": "AC Other1", "firstName": "Data Store"}
 
 ]
