@@ -32,8 +32,8 @@ services:
       DEFINITION_STORE_DB_PASSWORD: "${DB_PASSWORD}"
       DEFINITION_STORE_DB_USE_SSL: "${DB_USE_SSL}"
       DEFINITION_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DEFINITION_STORE}"
-      DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin,aac_manage_case_assignment
-      USER_PROFILE_HOST: http://docker.for.mac.localhost:4453
+      DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin,aac_manage_case_assignment,ccd_case_disposer
+      USER_PROFILE_HOST: http://ccd-user-profile-api:4453
       IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       REFORM_SERVICE_NAME: ccd-definition-store-api
@@ -44,7 +44,7 @@ services:
       ELASTIC_SEARCH_HOST: "ccd-elasticsearch"
       ELASTIC_SEARCH_FAIL_ON_IMPORT: "true"
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
-      # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
+      # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
     ports:
       - 4451:4451
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
@@ -77,11 +77,11 @@ services:
       DATA_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DATA_STORE}"
       DATA_STORE_TOKEN_SECRET: iuasbcuasdcbasdgcasdgcuysachjsacyasdgjcgasdj
       DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps,aac_manage_case_assignment,xui_webapp,ccd_case_document_am_api,am_role_assignment_service
+      DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
+      USER_PROFILE_HOST: http://ccd-user-profile-api:4453
+      IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}" # For backward compatibility with older images
       IDAM_API_BASE_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       IDAM_OIDC_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
-      DEFINITION_STORE_HOST: http://docker.for.mac.localhost:4451
-      USER_PROFILE_HOST: http://docker.for.mac.localhost:4453
-      IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       IDAM_OAUTH2_DATA_STORE_CLIENT_SECRET: idam_data_store_client_secret
       REFORM_SERVICE_NAME: ccd-data-store-api
@@ -93,12 +93,15 @@ services:
       ELASTIC_SEARCH_DATA_NODES_HOSTS: "http://ccd-elasticsearch:9200"
       CCD_DEFAULTPRINTURL: https://return-case-doc-ccd.nonprod.platform.hmcts.net/jurisdictions/:jid/case-types/:ctid/cases/:cid
       CCD_DOCUMENT_URL_PATTERN: "${CCD_DOCUMENT_URL_PATTERN}"
-      ENABLE_ATTRIBUTE_BASED_ACCESS_CONTROL: "${ENABLE_ATTRIBUTE_BASED_ACCESS_CONTROL:-false}"
-      ENABLE_PSEUDO_ROLE_ASSIGNMENTS_GENERATION: "${ENABLE_PSEUDO_ROLE_ASSIGNMENTS_GENERATION:-false}"
-      ENABLE_PSEUDO_ACCESS_PROFILES_GENERATION: "${ENABLE_PSEUDO_ACCESS_PROFILES_GENERATION:-false}"
+      ENABLE_ATTRIBUTE_BASED_ACCESS_CONTROL: "${ENABLE_ATTRIBUTE_BASED_ACCESS_CONTROL:-true}"
+      ENABLE_PSEUDO_ROLE_ASSIGNMENTS_GENERATION: "${ENABLE_PSEUDO_ROLE_ASSIGNMENTS_GENERATION:-true}"
+      ENABLE_PSEUDO_ACCESS_PROFILES_GENERATION: "${ENABLE_PSEUDO_ACCESS_PROFILES_GENERATION:-true}"
+      TESTING_SUPPORT_ENABLED: "${TESTING_SUPPORT_ENABLED:-true}"
+      MIGRATIONS_ENDPOINT_ENABLED: "${MIGRATIONS_ENDPOINT_ENABLED:-true}"
+      REFERENCE_DATA_API_URL: "${REFERENCE_DATA_API_URL:-http://ccd-test-stubs-service:5555}"
       ROLE_ASSIGNMENT_URL: "${ROLE_ASSIGNMENT_URL:-http://am-role-assignment-service:4096}"
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
-      # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
+      # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
     ports:
       - 4452:4452
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
@@ -134,7 +137,7 @@ services:
        LD_SDK_KEY:
        ROLE_ASSIGNMENT_IDAM_KEY:
        ROLE_ASSIGNMENT_TOKEN_SECRET:
-       ROLE_ASSIGNMENT_S2S_AUTHORISED_SERVICES: ccd_gw,am_role_assignment_service,am_org_role_mapping_service,wa_task_management_api,xui_webapp,ccd_data
+       ROLE_ASSIGNMENT_S2S_AUTHORISED_SERVICES: ccd_gw,am_role_assignment_service,am_org_role_mapping_service,wa_task_management_api,xui_webapp,ccd_data,aac_manage_case_assignment
        IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
        IDAM_S2S_URL: http://service-auth-provider-api:8080
        OPEN_ID_API_BASE_URI: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}/o"
@@ -143,14 +146,15 @@ services:
        ROLE_ASSIGNMENT_IDAM_CLIENT_SECRET: am_role_assignment_secret
        ROLE_ASSIGNMENT_IDAM_ADMIN_USERID: role.assignment.admin@gmail.com
        ROLE_ASSIGNMENT_IDAM_ADMIN_PASSWORD: "${AM_ROLE_AADMINGMENT_ADMIN_PWD:-Pa55word11}"
-       ROLE_ASSIGNMENT_IDAM_ADMIN_SCOPE: search-user
-       CCD_DATA_STORE_URL: http://docker.for.mac.localhost:4452
+       ROLE_ASSIGNMENT_IDAM_ADMIN_SCOPE: profile openid roles search-user
+       CCD_DATA_STORE_URL: http://ccd-data-store-api:4452
        AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY:
        REFORM_SERVICE_NAME: am-role-assignment-service
        REFORM_TEAM: am
        REFORM_ENVIRONMENT: local
-       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
-      #  JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
+       BYPASS_ORG_DROOL_RULE: "true"
+      # Uncomment this line to enable JVM debugging and uncomment the port mapping below
+      #  JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     ports:
       - 4096:4096
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
@@ -170,7 +174,7 @@ services:
         condition: service_started
     networks:
       - ccd-network
-  
+
   service-auth-provider-api:
     image: "hmctspublic.azurecr.io/rpe/service-auth-provider:latest"
     healthcheck:
@@ -193,7 +197,11 @@ services:
       MICROSERVICEKEYS_PAYMENT_APP: "${BEFTA_S2S_CLIENT_SECRET_OF_PAYMENT_APP}"
       MICROSERVICEKEYS_CCD_CASE_DOCUMENT_AM_API : "${IDAM_KEY_CASE_DOCUMENT}"
       MICROSERVICEKEYS_BULK_SCAN_PROCESSOR: "${IDAM_KEY_BULK_SCAN_PROCESSOR}"
+      MICROSERVICEKEYS_BULK_SCAN_ORCHESTRATOR: "${IDAM_KEY_BULK_SCAN_ORCHESTRATOR}"
       MICROSERVICEKEYS_AM_ROLE_ASSIGNMENT_SERVICE: "${IDAM_KEY_AM_ROLE_ASSIGNMENT}"
+      MICROSERVICEKEYS_API_GW: "${IDAM_KEY_API_GW}"
+      MICROSERVICEKEYS_HMC_HMI_INBOUND_ADAPTER: "${IDAM_KEY_API_HMI_INBOUND_ADAPTER}"
+      MICROSERVICEKEYS_CCD_CASE_DISPOSER: "${IDAM_KEY_CCD_CASE_DISPOSER}"
       TESTING_SUPPORT_ENABLED: "true"
     networks:
       - ccd-network

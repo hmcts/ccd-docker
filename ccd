@@ -39,11 +39,6 @@ function project_config() {
             repository="git@github.com:hmcts/ccd-api-gateway.git"
             envPrefix="CCD_API_GATEWAY"
             ;;
-        ccd-case-management-web|case-management-web|management-web|case-man|web|man-web)
-            name=ccd-case-management-web
-            repository="git@github.com:hmcts/ccd-case-management-web.git"
-            envPrefix="CCD_CASE_MANAGEMENT_WEB"
-            ;;
         ccd-admin-web|admin-web|admin-web)
             name=ccd-admin-web
             repository="git@github.com:hmcts/ccd-admin-web.git"
@@ -72,6 +67,12 @@ function project_config() {
             envPrefix="CCD_MESSAGE_PUBLISHER"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
+        ccd-case-disposer|case-disposer)
+            name=ccd-case-disposer
+            repository="git@github.com:hmcts/ccd-case-disposer.git"
+            envPrefix="CCD_CASE_DISPOSER"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
         am-role-assignment-service|role-assignment-service|ras)
             name=am-role-assignment-service
             repository="git@github.com:hmcts/am-role-assignment-service.git"
@@ -85,7 +86,7 @@ function project_config() {
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, ccd-case-management-web, xui-manage-cases, ccd-message-publisher, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api"
             exit 1 ;;
     esac
     case $config in
@@ -311,9 +312,7 @@ function active_compose_files() {
 function create_compose_file_options() {
     for compose_file in $(active_compose_files)
     do
-      if [ ${compose_file} != "logstash" ]; then
         compose_file_options="$compose_file_options -f compose/${compose_file}.yml"
-      fi
     done
     echo $compose_file_options
 }
@@ -584,34 +583,6 @@ function ccd_compose() {
     echo "Docker compose:"
     echo -e "docker-compose $compose_file_options $options\n"
     docker-compose $compose_file_options $options
-    ccd_compose_logstash $options
-}
-
-function ccd_compose_logstash() {
-    for compose_file in $(active_compose_files)
-    do
-      if [ ${compose_file} == "logstash" ]; then
-
-        var_services="${CCD_LOGSTASH_SERVICES}"
-        if [ -z "$CCD_LOGSTASH_SERVICES" ]; then
-          echo "WARNING: Missing CCD_LOGSTASH_SERVICES environment variable. Using default ccd-logstash:latest'."
-          var_services="ccd"
-        fi
-
-        if [ "$CCD_LOGSTASH_SERVICES" == "all" ] || [ "$CCD_LOGSTASH_SERVICES" == "testall" ]; then
-          var_services="testall"
-        fi
-
-        IFS=','
-        options="$@"
-        read -ra services <<< "${var_services}"
-          for service in "${services[@]}"; do
-            echo -e "docker-compose -p compose -f compose/logstash.yml $options $service-logstash\n"
-            docker-compose -p compose -f compose/logstash.yml "$@" $service-logstash
-          done
-        IFS=' '
-      fi
-    done
 }
 
 function print_warn_on_compose_down_if_idam_enabled {
@@ -628,8 +599,8 @@ function print_warn_on_compose_down_if_idam_enabled {
 
 function ccd_login() {
     #docker logout hmctspublic.azurecr.io &>/dev/null
-    az acr login --name hmctsprivate --subscription 8999dec3-0104-4a27-94ee-6588559729d1
-    az acr login --name hmctspublic --subscription 8999dec3-0104-4a27-94ee-6588559729d1
+    az acr login --name hmctspublic --subscription DCD-CNP-Prod
+    az acr login --name hmctsprivate --subscription DCD-CNP-Prod
 }
 
 if [ $# -lt 1 ]; then

@@ -1,0 +1,9 @@
+- pipeline.id: main
+  path.config: "/usr/share/logstash/pipeline/{01_input,02_filter,03_output}.conf"
+  pipeline.workers: 4
+  pipeline.batch.size: 500
+  queue.type: persisted
+- pipeline.id: index-dead-letter-to-es
+  path.config: "/usr/share/logstash/pipeline/dead_letter_indexing_pipeline.conf"
+  pipeline.workers: 1
+  dead_letter_queue.enable: false

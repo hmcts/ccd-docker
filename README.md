@@ -124,10 +124,10 @@ ensuring the response is
 {"status":"UP"}
 ```
 
-Then restart the `definition-store-api` & `data-store-api` containers
+Then restart any dependent containers by bringing up again (compose will automatically bring up just the ones which ones have failed)
 
 ```bash
-./ccd compose restart ccd-definition-store-api ccd-data-store-api
+./ccd compose up -d
 ```
 ---
 
@@ -178,7 +178,7 @@ and navigate to the `ccd-definition-store-api`.
 b. Run smoke tests to set up user and roles.
 
 ```bash
-export TEST_URL=http://localhost:3451
+export TEST_URL=http://localhost:4451
 
 ./gradlew clean smoke
 ```
@@ -724,7 +724,7 @@ The output can either be of the form:
 when no branches are used; or:
 
 > Current overrides:
-> ccd-case-management-web branch:RDM-2414 hash:ced648d
+> ccd-admin-web branch:RDM-2414 hash:ced648d
 
 when branches are in use.
 
@@ -745,7 +745,6 @@ By default, `ccd-docker` runs the most commonly used backend and frontend projec
 * Front-end:
   * **idam-web-public**: SIDAM's login UI
   * **ccd-api-gateway**: Proxy with SIDAM and S2S integration
-  * **ccd-case-management-web**: Caseworker UI
 
 Optional compose files will allow other projects to be enabled on demand using the `enable` and `disable` commands.
 
@@ -756,8 +755,8 @@ Optional compose files will allow other projects to be enabled on demand using t
 
 * To enable **ExUI** rather then the CCD UI
   * `./ccd enable xui-frontend`
+  * export XUI_LAUNCH_DARKLY_CLIENT_ID to value mentioned in xui web app preview template yaml file. 
   * run docker-compose `./ccd compose up -d`
-  * (optional) stop the CCD UI docker container `ccd-case-management-web`
   * access ExUI at `http://localhost:3455`
 
 * To enable **ElasticSearch**
@@ -767,40 +766,8 @@ Optional compose files will allow other projects to be enabled on demand using t
   * verify that Data Store is able to connect to elasticsearch: `curl localhost:4452/health`
 
 * To enable **Logstash**
-* `./ccd enable logstash` (assuming `elasticsearch` is already enabled, otherwise enable it)
-
-* To run **service specific logstash instance**
-  * First build the local log stash instances for all services using instructions on ccd-logstash [ccd-logstash](https://github.com/hmcts/ccd-logstash)
-  * Export CCD_LOGSTASH_SERVICES environment variable to use service specific logstash instances
-  * If CCD_LOGSTASH_SERVICES is not exported, then `ccd-logstash:latest` will be used
-  * Make sure to set the below two environment variables in `.env` file
-  * By default CCD_LOGSTASH_REPOSITORY_URL is point to remote repository `hmctspublic.azurecr.io`, this is defined in `.env` file.
-
-```bash
-    CCD_LOGSTASH_REPOSITORY_URL=hmctspublic.azurecr.io
-```
-
-   * For local docker repository please change the values as below
-
-```bash
-    CCD_LOGSTASH_REPOSITORY_URL=hmcts
-```
-   * To run service specific instances of logstash, give service names a comma serparated string as below
-
-```bash
-    export CCD_LOGSTASH_SERVICES=divorce,sscs,ethos,cmc,probate
-```
-
-   * To run all service instances of logstash
-
-```bash
-    CCD_LOGSTASH_SERVICES=all
-```
-OR
-
-```bash
-    CCD_LOGSTASH_SERVICES=testall
-```
+  * `./ccd enable logstash` (assuming `elasticsearch` is already enabled, otherwise enable it)
+  * Note that the config for Logstash is contained within the [logstash directory](logstash)
 
 * To enable **ccd-definition-designer-api**
   * `./ccd enable backend ccd-definition-designer-api`
@@ -812,6 +779,10 @@ OR
   * `./ccd enable backend message-publisher`
   * Run docker-compose `./ccd compose up -d`
   * Verify that ccd-message-publisher is up and running by `curl localhost:4456/health`
+
+* To enable **ccd-case-disposer**
+  * `./ccd enable backend case-disposer`
+  * Run docker-compose `./ccd compose up -d`
  
 * To enable **ccd-case-document-am-api**
   * `./ccd enable backend frontend dm-store case-document-am`
@@ -988,11 +959,7 @@ Currently used for:
 
 #### ccd-api-gateway
 
-API gateway securing interactions between `ccd-case-management-web` and the back-end services.
-
-#### ccd-case-management-web
-
-Caseworker frontend, exposed on port `3451`.
+Secured API Gateway integrating with IDAM
 
 ## Local development
 
