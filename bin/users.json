@@ -1,6 +1,9 @@
 [
   {"email": "befta.pui.caa.1@gmail.com", "roles": "pui-caa", "lastName": "CAA", "firstName": "Pui"},
   {"email": "ccd.docker.default@hmcts.net", "roles": "ccd-import", "lastName": "Default CCD_Docker"},
+  {"email": "ccd.docker.default1@hmcts.net", "roles": "ccd-import,manage-translations", "lastName": "Default CCD_Docker"},
+  {"email": "ccd.docker.default2@hmcts.net", "roles": "ccd-import,load-translations", "lastName": "Default CCD_Docker"},
+  {"email": "ccd.docker.default3@hmcts.net", "roles": "ccd-import,load-translations,manage-translations", "lastName": "Default CCD_Docker"},
 
   {"email": "auto.test.cnp@gmail.com", "roles": "caseworker,caseworker-autotest1,ccd-import", "lastName": "testsurname"},
   {"email": "auto.test.cnp+private@gmail.com", "roles": "caseworker,caseworker-autotest1,caseworker-autotest1-private"},
