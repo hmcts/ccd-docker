@@ -792,7 +792,7 @@ Optional compose files will allow other projects to be enabled on demand using t
 * To enable **ts-translation-service**
   * `./ccd enable backend ts-translation-service`
   * run docker-compose `./ccd compose up -d`
-  * verify that ccd-case-document-am-api is up and running by `curl localhost:4455/health`
+  * verify that ts-translation-service is up and running by `curl localhost:4650/health`
 
 ## Under the hood :speedboat:
 
