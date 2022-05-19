@@ -8,7 +8,7 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: "${TS_TRANSLATION_SERVICE_LOCAL-hmctspublic.azurecr.io/}/ts/translation-service:${TS_TRANSLATION_SERVICE_TAG:-latest}"
+    image: "${TS_TRANSLATION_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}/ts/translation-service:${TS_TRANSLATION_SERVICE_TAG:-latest}"
     container_name: translation-service
     environment:
       TS_TRANSLATION_SERVICE_DB_HOST: "${CCD_POSTGRES_11:-ccd-shared-database}"
@@ -21,7 +21,7 @@ services:
       TS_TRANSLATION_SERVICE_S2S_AUTHORISED_SERVICES: xui_webapp,ccd_admin
       S2S_URL: http://service-auth-provider-api:8080
       REFORM_SERVICE_NAME: ts-translation-service
-      REFORM_TEAM: ccd
+      REFORM_TEAM: ts
       REFORM_ENVIRONMENT: local
       APPINSIGHTS_INSTRUMENTATIONKEY: key
     ports:
