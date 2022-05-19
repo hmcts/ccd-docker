@@ -34,5 +34,7 @@ services:
       #  condition: service_started
       service-auth-provider-api:
         condition: service_started
+      idam-api:
+        condition: service_started
     networks:
       - ccd-network
