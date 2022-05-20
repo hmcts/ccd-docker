@@ -103,8 +103,12 @@ required only on the first run. Once executed, it doesn't need to be executed ag
 The `idam-api` container can be slow to start - both the `definition-store-api` and `data-store-api` containers will
 try to connect to the `idam-api` container when they start.
 
-There is also some optional containers to rely on `idam-api` to start. The optional containers that require `idam-api` 
-to start are the `ts-translation-service`, `case-disposer`, `case-document-am`,`frontend` and `xui-frontend`
+The following optional containers will not start successfully until `idam-api` container has started.
+* `ts-translation-service`
+* `case-disposer`
+* `case-document-am`
+* `frontend`
+* `xui-frontend`
 
 If `idam-api` is not up and running and accepting connections
 you may see errors in the `definition-store-api` and `data-store-api` containers, such as
