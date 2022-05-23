@@ -755,6 +755,19 @@ By default, `ccd-docker` runs the most commonly used backend and frontend projec
 
 Optional compose files will allow other projects to be enabled on demand using the `enable` and `disable` commands.
 
+**Note on Running Optional Projects** 
+
+If this is the first time running these optional projects from ccd docker you will need to do `./ccd compose pull` after you have enable the optional project
+
+Also if the database has not been created you might need to create a new ccd shared database image. To do this you need to:
+
+* Run `/ccd compose down -v`
+* Then find the id of any ccd shared database using `docker images | grep ccd-shared-database`
+* Using the ids from previous command use  `docker image rm <id>`
+* Then run `./ccd compose up -d`
+
+**Optional Project Commands**
+
 * To enable **document-management-store-app**
   * `./ccd enable backend frontend dm-store`
   * run docker-compose `./ccd compose up -d`
