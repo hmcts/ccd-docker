@@ -759,7 +759,7 @@ Optional compose files will allow other projects to be enabled on demand using t
 
 If this is the first time running these optional projects from ccd docker you will need to do `./ccd compose pull` after you have enable the optional project
 
-Also if the database has not been created you might need to create a new ccd shared database image. To do this you need to:
+Also if a certain database has not been created you might need to create a new ccd shared database image. To do this you need to do this:
 
 * Run `/ccd compose down -v`
 * Then find the id of any ccd shared database using `docker images | grep ccd-shared-database`
