@@ -1,9 +1,6 @@
 [
   {"email": "befta.pui.caa.1@gmail.com", "roles": "pui-caa", "lastName": "CAA", "firstName": "Pui"},
   {"email": "ccd.docker.default@hmcts.net", "roles": "ccd-import", "lastName": "Default CCD_Docker"},
-  {"email": "ccd.docker.default1@hmcts.net", "roles": "ccd-import,manage-translations", "lastName": "Default CCD_Docker"},
-  {"email": "ccd.docker.default2@hmcts.net", "roles": "ccd-import,load-translations", "lastName": "Default CCD_Docker"},
-  {"email": "ccd.docker.default3@hmcts.net", "roles": "ccd-import,load-translations,manage-translations", "lastName": "Default CCD_Docker"},
 
   {"email": "auto.test.cnp@gmail.com", "roles": "caseworker,caseworker-autotest1,ccd-import", "lastName": "testsurname"},
   {"email": "auto.test.cnp+private@gmail.com", "roles": "caseworker,caseworker-autotest1,caseworker-autotest1-private"},
@@ -70,8 +67,9 @@
   {"email": "ccd.ac.staff8@gmail.com", "roles": "caseworker", "lastName": "AC Staff8", "firstName": "Data Store"},
   {"email": "ccd.ac.other1@gmail.com", "roles": "caseworker", "lastName": "AC Other1", "firstName": "Data Store"},
 
-  {"email": "ts.service.translation1@gmail.com", "roles": "manage-translations", "lastName": "Translations", "firstName": "Manage"},
-  {"email": "ts.service.translation2@gmail.com", "roles": "load-translations", "lastName": "Translations", "firstName": "Load"}
+  {"email": "ts.service.translation-manage@gmail.com", "roles": "ccd-import,manage-translations", "lastName": "Translations", "firstName": "Manage"},
+  {"email": "ts.service.translation-load@gmail.com", "roles": "ccd-import,load-translations", "lastName":"Translations", "firstName": "Load"},
+  {"email": "ts.service.translation-manage-load@gmail.com", "roles": "ccd-import,load-translations,manage-translations", "lastName": "Translations", "firstName": "Manage-Load"}
 
 
 ]
