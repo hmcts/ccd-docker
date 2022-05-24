@@ -25,6 +25,8 @@
   { "role": "caseworker-befta_master-solicitor_3", "security_classification": "PUBLIC" },
   { "role": "caseworker-caa", "security_classification": "PUBLIC" },
   { "role": "ccd-import", "security_classification": "PUBLIC" },
+  { "role": "manage-translations", "security_classification": "PUBLIC" },
+  { "role": "load-translations", "security_classification": "PUBLIC" },
   { "role": "citizen", "security_classification": "PUBLIC" },
   { "role": "pui-caa", "security_classification": "PUBLIC" }
 ]
