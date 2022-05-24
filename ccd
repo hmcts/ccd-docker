@@ -24,7 +24,7 @@ function project_config() {
             ;;
         ts-translation-service|translation-service)
             name=ts-translation-service
-            repository="git@github.com/hmcts/ts-translation-service.git"
+            repository="git@github.com:hmcts/ts-translation-service.git"
             envPrefix="TS_TRANSLATION_SERVICE"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
