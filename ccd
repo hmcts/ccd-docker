@@ -22,6 +22,12 @@ function project_config() {
             envPrefix="CCD_CASE_DOCUMENT_AM_API"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
+        ts-translation-service|translation-service)
+            name=ts-translation-service
+            repository="git@github.com:hmcts/ts-translation-service.git"
+            envPrefix="TS_TRANSLATION_SERVICE"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
         ccd-definition-store-api|definition-store-api|definition-store|def-store|defstore)
             name=ccd-definition-store-api
             repository="git@github.com:hmcts/ccd-definition-store-api.git"
@@ -86,7 +92,7 @@ function project_config() {
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api, ts-translation-service"
             exit 1 ;;
     esac
     case $config in
@@ -266,9 +272,15 @@ function docker_build() {
       (cd $workspace && docker build . -t am/role-assignment-service:$tagName || exit $?)
     fi
 
-    if [[ $project != "xui-manage-cases" ]]; then
+    if [[ $project == "ts-translation-service" ]]; then
+      (cd $workspace && docker build . -t ts/translation-service:$tagName || exit $?)
+    fi
+
+    if [[ $project != "xui-manage-cases" && $project != "am-role-assignment-service" && $project != "ts-translation-service" ]]; then
       (cd $workspace && docker build . -t ccd/$imageName:$tagName || exit $?)
     fi
+
+
 }
 
 function available_compose_files() {
