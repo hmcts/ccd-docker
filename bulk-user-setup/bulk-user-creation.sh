@@ -334,7 +334,7 @@ then
   exit 1
 fi
 
-if [ "$ENV" != "local" ]; then export https_proxy=proxyout.reform.hmcts.net:8080; fi
+#if [ "$ENV" != "local" ]; then export https_proxy=proxyout.reform.hmcts.net:8080; fi
 REDIRECT_URI="https://create-bulk-user-test/oauth2redirect"
 CLIENT_ID="ccd-bulk-user-register"
 IDAM_URL=$(get_idam_url)
