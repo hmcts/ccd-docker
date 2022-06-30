@@ -23,6 +23,7 @@ services:
       REFORM_SERVICE_NAME: ts-translation-service
       REFORM_TEAM: ts
       REFORM_ENVIRONMENT: local
+      TESTING_SUPPORT_ENABLED: "${TESTING_SUPPORT_ENABLED:-true}"
       APPINSIGHTS_INSTRUMENTATIONKEY: key
     ports:
       - "4650:4650"
