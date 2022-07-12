@@ -1,4 +1,4 @@
-# The bulk user creation scrpt
+# The bulk user creation script
 
 The script requires the following bash utilities. Please install them depending on your OS.
 
@@ -22,19 +22,19 @@ The script will prompt for the following information:
 
 The CSV input file must contain the following *mandatory* elements, including a header row.
 
-| Header       | Mandatory | Description                                               |
-|--------------|-----------|-----------------------------------------------------------|
-| operation    | **Yes**   | Either `create` or `update`                                  |
-| email        | **Yes**   | Email address of user.                                    |
-| firstName    | **Yes**   | First name of user.                                       |
-| lastName     | **Yes**   | Last name of user.                                        |
-| roles        | **Yes**   | A pipe delimited list of roles for the user.              |
-| rolesToAdd   | no        | A pipe delimited list of roles to add for the user.       |
-| rolesToRemove| no        | A pipe delimited list of roles to remove for the user.    |
-| inviteStatus | (output)  | Status of invite, e.g. `SUCCESS`, `HTTP-404`, etc.  NB: If process is re-run using the output file then it will skip rows that have `inviteStatus == 'SUCCESS'`. |
-| idamResponse | (output)  | JSON response from API.                                   |
-| idamUserJson | (output)  | Copy of JSON submission to API.                           |
-| timestamp    | (output)  | Time of API call for user record.                         |
+| Header       | Mandatory                                    | Description                                                                                                                                                      |
+|--------------|----------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| operation    | **Only Mandatory for ./bulk-user-update.sh** | Either `add` or `update`                                                                                                                                         |
+| email        | **Yes**                                      | Email address of user.                                                                                                                                           |
+| firstName    | **Yes**                                      | First name of user.                                                                                                                                              |
+| lastName     | **Yes**                                      | Last name of user.                                                                                                                                               |
+| roles        | **Yes**                                      | A pipe delimited list of roles for the user.                                                                                                                     |
+| rolesToAdd   | **Only Mandatory for ./bulk-user-update.sh**                                           | A pipe delimited list of roles to add for the user.                                                                                                              |
+| rolesToRemove| no                                           | A pipe delimited list of roles to remove for the user.                                                                                                           |
+| inviteStatus | (output)                                     | Status of invite, e.g. `SUCCESS`, `HTTP-404`, etc.  NB: If process is re-run using the output file then it will skip rows that have `inviteStatus == 'SUCCESS'`. |
+| idamResponse | (output)                                     | JSON response from API.                                                                                                                                          |
+| idamUserJson | (output)                                     | Copy of JSON submission to API.                                                                                                                                  |
+| timestamp    | (output)                                     | Time of API call for user record.                                                                                                                                |
 
 > Note: The field headings are case sensitive but the order of the columns is not important.  Any additional columns
   will be ignored by the process.
