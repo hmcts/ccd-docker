@@ -814,6 +814,29 @@ Also if a certain database has not been created you might need to create a new c
   * run docker-compose `./ccd compose up -d`
   * verify that ts-translation-service is up and running by `curl localhost:4650/health`
 
+* To enable **hmc-hmi-outbound-adapter-api**
+  * `./ccd enable backend hmc-hmi-outbound-adapter-api`
+  * The following variables need to be populated in the hmi.yml:
+    * `HMC_SERVICE_BUS_CONNECTION_STRING`
+  * run docker-compose `./ccd compose up -d`
+  * verify that hmc-hmi-outbound-adapter-api is up and running by `curl localhost:4558/health`
+
+* To enable **hmc-hmi-inbound-adapter-api**
+  * `./ccd enable backend hmc-hmi-inbound-adapter-api`
+  * The following variables need to be populated in the hmi.yml:
+    * `HMC_SERVICE_BUS_CONNECTION_STRING`
+  * run docker-compose `./ccd compose up -d`
+  * verify that hmc-hmi-inbound-adapter-api is up and running by `curl localhost:4559/health`
+
+* To enable **hmc-cft-hearing-service-api**
+  * `./ccd enable backend hmc-cft-hearing-service-api`
+  * The following variables need to be populated in the hmi.yml:
+    * `HMC_QUEUE_CONNECTION_STRING`
+    * `HMC_OUTBOUND_QUEUE_CONNECTION_STRING`
+    * `HMC_SERVICE_BUS_CONNECTION_STRING`
+  * run docker-compose `./ccd compose up -d`
+  * verify that hmc-cft-hearing-service-api is up and running by `curl localhost:4561/health`
+
 ## Under the hood :speedboat:
 
 ### Set

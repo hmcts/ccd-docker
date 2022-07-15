@@ -91,8 +91,27 @@ function project_config() {
             envPrefix="CCD_DEFINITION_DESIGNER_API"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
+        hmc-hmi-outbound-adapter-api|hmc-hmi-outbound-adapter|hmi-outbound-adapter|outbound-adapter-api|outbound-adapter)
+            name=hmc-hmi-outbound-adapter-api
+            repository="git@github.com:hmcts/hmc-hmi-outbound-adapter.git"
+            envPrefix="HMC_HMI_OUTBOUND_ADAPTER"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+        hmc-hmi-inbound-adapter-api|hmc-hmi-inbound-adapter|hmi-inbound-adapter|inbound-adapter-api|inbound-adapter)
+            name=hmc-hmi-inbound-adapter-api
+            repository="git@github.com:hmcts/hmc-hmi-inbound-adapter.git"
+            envPrefix="HMC_HMI_INBOUND_ADAPTER"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+        hmc-cft-hearing-service-api|hmc-cft-hearing-service|cft-hearing-service|cft-hearing-service-api|hearing-service)
+            name=hmc-cft-hearing-service-api
+            repository="git@github.com:hmcts/hmc-cft-hearing-service.git"
+            envPrefix="HMC_CFT_HEARING_SERVICE"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api, ts-translation-service"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api, ts-translation-service, hmc-hmi-outbound-adapter-api, hmc-hmi-inbound-adapter-api, hmc-cft-hearing-service-api"
             exit 1 ;;
     esac
     case $config in
