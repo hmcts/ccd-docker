@@ -365,7 +365,7 @@ function process_input_file() {
   fi
 
   # write headers to output file
-  echo "operation,email,firstName,lastName,roles,inviteStatus,idamResponse,idamUserJson,timestamp" >> "$filepath_output_newpath"
+  echo "operation,email,firstName,lastName,roles,rolesToAdd,inviteStatus,idamResponse,idamUserJson,timestamp" >> "$filepath_output_newpath"
 
   # strip JSON into individual items then process in a while loop
   echo $json | jq -r -c '.[]' \
@@ -444,7 +444,7 @@ function process_input_file() {
         fi
 
         # prepare output (NB: escape generated values for CSV)
-        input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+        input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles, .extraCsvData.rolesToAdd] | @csv')
         timestamp=$(date -u +"%FT%H:%M:%SZ")
         output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
       else
@@ -453,7 +453,7 @@ function process_input_file() {
         echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: inviteStatus == ${GREEN}${inviteStatus}${NORMAL}"
 
         # prepare output
-        output_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles, .extraCsvData.inviteStatus, .extraCsvData.idamResponse // "", .extraCsvData.idamUserJson, '.extraCsvData.timestamp'] | @csv')
+        output_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles, , .extraCsvData.rolesToAdd, .extraCsvData.inviteStatus, .extraCsvData.idamResponse // "", .extraCsvData.idamUserJson, '.extraCsvData.timestamp'] | @csv')
 
       fi
       # record log of action in output file (NB: escape values for CSV)
