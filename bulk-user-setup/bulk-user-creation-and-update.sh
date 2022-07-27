@@ -30,8 +30,7 @@ function get_idam_token() {
       --data-urlencode "grant_type=password" \
       --data-urlencode "username=${ADMIN_USER}" \
       --data-urlencode "password=${ADMIN_USER_PWD}" \
-      --data-urlencode "redirect_uri=${REDIRECT_URI}" \
-      --data-urlencode "scope=openid roles create-user"
+      --data-urlencode "scope=openid roles create-user manage-user"
   )
 
   exit_code=$?
@@ -100,6 +99,125 @@ ${response_body}"
     # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
     response="CURL-${exit_code}
 ERROR: User registration request has failed with curl exit code: ${exit_code}"
+  fi
+  echo "$response"
+}
+
+function update_user_roles() {
+  local ROLES=$1
+  local USER=$2
+
+  curl_result=$(
+      curl -w $"\n%{http_code}" --silent -X PUT "${IDAM_URL}/api/v1/users/${USER}/roles" -H "accept: application/json" -H "Content-Type: application/json" \
+        -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}" \
+        -d "${ROLES}"
+    )
+
+    exit_code=$?
+    if [ $exit_code -eq 0 ]; then
+      # seperate body and status into an array
+      IFS=$'\n' response_array=($curl_result)
+
+      array_length=${#response_array[@]}
+      if [ $array_length -eq 1 ]; then
+        response_body='' # clear body
+        response_status=${response_array[0]}
+      else
+        response_body=${response_array[0]}
+        response_status=${response_array[${array_length}-1]}
+      fi
+
+      if [ $(( response_status )) -gt 199 ] && [ $(( response_status )) -lt 300 ]; then
+        # SUCCESS:
+        response="SUCCESS
+  ${response_body}"
+      else
+        # FAIL:
+        response="HTTP-${response_status}
+  ${response_body}"
+      fi
+    else
+      # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
+      response="CURL-${exit_code}
+  ERROR: User ${USER} role update request has failed with curl exit code: ${exit_code}"
+    fi
+    echo "$response"
+}
+
+function get_user() {
+  local EMAIL=$1
+
+  curl_result=$(
+    curl -w $"\n%{http_code}" --silent -X GET "${IDAM_URL}/users?email=${EMAIL}" -H "accept: */*" -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
+  )
+
+  exit_code=$?
+  if [ $exit_code -eq 0 ]; then
+    # seperate body and status into an array
+    IFS=$'\n' response_array=($curl_result)
+
+    array_length=${#response_array[@]}
+    if [ $array_length -eq 1 ]; then
+      response_body='' # clear body
+      response_status=${response_array[0]}
+    else
+      response_body=${response_array[0]}
+      response_status=${response_array[${array_length}-1]}
+    fi
+
+    if [ $(( response_status )) -gt 199 ] && [ $(( response_status )) -lt 300 ]; then
+      # SUCCESS:
+      response=${response_body}
+    else
+      # FAIL:
+      response="HTTP-${response_status}
+${response_body}"
+      echo "HTTP-${response_status}
+ERROR: Request for UserID with email address ${EMAIL} failed with http response: HTTP-${response_status}"
+    fi
+  else
+    # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
+    response="CURL-${exit_code}
+ERROR: Request for UserID with email address ${EMAIL} failed with curl exit code: ${exit_code}"
+  fi
+  echo "$response"
+}
+
+function get_user_roles() {
+  local USERID=$1
+
+  curl_result=$(
+    curl -w $"\n%{http_code}" --silent -X GET "${IDAM_URL}/api/v1/users/${USERID}" -H "accept: */*" -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
+  )
+
+  exit_code=$?
+  if [ $exit_code -eq 0 ]; then
+    # seperate body and status into an array
+    IFS=$'\n' response_array=($curl_result)
+
+    array_length=${#response_array[@]}
+    if [ $array_length -eq 1 ]; then
+      response_body='' # clear body
+      response_status=${response_array[0]}
+    else
+      response_body=${response_array[0]}
+      response_status=${response_array[${array_length}-1]}
+    fi
+
+    if [ $(( response_status )) -gt 199 ] && [ $(( response_status )) -lt 300 ]; then
+      # SUCCESS:
+      response=${response_body}
+    else
+      # FAIL:
+      response="HTTP-${response_status}
+${response_body}"
+      echo "HTTP-${response_status}
+ERROR: Request for roles of user UserID ${USERID} failed with http response: HTTP-${response_status}"
+    fi
+  else
+    # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
+    response="CURL-${exit_code}
+ERROR: Request for roles of user UserID ${USERID} failed with curl exit code: ${exit_code}"
   fi
   echo "$response"
 }
@@ -222,7 +340,7 @@ function convert_input_file_to_json() {
 function process_input_file() {
   local filepath_input_original=$1
 
-  # generate new paths for input and output files 
+  # generate new paths for input and output files
   local datestamp=$(date -u +"%FT%H%M%SZ")
   local filepath_input_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "${datestamp}_INPUT")
   local filepath_output_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "${datestamp}_OUTPUT")
@@ -254,20 +372,54 @@ function process_input_file() {
       # extract CSV fields from json to use in output
       local email=$(echo $user | jq --raw-output '.idamUser.email')
       local inviteStatus=$(echo $user | jq --raw-output '.extraCsvData.inviteStatus')
+      local roles=$(echo $user | jq --raw-output '.idamUser.roles')
 
       if [ "$inviteStatus" != "SUCCESS" ]; then
-        # load formatted user JSON ready to send to IDAM 
+
+        # load formatted user JSON ready to send to IDAM
         idamUserJson=$(echo $user | jq -c --raw-output '.idamUser')
 
-        # make call to IDAM
+        # register user
         submit_response=$(submit_user_registation "$idamUserJson")
 
+        # check if successful
+        if [ "$submit_response" != "SUCCESS" ]; then
+        # update user roles if needed
+          local rawReturnedValue=$(get_user "$email")
+          submit_response=$rawReturnedValue
+
+          # Prevent further API calls if User ID cannot be returned
+          if [[ $rawReturnedValue != *"HTTP-"* ]]; then
+            local userId=$(echo $rawReturnedValue | jq --raw-output '.id')
+            local rawUser=$(get_user_roles "$userId" )
+            local currentRoles=$(echo $rawUser | jq --raw-output '.roles')
+
+            # Logic test to confirm current roles are returned
+            # to prevent data loss
+            if [ "${currentRoles}" != "[]" ]; then
+            # combine current roles and roles to add
+              if [ "${roles}" != "null" ]; then
+                combinedRoles=$(echo $currentRoles $roles | jq '.[]' | jq -s)
+              fi
+
+            # convert roles to JSON ready to send to IDAM
+              combinedRolesJson=$(echo $combinedRoles | jq 'map( {"name" : . } )')
+
+            # make call to IDAM to update roles for existing user
+              submit_response=$(update_user_roles "$combinedRolesJson" "$userId")
+            else
+            # Update response showing why user was skipped
+              submit_response=$(echo skiping $email as no current roles have been returned)
+            fi
+          else
+            submit_response=$(echo "$rawReturnedValue")
+          fi
+        fi
         # seperate submit_user_registation reponse
         IFS=$'\n'
         local response_array=($submit_response)
         local inviteStatus=${response_array[0]}
         local idamResponse=${response_array[1]}
-
         if [ $inviteStatus == "SUCCESS" ]; then
           # SUCCESS:
           success_counter=$((success_counter+1))
@@ -289,8 +441,8 @@ function process_input_file() {
 
         # prepare output
         output_csv=$(echo $user | jq -r '[.idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles, .extraCsvData.inviteStatus, .extraCsvData.idamResponse // "", .extraCsvData.idamUserJson, '.extraCsvData.timestamp'] | @csv')
-      fi
 
+      fi
       # record log of action in output file (NB: escape values for CSV)
       echo "$output_csv" >> "$filepath_output_newpath"
     done
@@ -334,7 +486,6 @@ then
   exit 1
 fi
 
-#if [ "$ENV" != "local" ]; then export https_proxy=proxyout.reform.hmcts.net:8080; fi
 REDIRECT_URI="https://create-bulk-user-test/oauth2redirect"
 CLIENT_ID="ccd-bulk-user-register"
 IDAM_URL=$(get_idam_url)
