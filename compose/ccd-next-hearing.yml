@@ -1,0 +1,26 @@
+---
+version: '2.4'
+
+services:
+  ccd-next-hearing-date-updater:
+    image: "${CCD_NEXT_HEARING_UPDATER_LOCAL-hmctspublic.azurecr.io/}ccd/ccd-next-hearing-date-updater:${CCD_NEXT_HEARING_UPDATER_TAG:-latest}"
+    environment:
+      CCD_DATA_STORE_URL: http://ccd-data-store-api:4452
+      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      IDAM_KEY_NEXT_HEARING_UPDATER: AAAAAAAAAAAAAAAA
+      # Uncomment this line to enable JVM debugging and uncomment the port mapping below
+      #  JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+    #ports:
+      # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
+      # - 5005:5005
+    depends_on:
+      ccd-data-store-api:
+        condition: service_started
+    ccd-user-profile-api:
+        condition: service_started
+    networks:
+      - ccd-network
+
+networks:
+  ccd-network:
+    external: true
