@@ -8,6 +8,7 @@ services:
       CCD_DATA_STORE_URL: http://ccd-data-store-api:4452
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       IDAM_KEY_NEXT_HEARING_UPDATER: AAAAAAAAAAAAAAAA
+      HEARING_NEXT_DAY_CRON_JOB: true
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
       #  JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     #ports:
