@@ -79,6 +79,12 @@ function project_config() {
             envPrefix="CCD_CASE_DISPOSER"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
+        ccd-next-hearing-date-updater|next-hearing-date-updater)
+                    name=ccd-next-hearing-date-updater
+                    repository="git@github.com:hmcts/ccd-next-hearing-date-updater.git"
+                    envPrefix="CCD_NEXT_HEARING_DATE_UPDATER"
+                    buildCommand=$GRADLE_ASSEMBLE_CMD
+                    ;;
         am-role-assignment-service|role-assignment-service|ras)
             name=am-role-assignment-service
             repository="git@github.com:hmcts/am-role-assignment-service.git"

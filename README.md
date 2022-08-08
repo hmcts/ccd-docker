@@ -803,7 +803,11 @@ Also if a certain database has not been created you might need to create a new c
 * To enable **ccd-case-disposer**
   * `./ccd enable backend case-disposer`
   * Run docker-compose `./ccd compose up -d`
- 
+
+* To enable **ccd-next-hearing-date-updater**
+  * `./ccd enable backend ccd-next-hearing-date-updater`
+  * Run docker-compose `./ccd compose up -d`
+
 * To enable **ccd-case-document-am-api**
   * `./ccd enable backend frontend dm-store case-document-am`
   * run docker-compose `./ccd compose up -d`
