@@ -69,7 +69,7 @@
 
   {"email": "ts.service.translation-manage@gmail.com", "roles": "ccd-import,manage-translations", "lastName": "Translations", "firstName": "Manage"},
   {"email": "ts.service.translation-load@gmail.com", "roles": "ccd-import,load-translations", "lastName":"Translations", "firstName": "Load"},
-  {"email": "ts.service.translation-manage-load@gmail.com", "roles": "ccd-import,load-translations,manage-translations", "lastName": "Translations", "firstName": "Manage-Load"}
+  {"email": "ts.service.translation-manage-load@gmail.com", "roles": "ccd-import,load-translations,manage-translations", "lastName": "Translations", "firstName": "Manage-Load"},
 
-
+  {"email": "next.hearing.day.idam.system.user@gmail.com", "roles": "caseworker,caseworker-befta_master,next-hearing-date-admin", "lastName": "hearing", "firstName": "next-day"}
 ]
