@@ -15,3 +15,5 @@ ${dir}/utils/idam-create-service.sh "am_role_assignment" "am_role_assignment" "a
 ${dir}/utils/idam-create-service.sh "ccd_data_store_api" "ccd_data_store_api" "idam_data_store_client_secret" "http://ccd-data-store-api/oauth2redirect" "false" "profile openid roles manage-user"
 
 ${dir}/utils/idam-create-service.sh "ccd_case_disposer" "ccd_case_disposer" "idam_ccd_case_disposer_secret" "http://ccd-case-disposer/oauth2redirect" "false" "profile openid roles"
+
+${dir}/utils/idam-create-service.sh "ccd_next_hearing_updater_service" "ccd_next_hearing_updater_service" "AAAAAAAAAAAAAAAA" "http://ccd-next-hearing-updater-service/oauth2redirect" "false" "profile openid roles"

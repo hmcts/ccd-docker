@@ -76,7 +76,7 @@ services:
       DATA_STORE_DB_USE_SSL: "${DB_USE_SSL}"
       DATA_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DATA_STORE}"
       DATA_STORE_TOKEN_SECRET: iuasbcuasdcbasdgcasdgcuysachjsacyasdgjcgasdj
-      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps,aac_manage_case_assignment,xui_webapp,ccd_case_document_am_api,am_role_assignment_service
+      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps,aac_manage_case_assignment,xui_webapp,ccd_case_document_am_api,am_role_assignment_service,ccd_next_hearing_updater_service
       DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
       IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}" # For backward compatibility with older images
@@ -203,6 +203,7 @@ services:
       MICROSERVICEKEYS_HMC_HMI_INBOUND_ADAPTER: "${IDAM_KEY_API_HMI_INBOUND_ADAPTER}"
       MICROSERVICEKEYS_CCD_CASE_DISPOSER: "${IDAM_KEY_CCD_CASE_DISPOSER}"
       MICROSERVICEKEYS_TS_TRANSLATION_SERVICE: "${IDAM_KEY_TS_TRANSLATION_SERVICE}"
+      MICROSERVICEKEYS_CCD_NEXT_HEARING_UPDATER_SERVICE: "${IDAM_KEY_NEXT_HEARING_UPDATER}"
       TESTING_SUPPORT_ENABLED: "true"
     networks:
       - ccd-network
@@ -224,23 +225,23 @@ services:
     networks:
       - ccd-network
 
-# Uncomment this section to enable ccd-shared-database with Postgres version 11.
-#  ccd-shared-database-v11:
-#    build: ../database-v11
-#    healthcheck:
-#      interval: 10s
-#      timeout: 10s
-#      retries: 10
-#    environment:
-#      DB_USERNAME:
-#      DB_PASSWORD:
-#      POSTGRES_HOST_AUTH_METHOD: trust
-#    ports:
-#      - 5055:5432
-#    volumes:
-#      - ccd-docker-ccd-shared-database-data-v11:/var/lib/postgresql/data
-#    networks:
-#      - ccd-network
+  #This section should be commented when the pr is merged in master.
+  ccd-shared-database-v11:
+    build: ../database-v11
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    environment:
+      DB_USERNAME:
+      DB_PASSWORD:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - 5055:5432
+    volumes:
+      - ccd-docker-ccd-shared-database-data-v11:/var/lib/postgresql/data
+    networks:
+      - ccd-network
 
   ccd-test-stubs-service:
     image: "${CCD_TEST_STUBS_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}ccd/test-stubs-service:${CCD_TEST_STUBS_SERVICE_TAG:-latest}"
