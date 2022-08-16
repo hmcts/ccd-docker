@@ -28,5 +28,6 @@
   { "role": "manage-translations", "security_classification": "PUBLIC" },
   { "role": "load-translations", "security_classification": "PUBLIC" },
   { "role": "citizen", "security_classification": "PUBLIC" },
-  { "role": "pui-caa", "security_classification": "PUBLIC" }
+  { "role": "pui-caa", "security_classification": "PUBLIC" },
+  { "role": "GS_profile", "security_classification": "PUBLIC" }
 ]
