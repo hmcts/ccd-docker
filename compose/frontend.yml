@@ -35,6 +35,7 @@ services:
       ADMINWEB_ELASTIC_INDEX_URL : http://ccd-definition-store-api:4451/elastic-support/index
       ADMINWEB_ROLES_WHITELIST : "ccd-import,ccd-import-validate"
       APPINSIGHTS_INSTRUMENTATIONKEY: key
+      ADMINWEB_GET_DICTIONARY_URL: http://ts-translation-service:4650/dictionary
     ports:
     - 3100:3100
     depends_on:
