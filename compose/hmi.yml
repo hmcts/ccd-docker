@@ -1,0 +1,76 @@
+version: '2.4'
+services:
+  hmc-hmi-outbound-adapter:
+    image: "${HMC_HMI_OUTBOUND_ADAPTER_USE_LOCAL-hmctspublic.azurecr.io/}hmc/hmi-outbound-adapter:${HMC_HMI_OUTBOUND_ADAPTER_TAG:-latest}"
+    container_name: hmi-outbound-adapter
+    environment:
+      SERVER_PORT: 4558
+      REFORM_SERVICE_NAME: hmc-hmi-outbound-adapter
+      REFORM_ENVIRONMENT: local
+      APPINSIGHTS_INSTRUMENTATIONKEY: key
+      WIREMOCK_URL: "${WIREMOCK_STUB_SERVICE_NAME:-http://hmc-wiremock:4459}"
+      HMC_SERVICE_BUS_QUEUE: "hmc-to-hmi-demo"
+      HMC_SERVICE_BUS_CONNECTION_STRING: ""
+    ports:
+      - 4558:4558
+    networks:
+      - ccd-network
+
+  hmc-hmi-inbound-adapter:
+    image: "${HMC_HMI_INBOUND_ADAPTER_USE_LOCAL-hmctspublic.azurecr.io/}hmc/hmi-inbound-adapter:${HMC_HMI_INBOUND_ADAPTER_TAG:-latest}"
+    container_name: hmi-inbound-adapter
+    environment:
+      SERVER_PORT: 4559
+      REFORM_SERVICE_NAME: hmc-hmi-inbound-adapter
+      REFORM_ENVIRONMENT: local
+      APPINSIGHTS_INSTRUMENTATIONKEY: key
+      CFT_HEARING_SERVICE_URL: "${CFT_HEARING_SERVICE_URL:-http://hmc-cft-hearing-service:4561}"
+      HMC_SERVICE_BUS_QUEUE: "hmc-from-hmi-demo"
+      HMC_SERVICE_BUS_CONNECTION_STRING: ""
+      IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://docker.for.mac.localhost:5000}"
+      S2S_URL: http://docker.for.mac.localhost:4502
+    ports:
+      - 4559:4559
+    depends_on:
+      hmc-cft-hearing-service:
+        condition: service_started
+    networks:
+      - ccd-network
+
+  hmc-cft-hearing-service:
+    image: "${HMC_CFT_HEARING_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}hmc/cft-hearing-service:${HMC_CFT_HEARING_SERVICE_TAG:-latest}"
+    container_name: cft-hearing-service
+    environment:
+      CFT_HEARING_SERVICE_DB_USERNAME: hmc
+      CFT_HEARING_SERVICE_DB_PASSWORD: hmc
+      CFT_HEARING_SERVICE_DB_HOST: "hmc-shared-database"
+      CFT_HEARING_SERVICE_DB_PORT: 5432
+      CFT_HEARING_SERVICE_DB_NAME: hmc_cft_hearing_service
+      SERVER_PORT: 4561
+      REFORM_SERVICE_NAME: hmc-cft-hearing-service
+      REFORM_ENVIRONMENT: local
+      APPINSIGHTS_INSTRUMENTATIONKEY: key
+      IDAM_OIDC_URL: "${IDAM_STUB_SERVICE_NAME:-http://docker.for.mac.localhost:5000}"
+      IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://docker.for.mac.localhost:5000}"
+      #inbound queue
+      HMC_QUEUE_CONNECTION_STRING: ""
+      HMC_SERVICE_BUS_QUEUE: "hmc-from-hmi-demo"
+      #outbound queue
+      HMC_OUTBOUND_QUEUE_CONNECTION_STRING: ""
+      HMC_OUTBOUND_SERVICE_BUS_QUEUE: "hmc-to-hmi-demo"
+      #topic connection
+      HMC_SERVICE_BUS_CONNECTION_STRING: ""
+      HMC_SERVICE_BUS_TOPIC: "hmc-to-cft-demo"
+      HMC_SERVICE_BUS_SUBSCRIPTION: "hmc-subs-to-cft-demo"
+      S2S_URL: http://docker.for.mac.localhost:4502
+    ports:
+      - 4561:4561
+    depends_on:
+      ccd-shared-database:
+        condition: service_started
+      idam-api:
+        condition: service_started
+      ccd-data-store-api:
+        condition: service_started
+    networks:
+      - ccd-network
