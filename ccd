@@ -282,6 +282,10 @@ function docker_build() {
       (cd $workspace && docker build . -t ts/translation-service:$tagName || exit $?)
     fi
 
+    if [[ $project == "ccd-next-hearing-date-updater" ]]; then
+          (cd $workspace && docker build . -t ts/ccd-next-hearing-date-updater:$tagName || exit $?)
+    fi
+
     if [[ $project != "xui-manage-cases" && $project != "am-role-assignment-service" && $project != "ts-translation-service" ]]; then
       (cd $workspace && docker build . -t ccd/$imageName:$tagName || exit $?)
     fi
