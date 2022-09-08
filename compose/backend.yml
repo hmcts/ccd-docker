@@ -6,7 +6,7 @@ services:
   ccd-user-profile-api:
     image: "${CCD_USER_PROFILE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/user-profile-api:${CCD_USER_PROFILE_API_TAG:-latest}"
     environment:
-      USER_PROFILE_DB_HOST: "${CCD_POSTGRES_11:-ccd-shared-database}"
+      USER_PROFILE_DB_HOST: ccd-shared-database
       USER_PROFILE_DB_PORT: 5432
       USER_PROFILE_DB_USERNAME: "${DB_USERNAME}"
       USER_PROFILE_DB_PASSWORD: "${DB_PASSWORD}"
@@ -19,14 +19,14 @@ services:
     ports:
       - 4453:4453
     depends_on:
-      - ${CCD_POSTGRES_11:-ccd-shared-database}
+      - ccd-shared-database
     networks:
       - ccd-network
 
   ccd-definition-store-api:
     image: "${CCD_DEFINITION_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
     environment:
-      DEFINITION_STORE_DB_HOST: "${CCD_POSTGRES_11:-ccd-shared-database}"
+      DEFINITION_STORE_DB_HOST: ccd-shared-database
       DEFINITION_STORE_DB_PORT: 5432
       DEFINITION_STORE_DB_USERNAME: "${DB_USERNAME}"
       DEFINITION_STORE_DB_PASSWORD: "${DB_PASSWORD}"
@@ -57,9 +57,6 @@ services:
         condition: service_started
       ccd-shared-database:
         condition: service_started
-# Uncomment this line to enable ccd-shared-database with Postgres version 11
-#      ccd-shared-database-v11:
-#        condition: service_started
       ccd-user-profile-api:
         condition: service_started
     networks:
@@ -69,7 +66,7 @@ services:
     image: "${CCD_DATA_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
     environment:
       CASE_DOCUMENT_AM_URL: http://ccd-case-document-am-api:4455
-      DATA_STORE_DB_HOST: "${CCD_POSTGRES_11:-ccd-shared-database}"
+      DATA_STORE_DB_HOST: ccd-shared-database
       DATA_STORE_DB_PORT: 5432
       DATA_STORE_DB_USERNAME: "${DB_USERNAME}"
       DATA_STORE_DB_PASSWORD: "${DB_PASSWORD}"
@@ -114,9 +111,6 @@ services:
         condition: service_started
       ccd-shared-database:
         condition: service_started
-# Uncomment this line to enable ccd-shared-database with Postgres version 11
-#      ccd-shared-database-v11:
-#        condition: service_started
       ccd-user-profile-api:
         condition: service_started
       ccd-definition-store-api:
@@ -127,7 +121,7 @@ services:
   am-role-assignment-service:
     image: "${AM_ROLE_ASSIGNMENT_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}am/role-assignment-service:${AM_ROLE_ASSIGNMENT_SERVICE_TAG:-latest}"
     environment:
-       ROLE_ASSIGNMENT_DB_HOST: "${CCD_POSTGRES_11:-ccd-shared-database}"
+       ROLE_ASSIGNMENT_DB_HOST: ccd-shared-database
        ROLE_ASSIGNMENT_DB_NAME: role_assignment
        ROLE_ASSIGNMENT_DB_PORT: 5432
        ROLE_ASSIGNMENT_DB_USERNAME: "${DB_USERNAME}"
@@ -167,9 +161,6 @@ services:
         condition: service_started
       ccd-shared-database:
         condition: service_started
-# Uncomment this line to enable ccd-shared-database with Postgres version 11
-#      ccd-shared-database-v11:
-#        condition: service_started
       ccd-data-store-api:
         condition: service_started
     networks:
@@ -224,24 +215,6 @@ services:
     networks:
       - ccd-network
 
-# Uncomment this section to enable ccd-shared-database with Postgres version 11.
-#  ccd-shared-database-v11:
-#    build: ../database-v11
-#    healthcheck:
-#      interval: 10s
-#      timeout: 10s
-#      retries: 10
-#    environment:
-#      DB_USERNAME:
-#      DB_PASSWORD:
-#      POSTGRES_HOST_AUTH_METHOD: trust
-#    ports:
-#      - 5055:5432
-#    volumes:
-#      - ccd-docker-ccd-shared-database-data-v11:/var/lib/postgresql/data
-#    networks:
-#      - ccd-network
-
   ccd-test-stubs-service:
     image: "${CCD_TEST_STUBS_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}ccd/test-stubs-service:${CCD_TEST_STUBS_SERVICE_TAG:-latest}"
     environment:
@@ -257,7 +230,6 @@ services:
 
 volumes:
   ccd-docker-ccd-shared-database-data:
-  ccd-docker-ccd-shared-database-data-v11:
   wiremock:
 
 networks:
