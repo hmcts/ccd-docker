@@ -49,20 +49,14 @@ Note:
 if you experience any error with the above command, try `az login` first for [Azure Authentication for pulling latest docker images](#azure-authentication-for-pulling-latest-docker-images)
 
 
-
-3. Add Postgres V11 DB settings - **THIS STEP IS ONLY REQUIRED IF YOU NEED TO MIGRATE TO POSTGRES V11**
-- [Postgres v11 database set-up](/PostgresV11-prerequisites.md)
-
-
-
-4. Pull latest Docker images:
+3. Pull latest Docker images:
 
 ```bash
 ./ccd compose pull
 ```
 
 
-5. Set up environment: 
+4. Set up environment: 
 
 Note:
 required only on the first run. Once executed, it doesn't need to be executed again
