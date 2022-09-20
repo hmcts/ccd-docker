@@ -71,5 +71,8 @@
   {"email": "ts.service.translation-load@gmail.com", "roles": "ccd-import,load-translations", "lastName":"Translations", "firstName": "Load"},
   {"email": "ts.service.translation-manage-load@gmail.com", "roles": "ccd-import,load-translations,manage-translations", "lastName": "Translations", "firstName": "Manage-Load"},
 
-  {"email": "next.hearing.date.admin@gmail.com", "roles": "caseworker,next-hearing-date-admin", "lastName": "hearing", "firstName": "next-day"}
+  {"email": "next.hearing.date.admin@gmail.com", "roles": "caseworker,next-hearing-date-admin", "lastName": "hearing", "firstName": "next-day"},
+
+  {"email": "master.caseworker.staff@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "master.caseworker", "firstName": "staff"},
+  {"email": "master.caseworker.regional-staff@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "master.caseworker", "firstName": "regional-staff"}
 ]

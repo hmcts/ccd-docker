@@ -1,5 +1,48 @@
 [
   {
+    "email": "master.caseworker.staff@gmail.com",
+    "roleAssignments": [
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "ft_hmcts-staff",
+        "grantType": "BASIC",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": null,
+        "authorisations": []
+      }
+    ],
+    "overrideAll": true
+  },
+  {
+    "email": "master.caseworker.regional-staff@gmail.com",
+    "roleAssignments": [
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "ft_hmcts-staff",
+        "grantType": "BASIC",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": null,
+        "authorisations": []
+      },
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "ft_regional-staff",
+        "grantType": "STANDARD",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": { "region": "123" },
+        "authorisations": []
+      }
+    ],
+    "overrideAll": true
+  },
+
+  {
     "email": "auto.test.cnp@gmail.com", 
     "roleAssignments": [
       {
@@ -25,7 +68,7 @@
     ], 
     "overrideAll": true 
   },
-    {
+  {
     "email": "ccd.ac.superuser@gmail.com", 
     "roleAssignments": [
       {
