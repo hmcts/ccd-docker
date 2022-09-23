@@ -6,7 +6,7 @@
 
 * Make sure all micro-services are running the same branch, for instance: 'develop'.
 
-* Start ccd-docker and make sure the new container ccd-shared-database-v11 is up and running.
+* Start ccd-docker and make sure the new container ccd-shared-database is up and running.
 ```
 ./ccd compose up -d
 ```
