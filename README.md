@@ -49,7 +49,14 @@ Note:
 if you experience any error with the above command, try `az login` first for [Azure Authentication for pulling latest docker images](#azure-authentication-for-pulling-latest-docker-images)
 
 
-3. Pull latest Docker images:
+3. If ccd-docker already setup and all images/volumes exists and database points to Postgres9 then prior to pulling images run the below commands to delete existing images and volumes.
+
+```bash
+docker system prune -a --volumes
+docker rmi -f $(docker images -aq)
+```
+   Pull latest Docker images:
+   
 
 ```bash
 ./ccd compose pull
