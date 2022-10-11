@@ -19,9 +19,21 @@ is_test=1
 ###########################################
 # Special case Constants / global variables
 ###########################################
-SINGLE_ROLE="ccd-admin" #if only this role, then do not add default role below
-DEFAULT_ROLE="caseworker"
-NOT_ALLOWED_ROLE="judiciary"
+#'|' delimited string of roles. These roles are special roles
+#if found in request skip adding the default roles to the user
+SPECIAL_ROLES="ccd-admin|ccd-admin2" #if only this role, then do not add default role below
+
+#'|' delimited string of roles. These roles are default for all and will be added
+#if a special role above is not found in the request
+DEFAULT_ROLES="caseworker|caseworker1"
+
+#'|' delimited string of roles. These roles should not be processed by this script
+MANUAL_ROLES="judiciary|judiciary-1"
+
+#####################################
+# Operations supported by this script
+#####################################
+OPS=("add" "updatename" "delete" "find")
 
 function get_idam_url() {
     if [ "$ENV" == "prod" ]
@@ -201,7 +213,51 @@ function post_user_roles() {
   echo "$response"
 }
 
+function delete_user_role() {
+  #Removes a role from the user
+
+  local USER=$1
+  local ROLE=$2
+
+  curl_result=$(
+    curl -w $"\n%{http_code}" --silent -X DELETE "${IDAM_URL}/api/v1/users/${USER}/roles/${ROLE}" -H "accept: application/json" -H "Content-Type: application/json" \
+    -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
+  )
+
+  exit_code=$?
+  if [ $exit_code -eq 0 ]; then
+    # seperate body and status into an array
+    IFS=$'\n' response_array=($curl_result)
+
+    array_length=${#response_array[@]}
+    if [ $array_length -eq 1 ]; then
+      response_body='' # clear body
+      response_status=${response_array[0]}
+    else
+      response_body=${response_array[0]}
+      response_status=${response_array[${array_length}-1]}
+    fi
+
+    if [ $(( response_status )) -gt 199 ] && [ $(( response_status )) -lt 300 ]; then
+      # SUCCESS:
+      response="SUCCESS
+      ${response_body}"
+    else
+      # FAIL:
+      response="HTTP-${response_status}
+      ${response_body}"
+    fi
+  else
+    # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
+    response="CURL-${exit_code}
+    ERROR: User ${USER} role update request has failed with curl exit code: ${exit_code}"
+  fi
+  echo "$response"
+}
+
 function put_user_roles() {
+  #Replaces the entire set of role grants to the user
+
   local USER=$1
   local ROLES=$2
 
@@ -242,14 +298,12 @@ function put_user_roles() {
   echo "$response"
 }
 
-function delete_user_roles() {
-  local USER=$1
-  local ROLES=$2
+function get_user_api_v1() {
+  local EMAIL=$1
+  EMAIL="email%3A%20%22$EMAIL%22"
 
   curl_result=$(
-    curl -w $"\n%{http_code}" --silent -X PUT "${IDAM_URL}/api/v1/users/${USER}/roles" -H "accept: application/json" -H "Content-Type: application/json" \
-    -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}" \
-    -d "${ROLES}"
+    curl -w $"\n%{http_code}" --silent -X GET -G "${IDAM_URL}/api/v1/users?query=$EMAIL" -H "accept: */*" -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
   )
 
   exit_code=$?
@@ -268,19 +322,21 @@ function delete_user_roles() {
 
     if [ $(( response_status )) -gt 199 ] && [ $(( response_status )) -lt 300 ]; then
       # SUCCESS:
-      response="SUCCESS
-      ${response_body}"
+      response=${response_body}
     else
       # FAIL:
       response="HTTP-${response_status}
       ${response_body}"
+      echo "HTTP-${response_status}
+      ERROR: Request for UserID with email address ${EMAIL} failed with http response: HTTP-${response_status}"
     fi
   else
     # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
     response="CURL-${exit_code}
-    ERROR: User ${USER} role update request has failed with curl exit code: ${exit_code}"
+    ERROR: Request for UserID with email address ${EMAIL} failed with curl exit code: ${exit_code}"
   fi
   echo "$response"
+
 }
 
 function get_user() {
@@ -325,6 +381,7 @@ function get_user() {
   echo "$response"
 
 }
+
 
 function get_user_roles() {
   local USERID=$1
@@ -477,6 +534,8 @@ function generate_csv_path_with_insert() {
   local original_filename=$1
   local insert=$2
 
+  #CSV_PROCESSED_DIR_PATH
+
   local dirname=$(dirname "${original_filename}")
   local basename=$(basename "${original_filename}")
   local filename="${basename%.*}"
@@ -487,7 +546,10 @@ function generate_csv_path_with_insert() {
     extension="csv"
   fi
 
-  echo "${dirname}/${filename}.${insert}.${extension}"
+  if [[ ! -e "${dirname}/${CSV_PROCESSED_DIR_NAME}" ]]; then
+    mkdir "${dirname}/${CSV_PROCESSED_DIR_NAME}"
+  fi
+  echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/${filename}.${insert}.${extension}"
 }
 
 function generate_log_path_with_insert() {
@@ -501,7 +563,11 @@ function generate_log_path_with_insert() {
 
   extension="log"
 
-  echo "${dirname}/${filename}.${insert}.${extension}"
+  if [[ ! -e "${dirname}/${CSV_PROCESSED_DIR_NAME}" ]]; then
+    mkdir "${dirname}/${CSV_PROCESSED_DIR_NAME}"
+  fi
+
+  echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/${filename}.${insert}.${extension}"
 }
 
 function convert_input_file_to_json() {
@@ -521,6 +587,8 @@ function convert_input_file_to_json() {
   verify_json_format_includes_field "${raw_csv_as_json}" "lastName"
   verify_json_format_includes_field "${raw_csv_as_json}" "roles"
 
+  #"roles": (try(.roles | split("|") | walk( if type == "string" then (sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) else . end)) // null),
+
   # then reformat JSON using JQ
   local input_as_json=$(echo $raw_csv_as_json \
     | jq -r -c 'map({
@@ -535,7 +603,7 @@ function convert_input_file_to_json() {
         "extraCsvData": {
           "operation": .operation,
           "roles": .roles,
-          "inviteStatus": .status,
+          "status": .status,
           "idamResponse": .idamResponse,
           "idamUserJson": .idamUserJson,
           "timestamp": .timestamp
@@ -543,33 +611,6 @@ function convert_input_file_to_json() {
       })' ) # NB: extraCsvData element included in JSON to help preserve csv data when skipping an already complete record (i.e. inviteStatus="success")
 
   echo "$input_as_json"
-}
-
-function tester() {
-  if [ $is_test -eq 1 ] 
-  then
-    echo 'got here!'
-    exit 0
-  fi
-}
-
-function user_exists()
-{
-   if [ -d "${1}" ]; then
-       return $(true)
-   else
-       return $(false)
-   fi
-}
-
-function isUserExists() {
-  local rawReturnedValue=$(get_user "${1}")
-  if [[ $rawReturnedValue != *"HTTP-"* ]];
-  then
-    true
-  else
-    false
-  fi
 }
 
 function process_input_file() {
@@ -590,8 +631,6 @@ function process_input_file() {
     echo $filepath_input_original
     echo $filepath_input_newpath
     echo $filepath_output_newpath
-    #exit 0
-
     echo $IDAM_ACCESS_TOKEN
   fi
 
@@ -634,6 +673,8 @@ function process_input_file() {
       lastName=$(trim "$lastName") #trim leading and trailing spaces from lastName string
 
       local operation=$(echo $user | jq --raw-output '.extraCsvData.operation')
+      operation=$(trim "$operation")
+      operation=$(convertToLowerCase "$operation")
 
       # leading and trailing spaces between roles is taken care in the function call to convert_input_file_to_json
       local rolesFromCSV=$(echo $user | jq --raw-output '.idamUser.roles')
@@ -650,13 +691,22 @@ function process_input_file() {
       if [ "$inviteStatus" != "SUCCESS" ]; then
         # regardless if operation (add/remove) we should always check if the user already exists or not
         local rawReturnedValue=$(get_user "$email")
+        #local rawReturnedValue=$(get_user_api_v1 "${email}")
+
         if [[ $rawReturnedValue != *"HTTP-"* ]]; then
           local userId=$(echo $rawReturnedValue | jq --raw-output '.id')
+          #local userId=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.id')
+
           local userActiveState=$(echo $rawReturnedValue | jq --raw-output '.active') # i.e. ACTIVE
+          #local userActiveState=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.active')
+
           #local userRecordType=$(echo $userObject | jq --raw-output '.recordType') # i.e. LIVE
 
           local firstNameFromApi=$(echo $rawReturnedValue | jq --raw-output '.forename')
+          #local firstNameFromApi=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.forename')
+
           local lastNameFromApi=$(echo $rawReturnedValue | jq --raw-output '.surname')
+          #local lastNameFromApi=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.surname')
 
           local rawUserRoles=$(get_user_roles "$userId" )
           local usersRolesFromApi=$(echo $rawUserRoles | jq --raw-output '.roles')
@@ -666,68 +716,140 @@ function process_input_file() {
           log_debug "roles from API call: ${usersRolesFromApi}"
         fi
 
-        log_debug "roles from CSV: ${rolesFromCSV}"
+        log_debug "original roles from CSV: ${rolesFromCSV}"
 
-        if [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "add" ]; then
+        if [ $(echo $rolesFromCSV | jq -e '. | length') != 0 ]; then
+          rolesFromCSV=$(convertJsonStringArrayToLowerCase "${rolesFromCSV}")
+          log_debug "original roles from CSV (in lower case): ${rolesFromCSV}"
+        fi
+
+        if [ $(contains "${OPS[@]}" "${operation}") == "n" ]; then
+
+          # SKIP:
+          skipped_counter=$((skipped_counter+1))
+          inviteStatus="SKIPPED"
+          local reason="Operation '${operation}' not recognised, valid operations are: ${OPS[@]}"
+          idamResponse=$reason
+          log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+          echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+
+        elif ! $(validateEmailAddress "${email}"); then
+
+          fail_counter=$((fail_counter+1))
+          local reason="Invalid email detected, skipping line"
+          idamResponse=$reason
+          inviteStatus="FAILED"
+          log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+          echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+
+          # prepare output (NB: escape generated values for CSV)
+          input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+          timestamp=$(date -u +"%FT%H:%M:%SZ")
+          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+
+        elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "find" ]; then
+
+            fail_counter=$((fail_counter+1))
+            local reason="user not found"
+            idamResponse=$reason
+            inviteStatus="FAILED"
+            log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+            echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+
+            # prepare output (NB: escape generated values for CSV)
+            input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+            timestamp=$(date -u +"%FT%H:%M:%SZ")
+            output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+
+        elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "find" ]; then
+            local api_v1_user=$(get_user_api_v1 "${email}")
+
+            if [[ $api_v1_user != *"HTTP-"* ]]; then
+              # SUCCESS:
+              success_counter=$((success_counter+1))
+              local reason="user details successfully retrieved"
+              idamResponse=$api_v1_user
+              inviteStatus="SUCCESS"
+              log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+
+              # prepare output (NB: escape generated values for CSV)
+              input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+              timestamp=$(date -u +"%FT%H:%M:%SZ")
+              output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+            else
+              fail_counter=$((fail_counter+1))
+              local reason="user not found using api/v1/users?query=email:"${email}" endpoint"
+              idamResponse=$reason
+              inviteStatus="FAILED"
+              log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+
+              # prepare output (NB: escape generated values for CSV)
+              input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+              timestamp=$(date -u +"%FT%H:%M:%SZ")
+              output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+            fi
+
+        elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "add" ]; then
 
           log_debug "email: ${email} - User does not exist, sending invite registration"
 
-          #check if a role provided is a $NOT_ALLOWED_ROLE
-          local notAllowedRoleFound=0
-          for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
-            local found=0
-            if [ "${csvRole}" == "$NOT_ALLOWED_ROLE" ]; then
-              found=1
-              break
-            fi
-          done
-
-          if [ $found -eq 1 ]; then
+          if [ $(echo $rolesFromCSV | jq -e '. | length') == 0 ]; then
             # FAIL:
             fail_counter=$((fail_counter+1))
-            local reason="invalid role detected: $NOT_ALLOWED_ROLE"
+            local reason="No roles defined, skipping line"
             idamResponse=$reason
-            inviteStatus="FAIL"
+            inviteStatus="FAILED"
             log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
+            echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
           else
-            #conditionally add caseworker as it is always a required and default role
-            #if csv role is only to add $SINGLE_ROLE, $DEFAULT_ROLE is not required
-            if [[ $(echo $rolesFromCSV | jq -e '. | length') == 1 ]]; then
-              local singleRole="$(echo $rolesFromCSV | jq -r '.[0]')"
-              singleRole=$(trim "$singleRole") #trim leading and trailing spaces
-              echo ""${singleRole}""
-              if [ "${singleRole}" != "$SINGLE_ROLE" ]; then
-                rolesFromCSV=$(echo "${rolesFromCSV}" | jq --arg new "$DEFAULT_ROLE" '. += [$new]')
-              fi
-            else
-              rolesFromCSV=$(echo "${rolesFromCSV}" | jq --arg new "$DEFAULT_ROLE" '. += [$new]')
-            fi
-
-            # make call to IDAM
-            submit_response=$(submit_user_registation "$idamUserJson")
-
-            #echo $submit_response
-
-            # seperate submit_user_registation reponse
-            IFS=$'\n'
-            local response_array=($submit_response)
-            local inviteStatus=${response_array[0]}
-            local idamResponse=${response_array[1]}
-
-            if [ $inviteStatus == "SUCCESS" ]; then
-              # SUCCESS:
-              success_counter=$((success_counter+1))
-              local reason="user successfully registered"
-              log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-              echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
-            else
+            if [ $(checkAllowedRole "${rolesFromCSV}" "${MANUAL_ROLES}") -eq 1 ]; then
               # FAIL:
               fail_counter=$((fail_counter+1))
-              local reason="failed registering user"
-              inviteStatus="FAIL"
-              log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason} - - ${idamResponse}"
-              echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
+              local reason="One or more roles defined cannot be assigned using this script"
+              idamResponse=$reason
+              inviteStatus="FAILED"
+              log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+            else
+              if [ $(checkShouldAddRole "${rolesFromCSV}" "${SPECIAL_ROLES}") -eq 1 ]; then
+                log_debug "Adding default roles"
+                rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${DEFAULT_ROLES}")
+              else
+                log_debug "Skipping addition of default roles"
+              fi
+
+              log_debug "Final roles to apply: ${rolesFromCSV}"
+
+              #Need to update the roles in idamUserJson
+              idamUserJson=$(echo $idamUserJson | jq --argjson rolesFromCSV "${rolesFromCSV}" '.roles = $rolesFromCSV')
+
+              log_debug "idamUserJson: ${idamUserJson}"
+
+              # make call to IDAM
+              submit_response=$(submit_user_registation "$idamUserJson")
+
+              # seperate submit_user_registation reponse
+              IFS=$'\n'
+              local response_array=($submit_response)
+              local inviteStatus=${response_array[0]}
+              local idamResponse=${response_array[1]}
+
+              if [ $inviteStatus == "SUCCESS" ]; then
+                # SUCCESS:
+                success_counter=$((success_counter+1))
+                local reason="user successfully registered"
+                log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+              else
+                # FAIL:
+                fail_counter=$((fail_counter+1))
+                local reason="failed registering user"
+                inviteStatus="FAILED"
+                log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse}"
+                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
+              fi
             fi
           fi
 
@@ -740,123 +862,114 @@ function process_input_file() {
 
           log_debug "email: ${email} - User exists, doing role addition logic"
 
-          #check if a role provided is a $NOT_ALLOWED_ROLE
-          local notAllowedRoleFound=0
-          for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
-            local found=0
-            if [ "${csvRole}" == "$NOT_ALLOWED_ROLE" ]; then
-              found=1
-              break
-            fi
-          done
-          if [ $found -eq 1 ]; then
+          if [ $(echo $rolesFromCSV | jq -e '. | length') == 0 ]; then
             # FAIL:
             fail_counter=$((fail_counter+1))
-            local reason="invalid role detected: $NOT_ALLOWED_ROLE"
+            local reason="No roles defined, processes terminated"
             idamResponse=$reason
             inviteStatus="FAILED"
             log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
+            echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
           else
-            #Set user activate state to true if false
-            if [ $userActiveState == "false" ]; then
-              log_info "email: ${email} - User activate state=false, activating user"
-              #user activate state is false, need to call patch user api to set to true first
-              #note, update_user is a PATCH call, but we cannot modify any roles using this endpoint
-              body='{"active":true}'
-              submit_response=$(update_user "${userId}" "${body}")
-
-              if [[ "$submit_response" == *"$email"* ]]; then
-                log_info "email: ${email} - SUCCESS, user active state set to true"
-              else
-                log_info "email: ${email} - FAILED, user active state could not be set"
-              fi
-            fi
-
-            combinedCsvApiRoles=$(echo $rolesFromCSV $usersRolesFromApi | jq '.[]' | jq -s)
-
-            #conditionally add caseworker as it is always a required and default role
-            #if csv role is only to add $SINGLE_ROLE, $DEFAULT_ROLE is not required
-            if [[ $(echo $rolesFromCSV | jq -e '. | length') == 1 ]]; then
-              local singleRole="$(echo $rolesFromCSV | jq -r '.[0]')"
-              singleRole=$(trim "$singleRole") #trim leading and trailing spaces
-              echo ""${singleRole}""
-              if [ "${singleRole}" != "$SINGLE_ROLE" ]; then
-                rolesFromCSV=$(echo "${rolesFromCSV}" | jq --arg new "$DEFAULT_ROLE" '. += [$new]')
-              fi
+            if [ $(checkAllowedRole "${rolesFromCSV}" "${MANUAL_ROLES}") -eq 1 ]; then
+              # FAIL:
+              fail_counter=$((fail_counter+1))
+              local reason="One or more roles defined. cannot be assigned using this script"
+              idamResponse=$reason
+              inviteStatus="FAILED"
+              log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
             else
-              rolesFromCSV=$(echo "${rolesFromCSV}" | jq --arg new "$DEFAULT_ROLE" '. += [$new]')
-            fi
+              #Set user activate state to true if false
+              if [ $userActiveState == "false" ]; then
+                log_info "email: ${email} - User activate state=false, activating user"
+                #user activate state is false, need to call patch user api to set to true first
+                #note, update_user is a PATCH call, but we cannot modify any roles using this endpoint
+                body='{"active":true}'
+                submit_response=$(update_user "${userId}" "${body}")
 
-            #bit flaky, better to use the above jq code
-            #rolesFromCSV=$(addRequiredMandatoryRole "caseworker" "${rolesFromCSV}")
+                if [[ "$submit_response" == *"$email"* ]]; then
+                  log_info "email: ${email} - SUCCESS, user active state set to true"
+                else
+                  log_info "email: ${email} - FAILED, user active state could not be set"
+                fi
+              fi
 
-            ARRAY=() #declare empty shell array
+              combinedCsvApiRoles=$(echo $rolesFromCSV $usersRolesFromApi | jq '.[]' | jq -s)
 
-            #start - logic to add only the unique roles in csv by comparing already assigned roles
-            for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
-              local found=0
-              for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
-                if [ $csvRole == $apiRole ]; then
-                  found=1
-                  log_debug "email: ${email}, role: $csvRole  - already assigned"
+              if [ $(checkShouldAddRole "${rolesFromCSV}" "${SPECIAL_ROLES}") -eq 1 ]; then
+                log_debug "Adding default roles"
+                rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${DEFAULT_ROLES}")
+              else
+                log_debug "Skipping addition of default roles"
+              fi
+
+              ARRAY=() #declare empty shell array
+
+              #start - logic to add only the unique roles in csv by comparing already assigned roles
+              for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+                local found=0
+                for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
+                  if [ $csvRole == $apiRole ]; then
+                    found=1
+                    log_debug "email: ${email}, role: $csvRole  - already assigned"
+                  fi
+                done
+                if [ $found -eq 0 ]; then
+                  #Convert to lower-case if required
+                  csvRole=$(convertToLowerCase "${csvRole}")
+                  log_debug "email: ${email}, role: $csvRole  - Unique (TO BE ADDED)"
+                  #Add unique role to be added to bash array
+                  ARRAY+=("${csvRole}")
                 fi
               done
-              if [ $found -eq 0 ]; then
-                #Convert to lower-case if required
-                csvRole=$(convertToLowerCase "${csvRole}")
-                log_debug "email: ${email}, role: $csvRole  - Unique (TO BE ADDED)"
-                #Add unique role to be added to bash array
-                ARRAY+=("${csvRole}")
-              fi
-            done
-            #echo "Bash array of unique roles is (CALC): " ${ARRAY[*]}
-            #end - logic to add only the unique roles in csv by comparing already assigned roles
+              #echo "Bash array of unique roles is (CALC): " ${ARRAY[*]}
+              #end - logic to add only the unique roles in csv by comparing already assigned roles
 
-            arr='[]'  # Empty JSON array
-            for x in "${ARRAY[@]}"; do
-              arr=$(jq -n --arg x "$x" --argjson arr "$arr" '$arr + [$x]')
-            done
+              arr='[]'  # Empty JSON array
+              for x in "${ARRAY[@]}"; do
+                arr=$(jq -n --arg x "$x" --argjson arr "$arr" '$arr + [$x]')
+              done
 
-            combinedCsvApiRolesJson=$(echo $combinedCsvApiRoles | jq 'map( {"name" : . } ) | unique')
-            #echo "JSON array of Combined CSV and API" $combinedCsvApiRolesJson
+              uniqueRolesJson=$(echo ${arr} | jq 'map( {"name" : . } ) | unique')
+              #echo "JSON array of unique roles is (CALC): " $uniqueRolesJson
 
-            uniqueRolesJson=$(echo ${arr} | jq 'map( {"name" : . } ) | unique')
-            #echo "JSON array of unique roles is (CALC): " $uniqueRolesJson
+              log_debug "Final roles to apply: ${uniqueRolesJson}"
 
-            if [ "${uniqueRolesJson}" != "[]" ]; then
-              # make call to IDAM to update roles for existing user
-              submit_response=$(post_user_roles "$userId" "$uniqueRolesJson")
-              #echo $submit_response
+              if [ "${uniqueRolesJson}" != "[]" ]; then
+                # make call to IDAM to update roles for existing user
+                submit_response=$(post_user_roles "$userId" "$uniqueRolesJson")
+                #echo $submit_response
 
-              # seperate submit_response reponse
-              IFS=$'\n'
-              local response_array=($submit_response)
-              local inviteStatus=${response_array[0]}
-              local idamResponse=${response_array[1]}
-              if [ $inviteStatus == "SUCCESS" ]; then
-                # SUCCESS:
-                success_counter=$((success_counter+1))
-                inviteStatus="SUCCESS"
-                local reason="role(s) successfully assigned"
-                echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason - ${idamResponse}${NORMAL}"
-                log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                # seperate submit_response reponse
+                IFS=$'\n'
+                local response_array=($submit_response)
+                local inviteStatus=${response_array[0]}
+                local idamResponse=${response_array[1]}
+                if [ $inviteStatus == "SUCCESS" ]; then
+                  # SUCCESS:
+                  success_counter=$((success_counter+1))
+                  inviteStatus="SUCCESS"
+                  local reason="role(s) successfully assigned"
+                  echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason - ${idamResponse}${NORMAL}"
+                  log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                else
+                  # FAIL:
+                  fail_counter=$((fail_counter+1))
+                  inviteStatus="FAILED"
+                  local reason="failed assigning one or more roles"
+                  echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
+                  log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse}"
+                fi
               else
-                # FAIL:
-                fail_counter=$((fail_counter+1))
-                inviteStatus="FAILED"
-                local reason="failed assigning one or more roles"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
-                log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse}"
+                # SKIP:
+                skipped_counter=$((skipped_counter+1))
+                inviteStatus="SKIPPED"
+                local reason="required roles are already assigned, no role amendments required"
+                idamResponse=$reason
+                log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
               fi
-            else
-              # SKIP:
-              skipped_counter=$((skipped_counter+1))
-              inviteStatus="SKIPPED"
-              local reason="required roles are already assigned, no role amendments required"
-              idamResponse=$reason
-              log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-              echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
             fi
           fi
 
@@ -865,7 +978,7 @@ function process_input_file() {
           timestamp=$(date -u +"%FT%H:%M:%SZ")
           output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
 
-        elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "update" ]; then
+        elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "updatename" ]; then
 
           log_debug "email: ${email} - User exists, doing update firstname lastname logic"
 
@@ -935,7 +1048,7 @@ function process_input_file() {
           timestamp=$(date -u +"%FT%H:%M:%SZ")
           output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
 
-        elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "delete" ] || [ "$operation" == "update" ]; then
+        elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "delete" ] || [ "$operation" == "updatename" ]; then
 
           skipped_counter=$((skipped_counter+1))
           inviteStatus="SKIPPED"
@@ -948,7 +1061,9 @@ function process_input_file() {
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
           output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "delete" ]; then
+
           echo "User exists, processing deletion login"
           #TO DO
 
@@ -964,7 +1079,32 @@ function process_input_file() {
             # 412 if failed
             #The role provided is not assigned to the user.
             #One or more of the roles provided does not exist.
-            echo "nothing"
+            local addedCounter=0
+            local failedToAddCounter=0
+
+            skipped_counter=$((skipped_counter+1))
+            for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+              # make call to IDAM to update roles for existing user
+              submit_response=$(delete_user_role "$userId" "$csvRole")
+
+              # seperate submit_response reponse
+              IFS=$'\n'
+              local response_array=($submit_response)
+              local inviteStatus=${response_array[0]}
+              local idamResponse=${response_array[1]}
+
+              if [ $inviteStatus == "SUCCESS" ]; then
+                addedCounter=$((addedCounter+1))
+                local reason="role $csvRole successfully removed"
+                log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              else
+                # FAIL:
+                failedToAddCounter=$((failedToAddCounter+1))
+                local reason="failed removing role $csvRole"
+                log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse}"
+              fi
+
+            done
           else
             # SKIP:
             inviteStatus="User exists but not active"
@@ -980,13 +1120,20 @@ function process_input_file() {
           output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
 
         fi
+
       else
+
         # SKIP:
         skipped_counter=$((skipped_counter+1))
-        echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: inviteStatus == ${GREEN}${inviteStatus}${NORMAL}"
-
+        local reason="Request already processed previously"
+        idamResponse=$reason
+        echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
+        log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
         # prepare output
-        output_csv=$(echo $user | jq -r '[.idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles, .extraCsvData.inviteStatus, .extraCsvData.idamResponse // "", .extraCsvData.idamUserJson, '.extraCsvData.timestamp'] | @csv')
+        input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+        timestamp=$(date -u +"%FT%H:%M:%SZ")
+        output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+
       fi
 
       # record log of action in output file (NB: escape values for CSV)
@@ -1007,10 +1154,125 @@ function process_input_file() {
   fi
 }
 
+function contains() {
+    local n=$#
+    local value=${!n}
+    for ((i=1;i < $#;i++)) {
+        if [ "${!i}" == "${value}" ]; then
+            echo "y"
+            return 0
+        fi
+    }
+    echo "n"
+    return 1
+}
+
+function addRolesToCSVRoles {
+  local rolesFromCSV=$1
+  local strDefaultRoles=$2
+  local defaultRolesArray=( $(splitStringToArray "|" "${strDefaultRoles}") )
+
+  for role in "${defaultRolesArray[@]}"; do
+    rolesFromCSV=$(echo "${rolesFromCSV}" | jq --arg new "$role" '. += [$new]')
+  done
+
+  echo "${rolesFromCSV}"
+}
+
+function checkAllowedRole {
+  local rolesFromCSV=$1
+  local rolesToCheckFor=$2
+  local notAllowedRolesArray=( $(splitStringToArray "|" "${rolesToCheckFor}") )
+
+  #echo "Number of elements in the array: ${#notAllowedRolesArray[@]}" >&2
+
+  local notAllowedRoleFound=0
+
+  for role in "${notAllowedRolesArray[@]}"; do
+    #echo "role $role" >&2
+    for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+      if [ "${csvRole}" == "$role" ]; then
+        notAllowedRoleFound=1
+        break
+      fi
+    done
+    if [ $notAllowedRoleFound -eq 1 ]; then
+      break
+    fi
+  done
+
+  echo $notAllowedRoleFound
+}
+
+function checkShouldAddRole {
+  local rolesFromCSV=$1
+  local rolesToCheckFor=$2
+  local rolesToCheckForArray=( $(splitStringToArray "|" "${rolesToCheckFor}") )
+
+  local countRolesToCheckForArray=${#rolesToCheckForArray[@]}
+  local countRolesFromCSV=$(echo $rolesFromCSV | jq -e '. | length');
+
+  local counter=0
+  local shouldAdd=1
+
+  for role in "${rolesToCheckForArray[@]}"; do
+    for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+      if [ "${csvRole}" == "$role" ]; then
+        counter=$((counter+1))
+      fi
+    done
+  done
+
+  #echo "counter $counter" >&2
+  #echo "countRolesFromCSV $countRolesFromCSV" >&2
+
+  if [ $counter -eq $countRolesFromCSV ]; then
+    shouldAdd=0
+  fi
+
+  echo $shouldAdd
+}
+
+function splitStringToArray {
+  delimeter=$1
+  theString=$2
+
+  oldIFS="$IFS"
+  IFS="${delimeter}"
+  read -ra myArray <<< "${theString}"
+  IFS="$oldIFS"
+  echo "${myArray[@]}"
+}
+
 function convertToLowerCase {
   local strTemp=$1
   strTemp=$(echo "${strTemp}" | tr '[:upper:]' '[:lower:]')
   echo "${strTemp}"
+}
+
+function convertJsonStringArrayToLowerCase {
+  local rolesFromCSV=$1
+  local ARRAY=() #declare empty shell array
+
+  for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+    csvRole=$(convertToLowerCase "${csvRole}")
+    ARRAY+=("${csvRole}")
+  done
+
+  rolesFromCSV=$(printf '%s\n' "${ARRAY[@]}" | jq -R . | jq -s .)
+
+  echo "${rolesFromCSV}"
+}
+
+function validateEmailAddress {
+  regex="^[a-z0-9!#\$%&'*+/=?^_\`{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_\`{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?\$"
+  local emailAddress=$1
+
+  if [[ $emailAddress =~ $regex ]] ; then
+      true
+  else
+      false
+  fi
 }
 
 #This function is no longer used
@@ -1026,10 +1288,6 @@ function addRequiredMandatoryRole {
     fi
   done
   if [ $role_found_in_rolesFromCSV -eq 0 ]; then
-    #json_without_quotes=$(echo ${rolesFromCSV//\"/""})
-    #declare -a roles_array=($(echo $json_without_quotes | tr "\n" " " | tr "[" " " | tr "]" " " | tr "," " "))
-    #roles_array+=("$strRole")
-
     tempString=$(echo $rolesFromCSV | sed -e 's/\[ //g' -e 's/\ ]//g' -e 's/\,//g')
     roles_array=( $tempString )
 
@@ -1037,7 +1295,6 @@ function addRequiredMandatoryRole {
 
     arr='[]'  # Empty JSON array
     for x in "${roles_array[@]}"; do
-      #arr=$(jq -n --arg x "$x" --argjson arr "$arr" '$arr + [$x]')
       arr=$(jq -n --arg x "${x//\"}" --argjson arr "$arr" '$arr + [$x]')
     done
     rolesFromCSV=$arr
@@ -1111,13 +1368,16 @@ function log_error {
 # Logging Functions - End
 ##########################
 
-# loop & print a folder recusively,
-print_folder_recurse() {
-    for i in "$1"/*.csv;do
-        if [ -f "$i" ]; then
-            process_input_file "${i}"
-        fi
-    done
+# loop & process any .csv files found
+process_folder_recurse() {
+
+  TIMEFORMAT="The input was processed in: %3lR"
+
+  for i in "$1"/*.csv;do
+    if [ -f "$i" ]; then
+      time process_input_file "${i}"
+    fi
+  done
 }
 
 if [ $is_test -eq 1 ]
@@ -1128,9 +1388,10 @@ then
   IDAM_CLIENT_SECRET="anything"
   ENV="local"
   CSV_DIR_PATH="/Users/dineshpatel/Sandbox/CCD_Projects/ccd-docker/bulk-user-setup/bulk_processing"
+  CSV_PROCESSED_DIR_NAME="Output_$(date -u +"%F")"
 else
   # read input arguments
-  read -p "Please enter csv file path: " CSV_FILE_PATH
+  read -p "Please enter directory path containing csv input files: " CSV_DIR_PATH
   read -p "Please enter ccd idam-admin username: " ADMIN_USER
   ADMIN_USER_PWD=$(read_password_with_asterisk "Please enter ccd idam-admin password: ")
   IDAM_CLIENT_SECRET=$(read_password_with_asterisk $'\nPlease enter idam oauth2 secret for ccd-bulk-user-register client: ')
@@ -1164,7 +1425,8 @@ then
 fi
 
 # read csv and call curl in a loop for each record
-TIMEFORMAT="The input file(s) were/was processed in: %3lR"
+#TIMEFORMAT="The input file(s) were/was processed in: %3lR"
 #time process_input_file "${CSV_FILE_PATH}"
-time print_folder_recurse "${CSV_DIR_PATH}"
+
+process_folder_recurse "${CSV_DIR_PATH}"
 unset https_proxy;
