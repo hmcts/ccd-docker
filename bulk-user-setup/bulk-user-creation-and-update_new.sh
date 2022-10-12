@@ -21,14 +21,14 @@ is_test=1
 ###########################################
 #'|' delimited string of roles. These roles are special roles
 #if found in request skip adding the default roles to the user
-SPECIAL_ROLES="ccd-admin|ccd-admin2" #if only this role, then do not add default role below
+SPECIAL_ROLES="ccd-import|ccd-admin" #if only this role, then do not add default role below
 
 #'|' delimited string of roles. These roles are default for all and will be added
 #if a special role above is not found in the request
-DEFAULT_ROLES="caseworker|caseworker1"
+DEFAULT_ROLES="caseworker"
 
 #'|' delimited string of roles. These roles should not be processed by this script
-MANUAL_ROLES="judiciary|judiciary-1"
+MANUAL_ROLES="judiciary"
 
 #####################################
 # Operations supported by this script
