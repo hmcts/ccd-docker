@@ -575,7 +575,7 @@ function validateRoleString() {
   local roleString=$1
   local isValidRoleString=1
 
-  if [[ "${roleString}"  = *[!A-Za-z\|-]* ]]; then
+  if [[ "${roleString}"  = *[!A-Za-z\|-_]* ]]; then
     isValidRoleString=0
   fi
 
@@ -700,6 +700,7 @@ function process_input_file() {
       log_debug "processing user with email: ${email}"
 
       if [ "$inviteStatus" != "SUCCESS" ]; then
+
         # regardless if operation (add/remove) we should always check if the user already exists or not
         local rawReturnedValue=$(get_user "$email")
         #local rawReturnedValue=$(get_user_api_v1 "${email}")
@@ -722,10 +723,12 @@ function process_input_file() {
           local rawUserRoles=$(get_user_roles "$userId" )
           local usersRolesFromApi=$(echo $rawUserRoles | jq --raw-output '.roles')
 
-          log_debug "email: ${email}"
-          log_debug "user_id: ${userId}"
-          log_debug "roles from API call: ${usersRolesFromApi}"
+          #log_debug "email: ${email}"
+          #log_debug "user_id: ${userId}"
+          #log_debug "roles from API call: ${usersRolesFromApi}"
         fi
+
+        echo "firstname is ${firstName}"
 
         log_debug "original roles from CSV: ${rolesFromCSV}"
 
@@ -737,15 +740,15 @@ function process_input_file() {
         if [ "$operation" == "find" ]; then
           local icount=0
           local reason="the following fields were provided but are not required: "
-          if [[ -n "$strRolesFromCSV" ]]; then
+          if [[ "$strRolesFromCSV" != "null" ]]; then
             icount=$((icount+1))
             reason="${reason} roles,"
           fi
-          if [[ -n "$firstName" ]]; then
+          if [[ "$firstName" != "null" ]]; then
             icount=$((icount+1))
             reason="${reason} firstName,"
           fi
-          if [[ -n "$lastName" ]]; then
+          if [[ "$lastName" != "null" ]]; then
             icount=$((icount+1))
             reason="${reason} lastName,"
           fi
@@ -756,14 +759,8 @@ function process_input_file() {
         fi
 
         if [ "$operation" == "updatename" ]; then
-          local icount=0
-          local reason="the following fields were provided but are not required: "
-          if [[ -n "$strRolesFromCSV" ]]; then
-            icount=$((icount+1))
-            reason="${reason} roles,"
-          fi
-
-          if [ "$icount" -gt 0 ]; then
+          local reason="the following fields were provided but are not required: roles"
+          if [[ "$strRolesFromCSV" != "null" ]]; then
             log_warn "action: ${operation}, email: ${email} , status: ${reason}"
           fi
         fi
@@ -877,7 +874,7 @@ function process_input_file() {
 
           log_debug "email: ${email} - User does not exist, sending invite registration"
 
-          if [ -z "$firstName" ] && [ -z "$lastName" ]; then
+          if [ "$firstName" == "null" ] && [ "$lastName" == "null" ]; then
             # FAIL:
             fail_counter=$((fail_counter+1))
             local reason="both firstName and lastName cannot be empty"
@@ -895,7 +892,6 @@ function process_input_file() {
               log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
             else
-              #if [ $(checkShouldAddRole "${rolesFromCSV}" "${SPECIAL_ROLES}") -eq 1 ]; then
               if [ $(checkShouldAddDefaultRole "${rolesFromCSV}") -eq 1 ]; then
                 log_debug "Adding default roles"
                 rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${DEFAULT_ROLES}")
@@ -904,6 +900,16 @@ function process_input_file() {
               fi
 
               log_debug "Final roles to apply: ${rolesFromCSV}"
+
+              if [[ "$firstName" == "null" ]]; then
+                log_debug "firstName is empty setting to ' '"
+                firstName=" "
+                idamUserJson=$(echo $idamUserJson | jq --argjson firstName "${firstName}" '.firstName = $firstName')
+              elif [[ "$lastName" == "null" ]]; then
+                log_debug "lastName is empty setting to ' '"
+                lastName=" "
+                idamUserJson=$(echo $idamUserJson | jq --argjson lastName "${lastName}" '.lastName = $lastName')
+              fi
 
               #Need to update the roles in idamUserJson
               idamUserJson=$(echo $idamUserJson | jq --argjson rolesFromCSV "${rolesFromCSV}" '.roles = $rolesFromCSV')
@@ -1056,32 +1062,49 @@ function process_input_file() {
 
           log_debug "email: ${email} - User exists, doing update firstname lastname logic"
 
-          #Set user activate state to true if false
           if [ $userActiveState == "true" ]; then
             if [ "${firstName}" != "${firstNameFromApi}" ] || [ "$lastName" != "${lastNameFromApi}" ]; then
-              log_info "email: ${email} - doing firstname/lastname update"
-              body='{"forename": "'${firstName}'","surname": "'${lastName}'"}'
-              submit_response=$(update_user "${userId}" "${body}")
-
-              # seperate submit_response reponse
-              IFS=$'\n'
-              local response_array=($submit_response)
-              local inviteStatus=${response_array[0]}
-              local idamResponse=${response_array[1]}
-              if [[ "$submit_response" == *"$email"* ]]; then
-                # SUCCESS:
-                success_counter=$((success_counter+1))
-                inviteStatus="SUCCESS"
-                local reason="user firstname/lastname successfully updated"
-                log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
-              else
+              if [ "$firstName" == "null" ] && [ "$lastName" == "null" ]; then
                 # FAIL:
                 fail_counter=$((fail_counter+1))
+                local reason="both firstName and lastName cannot be empty"
+                idamResponse=$reason
                 inviteStatus="FAILED"
-                local reason="failed updating user firstname/lastname"
                 log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
+                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+              else
+                log_info "email: ${email} - doing firstname/lastname update"
+
+                if [ "$firstName" == "null" ] && [ "$lastName" != "null" ]; then
+                  body='{"surname": "'${lastName}'"}'
+                elif [ "$lastName" == "null" ] && [ "$firstName" != "null" ]; then
+                  body='{"forename": "'${firstName}'"}'
+                else
+                  body='{"forename": "'${firstName}'","surname": "'${lastName}'"}'
+                fi
+
+                submit_response=$(update_user "${userId}" "${body}")
+
+                # seperate submit_response reponse
+                IFS=$'\n'
+                local response_array=($submit_response)
+                local inviteStatus=${response_array[0]}
+                local idamResponse=${response_array[1]}
+                if [[ "$submit_response" == *"$email"* ]]; then
+                  # SUCCESS:
+                  success_counter=$((success_counter+1))
+                  inviteStatus="SUCCESS"
+                  local reason="user firstname/lastname successfully updated"
+                  log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                  echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+                else
+                  # FAIL:
+                  fail_counter=$((fail_counter+1))
+                  inviteStatus="FAILED"
+                  local reason="failed updating user firstname/lastname"
+                  log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                  echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
+                fi
               fi
             else
               # SKIP:
