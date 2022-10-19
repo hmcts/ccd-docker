@@ -728,8 +728,6 @@ function process_input_file() {
           #log_debug "roles from API call: ${usersRolesFromApi}"
         fi
 
-        echo "firstname is ${firstName}"
-
         log_debug "original roles from CSV: ${rolesFromCSV}"
 
         if [ $(echo $rolesFromCSV | jq -e '. | length') != 0 ]; then
@@ -737,10 +735,10 @@ function process_input_file() {
           log_debug "original roles from CSV (in lower case): ${rolesFromCSV}"
         fi
 
-        if [ "$operation" == "find" ]; then
+        if [ "$operation" == "find" ] || [ "$operation" == "delete" ]; then
           local icount=0
           local reason="the following fields were provided but are not required: "
-          if [[ "$strRolesFromCSV" != "null" ]]; then
+          if [[ "$strRolesFromCSV" != "null" ]] && [ "$operation" == "find" ]; then
             icount=$((icount+1))
             reason="${reason} roles,"
           fi
