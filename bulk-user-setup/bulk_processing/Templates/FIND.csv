@@ -1,0 +1,4 @@
+operation,email,firstName,lastName,roles,status,idamResponse,idamUserJson,timestamp,User Exists,Result,comment (not included in the actual csv file)
+find,ccd.test.user0@hmcts.gov.uk,,,,,,,,FALSE,FAIL,user does not exist
+find,ccd.test.user1@hmcts.gov.uk,,,,,,,,TRUE,SUCCESS,"output file will populate firstname/lastname, roles, active status, last modified etc"
+find,ccd.test.user2@hmcts.gov.uk,fn1,Ln1,caseworker,,,,,TRUE,SUCCESS,"populate cells from api, warn log as firstname/lastname/roles provided but not needed"
