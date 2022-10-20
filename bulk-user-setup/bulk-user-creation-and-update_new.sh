@@ -570,18 +570,6 @@ function generate_log_path_with_insert() {
   echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/${filename}.${insert}.${extension}"
 }
 
-function validateRoleString() {
-
-  local roleString=$1
-  local isValidRoleString=1
-
-  if [[ "${roleString}"  = *[!A-Za-z\|-_]* ]]; then
-    isValidRoleString=0
-  fi
-
-  echo $isValidRoleString
-}
-
 function convert_input_file_to_json() {
   local file=$1
 
@@ -707,6 +695,8 @@ function process_input_file() {
 
         if [[ $rawReturnedValue != *"HTTP-"* ]]; then
           local userId=$(echo $rawReturnedValue | jq --raw-output '.id')
+          #if using /api/v1 to find user by email, it returns an array or users which is empty if no user found
+          #if found, we need to ensure we get the first element
           #local userId=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.id')
 
           local userActiveState=$(echo $rawReturnedValue | jq --raw-output '.active') # i.e. ACTIVE
@@ -767,27 +757,37 @@ function process_input_file() {
 
           # SKIP:
           skipped_counter=$((skipped_counter+1))
-          inviteStatus="SKIPPED"
           local reason="Operation '${operation}' not recognised, valid operations are: ${OPS[@]}"
           idamResponse=$reason
-          log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-          echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+          inviteStatus="FAILED"
+          log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+          echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}${reason}${NORMAL}"
+
+          # prepare output (NB: escape generated values for CSV)
+          input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+          timestamp=$(date -u +"%FT%H:%M:%SZ")
+          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
 
         elif ([ $(echo ""$rolesFromCSV | jq -e '. | length') == 0 ]) && ([ "$operation" == "add" ] || [ "$operation" == "delete" ]); then
 
             # FAIL:
             fail_counter=$((fail_counter+1))
-            local reason="No roles defined, processes terminated"
+            local reason="No roles defined"
             idamResponse=$reason
             inviteStatus="FAILED"
             log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
+            # prepare output (NB: escape generated values for CSV)
+            input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+            timestamp=$(date -u +"%FT%H:%M:%SZ")
+            output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+
         elif ([ $(validateRoleString "${strRolesFromCSV}") -eq 0 ]) && ([ "$operation" == "add" ] || [ "$operation" == "delete" ]); then
 
             # FAIL:
             fail_counter=$((fail_counter+1))
-            local reason="roles defined contain invalid characters"
+            local reason="Roles defined contain invalid characters"
             idamResponse=$reason
             inviteStatus="FAILED"
             log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
@@ -796,7 +796,7 @@ function process_input_file() {
         elif ! $(validateEmailAddress "${email}"); then
 
           fail_counter=$((fail_counter+1))
-          local reason="Invalid email detected, skipping line"
+          local reason="Invalid email detected"
           idamResponse=$reason
           inviteStatus="FAILED"
           log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
@@ -845,7 +845,7 @@ function process_input_file() {
 
               # SUCCESS:
               success_counter=$((success_counter+1))
-              local reason="user details successfully retrieved"
+              local reason="User details successfully retrieved"
               idamResponse=$api_v1_user
               inviteStatus="SUCCESS"
               log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
@@ -857,7 +857,7 @@ function process_input_file() {
               output_csv="$input_csv,\"$api_v1_user_firstname\",\"$api_v1_user_lastname\",\"$strApi_v1_user_roles\",\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
             else
               fail_counter=$((fail_counter+1))
-              local reason="user not found using api/v1/users?query=email:"${email}" endpoint"
+              local reason="User not found using api/v1/users?query=email:"${email}" endpoint"
               idamResponse=$reason
               inviteStatus="FAILED"
               log_error "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
@@ -870,7 +870,7 @@ function process_input_file() {
             fi
         elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "add" ]; then
 
-          log_debug "email: ${email} - User does not exist, sending invite registration"
+          log_debug "email: ${email} - User does not exist, doing add new user logic"
 
           if [ "$firstName" == "null" ] && [ "$lastName" == "null" ]; then
             # FAIL:
@@ -1144,7 +1144,7 @@ function process_input_file() {
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "delete" ]; then
 
-          echo "User exists, processing deletion logic"
+          log_debug "email: ${email} - User exists, doing deletion logic"
 
           #bash array of roles to remove via api call
           local rolesToRemoveArray=()
@@ -1294,6 +1294,7 @@ function process_input_file() {
         idamResponse=$reason
         echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
         log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+
         # prepare output
         input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
         timestamp=$(date -u +"%FT%H:%M:%SZ")
@@ -1459,6 +1460,18 @@ function validateEmailAddress {
   else
       false
   fi
+}
+
+function validateRoleString() {
+
+  local roleString=$1
+  local isValidRoleString=1
+
+  if [[ "${roleString}"  = *[!A-Za-z\|-_]* ]]; then
+    isValidRoleString=0
+  fi
+
+  echo $isValidRoleString
 }
 
 #This function is no longer used
