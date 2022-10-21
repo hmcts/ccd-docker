@@ -659,7 +659,7 @@ function process_input_file() {
     exit 1
   fi
   # write headers to output file
-  echo "operation,email,firstName,lastName,roles,status,idamResponse,idamUserJson,timestamp" >> "$filepath_output_newpath"
+  echo "operation,email,firstName,lastName,roles,status,idamResponse,timestamp" >> "$filepath_output_newpath"
 
   # strip JSON into individual items then process in a while loop
   echo $json | jq -r -c '.[]' \
@@ -778,7 +778,7 @@ function process_input_file() {
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
-          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$timestamp\""
 
         elif ([ $(echo ""$rolesFromCSV | jq -e '. | length') == 0 ]) && ([ "$operation" == "add" ] || [ "$operation" == "delete" ]); then
 
@@ -793,7 +793,7 @@ function process_input_file() {
             # prepare output (NB: escape generated values for CSV)
             input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
             timestamp=$(date -u +"%FT%H:%M:%SZ")
-            output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+            output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$timestamp\""
 
         elif ([ $(validateRoleString "${strRolesFromCSV}") -eq 0 ]) && ([ "$operation" == "add" ] || [ "$operation" == "delete" ]); then
 
@@ -817,7 +817,7 @@ function process_input_file() {
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
-          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$timestamp\""
 
         elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "find" ]; then
 
@@ -831,7 +831,7 @@ function process_input_file() {
             # prepare output (NB: escape generated values for CSV)
             input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
             timestamp=$(date -u +"%FT%H:%M:%SZ")
-            output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+            output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$timestamp\""
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "find" ]; then
 
@@ -866,7 +866,7 @@ function process_input_file() {
               # prepare output (NB: escape generated values for CSV)
               input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email] | @csv')
               timestamp=$(date -u +"%FT%H:%M:%SZ")
-              output_csv="$input_csv,\"$api_v1_user_firstname\",\"$api_v1_user_lastname\",\"$strApi_v1_user_roles\",\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+              output_csv="$input_csv,\"$api_v1_user_firstname\",\"$api_v1_user_lastname\",\"$strApi_v1_user_roles\",\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$timestamp\""
             else
               fail_counter=$((fail_counter+1))
               local reason="User not found using api/v1/users?query=email:"${email}" endpoint"
@@ -878,7 +878,7 @@ function process_input_file() {
               # prepare output (NB: escape generated values for CSV)
               input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
               timestamp=$(date -u +"%FT%H:%M:%SZ")
-              output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+              output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$timestamp\""
             fi
         elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "add" ]; then
 
@@ -953,7 +953,7 @@ function process_input_file() {
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
-          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$timestamp\""
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "add" ]; then
 
@@ -1064,7 +1064,7 @@ function process_input_file() {
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
-          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$timestamp\""
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "updatename" ]; then
 
@@ -1136,7 +1136,7 @@ function process_input_file() {
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
-          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$timestamp\""
 
         elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "delete" ] || [ "$operation" == "updatename" ]; then
 
@@ -1150,7 +1150,7 @@ function process_input_file() {
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
-          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$timestamp\""
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "delete" ]; then
 
@@ -1292,7 +1292,7 @@ function process_input_file() {
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
-          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$timestamp\""
 
         fi
 
@@ -1308,7 +1308,7 @@ function process_input_file() {
         # prepare output
         input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
         timestamp=$(date -u +"%FT%H:%M:%SZ")
-        output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"${idamUserJson//\"/\"\"}\",\"$timestamp\""
+        output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$timestamp\""
 
       fi
 
