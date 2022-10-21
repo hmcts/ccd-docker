@@ -6,7 +6,7 @@
 LOGFILE='' #Will be set based on input file
 LOGLEVEL='DEBUG'
 #whether to create log per input file (1=true, 0=false)
-LOG_PER_INPUT_FILE=1
+LOG_PER_INPUT_FILE=0
 
 ##########################
 # console colours / fonts
@@ -632,7 +632,7 @@ function process_input_file() {
     LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp}_LOG")"
   else
     local datestamp_day=$(date -u +"%F")
-    LOGFILE="$(generate_log_path_with_insert "OUTPUT" "${datestamp_day}_LOG")"
+    LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp_day}_LOG")"
   fi
 
   log_debug "Processing input file ${filepath_input_original}"
@@ -860,7 +860,7 @@ function process_input_file() {
               local reason="User details successfully retrieved"
               idamResponse=$api_v1_user
               inviteStatus="SUCCESS"
-              log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
 
               # prepare output (NB: escape generated values for CSV)
@@ -937,7 +937,7 @@ function process_input_file() {
                 # SUCCESS:
                 success_counter=$((success_counter+1))
                 local reason="user successfully registered"
-                log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
                 echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
               else
                 # FAIL:
@@ -970,16 +970,16 @@ function process_input_file() {
           else
             #Set user activate state to true if false
             if [ $userActiveState == "false" ]; then
-              log_info "email: ${email} - User activate state=false, activating user"
+              log_debug "email: ${email} - User activate state=false, activating user"
               #user activate state is false, need to call patch user api to set to true first
               #note, update_user is a PATCH call, but we cannot modify any roles using this endpoint
               body='{"active":true}'
               submit_response=$(update_user "${userId}" "${body}")
 
               if [[ "$submit_response" == *"$email"* ]]; then
-                log_info "email: ${email} - SUCCESS, user active state set to true"
+                log_debug "email: ${email} - SUCCESS, user active state set to true"
               else
-                log_info "email: ${email} - FAILED, user active state could not be set"
+                log_error "email: ${email} - FAILED, user active state could not be set"
               fi
             fi
 
@@ -1041,7 +1041,7 @@ function process_input_file() {
                 inviteStatus="SUCCESS"
                 local reason="role(s) successfully assigned"
                 echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason - ${idamResponse}${NORMAL}"
-                log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               else
                 # FAIL:
                 fail_counter=$((fail_counter+1))
@@ -1056,7 +1056,7 @@ function process_input_file() {
               inviteStatus="SKIPPED"
               local reason="required roles are already assigned, no role amendments required"
               idamResponse=$reason
-              log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
             fi
           fi
@@ -1081,7 +1081,7 @@ function process_input_file() {
                 log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} , input file: ${filepath_input_original}"
                 echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
               else
-                log_info "email: ${email} - doing firstname/lastname update"
+                log_debug "email: ${email} - doing firstname/lastname update"
 
                 if [ "$firstName" == "null" ] && [ "$lastName" != "null" ]; then
                   body='{"surname": "'${lastName}'"}'
@@ -1103,7 +1103,7 @@ function process_input_file() {
                   success_counter=$((success_counter+1))
                   inviteStatus="SUCCESS"
                   local reason="user firstname/lastname successfully updated"
-                  log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                  log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
                   echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
                 else
                   # FAIL:
@@ -1120,7 +1120,7 @@ function process_input_file() {
               inviteStatus="SKIPPED"
               idamResponse=$reason
               local reason="no changes in firstname/lastname detected, nothing to update"
-              log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
             fi
           else
@@ -1129,7 +1129,7 @@ function process_input_file() {
             inviteStatus="SKIPPED"
             local reason="User exists but not active"
             idamResponse=$reason
-            log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+            log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
           fi
 
@@ -1215,7 +1215,7 @@ function process_input_file() {
                 local reason="All roles successfully unassigned"
                 idamResponse=$reason
                 echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
-                log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               else
                 # FAIL:
                 fail_counter=$((fail_counter+1))
@@ -1227,14 +1227,14 @@ function process_input_file() {
 
               #Set user activate state to false
               if [ $userActiveState == "true" ] && [ $inviteStatus == "SUCCESS" ]; then
-                log_info "email: ${email} - User activate state=true, de-activating user"
+                log_debug "email: ${email} - User activate state=true, de-activating user"
                 body='{"active":false}'
                 submit_response=$(update_user "${userId}" "${body}")
 
                 if [[ "$submit_response" == *"$email"* ]]; then
-                  log_info "email: ${email} - SUCCESS, user active state set to false"
+                  log_debug "email: ${email} - SUCCESS, user active state set to false"
                 else
-                  log_info "email: ${email} - FAILED, user active state could not be set"
+                  log_error "email: ${email} - FAILED, user active state could not be set"
                 fi
               fi
             else
@@ -1276,7 +1276,7 @@ function process_input_file() {
                 local reason="All roles successfully unassigned"
                 idamResponse=$reason
                 echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
-                log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               fi
             fi
           else
@@ -1285,7 +1285,7 @@ function process_input_file() {
             inviteStatus="SKIPPED"
             local reason="User exists but not active"
             idamResponse=$reason
-            log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+            log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
           fi
 
@@ -1303,7 +1303,7 @@ function process_input_file() {
         local reason="Request already processed previously"
         idamResponse=$reason
         echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
-        log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+        log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
 
         # prepare output
         input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
