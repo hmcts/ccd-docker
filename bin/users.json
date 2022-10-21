@@ -74,5 +74,9 @@
   {"email": "next.hearing.date.admin@gmail.com", "roles": "caseworker,next-hearing-date-admin", "lastName": "hearing", "firstName": "next-day"},
 
   {"email": "master.caseworker.staff@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "master.caseworker", "firstName": "staff"},
-  {"email": "master.caseworker.regional-staff@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "master.caseworker", "firstName": "regional-staff"}
+  {"email": "master.caseworker.regional-staff@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "master.caseworker", "firstName": "regional-staff"},
+
+  {"email": "master.caseworker.role1.basic@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "master.caseworker", "firstName": "role1-basic"},
+  {"email": "master.caseworker.role1.standard@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "master.caseworker", "firstName": "role1-staandard"},
+  {"email": "master.caseworker.role3.challenged@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "master.caseworker", "firstName": "role3-challenged"}
 ]
