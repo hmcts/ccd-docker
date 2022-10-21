@@ -572,7 +572,7 @@ function generate_log_path_with_insert() {
   if [ $LOG_PER_INPUT_FILE -eq 1 ]; then
     echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/${filename}.${insert}.${extension}"
   else
-    echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/"OUTPUT".${insert}.${extension}"
+    echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/"BULK-SCRIPT-OUTPUT".${insert}.${extension}"
   fi
 
 }
@@ -629,13 +629,13 @@ function process_input_file() {
   local filepath_output_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "${datestamp}_OUTPUT")
 
   if [ $LOG_PER_INPUT_FILE -eq 1 ]; then
-    LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp}_LOG")"
+    LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp}")"
   else
     local datestamp_day=$(date -u +"%F")
-    LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp_day}_LOG")"
+    LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp_day}")"
   fi
 
-  log_debug "Processing input file ${filepath_input_original}"
+  log_debug "Start - processing input file ${filepath_input_original}"
 
   if [ $is_test -eq 1 ]; then
     echo 'Test outputs of resulting files!'
@@ -660,6 +660,8 @@ function process_input_file() {
   fi
   # write headers to output file
   echo "operation,email,firstName,lastName,roles,status,idamResponse,timestamp" >> "$filepath_output_newpath"
+
+  #add is_active (true/false), last_modified
 
   # strip JSON into individual items then process in a while loop
   echo $json | jq -r -c '.[]' \
@@ -734,23 +736,23 @@ function process_input_file() {
 
         if [ $(echo $rolesFromCSV | jq -e '. | length') != 0 ]; then
           rolesFromCSV=$(convertJsonStringArrayToLowerCase "${rolesFromCSV}")
-          log_debug "original roles from CSV (in lower case): ${rolesFromCSV}"
+          #log_debug "original roles from CSV (in lower case): ${rolesFromCSV}"
         fi
 
         if [ "$operation" == "find" ] || [ "$operation" == "delete" ]; then
           local icount=0
-          local reason="the following fields were provided but are not required: "
+          local strReason="the following fields were provided but are not required: "
           if [[ "$strRolesFromCSV" != "null" ]] && [ "$operation" == "find" ]; then
             icount=$((icount+1))
-            reason="${reason} roles,"
+            strReason="${strReason} roles,"
           fi
           if [[ "$firstName" != "null" ]]; then
             icount=$((icount+1))
-            reason="${reason} firstName,"
+            strReason="${strReason} firstName,"
           fi
           if [[ "$lastName" != "null" ]]; then
             icount=$((icount+1))
-            reason="${reason} lastName,"
+            strReason="${strReason} lastName,"
           fi
 
           if [ "$icount" -gt 0 ]; then
@@ -759,16 +761,16 @@ function process_input_file() {
         fi
 
         if [ "$operation" == "updatename" ]; then
-          local reason="the following fields were provided but are not required: roles"
+          local strReason="the following fields were provided but are not required: roles"
           if [[ "$strRolesFromCSV" != "null" ]]; then
-            log_warn "action: ${operation}, email: ${email} , status: ${reason}"
+            log_warn "action: ${operation}, email: ${email} , status: ${strReason}"
           fi
         fi
 
         if [ $(contains "${OPS[@]}" "${operation}") == "n" ]; then
 
-          # SKIP:
-          skipped_counter=$((skipped_counter+1))
+          # FAIL:
+          fail_counter=$((fail_counter+1))
           local reason="Operation '${operation}' not recognised, valid operations are: ${OPS[@]}"
           idamResponse=$reason
           inviteStatus="FAILED"
@@ -1056,7 +1058,7 @@ function process_input_file() {
               inviteStatus="SKIPPED"
               local reason="required roles are already assigned, no role amendments required"
               idamResponse=$reason
-              log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
             fi
           fi
@@ -1118,9 +1120,9 @@ function process_input_file() {
               # SKIP:
               skipped_counter=$((skipped_counter+1))
               inviteStatus="SKIPPED"
-              idamResponse=$reason
               local reason="no changes in firstname/lastname detected, nothing to update"
-              log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              idamResponse=$reason
+              log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
             fi
           else
@@ -1129,7 +1131,7 @@ function process_input_file() {
             inviteStatus="SKIPPED"
             local reason="User exists but not active"
             idamResponse=$reason
-            log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+            log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
           fi
 
@@ -1285,7 +1287,7 @@ function process_input_file() {
             inviteStatus="SKIPPED"
             local reason="User exists but not active"
             idamResponse=$reason
-            log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+            log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
           fi
 
@@ -1303,7 +1305,7 @@ function process_input_file() {
         local reason="Request already processed previously"
         idamResponse=$reason
         echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
-        log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+        log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
 
         # prepare output
         input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -1315,6 +1317,9 @@ function process_input_file() {
       # record log of action in output file (NB: escape values for CSV)
       echo "$output_csv" >> "$filepath_output_newpath"
     done
+
+    log_debug "End - processing input file ${filepath_input_original}"
+
     echo "Process is complete: ${GREEN}success: ${success_counter}${NORMAL}, ${YELLOW}skipped: ${skipped_counter}${NORMAL}, ${RED}fail: ${fail_counter}${NORMAL}, total: ${total_counter}"
   )
 
