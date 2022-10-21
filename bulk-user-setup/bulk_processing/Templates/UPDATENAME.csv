@@ -1,0 +1,9 @@
+operation,email,firstName,lastName,roles,status,idamResponse,idamUserJson,timestamp,user exists,result,pre-requisite,comment (not included in the actual csv file)
+updatename,ccd.test.user1@hmcts.gov.uk,fn1-2,ln1-2,manage-translations|caseworker|somerole,,,,,TRUE,SUCCESS,user exists with fn1 and ln1,Ignore the roles if specified - put a warning log
+updatename,ccd.test.user0@hmcts.gov.uk,fn1,ln1,,,,,,FALSE,SKIPPED,user does not exist,user does not exist
+updatename,ccd.test.user1@hmcts.gov.uk,fn1-2,ln1-2,,,,,,TRUE,SKIPPED,user exists with fn1-2 and ln1-2,nothing to change
+updatename,ccd.test.user1@hmcts.gov.uk,fn1-3,,,,,,,TRUE,SUCCESS,user exists,change first name
+updatename,ccd.test.user1@hmcts.gov.uk,,ln1-3,,,,,,TRUE,SUCCESS,user exists,change last name
+updatename,ccd.test.user1@hmcts.gov.uk,fn1-4,ln1-4,,,,,,TRUE,SUCCESS,user exists,change first and last names
+updatename,ccd.test.user1@hmcts.gov.uk,,,,,,,,TRUE,FAIL,,No first and last names
+updatename,ccd.test.user2@hmcts.gov.uk,fn2,ln2,,,,,,TRUE,SKIPPED,user exists but inactive,skipped as not active user

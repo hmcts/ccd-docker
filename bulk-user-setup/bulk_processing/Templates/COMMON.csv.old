@@ -1,0 +1,40 @@
+operation,email,firstName,LastName, roles  ,status,idamResponse,idamUserJson,timestamp,user exists,result,pre-requisites,comment (not included in the actual csv file)
+Update,,,,,,,,,,,,Invalid Operation name
+add,ccd.test.user1@ hmcts.gov.uk,,,,,,,,NA,FAILED,,Invalid Email address format
+add,ccd.test.user1@hmcts.gov.uk,,,caseworker|caseworker+test,,,,,TRUE,FAILED,,Invalid Role format
+add,ccd.test.user1@hmcts.gov.uk,,,"caseworker,caseworker-role-one",,,,,TRUE,FAILED,,Invalid Role separator
+ add ,ccd.test.user2@hmcts.gov.uk,,,caseworker-role-one,,,,,TRUE,SUCCESS,"user exists, no roles",Spaces (front and back) in operation
+add, ccd.test.user3@hmcts.gov.uk ,,,caseworker-role-one,,,,,TRUE,SUCCESS,"user exists, no roles",Spaces (front and back) in email
+add,ccd.test.user0@hmcts.gov.uk, fn0,ln0,caseworker-role-one,,,,,FALSE,SUCCESS,user does not exist,Spaces (front and back) in first name
+add,ccd.test.user01@hmcts.gov.uk,fn01, ln01 ,caseworker-role-one|caseworker-role-two,,,,,FALSE,SUCCESS,user does not exist,Spaces (front and back) in last name
+add,ccd.test.user4@hmcts.gov.uk ,,,caseworker-role-one  | caseworker-role-two,,,,,TRUE,SUCCESS,user exists no roles,Spaces in roles
+add,ccd.test.user5@hmcts.gov.uk ,,,caseworker-role-ONE|caseWorkEr-role-two,,,,,TRUE,SUCCESS,user exists no roles,Roles in upper case - should be converted to lower case
+ADD,ccd.test.user06@hmcts.gov.uk ,fn06,ln06,caseworker-role-five|caseworker-role-six,,,,,FALSE,SUCCESS,,Operation in upper case - should be working
+add,ccd.test.user7@hmcts.gov.uk ,fn7,ln7,caseworker-role-six|caseworker_role_six,,,,,FALSE,SUCCESS,"user does not exist, roles do exist",Roles with - and _ should be allowed
+add,,,,,,,,,NA,FAILED,,Empty email id for all the operation types
+find,ccd.test.user1@ hmcts.gov.uk,,,,,,,,NA,FAILED,,Invalid Email address format
+find,ccd.test.user1@hmcts.gov.uk,sometext,sometext,sometext,,,,,TRUE,SUCCESS,user exists,WARN firstName/lastName/roles given but not required
+find,ccd.test.user1@hmcts.gov.uk,sometext,sometext,,,,,,TRUE,SUCCESS,user exists,WARN firstName/lastName given but not required
+find,ccd.test.user1@hmcts.gov.uk,sometext,,sometext,,,,,TRUE,SUCCESS,user exists,WARN firstName/roles given but not required
+FIND,ccd.test.user1@hmcts.gov.uk,fn6,ln6,caseworker-role-five|caseworker-role-six,,,,,TRUE,SUCCESS,user exists,Operation in upper case - should be working
+find,,,,,,,,,NA,FAILED,,Empty email id for all the operation types
+ find ,ccd.test.user1@hmcts.gov.uk,,,,,,,,TRUE,SUCCESS,,Spaces (front and back) in operation
+find, ccd.test.user1@hmcts.gov.uk ,,,,,,,,TRUE,SUCCESS,,Spaces (front and back) in email
+updatename,ccd.test.user1@ hmcts.gov.uk,,,,,,,,NA,FAILED,,Invalid Email address format
+updatename,ccd.test.user1@hmcts.gov.uk,fn1,ln1,sometext,,,,,TRUE,SUCCESS or SKIPPED,user exists,WARN roles given but not required
+UPDATENAME,ccd.test.user1@hmcts.gov.uk,fn1,ln1,,,,,,TRUE,SUCCESS or SKIPPED,user exists,Operation in upper case - should be working
+updatename,,,,,,,,,NA,FAILED,,Empty email id for all the operation types
+ updatename ,ccd.test.user1@hmcts.gov.uk,fn1,ln1,,,,,,TRUE,SUCCESS or SKIPPED,,Spaces (front and back) in operation
+updatename, ccd.test.user1@hmcts.gov.uk ,fn1,ln1,,,,,,TRUE,SUCCESS or SKIPPED,,Spaces (front and back) in email
+delete,ccd.test.user1@ hmcts.gov.uk,,,,,,,,NA,FAILED,,Invalid Email address format
+delete,ccd.test.user1@hmcts.gov.uk,,,caseworker|caseworker+test,,,,,TRUE,FAILED,,Invalid Role format
+delete,ccd.test.user1@hmcts.gov.uk,,,"caseworker,caseworker-role-one",,,,,TRUE,FAILED,,Invalid Role separator
+ delete ,ccd.test.user2@hmcts.gov.uk,,,caseworker-role-one,,,,,TRUE,SUCCESS,,Spaces (front and back) in operation
+delete, ccd.test.user3@hmcts.gov.uk ,,,caseworker-role-one,,,,,TRUE,SUCCESS,,Spaces (front and back) in email
+delete,ccd.test.user0@hmcts.gov.uk, fn0,ln0,caseworker-role-one,,,,,FALSE,FAILED,user does not exist,Spaces (front and back) in first name
+delete,ccd.test.user01@hmcts.gov.uk,fn01, ln01 ,caseworker-role-one|caseworker-role-two,,,,,FALSE,FAILED,user does not exist,Spaces (front and back) in last name
+delete,ccd.test.user4@hmcts.gov.uk ,,,caseworker-role-one  | caseworker-role-two,,,,,TRUE,SUCCESS,user exists with roles,Spaces in roles
+delete,ccd.test.user5@hmcts.gov.uk ,,,caseworker-role-ONE|caseWorkEr-role-two,,,,,TRUE,SUCCESS,user exists with roles,Roles in upper case - should be converted to lower case
+DELETE,ccd.test.user06@hmcts.gov.uk ,fn06,ln06,caseworker-role-five|caseworker-role-six,,,,,FALSE,SUCCESS,user exists with roles,Operation in upper case - should be working
+delete,ccd.test.user7@hmcts.gov.uk ,fn7,ln7,caseworker-role-six|caseworker_role_six,,,,,FALSE,SUCCESS,"user does not exist, roles do exist",Roles with - and _ should be allowed
+delete,,,,,,,,,NA,FAILED,,Empty email id for all the operation types
