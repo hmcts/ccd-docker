@@ -534,6 +534,17 @@ function verify_json_format_includes_field() {
   fi
 }
 
+function get_file_name_from_csv_path() {
+  local original_filename=$1
+
+  local dirname=$(dirname "${original_filename}")
+  local basename=$(basename "${original_filename}")
+  local filename="${basename%.*}"
+  local extension="${basename##*.}"
+
+  echo "${filename}.${extension}"
+}
+
 function generate_csv_path_with_insert() {
   local original_filename=$1
   local insert=$2
@@ -627,6 +638,7 @@ function process_input_file() {
   local datestamp=$(date -u +"%FT%H%M%SZ")
   local filepath_input_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "${datestamp}_INPUT")
   local filepath_output_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "${datestamp}_OUTPUT")
+  local filename=$(get_file_name_from_csv_path "$filepath_input_original")
 
   if [ $LOG_PER_INPUT_FILE -eq 1 ]; then
     LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp}")"
@@ -756,7 +768,7 @@ function process_input_file() {
           fi
 
           if [ "$icount" -gt 0 ]; then
-            log_warn "action: ${operation}, email: ${email} , status: ${reason}"
+            log_warn "action: ${operation}, email: ${email} , status: ${strReason}"
           fi
         fi
 
@@ -778,7 +790,7 @@ function process_input_file() {
           local reason="Operation '${operation}' not recognised, valid operations are: ${OPS[@]}"
           idamResponse=$reason
           inviteStatus="FAILED"
-          log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} , input file: ${filepath_input_original}"
+          log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
           echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}${reason}${NORMAL}"
 
           # prepare output (NB: escape generated values for CSV)
@@ -794,7 +806,7 @@ function process_input_file() {
             local reason="No roles defined"
             idamResponse=$reason
             inviteStatus="FAILED"
-            log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} , input file: ${filepath_input_original}"
+            log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
             # prepare output (NB: escape generated values for CSV)
@@ -809,7 +821,7 @@ function process_input_file() {
             local reason="Roles defined contain invalid characters"
             idamResponse=$reason
             inviteStatus="FAILED"
-            log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} , input file: ${filepath_input_original}"
+            log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
             # prepare output (NB: escape generated values for CSV)
@@ -823,7 +835,7 @@ function process_input_file() {
           local reason="Invalid email detected"
           idamResponse=$reason
           inviteStatus="FAILED"
-          log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} , input file: ${filepath_input_original}"
+          log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
           echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
           # prepare output (NB: escape generated values for CSV)
@@ -837,7 +849,7 @@ function process_input_file() {
             local reason="user not found"
             idamResponse=$reason
             inviteStatus="FAILED"
-            log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} , input file: ${filepath_input_original}"
+            log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
             # prepare output (NB: escape generated values for CSV)
@@ -875,7 +887,9 @@ function process_input_file() {
               idamResponse=$api_v1_user
               inviteStatus="SUCCESS"
               log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-              echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+              echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${N
+
+              ORMAL}: Status == ${GREEN}${reason}${NORMAL}"
 
               # prepare output (NB: escape generated values for CSV)
               input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email] | @csv')
@@ -886,7 +900,7 @@ function process_input_file() {
               local reason="User not found using api/v1/users?query=email:"${email}" endpoint"
               idamResponse=$reason
               inviteStatus="FAILED"
-              log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} , input file: ${filepath_input_original}"
+              log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
               # prepare output (NB: escape generated values for CSV)
@@ -904,7 +918,7 @@ function process_input_file() {
             local reason="both firstName and lastName cannot be empty"
             idamResponse=$reason
             inviteStatus="FAILED"
-            log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} , input file: ${filepath_input_original}"
+            log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
           else
             if [ $(checkAllowedRole "${rolesFromCSV}" "${MANUAL_ROLES}") -eq 1 ]; then
@@ -913,7 +927,7 @@ function process_input_file() {
               local reason="One or more roles defined cannot be assigned using this script"
               idamResponse=$reason
               inviteStatus="FAILED"
-              log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} , input file: ${filepath_input_original}"
+              log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
             else
               if [ $(checkShouldAddDefaultRole "${rolesFromCSV}") -eq 1 ]; then
@@ -958,7 +972,7 @@ function process_input_file() {
                 fail_counter=$((fail_counter+1))
                 local reason="failed registering user"
                 inviteStatus="FAILED"
-                log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse} , input file: ${filepath_input_original}"
+                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse}"
                 echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
               fi
             fi
@@ -979,7 +993,7 @@ function process_input_file() {
             local reason="One or more roles defined cannot be assigned using this script"
             idamResponse=$reason
             inviteStatus="FAILED"
-            log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} , input file: ${filepath_input_original}"
+            log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
           else
             #Set user activate state to true if false
@@ -1062,7 +1076,7 @@ function process_input_file() {
                 inviteStatus="FAILED"
                 local reason="failed assigning one or more roles"
                 echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
-                log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse} , input file: ${filepath_input_original}"
+                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse}"
               fi
             else
               # SKIP:
@@ -1092,7 +1106,7 @@ function process_input_file() {
                 local reason="both firstName and lastName cannot be empty"
                 idamResponse=$reason
                 inviteStatus="FAILED"
-                log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} , input file: ${filepath_input_original}"
+                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
                 echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
               else
                 log_debug "email: ${email} - doing firstname/lastname update"
@@ -1124,7 +1138,7 @@ function process_input_file() {
                   fail_counter=$((fail_counter+1))
                   inviteStatus="FAILED"
                   local reason="failed updating user firstname/lastname"
-                  log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} , input file: ${filepath_input_original}"
+                  log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
                   echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
                 fi
               fi
@@ -1236,7 +1250,7 @@ function process_input_file() {
                 inviteStatus="FAILED"
                 local reason="failed removing all roles"
                 echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
-                log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse} , input file: ${filepath_input_original}"
+                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse}"
               fi
 
               #Set user activate state to false
@@ -1271,7 +1285,7 @@ function process_input_file() {
                   # FAIL:
                   failedToAddCounter=$((failedToAddCounter+1))
                   local reason="failed removing role $csvRole"
-                  log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse} , input file: ${filepath_input_original}"
+                  log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse}"
                 fi
               done
 
@@ -1282,7 +1296,7 @@ function process_input_file() {
                 local reason="Some roles could not be unassigned, please check logs for further information"
                 idamResponse=$reason
                 echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
-                log_error "action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} , input file: ${filepath_input_original}"
+                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
               elif [ "$failedToAddCounter" -eq 0 ] && [ "$addedCounter" -gt 0 ]; then
                 # SUCCESS:
                 success_counter=$((success_counter+1))
