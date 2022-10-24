@@ -22,27 +22,23 @@ The script will prompt for the following information:
 
 The CSV input file must contain the following *mandatory* elements, including a header row.
 
-| Header       | Mandatory                                    | Description                                                                                                                                                      |
-|--------------|----------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| operation    | **Only Mandatory for ./bulk-user-update.sh** | Either `add` or `update`                                                                                                                                         |
-| email        | **Yes**                                      | Email address of user.                                                                                                                                           |
-| firstName    | **Yes**                                      | First name of user.                                                                                                                                              |
-| lastName     | **Yes**                                      | Last name of user.                                                                                                                                               |
-| roles        | **Yes**                                      | A pipe delimited list of roles for the user.                                                                                                                     |
-| rolesToAdd   | **Only Mandatory for ./bulk-user-update.sh**                                           | A pipe delimited list of roles to add for the user.                                                                                                              |
-| rolesToRemove| no                                           | A pipe delimited list of roles to remove for the user.                                                                                                           |
-| inviteStatus | (output)                                     | Status of invite, e.g. `SUCCESS`, `HTTP-404`, etc.  NB: If process is re-run using the output file then it will skip rows that have `inviteStatus == 'SUCCESS'`. |
-| idamResponse | (output)                                     | JSON response from API.                                                                                                                                          |
-| idamUserJson | (output)                                     | Copy of JSON submission to API.                                                                                                                                  |
-| timestamp    | (output)                                     | Time of API call for user record.                                                                                                                                |
+| Header       | Mandatory                | Description                                                         |
+|--------------|--------------------------|---------------------------------------------------------------------|
+| operation    | **Yes**                  | `add` or `delete` or `updateName` or `find`                         |
+| email        | **Yes**                  | Email address of the user.                                          |
+| firstName    | **Depends on operation** | First name of the user.                                             |
+| lastName     | **Depends on operation** | Last name of the user.                                              |
+| roles        | **Depends on operation** | A pipe delimited list of roles for the user to be added or removed. |
+| status       | (output)                 | Status of operation, e.g. `SUCCESS`, `HTTP-404`, etc.               |
+| idamResponse | (output)                 | JSON response from API.                                             |
+| timestamp    | (output)                 | Time of API call for user record.                                   |
 
-> Note: The field headings are case sensitive but the order of the columns is not important.  Any additional columns
+> Note: The field headings are case-sensitive but the order of the columns is not important. Any additional columns
   will be ignored by the process.
 
-The import CSV file is renamed by the process to discourage its accidental re-use.  However at the end of the process
- a copy of the output file is copied to the original input file location.  This new file will contain the additional
- output fields listed above: these include the *inviteStatus* field which prevents successfully processed fields from
- being included in a repeat run.
+The import CSV file is renamed by the process to discourage its accidental re-use. However, at the end of the process
+ a copy of the output file is copied to the original input file location. This new file will contain the additional
+ output fields listed above.
 
 > Note: In the unlikely event the script terminates early; then manual intervention would be required to generate the
   ‘next’ input file: by combining the unprocessed input records with those already present in the latest output file.

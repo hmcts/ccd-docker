@@ -21,13 +21,8 @@ is_test=1
 ###########################################
 # Special case Constants / global variables
 ###########################################
-#'|' delimited string of roles. These roles are special roles
-#if requested roles are only these special roles default roles will be skipped
-SPECIAL_ROLES="ccd-import|ccd-admin"
 
-#'|' delimited string of roles. These roles are default for all and will be added
-#default roles below will be added if requested roles contain more or unique roles
-#as compared to special_roles
+#'|' delimited string of roles. These roles will be added by default for all caseworkers
 DEFAULT_ROLES="caseworker"
 
 #'|' delimited string of roles. These roles should not be processed by this script
@@ -1013,7 +1008,6 @@ function process_input_file() {
 
             combinedCsvApiRoles=$(echo $rolesFromCSV $usersRolesFromApi | jq '.[]' | jq -s)
 
-            #if [ $(checkShouldAddRole "${rolesFromCSV}" "${SPECIAL_ROLES}") -eq 1 ]; then
             if [ $(checkShouldAddDefaultRole "${rolesFromCSV}") -eq 1 ]; then
               log_debug "Adding default roles"
               rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${DEFAULT_ROLES}")

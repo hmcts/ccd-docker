@@ -1,4 +1,4 @@
-operation,email,firstName,LastName, roles  ,status,idamResponse,idamUserJson,timestamp,user exists,result,pre-requisites,comment (not included in the actual csv file)
+operation,email,firstName,LastName,roles,status,idamResponse,idamUserJson,timestamp,user exists,result,pre-requisites,comment (not included in the actual csv file)
 add,ccd.test.user1hmcts.gov.uk,,,,,,,,NA,FAILED,,Invalid Email address format
 add,ccd.test.user1@hmcts.gov.uk,,,caseworker|caseworker+test,,,,,TRUE,FAILED,,Invalid Role format
 add,ccd.test.user1@hmcts.gov.uk,,,"caseworker,caseworker-role-one",,,,,TRUE,FAILED,,Invalid Role separator
