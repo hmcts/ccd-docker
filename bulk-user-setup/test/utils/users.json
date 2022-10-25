@@ -18,5 +18,6 @@
   {"email": "ccd.test.user17@hmcts.gov.uk", "roles": "caseworker", "lastName": "ln17", "firstName": "fn17"},
   {"email": "ccd.test.user18@hmcts.gov.uk", "roles": "caseworker", "lastName": "ln18", "firstName": "fn18"},
   {"email": "ccd.test.user19@hmcts.gov.uk", "roles": "caseworker", "lastName": "ln19", "firstName": "fn19"},
-  {"email": "ccd.test.user20@hmcts.gov.uk", "roles": "caseworker", "lastName": "ln20", "firstName": "fn20"}
+  {"email": "ccd.test.user20@hmcts.gov.uk", "roles": "caseworker", "lastName": "ln20", "firstName": "fn20"},
+  {"email": "idamAdmin@hmcts.net", "roles": "idam-admin", "lastName": "IDAM", "firstName": "Admin"}
 ]

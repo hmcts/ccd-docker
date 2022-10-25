@@ -49,14 +49,11 @@ The import CSV file is renamed by the process to discourage its accidental re-us
 
 ## Local docker testing setup
 
-1. Create a new client using [idam admin web interface](http://localhost:8082)
+At this point most users can run the following 4 scripts
 
-    * Client-id / label to  =>  "ccd-bulk-user-register"
-    * Client description to  =>   "CCD bulk user register"
-    * Client secret => anything
-    * Scope => "create-user manage-user"
-    * Redirect-uri => https://create-bulk-user-test/oauth2redirect
+./test/utils/add-idam-clients.sh
+./test/utils/add-idam-roles.sh
+./test/utils/add-users.sh
 
-2. You need to use ccd admin user ideally rather than idam super admin for this activity.
-   So, create a role like "ccd-admin" under service ccd-api-gateway on idam web and create a admin user with that role using bin/idam-create-caseworker.sh script.
-   This role should have assigned role permissions for all other roles you want to assign to users. This can be done using "manage role" option on idam admin web console.
+
+
