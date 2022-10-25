@@ -29,5 +29,8 @@
   { "role": "load-translations", "security_classification": "PUBLIC" },
   { "role": "citizen", "security_classification": "PUBLIC" },
   { "role": "pui-caa", "security_classification": "PUBLIC" },
-  { "role": "next-hearing-date-admin", "security_classification": "PUBLIC" }
+  { "role": "next-hearing-date-admin", "security_classification": "PUBLIC" },
+  { "role": "hearing-manager", "security_classification": "PUBLIC" },
+  { "role": "hearing-viewer", "security_classification": "PUBLIC" },
+  { "role": "listed-hearing-viewer", "security_classification": "PUBLIC" }
 ]
