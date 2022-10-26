@@ -10,10 +10,10 @@ The script requires the following bash utilities. Please install them depending 
 
 The script will prompt for the following information:
 
-* path to the CSV input file
+* path to the CSV input file (Directory path)
 * ccd _idam-admin_ username
 * ccd _idam-admin_ password
-* idam oauth2 secret for _ccd-bulk-user-register_ client
+* idam oauth2 secret for _ccd-bulk-user-management_ client
 * environment
 
 ----
@@ -49,11 +49,15 @@ The import CSV file is renamed by the process to discourage its accidental re-us
 
 ## Local docker testing setup
 
-At this point most users can run the following 4 scripts
+Run the following scripts to create client and required users and roles for local testing from bulk-user-setup directory.
 
 ./test/utils/add-idam-clients.sh
 ./test/utils/add-idam-roles.sh
 ./test/utils/add-users.sh
+
+Run sh ./bulk-user-setup.sh
+
+We don't need to pass any parameters as it takes default values for local.
 
 
 

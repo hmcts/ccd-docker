@@ -9,7 +9,7 @@ CLIENT_ID=${2}
 CLIENT_SECRET=${3}
 REDIRECT_URL=${4}
 SELF_REGISTRATION=${5:-"false"}
-SCOPE=${6:-"create-user manage-user"}
+SCOPE=${6:-"openid roles create-user manage-user search-user"}
 
 apiToken=$(${dir}/../../../bin/utils/idam-authenticate.sh "${IDAM_ADMIN_USER}" "${IDAM_ADMIN_PASSWORD}")
 

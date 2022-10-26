@@ -525,7 +525,7 @@ function verify_json_format_includes_field() {
   ## verify JSON format by checking JUST THE FIRST ITEM has the required field
   if [ $(echo $json | jq "first(.[] | has(\"${field}\"))") == false ]; then
     echo "${RED}ERROR: Field not found in input:${NORMAL} ${field}"
-    exit 99
+    return
   fi
 }
 
@@ -882,9 +882,7 @@ function process_input_file() {
               idamResponse=$api_v1_user
               inviteStatus="SUCCESS"
               log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-              echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${N
-
-              ORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+              echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
 
               # prepare output (NB: escape generated values for CSV)
               input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email] | @csv')
@@ -1616,10 +1614,10 @@ process_folder_recurse() {
 
 if [ $is_test -eq 1 ]
 then
-  CSV_DIR_PATH="/Users/dineshpatel/Sandbox/CCD_Projects/ccd-docker/bulk-user-setup/bulk_processing"
+  CSV_DIR_PATH="../bulk-user-setup/test/inputs"
   ADMIN_USER="idamOwner@hmcts.net"
   ADMIN_USER_PWD="Ref0rmIsFun"
-  IDAM_CLIENT_SECRET="anything"
+  IDAM_CLIENT_SECRET="ccd_bulk_user_management_secret"
   ENV="local"
   CSV_PROCESSED_DIR_NAME="Output_$(date -u +"%F")"
 else
@@ -1647,7 +1645,7 @@ then
 fi
 
 REDIRECT_URI="https://create-bulk-user-test/oauth2redirect"
-CLIENT_ID="ccd-bulk-user-register"
+CLIENT_ID="ccd-bulk-user-management"
 IDAM_URL=$(get_idam_url)
 IDAM_ACCESS_TOKEN=$(get_idam_token)
 check_exit_code_for_error $? "$IDAM_ACCESS_TOKEN"
