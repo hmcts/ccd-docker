@@ -95,7 +95,10 @@
         "roleCategory": "PROFESSIONAL",
         "classification": "PUBLIC",
         "readOnly": false,
-        "attributes": { "region": "123" },
+        "attributes": {
+          "region": "123",
+          "location": "1"
+        },
         "authorisations": []
       }
     ],
