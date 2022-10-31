@@ -10,11 +10,18 @@ The script requires the following bash utilities. Please install them depending 
 
 The script will prompt for the following information:
 
-* path to the CSV input file
+* path to the CSV input file (Directory path)
 * ccd _idam-admin_ username
 * ccd _idam-admin_ password
-* idam oauth2 secret for _ccd-bulk-user-register_ client
-* environment
+* idam oauth2 secret for _ccd-bulk-user-management_ client - 
+* environment - will be prod in production environment
+
+To get the oauth2 secret for idam client run the following:
+
+az login (if not already logged in to Azure)
+az keyvault secret show --vault-name ccd-prod --name ccd_bulk_user_management_secret
+
+Generated log file and output files will be placed in bulk-user-setup/test/outputs/{Date} folder.
 
 ----
 
@@ -49,14 +56,21 @@ The import CSV file is renamed by the process to discourage its accidental re-us
 
 ## Local docker testing setup
 
-1. Create a new client using [idam admin web interface](http://localhost:8082)
+Run the following scripts to create client and required users and roles for local testing from bulk-user-setup directory.
 
-    * Client-id / label to  =>  "ccd-bulk-user-register"
-    * Client description to  =>   "CCD bulk user register"
-    * Client secret => anything
-    * Scope => "create-user manage-user"
-    * Redirect-uri => https://create-bulk-user-test/oauth2redirect
+./test/utils/add-idam-clients.sh
 
-2. You need to use ccd admin user ideally rather than idam super admin for this activity.
-   So, create a role like "ccd-admin" under service ccd-api-gateway on idam web and create a admin user with that role using bin/idam-create-caseworker.sh script.
-   This role should have assigned role permissions for all other roles you want to assign to users. This can be done using "manage role" option on idam admin web console.
+./test/utils/add-idam-roles.sh
+
+./test/utils/add-users.sh
+
+Before running below script make sure input csv files copied to  bulk-user-setup/test/inputs folder. After running the 
+below script files that are copied to bulk-user-setup/test/inputs will be processed. 
+Generated output files, copy of input files will be copied to bulk-user-setup/test/outputs/{Date} folder.
+
+sh ./bulk-user-setup.sh 
+
+We don't need to pass any parameters as it takes default values for local.
+
+
+

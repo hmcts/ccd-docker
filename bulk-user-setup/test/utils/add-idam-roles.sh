@@ -3,5 +3,5 @@
 set -eu
 dir=$(dirname ${0})
 jq -r '[(.[] | .roles | split(",")) | .[] ] | unique[]' ${dir}/users.json | while read args; do
-  ${dir}/TestScripts/idam-add-role.sh "$args"
+  ${dir}/../../../bin/utils/idam-add-role.sh "$args"
 done
