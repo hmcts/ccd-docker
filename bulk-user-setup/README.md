@@ -13,8 +13,15 @@ The script will prompt for the following information:
 * path to the CSV input file (Directory path)
 * ccd _idam-admin_ username
 * ccd _idam-admin_ password
-* idam oauth2 secret for _ccd-bulk-user-management_ client
-* environment
+* idam oauth2 secret for _ccd-bulk-user-management_ client - 
+* environment - will be prod in production environment
+
+To get the oauth2 secret for idam client run the following:
+
+az login (if not already logged in to Azure)
+az keyvault secret show --vault-name ccd-prod --name ccd_bulk_user_management_secret
+
+Generated log file and output files will be placed in bulk-user-setup/test/outputs/{Date} folder.
 
 ----
 
@@ -52,10 +59,16 @@ The import CSV file is renamed by the process to discourage its accidental re-us
 Run the following scripts to create client and required users and roles for local testing from bulk-user-setup directory.
 
 ./test/utils/add-idam-clients.sh
+
 ./test/utils/add-idam-roles.sh
+
 ./test/utils/add-users.sh
 
-Run sh ./bulk-user-setup.sh
+Before running below script make sure input csv files copied to  bulk-user-setup/test/inputs folder. After running the 
+below script files that are copied to bulk-user-setup/test/inputs will be processed. 
+Generated output files, copy of input files will be copied to bulk-user-setup/test/outputs/{Date} folder.
+
+sh ./bulk-user-setup.sh 
 
 We don't need to pass any parameters as it takes default values for local.
 

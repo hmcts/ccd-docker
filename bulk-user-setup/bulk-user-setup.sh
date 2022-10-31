@@ -25,6 +25,8 @@ is_test=1
 #'|' delimited string of roles. These roles will be added by default for all caseworkers
 DEFAULT_ROLES="caseworker"
 
+DEFAULT_CASEWORKER_ROLE="caseworker"
+
 #'|' delimited string of roles. These roles should not be processed by this script
 #as they require a snow ticket
 MANUAL_ROLES="judiciary"
@@ -525,7 +527,7 @@ function verify_json_format_includes_field() {
   ## verify JSON format by checking JUST THE FIRST ITEM has the required field
   if [ $(echo $json | jq "first(.[] | has(\"${field}\"))") == false ]; then
     echo "${RED}ERROR: Field not found in input:${NORMAL} ${field}"
-    return
+    exit 99
   fi
 }
 
@@ -555,9 +557,9 @@ function generate_csv_path_with_insert() {
   fi
 
   if [[ ! -e "${dirname}/${CSV_PROCESSED_DIR_NAME}" ]]; then
-    mkdir "${dirname}/${CSV_PROCESSED_DIR_NAME}"
+    mkdir -pv "${dirname}/${CSV_PROCESSED_DIR_NAME}"
   fi
-  echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/${filename}.${insert}.${extension}"
+  echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/${filename}${insert}.${extension}"
 }
 
 function generate_log_path_with_insert() {
@@ -572,13 +574,13 @@ function generate_log_path_with_insert() {
   extension="log"
 
   if [[ ! -e "${dirname}/${CSV_PROCESSED_DIR_NAME}" ]]; then
-    mkdir "${dirname}/${CSV_PROCESSED_DIR_NAME}"
+    mkdir -pv "${dirname}/${CSV_PROCESSED_DIR_NAME}"
   fi
 
   if [ $LOG_PER_INPUT_FILE -eq 1 ]; then
-    echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/${filename}.${insert}.${extension}"
+    echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/${filename}${insert}.${extension}"
   else
-    echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/"BULK-SCRIPT-OUTPUT".${insert}.${extension}"
+    echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/"BULK-SCRIPT-OUTPUT"${insert}.${extension}"
   fi
 
 }
@@ -631,8 +633,8 @@ function process_input_file() {
 
   # generate new paths for input and output files
   local datestamp=$(date -u +"%FT%H%M%SZ")
-  local filepath_input_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "${datestamp}_INPUT")
-  local filepath_output_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "${datestamp}_OUTPUT")
+  local filepath_input_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "_Input_${datestamp}")
+  local filepath_output_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "_Output_${datestamp}")
   local filename=$(get_file_name_from_csv_path "$filepath_input_original")
 
   if [ $LOG_PER_INPUT_FILE -eq 1 ]; then
@@ -654,19 +656,21 @@ function process_input_file() {
 
   # convert input file to json
   json=$(convert_input_file_to_json "${filepath_input_original}")
-  check_exit_code_for_error $? "$json"
+
+  # check_exit_code_for_error $? "$json"
 
   # input file read ok ...
   # ... so move it to backup location
-  mv "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null
   if [ $? -eq 0 ]; then
-    echo "Moved input file to backup location: ${BOLD}${filepath_input_newpath}${NORMAL}"
-  else
-    echo "${RED}ERROR: Aborted as unable to move input file to backup location:${NORMAL} ${filepath_input_original}"
-    exit 1
-  fi
-  # write headers to output file
-  echo "operation,email,firstName,lastName,roles,status,idamResponse,is_active,last_modified,timestamp" >> "$filepath_output_newpath"
+    mv "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null
+    if [ $? -eq 0 ]; then
+      echo "Moved input file to backup location: ${BOLD}${filepath_input_newpath}${NORMAL}"
+    else
+     echo "${RED}ERROR: Aborted as unable to move input file to backup location:${NORMAL} ${filepath_input_original}"
+     exit 1
+    fi
+    # write headers to output file
+    echo "operation,email,firstName,lastName,roles,status,idamResponse,is_active,last_modified,timestamp" >> "$filepath_output_newpath"
 
   #add is_active (true/false), last_modified
 
@@ -1060,7 +1064,7 @@ function process_input_file() {
                 success_counter=$((success_counter+1))
                 inviteStatus="SUCCESS"
                 local reason="role(s) successfully assigned"
-                echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason - ${idamResponse}${NORMAL}"
+                echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason"
                 log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               else
                 # FAIL:
@@ -1210,6 +1214,18 @@ function process_input_file() {
 
           local USE_PUT=0
 
+          #Below code is to delete caseworker role is there are no other service specific roles available
+          local otherServieRole=false
+          for role in "${rolesFromApiArray[@]}"
+          do
+              if [ "${role}" == "${DEFAULT_CASEWORKER_ROLE}-*" ] && [$otherServieRole == false ] ; then
+                  otherServieRole=true
+              fi
+          done
+          if [  $otherServieRole==false ]; then
+              rolesFromApiArray=(${rolesFromApiArray[@]/${DEFAULT_CASEWORKER_ROLE}})
+          fi
+
           if [ $array_count == 1 ]; then
             if [  "${rolesFromApiArray[0]}" == "${DEFAULT_ROLES}" ]; then
               #after removing roles only role left is the default role
@@ -1340,6 +1356,11 @@ function process_input_file() {
 
     echo "Process is complete: ${GREEN}success: ${success_counter}${NORMAL}, ${YELLOW}skipped: ${skipped_counter}${NORMAL}, ${RED}fail: ${fail_counter}${NORMAL}, total: ${total_counter}"
   )
+
+else
+  echo $json
+
+fi
 
 
   # copy output file back to original input file location so it can be used for re-run
@@ -1619,7 +1640,7 @@ then
   ADMIN_USER_PWD="Ref0rmIsFun"
   IDAM_CLIENT_SECRET="ccd_bulk_user_management_secret"
   ENV="local"
-  CSV_PROCESSED_DIR_NAME="Output_$(date -u +"%F")"
+  CSV_PROCESSED_DIR_NAME="../outputs/$(date -u +"%F")"
 else
   # read input arguments
   read -p "Please enter directory path containing csv input files: " CSV_DIR_PATH
@@ -1627,7 +1648,7 @@ else
   ADMIN_USER_PWD=$(read_password_with_asterisk "Please enter ccd idam-admin password: ")
   IDAM_CLIENT_SECRET=$(read_password_with_asterisk $'\nPlease enter idam oauth2 secret for ccd-bulk-user-register client: ')
   read -p $'\nPlease enter environment default [prod]: ' ENV
-  CSV_PROCESSED_DIR_NAME="Output_$(date -u +"%F")"
+  CSV_PROCESSED_DIR_NAME="../outputs/$(date -u +"%F")"
 fi
 
 # Check if a param is set to a valid value
