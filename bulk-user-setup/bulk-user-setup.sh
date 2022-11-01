@@ -1374,9 +1374,11 @@ function addPreDefinedRolesToCSVRoles {
   local rolesFromCSV=$1
 
   for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
-    if [[ "$csvRole" == *"_ROLES"* ]]; then
-      if [ -z "$csvRole" ]; then
-        local preDefinedRoles=( $(splitStringToArray "|" "${csvRole}") )
+    if [[ "$csvRole" == *"_roles"* ]]; then
+      csvRoleUpper=$(echo "${csvRole}" | tr '[:lower:]' '[:upper:]')
+      staticRole="STATIC_${csvRoleUpper}"
+      if [ -z "$staticRole" ]; then
+        local preDefinedRoles=( $(splitStringToArray "|" "${staticRole}") )
         for role in "${preDefinedRoles[@]}"; do
             rolesFromCSV=$(echo "${rolesFromCSV}" | jq --arg new "$role" '. += [$new]')
         done
