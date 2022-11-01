@@ -1,40 +1,6 @@
 #!/usr/bin/env bash
 
-#######################################
-# Logging Constants / global variables
-#######################################
-LOGFILE='' #Will be set based on input file
-LOGLEVEL='DEBUG'
-#whether to create log per input file (1=true, 0=false)
-LOG_PER_INPUT_FILE=0
-
-##########################
-# console colours / fonts
-##########################
-RED=$(tput setaf 1)
-YELLOW=$(tput setaf 3)
-GREEN=$(tput setaf 2)
-BOLD=$(tput bold)
-NORMAL=$(tput sgr0)
-is_test=1
-
-###########################################
-# Special case Constants / global variables
-###########################################
-
-#'|' delimited string of roles. These roles will be added by default for all caseworkers
-DEFAULT_ROLES="caseworker"
-
-DEFAULT_CASEWORKER_ROLE="caseworker"
-
-#'|' delimited string of roles. These roles should not be processed by this script
-#as they require a snow ticket
-MANUAL_ROLES="judiciary"
-
-#####################################
-# Operations supported by this script
-#####################################
-OPS=("add" "updatename" "delete" "find")
+source ./bulk-user-setup.config
 
 function get_idam_url() {
     if [ "$ENV" == "prod" ]
@@ -672,8 +638,6 @@ function process_input_file() {
     # write headers to output file
     echo "operation,email,firstName,lastName,roles,status,idamResponse,is_active,last_modified,timestamp" >> "$filepath_output_newpath"
 
-  #add is_active (true/false), last_modified
-
   # strip JSON into individual items then process in a while loop
   echo $json | jq -r -c '.[]' \
       |  \
@@ -927,6 +891,9 @@ function process_input_file() {
               log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
             else
+
+              rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
+
               if [ $(checkShouldAddDefaultRole "${rolesFromCSV}") -eq 1 ]; then
                 log_debug "Adding default roles"
                 rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${DEFAULT_ROLES}")
@@ -1002,13 +969,15 @@ function process_input_file() {
               submit_response=$(update_user "${userId}" "${body}")
 
               if [[ "$submit_response" == *"$email"* ]]; then
-                log_debug "email: ${email} - SUCCESS, user active state set to true"
+                log_warn "email: ${email} - SUCCESS, user active state set to true"
               else
                 log_error "email: ${email} - FAILED, user active state could not be set"
               fi
             fi
 
             combinedCsvApiRoles=$(echo $rolesFromCSV $usersRolesFromApi | jq '.[]' | jq -s)
+
+            rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
 
             if [ $(checkShouldAddDefaultRole "${rolesFromCSV}") -eq 1 ]; then
               log_debug "Adding default roles"
@@ -1190,6 +1159,8 @@ function process_input_file() {
                 rolesFromApiArray+=("${apiRole}")
           done
 
+          rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
+
           for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
             for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
               #add csv role to array excluding default role
@@ -1268,7 +1239,7 @@ function process_input_file() {
                 submit_response=$(update_user "${userId}" "${body}")
 
                 if [[ "$submit_response" == *"$email"* ]]; then
-                  log_debug "email: ${email} - SUCCESS, user active state set to false"
+                  log_warn "email: ${email} - SUCCESS, user active state set to false"
                 else
                   log_error "email: ${email} - FAILED, user active state could not be set"
                 fi
@@ -1288,7 +1259,7 @@ function process_input_file() {
                 if [ $inviteStatus == "SUCCESS" ]; then
                   addedCounter=$((addedCounter+1))
                   local reason="role $csvRole successfully removed"
-                  log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                  log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
                 else
                   # FAIL:
                   failedToAddCounter=$((failedToAddCounter+1))
@@ -1312,7 +1283,7 @@ function process_input_file() {
                 local reason="All roles successfully unassigned"
                 idamResponse=$reason
                 echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
-                log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               fi
             fi
           else
@@ -1394,6 +1365,25 @@ function addRolesToCSVRoles {
 
   for role in "${defaultRolesArray[@]}"; do
     rolesFromCSV=$(echo "${rolesFromCSV}" | jq --arg new "$role" '. += [$new]')
+  done
+
+  echo "${rolesFromCSV}"
+}
+
+function addPreDefinedRolesToCSVRoles {
+  local rolesFromCSV=$1
+
+  for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+    if [[ "$csvRole" == *"_ROLES"* ]]; then
+      if [ -z "$csvRole" ]; then
+        local preDefinedRoles=( $(splitStringToArray "|" "${csvRole}") )
+        for role in "${preDefinedRoles[@]}"; do
+            rolesFromCSV=$(echo "${rolesFromCSV}" | jq --arg new "$role" '. += [$new]')
+        done
+      else
+        log_error "$csvRole not defined in configuration file"
+      fi
+    fi
   done
 
   echo "${rolesFromCSV}"

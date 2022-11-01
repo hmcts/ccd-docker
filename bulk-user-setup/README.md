@@ -72,5 +72,12 @@ sh ./bulk-user-setup.sh
 
 We don't need to pass any parameters as it takes default values for local.
 
+## Production setup / user guide
 
+To use this bulk script in any environment other than local the following should be changed (if required):
+
+1. Amend 'bulk-user-setup.config' and ensure is_test is set to 0 (i.e. is_test=0)
+2. open a terminal session at the root directory 'bulk-user-setup'
+3. issue the command ,/bulk-user-setup.sh
+4. provide 
 
