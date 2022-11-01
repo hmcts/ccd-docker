@@ -1389,6 +1389,7 @@ function addPreDefinedRolesToCSVRoles {
   done
 
   echo "${rolesFromCSV}"
+
 }
 
 function checkAllowedRole {
