@@ -1372,24 +1372,43 @@ function addRolesToCSVRoles {
 
 function addPreDefinedRolesToCSVRoles {
   local rolesFromCSV=$1
+  local finalRoles=() #declare empty shell array
+
+  local array=(
+      "IA_ROLES::${IA_ROLES}"
+      "PRIVATELAW_ROLES::${PRIVATELAW_ROLES}"
+      "PUBLICLAW_ROLES::${PUBLICLAW_ROLES}"
+      "SSCS_ROLES::${SSCS_ROLES}"
+  )
+
 
   for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
     if [[ "$csvRole" == *"_roles"* ]]; then
-      csvRoleUpper=$(echo "${csvRole}" | tr '[:lower:]' '[:upper:]')
-      staticRole="STATIC_${csvRoleUpper}"
-      if [ -z "$staticRole" ]; then
-        local preDefinedRoles=( $(splitStringToArray "|" "${staticRole}") )
-        for role in "${preDefinedRoles[@]}"; do
-            rolesFromCSV=$(echo "${rolesFromCSV}" | jq --arg new "$role" '. += [$new]')
+        log_debug "Adding preDefinedRoles"
+        local found=0
+        csvRoleUpper=$(echo "${csvRole}" | tr '[:lower:]' '[:upper:]')
+        for index in "${array[@]}" ; do
+            KEY="${index%%::*}"
+            VALUE="${index##*::}"
+            if [ "${KEY}" = "${csvRoleUpper}" ]; then
+                local preDefinedRoles=( $(splitStringToArray "|" "${VALUE}") )
+                for role in "${preDefinedRoles[@]}"; do
+                    finalRoles+=("${role}")
+                done
+                found=1
+                break
+            fi
         done
-      else
-        log_error "$csvRole not defined in configuration file"
-      fi
+        if [ $found -eq 0 ]; then
+            log_error "${csvRole} not defined in configuration file"
+        fi
+    else
+        finalRoles+=("${csvRole}")
     fi
   done
 
+  rolesFromCSV=$(printf '%s\n' "${finalRoles[@]}" | jq -R . | jq -s .)
   echo "${rolesFromCSV}"
-
 }
 
 function checkAllowedRole {
