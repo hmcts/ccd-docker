@@ -1394,10 +1394,10 @@ function addPreDefinedRolesToCSVRoles {
   local finalRoles=() #declare empty shell array
 
   local array=(
-      "IA-ROLES::${IA_ROLES}"
-      "PRIVATELAW-ROLES::${PRIVATELAW_ROLES}"
-      "PUBLICLAW-ROLES::${PUBLICLAW_ROLES}"
-      "SSCS-ROLES::${SSCS_ROLES}"
+      "IA-ROLES::${IA-ROLES}"
+      "PRIVATELAW-ROLES::${PRIVATELAW-ROLES}"
+      "PUBLICLAW-ROLES::${PUBLICLAW-ROLES}"
+      "SSCS-ROLES::${SSCS-ROLES}"
   )
 
   for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
