@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source ./bulk-user-setup.config
+source ./bulk-user-setup.config > out.log 2> /dev/null
 
 function get_idam_url() {
     if [ "$ENV" == "prod" ]
@@ -487,12 +487,14 @@ function verify_json_format_includes_field() {
   ## verify JSON array is not empty
   if [ $(echo $json | jq -e '. | length') == 0 ]; then
     echo "${RED}ERROR: input file conversion produced empty result.${NORMAL} Please check input file format."
+    log_error "file: ${filename} , ERROR: input file conversion produced empty result.Please check input file format."
     exit 99
   fi
 
   ## verify JSON format by checking JUST THE FIRST ITEM has the required field
   if [ $(echo $json | jq "first(.[] | has(\"${field}\"))") == false ]; then
     echo "${RED}ERROR: Field not found in input:${NORMAL} ${field}"
+    log_error "file: ${filename} , ERROR: Field not found in input:${field}"
     exit 99
   fi
 }
@@ -1661,15 +1663,8 @@ process_folder_recurse() {
   done
 }
 
-if [ $is_test -eq 1 ]
+if [ $is_test -eq 0 ]
 then
-  CSV_DIR_PATH="../bulk-user-setup/test/inputs"
-  ADMIN_USER="idamOwner@hmcts.net"
-  ADMIN_USER_PWD="Ref0rmIsFun"
-  IDAM_CLIENT_SECRET="ccd_bulk_user_management_secret"
-  ENV="local"
-  CSV_PROCESSED_DIR_NAME="../outputs/$(date -u +"%F")"
-else
   # read input arguments
   read -p "Please enter directory path containing csv input files: " CSV_DIR_PATH
   read -p "Please enter ccd idam-admin username: " ADMIN_USER
