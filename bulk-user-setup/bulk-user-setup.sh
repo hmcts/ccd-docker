@@ -892,7 +892,7 @@ function process_input_file() {
               echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
             else
 
-              rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
+              #rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
 
               if [ $(checkShouldAddDefaultRole "${rolesFromCSV}") -eq 1 ]; then
                 log_debug "Adding default roles"
@@ -1392,14 +1392,14 @@ function addPreDefinedRolesToCSVRoles {
   local finalRoles=() #declare empty shell array
 
   local array=(
-      "IA_ROLES::${IA_ROLES}"
-      "PRIVATELAW_ROLES::${PRIVATELAW_ROLES}"
-      "PUBLICLAW_ROLES::${PUBLICLAW_ROLES}"
-      "SSCS_ROLES::${SSCS_ROLES}"
+      "IA-ROLES::${IA_ROLES}"
+      "PRIVATELAW-ROLES::${PRIVATELAW_ROLES}"
+      "PUBLICLAW-ROLES::${PUBLICLAW_ROLES}"
+      "SSCS-ROLES::${SSCS_ROLES}"
   )
 
   for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
-    if [[ "$csvRole" == *"_roles"* ]]; then
+    if [[ "$csvRole" == *"-roles"* ]]; then
         log_debug "Adding preDefinedRoles"
         local found=0
         csvRoleUpper=$(echo "${csvRole}" | tr '[:lower:]' '[:upper:]')
