@@ -977,7 +977,7 @@ function process_input_file() {
 
             combinedCsvApiRoles=$(echo $rolesFromCSV $usersRolesFromApi | jq '.[]' | jq -s)
 
-            rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
+            #rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
 
             if [ $(checkShouldAddDefaultRole "${rolesFromCSV}") -eq 1 ]; then
               log_debug "Adding default roles"
