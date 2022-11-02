@@ -10,3 +10,4 @@ delete,ccd.test.user6@hmcts.gov.uk,,,caseworker-five|caseworker-role-six|some-ot
 delete,ccd.test.user7@hmcts.gov.uk,,,caseworker-five|caseworker-role-six|some-other-role,,,,,TRUE,SUCCESS,,Few roles removed and remaining are not found with the user
 delete,ccd.test.user8@hmcts.gov.uk,,,caseworker,,,,,TRUE,SUCCESS,should user have no role or only caseworker?,Caseworker role mentioned in the list and no role present with the user - deactivate user
 delete,ccd.test.user9@hmcts.gov.uk,,,caseworker|caseworker-role-one,,,,,TRUE,SKIPPED,,User inactive - ignore and log warning
+delete,ccd.test.user10@hmcts.gov.uk,fn07,ln07,caseworker-role-two|ia_roles,,,,,TRUE,SUCCESS,"user exists with caseworker-role-two, caseworker and all the ia_roles. Should remove all roles and de-activate user","User exists, should remove all roles and de-activate the user"
