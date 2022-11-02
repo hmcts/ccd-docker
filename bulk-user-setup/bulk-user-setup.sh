@@ -1380,6 +1380,13 @@ function addRolesToCSVRoles {
   echo "${rolesFromCSV}"
 }
 
+# set config value
+# usage: set_config IA_ROLES $NEW_IA_ROLES
+# where IA_ROLES is the key field, $NEW_IA_ROLES is the new value
+function set_config(){
+    sudo sed -i "s/^\($1\s*=\s*\).*\$/\1$2/" $CONFIG
+}
+
 function addPreDefinedRolesToCSVRoles {
   local rolesFromCSV=$1
   local finalRoles=() #declare empty shell array
