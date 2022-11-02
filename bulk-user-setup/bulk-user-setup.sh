@@ -1205,6 +1205,8 @@ function process_input_file() {
             fi
           fi
 
+          log_debug "Final roles to delete: ${rolesFromCSV}"
+
           if [ $userActiveState == "true" ]; then
             if [ $USE_PUT -eq 1 ]; then
               submit_response=$(put_user_roles "$userId" "[]")
@@ -1284,6 +1286,14 @@ function process_input_file() {
                 idamResponse=$reason
                 echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
                 log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              else
+                # FAIL:
+                fail_counter=$((fail_counter+1))
+                inviteStatus="FAILED"
+                local reason="Roles could not be unassigned, please check logs for further information"
+                idamResponse=$reason
+                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
               fi
             fi
           else
@@ -1380,7 +1390,6 @@ function addPreDefinedRolesToCSVRoles {
       "PUBLICLAW_ROLES::${PUBLICLAW_ROLES}"
       "SSCS_ROLES::${SSCS_ROLES}"
   )
-
 
   for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
     if [[ "$csvRole" == *"_roles"* ]]; then
