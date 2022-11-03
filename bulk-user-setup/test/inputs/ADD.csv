@@ -22,4 +22,4 @@ add,ccd.test.user07@hmcts.gov.uk,fn07,ln07,caseworker|caseworker-role-six,,,,,FA
 add,ccd.test.user11@hmcts.gov.uk,,,caseworker|caseworker-role-six,,,,,TRUE,SUCCESS,user exists inactive no roles,User is inactive. Caseworker role mentioned in the roles
 add,ccd.test.user12@hmcts.gov.uk,,,caseworker|caseworker-role-six,,,,,TRUE,SUCCESS,"user exists, active no roles",User found. Caseworker role mentioned in the roles
 add,ccd.test.user13@hmcts.gov.uk,,,caseworker|caseworker-role-six,,,,,TRUE,SKIPPED,"user exists, active all roles already assigned",nothing to change
-add,ccd.test.user07@hmcts.gov.uk,fn07,ln07,caseworker-role-two|ia-roles,,,,,FALSE,SUCCESS,user does not exist,User not found. Should fail as ia-roles does not exist
+add,ccd.test.user07@hmcts.gov.uk,fn07,ln07,caseworker-role-two|ia-roles,,,,,FALSE,FAILED,user does not exist,User does not exist. Should fail as ia-roles does not exist
