@@ -1035,7 +1035,7 @@ function process_input_file() {
                 success_counter=$((success_counter+1))
                 inviteStatus="SUCCESS"
                 local reason="role(s) successfully assigned"
-                echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason"
+                echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason"
                 log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               else
                 # FAIL:
@@ -1163,6 +1163,8 @@ function process_input_file() {
 
           rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
 
+          log_debug "Computed roles to delete: ${rolesFromCSV}"
+
           for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
             for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
               #add csv role to array excluding default role
@@ -1207,7 +1209,7 @@ function process_input_file() {
             fi
           fi
 
-          log_debug "Final roles to delete: ${rolesFromCSV}"
+          log_debug "Assigned roles to remove: ${rolesToRemoveArray[@]}"
 
           if [ $userActiveState == "true" ]; then
             if [ $USE_PUT -eq 1 ]; then
@@ -1225,7 +1227,7 @@ function process_input_file() {
                 inviteStatus="SUCCESS"
                 local reason="All roles successfully unassigned"
                 idamResponse=$reason
-                echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
+                echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
                 log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               else
                 # FAIL:
@@ -1252,7 +1254,10 @@ function process_input_file() {
               local addedCounter=0
               local failedToAddCounter=0
 
-              for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+              local rolesToRemoveArray_count=${#rolesToRemoveArray[@]}
+
+              #for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+              for csvRole in "${rolesToRemoveArray[@]}"; do
                 submit_response=$(delete_user_role "$userId" "$csvRole")
                 # seperate submit_response reponse
                 IFS=$'\n'
@@ -1272,7 +1277,14 @@ function process_input_file() {
                 fi
               done
 
-              if [ "$failedToAddCounter" -gt 0 ] && [ "$addedCounter" -gt 0 ]; then
+              if [ $rolesToRemoveArray_count == 0 ]; then
+                skipped_counter=$((skipped_counter+1))
+                inviteStatus="SKIPPED"
+                local reason="None of the roles defined are currently assigned to the user"
+                idamResponse=$reason
+                log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+              elif [ "$failedToAddCounter" -gt 0 ] && [ "$addedCounter" -gt 0 ]; then
                 # FAIL:
                 fail_counter=$((fail_counter+1))
                 inviteStatus="PARTIALLY-FAILED"
@@ -1286,7 +1298,7 @@ function process_input_file() {
                 inviteStatus="SUCCESS"
                 local reason="All roles successfully unassigned"
                 idamResponse=$reason
-                echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
+                echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
                 log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               else
                 # FAIL:
@@ -1394,10 +1406,10 @@ function addPreDefinedRolesToCSVRoles {
   local finalRoles=() #declare empty shell array
 
   local array=(
-      "IA-ROLES::${IA-ROLES}"
-      "PRIVATELAW-ROLES::${PRIVATELAW-ROLES}"
-      "PUBLICLAW-ROLES::${PUBLICLAW-ROLES}"
-      "SSCS-ROLES::${SSCS-ROLES}"
+      "IA-ROLES::${IA_ROLES}"
+      "PRIVATELAW-ROLES::${PRIVATELAW_ROLES}"
+      "PUBLICLAW-ROLES::${PUBLICLAW_ROLES}"
+      "SSCS-ROLES::${SSCS_ROLES}"
   )
 
   for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
@@ -1409,7 +1421,7 @@ function addPreDefinedRolesToCSVRoles {
             KEY="${index%%::*}"
             VALUE="${index##*::}"
             if [ "${KEY}" = "${csvRoleUpper}" ]; then
-                local preDefinedRoles=( $(splitStringToArray "|" "${VALUE}") )
+                local preDefinedRoles=( $(splitStringToArray "|" $VALUE) )
                 for role in "${preDefinedRoles[@]}"; do
                     finalRoles+=("${role}")
                 done
@@ -1508,11 +1520,14 @@ function splitStringToArray {
   delimeter=$1
   theString=$2
 
-  oldIFS="$IFS"
+  myArray=()
+
+  oldIFS=$IFS
   IFS="${delimeter}"
-  read -ra myArray <<< "${theString}"
-  IFS="$oldIFS"
-  echo "${myArray[@]}"
+  #read -ra myArray <<< "${theString}"
+  read -r -d '' -a myArray <<< "$theString"
+  IFS=$oldIFS
+  echo "${myArray[*]}"
 }
 
 function convertToLowerCase {

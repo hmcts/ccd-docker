@@ -19,5 +19,6 @@
   {"email": "ccd.test.user18@hmcts.gov.uk", "roles": "caseworker", "lastName": "ln18", "firstName": "fn18"},
   {"email": "ccd.test.user19@hmcts.gov.uk", "roles": "caseworker", "lastName": "ln19", "firstName": "fn19"},
   {"email": "ccd.test.user20@hmcts.gov.uk", "roles": "caseworker", "lastName": "ln20", "firstName": "fn20"},
-  {"email": "ccd.test.user21@hmcts.gov.uk", "roles": "caseworker,caseworker-role-one,payment", "lastName": "ln20", "firstName": "fn20"}
+  {"email": "ccd.test.user21@hmcts.gov.uk", "roles": "caseworker,caseworker-role-one,payment", "lastName": "ln20", "firstName": "fn20"},
+  {"email": "ccd.test.user22@hmcts.gov.uk", "roles": "caseworker-ia,caseworker-ia-admofficer,caseworker-ia-bails,caseworker-ia-caseofficer,caseworker-ia-homeofficeapc,caseworker-ia-homeofficebail,caseworker-ia-homeofficelart,caseworker-ia-homeofficepou,caseworker-ia-iacjudge,caseworker-ia-judiciary,caseworker-ia-legalrep-solicitor,caseworker-ia-readonly,caseworker-ia-respondentofficer,caseworker-ia-srcaseofficer,caseworker-ia-system,caseworker-ia-system-access,caseworker-iac-bulkscan,caseworker-iac-systemupdate", "lastName": "ln20", "firstName": "fn20"}
 ]
