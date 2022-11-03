@@ -75,8 +75,8 @@
   {"email": "master.caa@gmail.com", "roles": "caseworker,caseworker-caa", "lastName": "caa", "firstName": "master"},
   {"email": "noc.approver@gmail.com", "roles": "caseworker-approver", "lastName": "noc", "firstName": "approver"},
 
-  {"email": "hmc.hearing-manager@gmail.com", "roles": "hearing-manager,caseworker,caseworker-befta_master", "lastName": "hearing-manager", "firstName": "hmc"},
-  {"email": "hmc.hearing-viewer@gmail.com", "roles": "hearing-viewer,caseworker,caseworker-befta_master", "lastName": "hearing-viewer", "firstName": "hmc"},
-  {"email": "hmc.listed-hearing-viewer@gmail.com", "roles": "listed-hearing-viewer,caseworker,caseworker-befta_master", "lastName": "listed-hearing-viewer", "firstName": "hmc"},
-  {"email": "hmc.superuser@gmail.com", "roles": "hearing-manager,hearing-viewer,listed-hearing-viewer,caseworker,caseworker-befta_master", "lastName": "superuser", "firstName": "hmc"}
+  {"email": "hmc.hearing-manager@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "hearing-manager", "firstName": "hmc"},
+  {"email": "hmc.hearing-viewer@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "hearing-viewer", "firstName": "hmc"},
+  {"email": "hmc.listed-hearing-viewer@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "listed-hearing-viewer", "firstName": "hmc"},
+  {"email": "hmc.superuser@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "superuser", "firstName": "hmc"}
 ]
