@@ -17,3 +17,5 @@ ${dir}/utils/idam-create-service.sh "ccd_data_store_api" "ccd_data_store_api" "i
 ${dir}/utils/idam-create-service.sh "ccd_case_disposer" "ccd_case_disposer" "idam_ccd_case_disposer_secret" "http://ccd-case-disposer/oauth2redirect" "false" "profile openid roles"
 
 ${dir}/utils/idam-create-service.sh "ccd_next_hearing_date_updater" "ccd_next_hearing_date_updater" "AAAAAAAAAAAAAAAA" "http://ccd-next-hearing-date-updater/oauth2redirect" "false" "profile openid roles"
+
+${dir}/utils/idam-create-service.sh "hmc_hmi_inbound_adapter" "hmc_hmi_inbound_adapter" "hmc_hmi_inbound_adapter_secret" "https://hmi-inbound-adapter/oauth2redirect" "false" "profile openid roles manage-user"
