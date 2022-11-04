@@ -1,2 +1,2 @@
-operation,email,firstName,LastName,roles,status,idamResponse,idamUserJson,timestamp,user exists,result,pre-requisite,comment (not included in the actual csv file)
-add,ccd.test.user0@hmcts.gov.uk,fn1,ln1,,,,,,FALSE,FAILED,,User not found. Roles are mandatory
+operation,email,firstName,lastName,roles,userExists,result,prerequisite,comment
+add,ccd.test.user0@hmcts.gov.uk,fn1,ln1,,FALSE,FAILED,,User not found. Roles are mandatory
