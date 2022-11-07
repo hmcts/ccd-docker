@@ -773,14 +773,14 @@ function process_input_file() {
           fi
 
           if [ "$icount" -gt 0 ]; then
-            log_warn "action: ${operation}, email: ${email} , status: ${strReason}"
+            log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${strReason}"
           fi
         fi
 
         if [ "$operation" == "updatename" ]; then
           local strReason="the following fields were provided but are not required: roles"
           if [[ "$strRolesFromCSV" != "null" ]]; then
-            log_warn "action: ${operation}, email: ${email} , status: ${strReason}"
+            log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${strReason}"
           fi
         fi
 
@@ -1012,9 +1012,9 @@ function process_input_file() {
               submit_response=$(update_user "${userId}" "${body}")
 
               if [[ "$submit_response" == *"$email"* ]]; then
-                log_warn "email: ${email} - SUCCESS, user active state set to true"
+                log_warn "file: ${filename} , email: ${email} - SUCCESS, user active state set to true"
               else
-                log_error "email: ${email} - FAILED, user active state could not be set"
+                log_error "file: ${filename} , email: ${email} - FAILED, user active state could not be set"
               fi
             fi
 
@@ -1093,7 +1093,7 @@ function process_input_file() {
               inviteStatus="SKIPPED"
               local reason="required roles are already assigned, no role amendments required"
               responseMessage="INFO: $reason"
-              log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
             fi
           fi
@@ -1158,7 +1158,7 @@ function process_input_file() {
               inviteStatus="SKIPPED"
               local reason="no changes in firstname/lastname detected, nothing to update"
               responseMessage=$reason
-              log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
             fi
           else
@@ -1167,7 +1167,7 @@ function process_input_file() {
             inviteStatus="SKIPPED"
             local reason="User exists but not active"
             responseMessage=$reason
-            log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+            log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
           fi
 
@@ -1182,7 +1182,7 @@ function process_input_file() {
           inviteStatus="SKIPPED"
           local reason="User does not exist, cannot process $operation operation"
           responseMessage=$reason
-          log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+          log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
           echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
 
           # prepare output (NB: escape generated values for CSV)
@@ -1289,10 +1289,10 @@ function process_input_file() {
                 submit_response=$(update_user "${userId}" "${body}")
 
                 if [[ "$submit_response" == *"$email"* ]]; then
-                  log_warn "email: ${email} - SUCCESS, user active state set to false"
+                  log_warn "file: ${filename} , email: ${email} - SUCCESS, user active state set to false"
                   responseMessage="WARN: user active state set to false"
                 else
-                  log_error "email: ${email} - FAILED, user active state could not be set"
+                  log_error "file: ${filename} , email: ${email} - FAILED, user active state could not be set"
                 fi
               fi
             else
@@ -1313,7 +1313,7 @@ function process_input_file() {
                 if [ $inviteStatus == "SUCCESS" ]; then
                   addedCounter=$((addedCounter+1))
                   local reason="role $csvRole successfully removed"
-                  log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                  log_info "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
                 else
                   # FAIL:
                   failedToAddCounter=$((failedToAddCounter+1))
@@ -1327,7 +1327,7 @@ function process_input_file() {
                 inviteStatus="SKIPPED"
                 local reason="None of the roles defined are currently assigned to the user"
                 responseMessage=$reason
-                log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
                 echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
               elif [ "$failedToAddCounter" -gt 0 ] && [ "$addedCounter" -gt 0 ]; then
                 # FAIL:
@@ -1346,7 +1346,7 @@ function process_input_file() {
                 local reason="All specified roles were successfully removed from the user"
                 responseMessage=$reason
                 echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
-                log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                log_info "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               else
                 # FAIL:
                 fail_counter=$((fail_counter+1))
@@ -1363,7 +1363,7 @@ function process_input_file() {
             inviteStatus="SKIPPED"
             local reason="User exists but not active"
             responseMessage=$reason
-            log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+            log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
           fi
 
@@ -1381,7 +1381,7 @@ function process_input_file() {
         local reason="Request already processed previously"
         responseMessage=$reason
         echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
-        log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+        log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
 
         # prepare output
         input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -1476,7 +1476,7 @@ function addPreDefinedRolesToCSVRoles {
             fi
         done
         if [ $found -eq 0 ]; then
-            log_error "${csvRole} not defined in configuration file"
+            log_error "file: ${filename} , ${csvRole} not defined in configuration file"
         fi
     else
         finalRoles+=("${csvRole}")
