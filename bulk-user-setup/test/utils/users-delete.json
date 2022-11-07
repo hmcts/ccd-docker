@@ -1,0 +1,13 @@
+[
+  {"email": "ccd.test.user1@hmcts.gov.uk", "roles": "caseworker", "lastName": "ln1", "firstName": "fn1"},
+  {"email": "ccd.test.user2@hmcts.gov.uk", "roles": "caseworker,caseworker-role-two", "lastName": "ln2", "firstName": "fn2"},
+  {"email": "ccd.test.user3@hmcts.gov.uk", "roles": " caseworker,caseworker-role-three,caseworker-role-four", "lastName": "ln3", "firstName": "fn3"},
+  {"email": "ccd.test.user4@hmcts.gov.uk", "roles": "caseworker,caseworker-role-four,payment", "lastName": "ln4", "firstName": "fn4"},
+  {"email": "ccd.test.user5@hmcts.gov.uk", "roles": "caseworker", "lastName": "ln5", "firstName": "fn5"},
+  {"email": "ccd.test.user6@hmcts.gov.uk", "roles": "caseworker,caseworker-role-five,caseworker-role-six", "lastName": "ln6", "firstName": "fn6"},
+  {"email": "ccd.test.user7@hmcts.gov.uk", "roles": "caseworker,caseworker-role-five", "lastName": "ln7", "firstName": "fn7"},
+  {"email": "ccd.test.user8@hmcts.gov.uk", "roles": "caseworker", "lastName": "ln8", "firstName": "fn8"},
+  {"email": "ccd.test.user9@hmcts.gov.uk", "roles": "caseworker", "lastName": "ln9", "firstName": "fn9"},
+  {"email": "ccd.test.user10@hmcts.gov.uk", "roles": "caseworker-role-two,caseworker,caseworker-ia,caseworker-ia-admofficer,caseworker-ia-bails,caseworker-ia-caseofficer,caseworker-ia-homeofficeapc,caseworker-ia-homeofficebail,caseworker-ia-homeofficelart,caseworker-ia-homeofficepou,caseworker-ia-iacjudge,caseworker-ia-judiciary,caseworker-ia-legalrep-solicitor,caseworker-ia-readonly,caseworker-ia-respondentofficer,caseworker-ia-srcaseofficer,caseworker-ia-system,caseworker-ia-system-access,caseworker-iac-bulkscan,caseworker-iac-systemupdate", "lastName": "ln10", "firstName": "fn10"},
+  {"email": "ccd.test.user11@hmcts.gov.uk", "roles": "caseworker-role-two,caseworker,caseworker-ia,caseworker-ia-admofficer,caseworker-ia-bails,caseworker-ia-caseofficer,caseworker-ia-homeofficeapc,caseworker-ia-homeofficebail,caseworker-ia-homeofficelart,caseworker-ia-homeofficepou,caseworker-ia-iacjudge,caseworker-ia-judiciary,caseworker-ia-legalrep-solicitor,caseworker-ia-readonly,caseworker-ia-respondentofficer,caseworker-ia-srcaseofficer,caseworker-ia-system,caseworker-ia-system-access,caseworker-iac-bulkscan,caseworker-iac-systemupdate", "lastName": "ln11", "firstName": "fn11"}
+]

@@ -37,8 +37,6 @@ The CSV input file must contain the following *mandatory* elements, including a 
 | lastName     | **Depends on operation** | Last name of the user.                                              |
 | roles        | **Depends on operation** | A pipe delimited list of roles for the user to be added or removed. |
 | status       | (output)                 | Status of operation, e.g. `SUCCESS`, `HTTP-404`, etc.               |
-| idamResponse | (output)                 | JSON response from API.                                             |
-| timestamp    | (output)                 | Time of API call for user record.                                   |
 
 > Note: The field headings are case-sensitive but the order of the columns is not important. Any additional columns
   will be ignored by the process.
@@ -66,11 +64,15 @@ Run the following scripts to create client and required users and roles for loca
 
 Before running below script make sure input csv files copied to  bulk-user-setup/test/inputs folder. After running the 
 below script files that are copied to bulk-user-setup/test/inputs will be processed. 
-Generated output files, copy of input files will be copied to bulk-user-setup/test/outputs/{Date} folder.
+Generated output files and backup of input files will be copied to ../outputs/{DateTime} (i.e. /bulk-user-setup/test/outputs/{DateTime}) folder.
 
 sh ./bulk-user-setup.sh 
 
-We don't need to pass any parameters as it takes default values for local.
+When running the script you will be prompted for which environment to use (default being 'local'). This translates to the idam api url to use i.e.:
+
+prod = https://idam-api.platform.hmcts.net
+local = http://localhost:5000
+other = https://idam-api.${other}.platform.hmcts.net
 
 ## Production setup / user guide
 
