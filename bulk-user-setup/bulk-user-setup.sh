@@ -391,6 +391,46 @@ function get_user_roles() {
 
 }
 
+function get_roles() {
+
+  curl_result=$(
+    curl -w $"\n%{http_code}" --silent -X GET "${IDAM_URL}/roles" -H "accept: */*" -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
+  )
+
+  exit_code=$?
+  if [ $exit_code -eq 0 ]; then
+
+    # seperate body and status into an array
+    IFS=$'\n' response_array=($curl_result)
+
+    array_length=${#response_array[@]}
+    if [ $array_length -eq 1 ]; then
+      response_body='' # clear body
+      response_status=${response_array[0]}
+    else
+      response_body=${response_array[0]}
+      response_status=${response_array[${array_length}-1]}
+    fi
+
+    if [ $(( response_status )) -gt 199 ] && [ $(( response_status )) -lt 300 ]; then
+      # SUCCESS:
+      response=${response_body}
+    else
+      # FAIL:
+      response="HTTP-${response_status}
+      ${response_body}"
+      echo "HTTP-${response_status}
+      ERROR: Request for get roles failed with http response: HTTP-${response_status}"
+    fi
+  else
+    # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
+    response="CURL-${exit_code}
+    ERROR: Request for get roles failed with curl exit code: ${exit_code}"
+  fi
+  echo "$response"
+
+}
+
 function update_user() {
   local USERID=$1
   local USERBODY=$2
@@ -587,7 +627,7 @@ function convert_input_file_to_json() {
           "operation": .operation,
           "roles": .roles,
           "status": .status,
-          "idamResponse": .idamResponse,
+          "responseMessage": .responseMessage,
           "idamUserJson": .idamUserJson,
           "timestamp": .timestamp
         }
@@ -638,7 +678,7 @@ function process_input_file() {
      exit 1
     fi
     # write headers to output file
-    echo "operation,email,firstName,lastName,roles,status,idamResponse,is_active,last_modified,timestamp" >> "$filepath_output_newpath"
+    echo "operation,email,firstName,lastName,roles,status,responseMessage,isActive,lastModified" >> "$filepath_output_newpath"
 
   # strip JSON into individual items then process in a while loop
   echo $json | jq -r -c '.[]' \
@@ -744,32 +784,30 @@ function process_input_file() {
           fi
         fi
 
-        local is_active=" "
-        local last_modified=" "
-
+        local isActive=" "
+        local lastModified=" "
 
         if [ $(contains "${OPS[@]}" "${operation}") == "n" ]; then
 
           # FAIL:
           fail_counter=$((fail_counter+1))
           local reason="Operation '${operation}' not recognised, valid operations are: ${OPS[@]}"
-          idamResponse=$reason
+          responseMessage=$reason
           inviteStatus="FAILED"
           log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
           echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}${reason}${NORMAL}"
 
           # prepare output (NB: escape generated values for CSV)
-          "operation,email,firstName,lastName,roles,status,idamResponse,is_active,last_modified,timestamp"
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
-          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$is_active\",\"$last_modified\",\"$timestamp\""
+          output_csv="$input_csv,\"$inviteStatus\",\"${responseMessage//\"/\"\"}\",\"$isActive\",\"$lastModified\""
 
         elif ([ $(echo ""$rolesFromCSV | jq -e '. | length') == 0 ]) && ([ "$operation" == "add" ] || [ "$operation" == "delete" ]); then
 
             # FAIL:
             fail_counter=$((fail_counter+1))
             local reason="No roles defined"
-            idamResponse=$reason
+            responseMessage="ERROR: $reason"
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
@@ -777,14 +815,14 @@ function process_input_file() {
             # prepare output (NB: escape generated values for CSV)
             input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
             timestamp=$(date -u +"%FT%H:%M:%SZ")
-            output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$is_active\",\"$last_modified\",\"$timestamp\""
+            output_csv="$input_csv,\"$inviteStatus\",\"${responseMessage//\"/\"\"}\",\"$isActive\",\"$lastModified\""
 
         elif ([ $(validateRoleString "${strRolesFromCSV}") -eq 0 ]) && ([ "$operation" == "add" ] || [ "$operation" == "delete" ]); then
 
             # FAIL:
             fail_counter=$((fail_counter+1))
             local reason="Roles defined contain invalid characters"
-            idamResponse=$reason
+            responseMessage=$reason
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
@@ -792,13 +830,13 @@ function process_input_file() {
             # prepare output (NB: escape generated values for CSV)
             input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
             timestamp=$(date -u +"%FT%H:%M:%SZ")
-            output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$is_active\",\"$last_modified\",\"$timestamp\""
+            output_csv="$input_csv,\"$inviteStatus\",\"${responseMessage//\"/\"\"}\",\"$isActive\",\"$lastModified\""
 
         elif ! $(validateEmailAddress "${email}"); then
 
           fail_counter=$((fail_counter+1))
           local reason="Invalid email detected"
-          idamResponse=$reason
+          responseMessage=$reason
           inviteStatus="FAILED"
           log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
           echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
@@ -806,13 +844,13 @@ function process_input_file() {
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
-          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$is_active\",\"$last_modified\",\"$timestamp\""
+          output_csv="$input_csv,\"$inviteStatus\",\"${responseMessage//\"/\"\"}\",\"$isActive\",\"$lastModified\""
 
         elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "find" ]; then
 
             fail_counter=$((fail_counter+1))
             local reason="user not found"
-            idamResponse=$reason
+            responseMessage=$reason
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
@@ -820,7 +858,7 @@ function process_input_file() {
             # prepare output (NB: escape generated values for CSV)
             input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
             timestamp=$(date -u +"%FT%H:%M:%SZ")
-            output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$is_active\",\"$last_modified\",\"$timestamp\""
+            output_csv="$input_csv,\"$inviteStatus\",\"${responseMessage//\"/\"\"}\",\"$isActive\",\"$lastModified\""
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "find" ]; then
 
@@ -831,8 +869,8 @@ function process_input_file() {
               local api_v1_user_firstname=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.forename')
               local api_v1_user_lastname=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.surname')
               local api_v1_user_roles=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.roles')
-              is_active=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.active')
-              last_modified=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.lastModified')
+              isActive=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.active')
+              lastModified=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.lastModified')
 
               local strApi_v1_user_roles=""
 
@@ -849,7 +887,9 @@ function process_input_file() {
               # SUCCESS:
               success_counter=$((success_counter+1))
               local reason="User details successfully retrieved"
-              idamResponse=$api_v1_user
+              #for success there is no need to output into the responseMessage column
+              #responseMessage=$api_v1_user
+              responseMessage=""
               inviteStatus="SUCCESS"
               log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
@@ -857,11 +897,11 @@ function process_input_file() {
               # prepare output (NB: escape generated values for CSV)
               input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email] | @csv')
               timestamp=$(date -u +"%FT%H:%M:%SZ")
-              output_csv="$input_csv,\"$api_v1_user_firstname\",\"$api_v1_user_lastname\",\"$strApi_v1_user_roles\",\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$is_active\",\"$last_modified\",\"$timestamp\""
+              output_csv="$input_csv,\"$api_v1_user_firstname\",\"$api_v1_user_lastname\",\"$strApi_v1_user_roles\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\",\"$isActive\",\"$lastModified\""
             else
               fail_counter=$((fail_counter+1))
               local reason="User not found using api/v1/users?query=email:"${email}" endpoint"
-              idamResponse=$reason
+              responseMessage=$reason
               inviteStatus="FAILED"
               log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
@@ -869,7 +909,7 @@ function process_input_file() {
               # prepare output (NB: escape generated values for CSV)
               input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
               timestamp=$(date -u +"%FT%H:%M:%SZ")
-              output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$is_active\",\"$last_modified\",\"$timestamp\""
+              output_csv="$input_csv,\"$inviteStatus\",\"${responseMessage//\"/\"\"}\",\"$isActive\",\"$lastModified\""
             fi
         elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "add" ]; then
 
@@ -878,8 +918,8 @@ function process_input_file() {
           if [ "$firstName" == "null" ] && [ "$lastName" == "null" ]; then
             # FAIL:
             fail_counter=$((fail_counter+1))
-            local reason="both firstName and lastName cannot be empty"
-            idamResponse=$reason
+            local reason="ERROR: both firstName and lastName cannot be empty"
+            responseMessage=$reason
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
@@ -888,7 +928,7 @@ function process_input_file() {
               # FAIL:
               fail_counter=$((fail_counter+1))
               local reason="One or more roles defined cannot be assigned using this script"
-              idamResponse=$reason
+              responseMessage="ERROR: $reason"
               inviteStatus="FAILED"
               log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
@@ -925,11 +965,12 @@ function process_input_file() {
               IFS=$'\n'
               local response_array=($submit_response)
               local inviteStatus=${response_array[0]}
-              local idamResponse=${response_array[1]}
+              local responseMessage=${response_array[1]}
 
               if [ $inviteStatus == "SUCCESS" ]; then
                 # SUCCESS:
                 success_counter=$((success_counter+1))
+                lastModified=$(date -u +"%FT%H:%M:%SZ")
                 local reason="user successfully registered"
                 log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
                 echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
@@ -938,8 +979,8 @@ function process_input_file() {
                 fail_counter=$((fail_counter+1))
                 local reason="failed registering user"
                 inviteStatus="FAILED"
-                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse}"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
+                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
+                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
               fi
             fi
           fi
@@ -947,7 +988,7 @@ function process_input_file() {
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
-          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$is_active\",\"$last_modified\",\"$timestamp\""
+          output_csv="$input_csv,\"$inviteStatus\",\"${responseMessage//\"/\"\"}\",\"$isActive\",\"$lastModified\""
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "add" ]; then
 
@@ -957,7 +998,7 @@ function process_input_file() {
             # FAIL:
             fail_counter=$((fail_counter+1))
             local reason="One or more roles defined cannot be assigned using this script"
-            idamResponse=$reason
+            responseMessage="ERROR: $reason"
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
@@ -1029,10 +1070,11 @@ function process_input_file() {
               IFS=$'\n'
               local response_array=($submit_response)
               local inviteStatus=${response_array[0]}
-              local idamResponse=${response_array[1]}
+              local responseMessage=${response_array[1]}
               if [ $inviteStatus == "SUCCESS" ]; then
                 # SUCCESS:
                 success_counter=$((success_counter+1))
+                lastModified=$(date -u +"%FT%H:%M:%SZ")
                 inviteStatus="SUCCESS"
                 local reason="role(s) successfully assigned"
                 echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason"
@@ -1042,15 +1084,15 @@ function process_input_file() {
                 fail_counter=$((fail_counter+1))
                 inviteStatus="FAILED"
                 local reason="failed assigning one or more roles"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
-                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse}"
+                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
               fi
             else
               # SKIP:
               skipped_counter=$((skipped_counter+1))
               inviteStatus="SKIPPED"
               local reason="required roles are already assigned, no role amendments required"
-              idamResponse=$reason
+              responseMessage="INFO: $reason"
               log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
             fi
@@ -1059,7 +1101,7 @@ function process_input_file() {
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
-          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$is_active\",\"$last_modified\",\"$timestamp\""
+          output_csv="$input_csv,\"$inviteStatus\",\"${responseMessage//\"/\"\"}\",\"$isActive\",\"$lastModified\""
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "updatename" ]; then
 
@@ -1071,7 +1113,7 @@ function process_input_file() {
                 # FAIL:
                 fail_counter=$((fail_counter+1))
                 local reason="both firstName and lastName cannot be empty"
-                idamResponse=$reason
+                responseMessage="ERROR: $reason"
                 inviteStatus="FAILED"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
                 echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
@@ -1092,10 +1134,11 @@ function process_input_file() {
                 IFS=$'\n'
                 local response_array=($submit_response)
                 local inviteStatus=${response_array[0]}
-                local idamResponse=${response_array[1]}
+                local responseMessage=${response_array[1]}
                 if [[ "$submit_response" == *"$email"* ]]; then
                   # SUCCESS:
                   success_counter=$((success_counter+1))
+                  lastModified=$(date -u +"%FT%H:%M:%SZ")
                   inviteStatus="SUCCESS"
                   local reason="user firstname/lastname successfully updated"
                   log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
@@ -1106,7 +1149,7 @@ function process_input_file() {
                   inviteStatus="FAILED"
                   local reason="failed updating user firstname/lastname"
                   log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-                  echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
+                  echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
                 fi
               fi
             else
@@ -1114,7 +1157,7 @@ function process_input_file() {
               skipped_counter=$((skipped_counter+1))
               inviteStatus="SKIPPED"
               local reason="no changes in firstname/lastname detected, nothing to update"
-              idamResponse=$reason
+              responseMessage=$reason
               log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
             fi
@@ -1123,7 +1166,7 @@ function process_input_file() {
             skipped_counter=$((skipped_counter+1))
             inviteStatus="SKIPPED"
             local reason="User exists but not active"
-            idamResponse=$reason
+            responseMessage=$reason
             log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
           fi
@@ -1131,21 +1174,21 @@ function process_input_file() {
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
-          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$is_active\",\"$last_modified\",\"$timestamp\""
+          output_csv="$input_csv,\"$inviteStatus\",\"${responseMessage//\"/\"\"}\",\"$isActive\",\"$lastModified\""
 
         elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "delete" ] || [ "$operation" == "updatename" ]; then
 
           skipped_counter=$((skipped_counter+1))
           inviteStatus="SKIPPED"
           local reason="User does not exist, cannot process $operation operation"
-          idamResponse=$reason
+          responseMessage=$reason
           log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
           echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
 
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
-          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$is_active\",\"$last_modified\",\"$timestamp\""
+          output_csv="$input_csv,\"$inviteStatus\",\"${responseMessage//\"/\"\"}\",\"$isActive\",\"$lastModified\""
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "delete" ]; then
 
@@ -1219,14 +1262,15 @@ function process_input_file() {
               IFS=$'\n'
               local response_array=($submit_response)
               local inviteStatus=${response_array[0]}
-              local idamResponse=${response_array[1]}
+              local responseMessage=${response_array[1]}
 
               if [ $inviteStatus == "SUCCESS" ]; then
                 # SUCCESS:
                 success_counter=$((success_counter+1))
+                lastModified=$(date -u +"%FT%H:%M:%SZ")
                 inviteStatus="SUCCESS"
-                local reason="All roles successfully unassigned"
-                idamResponse=$reason
+                local reason="All specified roles were successfully removed from the user"
+                responseMessage=" "
                 echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
                 log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               else
@@ -1234,8 +1278,8 @@ function process_input_file() {
                 fail_counter=$((fail_counter+1))
                 inviteStatus="FAILED"
                 local reason="failed removing all roles"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${idamResponse}${NORMAL}"
-                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse}"
+                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
               fi
 
               #Set user activate state to false
@@ -1246,6 +1290,7 @@ function process_input_file() {
 
                 if [[ "$submit_response" == *"$email"* ]]; then
                   log_warn "email: ${email} - SUCCESS, user active state set to false"
+                  responseMessage="WARN: user active state set to false"
                 else
                   log_error "email: ${email} - FAILED, user active state could not be set"
                 fi
@@ -1263,7 +1308,7 @@ function process_input_file() {
                 IFS=$'\n'
                 local response_array=($submit_response)
                 local inviteStatus=${response_array[0]}
-                local idamResponse=${response_array[1]}
+                local responseMessage=${response_array[1]}
 
                 if [ $inviteStatus == "SUCCESS" ]; then
                   addedCounter=$((addedCounter+1))
@@ -1273,7 +1318,7 @@ function process_input_file() {
                   # FAIL:
                   failedToAddCounter=$((failedToAddCounter+1))
                   local reason="failed removing role $csvRole"
-                  log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${idamResponse}"
+                  log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
                 fi
               done
 
@@ -1281,23 +1326,25 @@ function process_input_file() {
                 skipped_counter=$((skipped_counter+1))
                 inviteStatus="SKIPPED"
                 local reason="None of the roles defined are currently assigned to the user"
-                idamResponse=$reason
+                responseMessage=$reason
                 log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
                 echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
               elif [ "$failedToAddCounter" -gt 0 ] && [ "$addedCounter" -gt 0 ]; then
                 # FAIL:
                 fail_counter=$((fail_counter+1))
+                lastModified=$(date -u +"%FT%H:%M:%SZ")
                 inviteStatus="PARTIALLY-FAILED"
                 local reason="Some roles could not be unassigned, please check logs for further information"
-                idamResponse=$reason
+                responseMessage=$reason
                 echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
               elif [ "$failedToAddCounter" -eq 0 ] && [ "$addedCounter" -gt 0 ]; then
                 # SUCCESS:
                 success_counter=$((success_counter+1))
+                lastModified=$(date -u +"%FT%H:%M:%SZ")
                 inviteStatus="SUCCESS"
-                local reason="All roles successfully unassigned"
-                idamResponse=$reason
+                local reason="All specified roles were successfully removed from the user"
+                responseMessage=$reason
                 echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
                 log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               else
@@ -1305,7 +1352,7 @@ function process_input_file() {
                 fail_counter=$((fail_counter+1))
                 inviteStatus="FAILED"
                 local reason="Roles could not be unassigned, please check logs for further information"
-                idamResponse=$reason
+                responseMessage=$reason
                 echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
               fi
@@ -1315,7 +1362,7 @@ function process_input_file() {
             skipped_counter=$((skipped_counter+1))
             inviteStatus="SKIPPED"
             local reason="User exists but not active"
-            idamResponse=$reason
+            responseMessage=$reason
             log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
           fi
@@ -1323,7 +1370,7 @@ function process_input_file() {
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
-          output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$is_active\",\"$last_modified\",\"$timestamp\""
+          output_csv="$input_csv,\"$inviteStatus\",\"${responseMessage//\"/\"\"}\",\"$isActive\",\"$lastModified\""
 
         fi
 
@@ -1332,14 +1379,14 @@ function process_input_file() {
         # SKIP:
         skipped_counter=$((skipped_counter+1))
         local reason="Request already processed previously"
-        idamResponse=$reason
+        responseMessage=$reason
         echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
         log_warn "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
 
         # prepare output
         input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
         timestamp=$(date -u +"%FT%H:%M:%SZ")
-        output_csv="$input_csv,\"$inviteStatus\",\"${idamResponse//\"/\"\"}\",\"$is_active\",\"$last_modified\",\"$timestamp\""
+        output_csv="$input_csv,\"$inviteStatus\",\"${responseMessage//\"/\"\"}\",\"$isActive\",\"$lastModified\""
 
       fi
 
@@ -1356,7 +1403,6 @@ else
   echo $json
 
 fi
-
 
   # copy output file back to original input file location so it can be used for re-run
   # not required as original input directory is now looped through recursively
