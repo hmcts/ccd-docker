@@ -1,5 +1,5 @@
 operation,email,firstName,lastName,roles,userExists,result,prerequisite,comment
-find,ccd.test.user0@hmcts.gov.uk,,,,FALSE,FAIL,user does not exist,
-find,ccd.test.user1@hmcts.gov.uk,,,,TRUE,SUCCESS,"output file will populate firstname/lastname, roles, active status, last modified etc",
-find,ccd.test.user2@hmcts.gov.uk,fn1,Ln1,caseworker,TRUE,SUCCESS,"populate cells from api, warn log as firstname/lastname/roles provided but not needed",
-find,ccd.test.user3@hmcts.gov.uk,,,,TRUE,SUCCESS,user is inactive,
+find,ccd.test.user0@hmcts.gov.uk,,,,FALSE,FAILED,user does not exist,
+find,ccd.test.add.user1@hmcts.gov.uk,,,,TRUE,SUCCESS,"output file will populate firstname/lastname, roles, active status, last modified etc",
+find,ccd.test.add.user2@hmcts.gov.uk,fn1,Ln1,caseworker,TRUE,SUCCESS,"populate cells from api, warn log as firstname/lastname/roles provided but not needed",
+find,ccd.test.add.user3@hmcts.gov.uk,,,,TRUE,SUCCESS,user is inactive,

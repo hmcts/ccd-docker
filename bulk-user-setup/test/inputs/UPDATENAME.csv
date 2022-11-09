@@ -1,5 +1,5 @@
 operation,email,firstName,lastName,roles,userExists,result,prerequisite,comment
-updatename,ccd.test.user1@hmcts.gov.uk,fn1-2,ln1-2,manage-translations|caseworker|somerole,TRUE,SUCCESS,user exists with fn1 and ln1,ignore the roles if specified - put a warning log
+updatename,ccd.test.updatename.user1@hmcts.gov.uk,fn1-2,ln1-2,manage-translations|caseworker|somerole,TRUE,SUCCESS,user exists with fn1 and ln1,ignore the roles if specified - put a warning log
 updatename,ccd.test.user0@hmcts.gov.uk,fn1,ln1,,FALSE,SKIPPED,user does not exist,user does not exist
 updatename,ccd.test.user1@hmcts.gov.uk,fn1-2,ln1-2,,TRUE,SKIPPED,user exists with fn1-2 and ln1-2,nothing to change
 updatename,ccd.test.user1@hmcts.gov.uk,fn1-3,,,TRUE,SUCCESS,user exists,change first name

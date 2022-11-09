@@ -629,7 +629,8 @@ function convert_input_file_to_json() {
           "status": .status,
           "responseMessage": .responseMessage,
           "idamUserJson": .idamUserJson,
-          "timestamp": .timestamp
+          "timestamp": .timestamp,
+          "result": .result
         }
       })' ) # NB: extraCsvData element included in JSON to help preserve csv data when skipping an already complete record (i.e. inviteStatus="success")
 
@@ -683,7 +684,7 @@ function process_input_file() {
   # strip JSON into individual items then process in a while loop
   echo $json | jq -r -c '.[]' \
       |  \
-  ( success_counter=0;skipped_counter=0;fail_counter=0;total_counter=0;
+  ( success_counter=0;skipped_counter=0;fail_counter=0;total_counter=0;test_pass_counter=0;test_fail_counter=0
     while IFS= read -r user; do
       total_counter=$((total_counter+1))
 
@@ -717,6 +718,8 @@ function process_input_file() {
       #inviteStatus from input CSV can take value SUCCESS
       #required so we do not send another registration request if one is already pending
       local inviteStatus=$(echo $user | jq --raw-output '.extraCsvData.status')
+
+      local result=$(echo $user | jq --raw-output '.extraCsvData.result')
 
       log_debug "==============================================="
       log_debug "processing user with email: ${email}"
@@ -1217,14 +1220,11 @@ function process_input_file() {
           for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
             for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
               #add csv role to array excluding default role
-              if [ "$csvRole" == "$apiRole" ] && [ "$csvRole" != "${DEFAULT_ROLES}" ]; then
+              if [ "$csvRole" == "$apiRole" ] && [ "$csvRole" != "${DEFAULT_CASEWORKER_ROLE}" ]; then
                 rolesToRemoveArray+=("${csvRole}")
               fi
             done
           done
-
-          #echo ${rolesFromApiArray[*]}
-          #echo ${rolesToRemoveArray[*]}
 
           #remove the roles fetched from api
           for del in "${rolesToRemoveArray[@]}"
@@ -1232,26 +1232,24 @@ function process_input_file() {
              rolesFromApiArray=(${rolesFromApiArray[@]/$del})
           done
 
-          local array_count=${#rolesFromApiArray[@]}
-
-          #echo ${rolesFromApiArray[*]}
-
           local USE_PUT=0
 
           #Below code is to delete caseworker role is there are no other service specific roles available
-          local otherServieRole=false
+          local otherServiceRole=false
           for role in "${rolesFromApiArray[@]}"
           do
               if [ "${role}" == "${DEFAULT_CASEWORKER_ROLE}-*" ] && [$otherServieRole == false ] ; then
-                  otherServieRole=true
+                  otherServiceRole=true
               fi
           done
-          if [  $otherServieRole==false ]; then
+          if [  $otherServiceRole==false ]; then
               rolesFromApiArray=(${rolesFromApiArray[@]/${DEFAULT_CASEWORKER_ROLE}})
           fi
 
+          local array_count=${#rolesFromApiArray[@]}
+
           if [ $array_count == 1 ]; then
-            if [  "${rolesFromApiArray[0]}" == "${DEFAULT_ROLES}" ]; then
+            if [  "${rolesFromApiArray[0]}" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
               #after removing roles only role left is the default role
               #we can therefore use put, to set roles to an empty array
               USE_PUT=1
@@ -1352,7 +1350,7 @@ function process_input_file() {
                 lastModified=$(date -u +"%FT%H:%M:%SZ")
                 inviteStatus="SUCCESS"
                 local reason="All specified roles were successfully removed from the user"
-                responseMessage=$reason
+                responseMessage=" "
                 echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
                 log_info "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               else
@@ -1398,6 +1396,16 @@ function process_input_file() {
 
       fi
 
+      local isResultColumnPresent=0
+      if [[ "$result" != "null" ]]; then
+          isResultColumnPresent=1
+          if [ "${result}" == "${inviteStatus}" ]; then
+            test_pass_counter=$((test_pass_counter+1))
+          else
+            test_fail_counter=$((test_fail_counter+1))
+          fi
+      fi
+
       # record log of action in output file (NB: escape values for CSV)
       echo "$output_csv" >> "$filepath_output_newpath"
     done
@@ -1405,6 +1413,16 @@ function process_input_file() {
     log_debug "End - processing input file ${filepath_input_original}"
 
     echo "Process is complete: ${GREEN}success: ${success_counter}${NORMAL}, ${YELLOW}skipped: ${skipped_counter}${NORMAL}, ${RED}fail: ${fail_counter}${NORMAL}, total: ${total_counter}"
+
+    if [ "$isResultColumnPresent" -eq 1 ]; then
+        if [ "$test_pass_counter" -gt 0 ] && [ "$test_fail_counter" -eq 0 ]; then
+            echo "**** ${GREEN}ALL TESTS PASSED${NORMAL} ****"
+        elif [ "$test_pass_counter" -eq 0 ] && [ "$test_fail_counter" -gt 0 ]; then
+            echo "**** ${RED}ALL TESTS FAILED${NORMAL} ****"
+        else
+            echo "**** ${YELLOW}NOT ALL TESTS PASSED${NORMAL} ****"
+        fi
+    fi
   )
 
 else
