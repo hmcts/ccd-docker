@@ -1199,6 +1199,16 @@ function process_input_file() {
           timestamp=$(date -u +"%FT%H:%M:%SZ")
           output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
 
+        elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "delete" ] && [ $(checkAllowedRole "${rolesFromCSV}" "${MANUAL_ROLES}") -eq 1 ]; then
+
+          # FAIL:
+          fail_counter=$((fail_counter+1))
+          local reason="One or more roles defined cannot be assigned using this script"
+          responseMessage="ERROR: $reason"
+          inviteStatus="FAILED"
+          log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
+          echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "delete" ]; then
 
           log_debug "email: ${email} - User exists, doing deletion logic"
@@ -1238,7 +1248,7 @@ function process_input_file() {
           local otherServiceRole=false
           for role in "${rolesFromApiArray[@]}"
           do
-              if [ "${role}" == "${DEFAULT_CASEWORKER_ROLE}-*" ] && [$otherServieRole == false ] ; then
+              if [ "${role}" == "${DEFAULT_CASEWORKER_ROLE}-*" ] && [$otherServiceRole == false ] ; then
                   otherServiceRole=true
               fi
           done
@@ -1248,12 +1258,13 @@ function process_input_file() {
 
           local array_count=${#rolesFromApiArray[@]}
 
-          if [ $array_count == 1 ]; then
-            if [  "${rolesFromApiArray[0]}" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
+          if [ $array_count == 0 ]; then
+            USE_PUT=1
+            #if [  "${rolesFromApiArray[0]}" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
               #after removing roles only role left is the default role
               #we can therefore use put, to set roles to an empty array
-              USE_PUT=1
-            fi
+              #USE_PUT=1
+            #fi
           fi
 
           log_debug "Assigned roles to remove: ${rolesToRemoveArray[@]}"
@@ -1377,7 +1388,6 @@ function process_input_file() {
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
           output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
-
         fi
 
       else
