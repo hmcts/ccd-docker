@@ -1415,13 +1415,18 @@ function process_input_file() {
     echo "Process is complete: ${GREEN}success: ${success_counter}${NORMAL}, ${YELLOW}skipped: ${skipped_counter}${NORMAL}, ${RED}fail: ${fail_counter}${NORMAL}, total: ${total_counter}"
 
     if [ "$isResultColumnPresent" -eq 1 ]; then
+        local testResult=""
         if [ "$test_pass_counter" -gt 0 ] && [ "$test_fail_counter" -eq 0 ]; then
             echo "**** ${GREEN}ALL TESTS PASSED${NORMAL} ****"
+            testResult="**** ALL TESTS PASSED ****"
         elif [ "$test_pass_counter" -eq 0 ] && [ "$test_fail_counter" -gt 0 ]; then
             echo "**** ${RED}ALL TESTS FAILED${NORMAL} ****"
+            testResult="**** ALL TESTS FAILED ****"
         else
             echo "**** ${YELLOW}NOT ALL TESTS PASSED${NORMAL} ****"
+            testResult="**** NOT ALL TESTS PASSED ****"
         fi
+        log_info "${testResult}"
     fi
   )
 
@@ -1673,6 +1678,25 @@ function addRequiredMandatoryRole {
   echo "$rolesFromCSV"
 }
 
+function checkMasterCaseworkerRoles
+{
+    IFS=$'\n' read -d '' -r -a lines < ./caseworker-roles-master.txt
+    for line in "${lines[@]}"
+    do
+        echo "${line}"
+    done
+
+    local rawRoles=$(get_roles)
+
+    for role in $(echo "${rawRoles}" | jq -r '.[]'); do
+    #    if [ $csvRole == $apiRole ]; then
+    #      found=1
+    #      log_debug "email: ${email}, role: $csvRole  - already assigned"
+    #    fi
+    echo "something"
+    done
+}
+
 function jumpto
 {
     label=$1
@@ -1748,6 +1772,10 @@ process_folder_recurse() {
       time process_input_file "${i}"
     fi
   done
+
+  #final task is to check and report on missing caseworker-roles by comparing
+  #api results to local master file
+
 }
 
 read -p $'\nPlease enter environment (default is local): ' ENV
@@ -1791,6 +1819,9 @@ then
     echo "${RED}ERROR: Problem getting idam token for admin user:${NORMAL} $ADMIN_USER"
     exit 1
 fi
+
+#checkMasterCaseworkerRoles
+#exit 0
 
 # read csv(s) and call curl in a loop for each record
 process_folder_recurse "${CSV_DIR_PATH}"
