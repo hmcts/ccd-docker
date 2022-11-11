@@ -59,11 +59,14 @@ Run the following scripts to create client and required users and roles for loca
 ./test/utils/add-idam-clients.sh
 
 ./test/utils/add-idam-roles.sh
+(Roles to be added are defined in the file: roles.json)
 
 ./test/utils/add-users.sh
+(Users to be added are defined in the file: users.json. Please ensure roles are created before assigning to users via the add-users.sh 
+script. To add a user without any roles, pass the roles as "''" as can be seen in the example file included in this repo.)
 
-Before running below script make sure input csv files copied to  bulk-user-setup/test/inputs folder. After running the 
-below script files that are copied to bulk-user-setup/test/inputs will be processed. 
+Before running the main script make sure the input csv file(s) are copied to bulk-user-setup/test/inputs folder. 
+After running the below script files that are copied to bulk-user-setup/test/inputs will be processed. 
 Generated output files and backup of input files will be copied to ../outputs/{DateTime} (i.e. /bulk-user-setup/test/outputs/{DateTime}) folder.
 
 sh ./bulk-user-setup.sh 
