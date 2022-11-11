@@ -100,7 +100,7 @@ recreate_user() {
   deleteResponse=$(delete_user_request)
   if [[ "$deleteResponse" -ne 200 && "$deleteResponse" -ne 204 ]]; then
       printf "%s%s\n" "Unexpected HTTP status code from IDAM: " "${deleteResponse}"
-      exit 1
+      #exit 1
   elif [[ "$deleteResponse" -eq 404 ]]; then
       printf "%s%s%s\n" "User " "${email}" " doesn't exist"
   elif [[ "$deleteResponse" -eq 200 ]]; then
@@ -225,6 +225,7 @@ rolesStr=${2}
 surname=${3:-"Tester"}
 firstName=${4:-${email}}
 active=${5:-"true"}
+
 
 IFS=',' read -ra roles <<<"${rolesStr}"
 

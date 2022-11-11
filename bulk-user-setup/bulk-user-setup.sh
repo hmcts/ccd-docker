@@ -806,6 +806,20 @@ function process_input_file() {
           timestamp=$(date -u +"%FT%H:%M:%SZ")
           output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
 
+        elif ! $(validateEmailAddress "${email}"); then
+
+          fail_counter=$((fail_counter+1))
+          local reason="Invalid email detected"
+          responseMessage=$reason
+          inviteStatus="FAILED"
+          log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
+          echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+
+          # prepare output (NB: escape generated values for CSV)
+          input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+          timestamp=$(date -u +"%FT%H:%M:%SZ")
+          output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
+
         elif ([ $(echo ""$rolesFromCSV | jq -e '. | length') == 0 ]) && ([ "$operation" == "add" ] || [ "$operation" == "delete" ]); then
 
             # FAIL:
@@ -835,20 +849,6 @@ function process_input_file() {
             input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
             timestamp=$(date -u +"%FT%H:%M:%SZ")
             output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
-
-        elif ! $(validateEmailAddress "${email}"); then
-
-          fail_counter=$((fail_counter+1))
-          local reason="Invalid email detected"
-          responseMessage=$reason
-          inviteStatus="FAILED"
-          log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-          echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
-
-          # prepare output (NB: escape generated values for CSV)
-          input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
-          timestamp=$(date -u +"%FT%H:%M:%SZ")
-          output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
 
         elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "find" ]; then
 
@@ -1413,6 +1413,7 @@ function process_input_file() {
             test_pass_counter=$((test_pass_counter+1))
           else
             test_fail_counter=$((test_fail_counter+1))
+            log_debug "test failed at record number: $((total_counter+1))"
           fi
       fi
 
@@ -1629,6 +1630,8 @@ function convertJsonStringArrayToLowerCase {
 
   for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
     csvRole=$(convertToLowerCase "${csvRole}")
+    #remove white space in between role
+    csvRole="${csvRole// /}"
     ARRAY+=("${csvRole}")
   done
 
@@ -1653,8 +1656,8 @@ function validateRoleString() {
   local roleString=$1
   local isValidRoleString=1
 
-  if [[ "${roleString}"  = *[!A-Za-z_\|-]* ]]; then
-    isValidRoleString=0
+  if [[ "${roleString}" = *[![:space:]A-Za-z_\|-]* ]]; then
+      isValidRoleString=0
   fi
 
   echo $isValidRoleString
