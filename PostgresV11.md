@@ -1,4 +1,4 @@
-# Postgres v11 migration steps
+# Steps to migrate existing v9.6 PostgreSQL database to v11
 
 ##  1 Pull latest ccd-docker (Mandatory)
 
@@ -65,7 +65,6 @@ select * from event;
 
 **The following steps should be done to define the micro-services dependency to the new V11 DB container**
 
-```
 1) Stop and re-start the ccd-docker.
    
    Steps to stop the old DB container.
