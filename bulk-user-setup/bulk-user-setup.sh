@@ -795,8 +795,9 @@ function process_input_file() {
 
           # FAIL:
           fail_counter=$((fail_counter+1))
-          local reason="Operation '${operation}' not recognised, valid operations are: ${OPS[@]}"
-          responseMessage=$reason
+          #local reason="Operation '${operation}' is invalid, valid operations are: ${OPS[@]}"
+          local reason="Operation '${operation}' is invalid"
+          responseMessage="ERROR: $reason"
           inviteStatus="FAILED"
           log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
           echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}${reason}${NORMAL}"
@@ -810,7 +811,7 @@ function process_input_file() {
 
           fail_counter=$((fail_counter+1))
           local reason="Invalid email detected"
-          responseMessage=$reason
+          responseMessage="ERROR: $reason"
           inviteStatus="FAILED"
           log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
           echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
@@ -840,7 +841,7 @@ function process_input_file() {
             # FAIL:
             fail_counter=$((fail_counter+1))
             local reason="Roles defined contain invalid characters"
-            responseMessage=$reason
+            responseMessage="ERROR: $reason"
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
@@ -854,7 +855,7 @@ function process_input_file() {
 
             fail_counter=$((fail_counter+1))
             local reason="user not found"
-            responseMessage=$reason
+            responseMessage="ERROR: $reason"
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
@@ -905,7 +906,7 @@ function process_input_file() {
             else
               fail_counter=$((fail_counter+1))
               local reason="User not found using api/v1/users?query=email:"${email}" endpoint"
-              responseMessage=$reason
+              responseMessage="ERROR: $reason"
               inviteStatus="FAILED"
               log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
@@ -922,8 +923,8 @@ function process_input_file() {
           if [ "$firstName" == "null" ] && [ "$lastName" == "null" ]; then
             # FAIL:
             fail_counter=$((fail_counter+1))
-            local reason="ERROR: both firstName and lastName cannot be empty"
-            responseMessage=$reason
+            local reason="both firstName and lastName cannot be empty"
+            responseMessage="ERROR: $reason"
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
@@ -1081,7 +1082,7 @@ function process_input_file() {
                   if [[ "$submit_response" == *"$email"* ]]; then
                     log_info "file: ${filename} , email: ${email} - SUCCESS, user active state set to true"
                     isActive="TRUE"
-                    responseMessage="INFO: user active state set to true"
+                    responseMessage="INFO: user has been activated"
                   else
                     log_error "file: ${filename} , email: ${email} - FAILED, user active state could not be set"
                     responseMessage="ERROR: user active state could not be set to true"
@@ -1101,7 +1102,7 @@ function process_input_file() {
               skipped_counter=$((skipped_counter+1))
               inviteStatus="SKIPPED"
               local reason="required roles are already assigned, no role amendments required"
-              responseMessage="INFO: $reason"
+              responseMessage="WARN: $reason"
               log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
             fi
@@ -1166,7 +1167,7 @@ function process_input_file() {
               skipped_counter=$((skipped_counter+1))
               inviteStatus="SKIPPED"
               local reason="no changes in firstname/lastname detected, nothing to update"
-              responseMessage=$reason
+              responseMessage="WARN: $reason"
               log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
             fi
@@ -1175,7 +1176,7 @@ function process_input_file() {
             skipped_counter=$((skipped_counter+1))
             inviteStatus="SKIPPED"
             local reason="User exists but not active"
-            responseMessage="INFO: $reason"
+            responseMessage="WARN: $reason"
             log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
           fi
@@ -1190,7 +1191,7 @@ function process_input_file() {
           skipped_counter=$((skipped_counter+1))
           inviteStatus="SKIPPED"
           local reason="User does not exist, cannot process $operation operation"
-          responseMessage="INFO: $reason"
+          responseMessage="WARN: $reason"
           log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
           echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
 
@@ -1305,7 +1306,7 @@ function process_input_file() {
 
                 if [[ "$submit_response" == *"$email"* ]]; then
                   log_warn "file: ${filename} , email: ${email} - SUCCESS, user active state set to false"
-                  responseMessage="WARN: user active state set to false"
+                  responseMessage="INFO: user has been deactivated"
                   isActive="FALSE"
                 else
                   log_error "file: ${filename} , email: ${email} - FAILED, user active state could not be set"
@@ -1343,7 +1344,7 @@ function process_input_file() {
                 skipped_counter=$((skipped_counter+1))
                 inviteStatus="SKIPPED"
                 local reason="None of the roles defined are currently assigned to the user"
-                responseMessage="INFO: $reason"
+                responseMessage="WARN: $reason"
                 log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
                 echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
               elif [ "$failedToAddCounter" -gt 0 ] && [ "$addedCounter" -gt 0 ]; then
@@ -1352,7 +1353,7 @@ function process_input_file() {
                 lastModified=$(date -u +"%FT%H:%M:%SZ")
                 inviteStatus="PARTIALLY-FAILED"
                 local reason="Some roles could not be unassigned, please check logs for further information"
-                responseMessage=$reason
+                responseMessage="ERROR: $reason"
                 echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
               elif [ "$failedToAddCounter" -eq 0 ] && [ "$addedCounter" -gt 0 ]; then
@@ -1379,7 +1380,7 @@ function process_input_file() {
             skipped_counter=$((skipped_counter+1))
             inviteStatus="SKIPPED"
             local reason="User exists but not active"
-            responseMessage="INFO: $reason"
+            responseMessage="WARN: $reason"
             log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
           fi
@@ -1395,7 +1396,7 @@ function process_input_file() {
         # SKIP:
         skipped_counter=$((skipped_counter+1))
         local reason="Request already processed previously"
-        responseMessage=$reason
+        responseMessage="WARN: $reason"
         echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
         log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
 
