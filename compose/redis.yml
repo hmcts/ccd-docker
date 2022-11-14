@@ -8,6 +8,3 @@ services:
       - 6379:6379
     networks:
       - ccd-network
-    volumes:
-      - redis-data:/data
-      - redis-conf:/usr/local/etc/redis/redis.conf
