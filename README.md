@@ -1089,6 +1089,12 @@ We will need to install the az cli using Python PIP.
 3. Execute the command "pip install azure-cli" using command line. It takes about 20 minutes to install the azure cli.
 4. Verify the installation using the command az --version.
 
+### Data store Application cache
+The env var CACHE_TYPE used to define the cache mechanism. **Distributed Redis or hazelcast**.
+We can used the env vars (CACHE_TYPE, REDIS_HOST and REDIS_PORT) to define the cache settings.
+
+CACHE_TYPE en var can be defined as redis or hazelcast
+
 ## Troubleshooting
 
 ccd-network could not be found error:
