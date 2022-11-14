@@ -1,8 +1,0 @@
-operation,email,firstName,lastName,roles,userExists,result,prerequisite,comment
-add,ccd.test.user21@hmcts.gov.uk,abc,xyz,caseworker|caseworker-role-one|caseworker-role-two,,,,
-add,ccd.test.user21@hmcts.gov.uk,,,caseworker-role-three|caseworker-role-four,,,,
-delete,ccd.test.user21@hmcts.gov.uk,,,caseworker-role-one|caseworker-role-three,,,,
-delete,ccd.test.user21@hmcts.gov.uk,,,caseworker|caseworker-role-one|caseworker-role-three|caseworker-role-two|caseworker-role-four,,,,
-find,ccd.test.user22@hmcts.gov.uk,,,,,,,
-delete,ccd.test.user22@hmcts.gov.uk,,,ia-roles,,,,
-updateName,ccd.test.user22@hmcts.gov.uk,abcd,wxyz,,,,,
