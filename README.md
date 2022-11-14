@@ -50,26 +50,28 @@ if you experience any error with the above command, try `az login` first for [Az
 
 
 3. If ccd-docker already setup and all images/volumes exists and database points to Postgres9 then prior to pulling images run the below commands to delete existing images and volumes.
+  
+   If ccd-docker not setup proceed to step 4.
 
 ```bash
 docker system prune -a --volumes
 docker rmi -f $(docker images -aq)
 ```
-   Pull latest Docker images:
-   
 
+4. Pull latest Docker images:
+   
 ```bash
 ./ccd compose pull
 ```
 
-
-4. Set up environment: 
+5. Set up environment: 
 
 Note:
 required only on the first run. Once executed, it doesn't need to be executed again
 
   a. Create docker network
-  ```bash
+  
+```bash
   ./ccd init
   ```
   
