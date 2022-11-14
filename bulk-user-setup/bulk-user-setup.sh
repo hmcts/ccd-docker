@@ -2,6 +2,8 @@
 
 source ./bulk-user-setup.config > out.log 2> /dev/null
 
+is_test=0
+
 function get_idam_url() {
     if [ "$ENV" == "prod" ]
     then
@@ -533,7 +535,7 @@ function verify_json_format_includes_field() {
 
   ## verify JSON format by checking JUST THE FIRST ITEM has the required field
   if [ $(echo $json | jq "first(.[] | has(\"${field}\"))") == false ]; then
-    echo "${RED}ERROR: Field not found in input:${NORMAL} ${field}"
+    echo "${RED}file: ${filename} ,ERROR: Field not found in input:${NORMAL} ${field}"
     log_error "file: ${filename} , ERROR: Field not found in input:${field}"
     exit 99
   fi
@@ -1694,21 +1696,24 @@ function addRequiredMandatoryRole {
 
 function checkMasterCaseworkerRoles
 {
+
     IFS=$'\n' read -d '' -r -a lines < ./caseworker-roles-master.txt
     for line in "${lines[@]}"
     do
         echo "${line}"
     done
 
-    local rawRoles=$(get_roles)
+    local rawAllRoles=$(get_roles)
 
-    for role in $(echo "${rawRoles}" | jq -r '.[]'); do
-    #    if [ $csvRole == $apiRole ]; then
-    #      found=1
-    #      log_debug "email: ${email}, role: $csvRole  - already assigned"
-    #    fi
-    echo "something"
-    done
+    if [[ $rawAllRoles != *"HTTP-"* ]]; then
+        for role in $(echo "${rawRoles}" | jq -r '.[]'); do
+            #    if [ $csvRole == $apiRole ]; then
+            #      found=1
+            #      log_debug "email: ${email}, role: $csvRole  - already assigned"
+            #    fi
+            echo "something"
+        done
+    fi
 }
 
 function jumpto
