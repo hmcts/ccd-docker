@@ -57,17 +57,18 @@ The import CSV file is renamed by the process to discourage its accidental re-us
 Run the following scripts to create client and required users and roles for local testing.
 
 1. open terminal ensuring to change directory into root folder "bulk-user-setup"
-3. execute ./test/utils/add-idam-clients.sh
-4. execute ./test/utils/add-idam-roles.sh
+2. execute ./test/utils/add-idam-clients.sh
+3. execute ./test/utils/add-idam-roles.sh
    (Roles to be added are defined in the file: roles.json)
-5. execute ./test/utils/add-users.sh
+4. execute ./test/utils/add-users.sh (note: if CREATE_TEST_USERS=1 is set in 'bulk-user-setup.config' there is no need to create the users separately as 
+   the add-users.sh script will be called from the main bulk-user-setup.sh script)
    (Users to be added are defined in the file: users.json. Please ensure roles are created before assigning to users via the add-users.sh 
     script. To add a user without any roles, pass the roles as "''" as can be seen in the example file included in this repo.)
 
    Before running the main script make sure the input csv file(s) are copied to bulk-user-setup/test/inputs folder.
    Note: In 'bulk-user-setup.config' the variable CREATE_TEST_USERS=1 implies test users will be created prior to processing any input file
-7. execute ./bulk-user-setup.sh
-   For testing in local, enter local when prompted for environment
+5. execute ./bulk-user-setup.sh
+   For testing in local, enter 'local' when prompted for environment
 
 After running the main script input files copied to bulk-user-setup/test/inputs will be processed in turn (only files with extension .csv will be considered)
 Generated output and backup of input files will be copied to ../outputs/{DateTime} (i.e. /bulk-user-setup/test/outputs/{DateTime}) folder.
