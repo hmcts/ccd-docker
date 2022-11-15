@@ -1803,6 +1803,10 @@ ENV=${ENV:-local}
 
 if [ "$ENV" == "local" ]; then
     is_test=1
+    if [ $CREATE_TEST_USERS -eq 1 ]; then
+        echo "Calling ./test/utils/add-users.sh"
+        ./test/utils/add-users.sh
+    fi
 fi
 
 if [ $is_test -eq 0 ]

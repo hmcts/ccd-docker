@@ -199,8 +199,8 @@ function update_user() {
 ######################
 ## MAIN
 ######################
-
-source ../../bulk-user-setup.config > out.log 2> /dev/null
+current_dir=$(pwd)
+source ${current_dir}/./bulk-user-setup.config > out.log 2> /dev/null
 
 set -eu
 

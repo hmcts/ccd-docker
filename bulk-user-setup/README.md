@@ -54,26 +54,35 @@ The import CSV file is renamed by the process to discourage its accidental re-us
 
 ## Local docker testing setup
 
-Run the following scripts to create client and required users and roles for local testing from bulk-user-setup directory.
+Run the following scripts to create client and required users and roles for local testing.
 
-1. open terminal ensuring to change directory into root folder bulk-user-setup
-2. cd into ./test/utils
-3. execute ./add-idam-clients.sh
-4. execute ./add-idam-roles.sh
+1. open terminal ensuring to change directory into root folder "bulk-user-setup"
+3. execute ./test/utils/add-idam-clients.sh
+4. execute ./test/utils/add-idam-roles.sh
    (Roles to be added are defined in the file: roles.json)
-5. execute ./add-users.sh
+5. execute ./test/utils/add-users.sh
    (Users to be added are defined in the file: users.json. Please ensure roles are created before assigning to users via the add-users.sh 
     script. To add a user without any roles, pass the roles as "''" as can be seen in the example file included in this repo.)
 
    Before running the main script make sure the input csv file(s) are copied to bulk-user-setup/test/inputs folder.
-
-6. change directory back into root folder "bulk-user-setup"
+   Note: In 'bulk-user-setup.config' the variable CREATE_TEST_USERS=1 implies test users will be created prior to processing any input file
 7. execute ./bulk-user-setup.sh
    For testing in local, enter local when prompted for environment
 
 After running the main script input files copied to bulk-user-setup/test/inputs will be processed in turn (only files with extension .csv will be considered)
 Generated output and backup of input files will be copied to ../outputs/{DateTime} (i.e. /bulk-user-setup/test/outputs/{DateTime}) folder.
 Any invalid input file will be skipped (i.e. due to missing or incorrect mandatory CSV header) and remain in the original bulk-user-setup/test/inputs folder.
+
+## Verifying results when testing locally against the test input scenario files
+
+1. After all the .csv test input files are processed you should find a output log file i.e. BULK-SCRIPT-OUTPUT2022-11-14.log
+2. Open this file and locate lines beginning with "Start - processing input file ../bulk-user-setup/test/inputs/<file>.csv"
+   and "End - processing input file ../bulk-user-setup/test/inputs/<file>.csv"
+3. Assuming the file was not skipped over (due to invalid format or invalid header attributes), you should see one of 
+   the following just after each "End - processing input file..." statement
+   "INFO **** ALL TESTS PASSED ****" or "INFO **** ALL TESTS FAILED ****" or "INFO **** NOT ALL TESTS PASSED ****"
+4. If all tests did not pass in a particular input file, the log will display the line number of the failing test i.e.
+   "DEBUG test failed at record number: 10"
 
 When running the script you will be prompted for which environment to use (default being 'local'). This translates to the idam api url to use i.e.:
 
@@ -86,7 +95,8 @@ other = https://idam-api.${other}.platform.hmcts.net
 To use this bulk script in any environment other than local the following should be changed (if required):
 
 1. Open a terminal session at the root directory 'bulk-user-setup'
-2. Issue the command ./bulk-user-setup.sh
-3. Provide inputs as required
-4. Finally check output (results and logs to understand console output other than success, i.e. skipped, failed executions)
+2. In 'bulk-user-setup.config' change CREATE_TEST_USERS=1 to CREATE_TEST_USERS=0
+3. Issue the command ./bulk-user-setup.sh
+4. Provide inputs as required
+5. Finally check output (results and logs to understand console output other than success, i.e. skipped, failed executions)
 
