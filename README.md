@@ -794,6 +794,11 @@ Also if a certain database has not been created you might need to create a new c
   * run docker-compose `./ccd compose up -d`
   * verify that ccd-definition-designer-api is up and running by `curl localhost:4544/health`
 
+* To enable **ccd-data-store-api** with redis cache
+  * `./ccd enable backend redis`
+  * `export CACHE_TYPE=redis`
+  * run docker-compose `./ccd compose up -d`
+
 * To enable **ccd-message-publisher**
   * NOTE: By default the CCD Message Publisher will use an embedded ActiveMQ instance. See [ccd-message-publisher](https://github.com/hmcts/ccd-message-publisher) for more information.
   * `./ccd enable backend message-publisher`
@@ -1088,12 +1093,6 @@ We will need to install the az cli using Python PIP.
 2. Setup the Python(version 2.x/3.x) on windows machine. PIP is bundled with Python.
 3. Execute the command "pip install azure-cli" using command line. It takes about 20 minutes to install the azure cli.
 4. Verify the installation using the command az --version.
-
-### Data store Application cache
-The env var CACHE_TYPE used to define the cache mechanism. **Distributed Redis or hazelcast**.
-We can used the env vars (CACHE_TYPE, REDIS_HOST and REDIS_PORT) to define the cache settings.
-
-CACHE_TYPE en var can be defined as redis or hazelcast
 
 ## Troubleshooting
 
