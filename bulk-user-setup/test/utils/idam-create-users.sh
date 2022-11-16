@@ -9,16 +9,17 @@ get_user_roles() {
 }
 
 function get_idam_token() {
+
   curl_result=$(
     curl -w $"\n%{http_code}" --silent --show-error -X POST "${IDAM_URL}/o/token" \
-      -H "accept: application/json" \
-      -H "Content-Type: application/x-www-form-urlencoded" \
-      --data-urlencode "client_id=${CLIENT_ID}" \
-      --data-urlencode "client_secret=${IDAM_CLIENT_SECRET}" \
-      --data-urlencode "grant_type=password" \
-      --data-urlencode "username=${ADMIN_USER}" \
-      --data-urlencode "password=${ADMIN_USER_PWD}" \
-      --data-urlencode "scope=openid roles create-user manage-user search-user"
+        -H "accept: application/json" \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        --data-urlencode "client_id=${CLIENT_ID}" \
+        --data-urlencode "client_secret=${IDAM_CLIENT_SECRET}" \
+        --data-urlencode "grant_type=password" \
+        --data-urlencode "username=${ADMIN_USER}" \
+        --data-urlencode "password=${ADMIN_USER_PWD}" \
+        --data-urlencode "scope=openid roles create-user manage-user"
   )
 
   exit_code=$?
@@ -208,8 +209,6 @@ if [ "${ENVIRONMENT:-local}" != "local" ]; then
   exit 0;
 fi
 
-REDIRECT_URI="https://create-bulk-user-test/oauth2redirect"
-CLIENT_ID="ccd-bulk-user-management"
 IDAM_URL="http://localhost:5000"
 IDAM_ACCESS_TOKEN=$(get_idam_token)
 check_exit_code_for_error $? "$IDAM_ACCESS_TOKEN"

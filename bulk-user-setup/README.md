@@ -29,14 +29,27 @@ Generated log file and output files will be placed in bulk-user-setup/test/outpu
 
 The CSV input file must contain the following *mandatory* elements, including a header row.
 
-| Header       | Mandatory                | Description                                                         |
-|--------------|--------------------------|---------------------------------------------------------------------|
-| operation    | **Yes**                  | `add` or `delete` or `updateName` or `find`                         |
-| email        | **Yes**                  | Email address of the user.                                          |
-| firstName    | **Depends on operation** | First name of the user.                                             |
-| lastName     | **Depends on operation** | Last name of the user.                                              |
-| roles        | **Depends on operation** | A pipe delimited list of roles for the user to be added or removed. |
-| status       | (output)                 | Status of operation, e.g. `SUCCESS`, `HTTP-404`, etc.               |
+| Header            | Mandatory                | Description                                                         |
+|-------------------|--------------------------|---------------------------------------------------------------------|
+| operation         | **Yes**                  | `add` or `delete` or `updateName` or `find`                         |
+| email             | **Yes**                  | Email address of the user.                                          |
+| firstName         | **Depends on operation** | First name of the user.                                             |
+| lastName          | **Depends on operation** | Last name of the user.                                              |
+| roles             | **Depends on operation** | A pipe delimited list of roles for the user to be added or removed. |
+| isActive          | (output)                 | active state of the user (TRUE/FALSE or blank)                      |
+| lastModified      | (output)                 | datetime stamp user last updated or blank                           |
+| status            | (output)                 | Status of operation, e.g. `SUCCESS`, `FAILED`, `SKIPPED`            |
+| responseMessage   | (output)                 | additional output message for operation                             |
+
+To enable overall testing we can supply the following headers in the test input files:
+
+operation,email,firstName,lastName,roles,userExists,result,prerequisite,comment
+
+where: 
+userExists is a boolean value (TRUE/FALSE) which can later be used for verification
+result is a string value (SUCCESS/FAILED/SKIPPED). If this header is provided and populated the test will verify the actual 
+result of the operation.
+
 
 > Note: The field headings are case-sensitive but the order of the columns is not important. Any additional columns
   will be ignored by the process.

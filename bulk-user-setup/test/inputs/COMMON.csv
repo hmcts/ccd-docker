@@ -20,6 +20,7 @@ find,,,,,NA,FAILED,,Empty email id
 find,ccd.test.common.user1@hmcts.gov.uk,sometext,sometext,sometext,TRUE,SUCCESS,user exists,WARN firstName/lastName/roles given but not required
 find,ccd.test.common.user1@hmcts.gov.uk,sometext,sometext,,TRUE,SUCCESS,user exists,WARN firstName/lastName given but not required
 find,ccd.test.common.user1@hmcts.gov.uk,sometext,,sometext,TRUE,SUCCESS,user exists,WARN firstName/roles given but not required
+find,Ccd.Test.Common.user1@hmcts.gov.uk,sometext,,sometext,TRUE,SUCCESS,user exists,WARN firstName/roles given but not required
 updatename,ccd.test.common.user1@%^&hmcts.gov.uk,,,,NA,FAILED,,Invalid Email address format
  updatename ,ccd.test.common.user1@hmcts.gov.uk,fn1,ln1,,TRUE,SUCCESS,user exists,Spaces (front and back) in operation
 updatename,ccd.test.common.user1@hmcts.gov.uk,fn2,ln2,,TRUE,SUCCESS,user exists,Spaces (front and back) in email
