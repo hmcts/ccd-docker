@@ -799,6 +799,14 @@ Also if a certain database has not been created you might need to create a new c
   * `export CACHE_TYPE=redis`
   * run docker-compose `./ccd compose up -d`
 
+* To disable **ccd-data-store-api** redis cache
+  * `./ccd disable redis`
+  * ` unset CACHE_TYPE`
+  * run docker-compose `./ccd compose up -d`
+
+
+unset CACHE_TYPE
+
 * To enable **ccd-message-publisher**
   * NOTE: By default the CCD Message Publisher will use an embedded ActiveMQ instance. See [ccd-message-publisher](https://github.com/hmcts/ccd-message-publisher) for more information.
   * `./ccd enable backend message-publisher`
