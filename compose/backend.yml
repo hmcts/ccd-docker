@@ -76,7 +76,7 @@ services:
       DATA_STORE_DB_USE_SSL: "${DB_USE_SSL}"
       DATA_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DATA_STORE}"
       DATA_STORE_TOKEN_SECRET: iuasbcuasdcbasdgcasdgcuysachjsacyasdgjcgasdj
-      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps,aac_manage_case_assignment,xui_webapp,ccd_case_document_am_api,am_role_assignment_service,ccd_next_hearing_date_updater
+      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps,aac_manage_case_assignment,xui_webapp,ccd_case_document_am_api,am_role_assignment_service,ccd_next_hearing_date_updater,hmc_cft_hearing_service
       DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
       IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}" # For backward compatibility with older images
@@ -137,7 +137,7 @@ services:
        LD_SDK_KEY:
        ROLE_ASSIGNMENT_IDAM_KEY:
        ROLE_ASSIGNMENT_TOKEN_SECRET:
-       ROLE_ASSIGNMENT_S2S_AUTHORISED_SERVICES: ccd_gw,am_role_assignment_service,am_org_role_mapping_service,wa_task_management_api,xui_webapp,ccd_data,aac_manage_case_assignment
+       ROLE_ASSIGNMENT_S2S_AUTHORISED_SERVICES: ccd_gw,am_role_assignment_service,am_org_role_mapping_service,wa_task_management_api,xui_webapp,ccd_data,aac_manage_case_assignment,hmc_cft_hearing_service
        IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
        IDAM_S2S_URL: http://service-auth-provider-api:8080
        OPEN_ID_API_BASE_URI: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}/o"
@@ -199,6 +199,7 @@ services:
       MICROSERVICEKEYS_BULK_SCAN_PROCESSOR: "${IDAM_KEY_BULK_SCAN_PROCESSOR}"
       MICROSERVICEKEYS_BULK_SCAN_ORCHESTRATOR: "${IDAM_KEY_BULK_SCAN_ORCHESTRATOR}"
       MICROSERVICEKEYS_AM_ROLE_ASSIGNMENT_SERVICE: "${IDAM_KEY_AM_ROLE_ASSIGNMENT}"
+      MICROSERVICEKEYS_HMC_CFT_HEARING_SERVICE: "${IDAM_KEY_CFT_HEARING_SERVICE}"
       MICROSERVICEKEYS_API_GW: "${IDAM_KEY_API_GW}"
       MICROSERVICEKEYS_HMC_HMI_INBOUND_ADAPTER: "${IDAM_KEY_API_HMI_INBOUND_ADAPTER}"
       MICROSERVICEKEYS_CCD_CASE_DISPOSER: "${IDAM_KEY_CCD_CASE_DISPOSER}"
