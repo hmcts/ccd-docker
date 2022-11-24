@@ -54,8 +54,7 @@ if you experience any error with the above command, try `az login` first for [Az
    If ccd-docker not setup proceed to step 4.
 
 ```bash
-docker system prune -a --volumes
-docker rmi -f $(docker images -aq)
+./ccd compose down
 ```
 
 4. Pull latest Docker images:
@@ -74,6 +73,7 @@ required only on the first run. Once executed, it doesn't need to be executed ag
 ```bash
   ./ccd init
   ```
+  Ignore if we get error message ccd-network already exists while running above command
   
   b. Export environment variables
 
