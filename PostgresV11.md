@@ -6,7 +6,11 @@
 
 * Make sure all micro-services are running the same branch, for instance: 'develop'.
 
-* Start ccd-docker and make sure the new container ccd-shared-database is up and running.
+* To know which branches are currently used, the status command can be used:
+```
+./ccd status
+```
+Start ccd-docker and make sure the new container ccd-shared-database is up and running.
 ```
 ./ccd compose up -d
 ```
@@ -91,6 +95,7 @@ steps shown below:
 ./bin/add-idam-roles.sh
 ./bin/add-users.sh
 ./bin/add-ccd-roles.sh
+./bin/add-role-assignments.sh
 ```
 
 
