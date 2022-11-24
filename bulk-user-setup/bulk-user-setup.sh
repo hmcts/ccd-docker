@@ -1020,12 +1020,14 @@ function process_input_file() {
                 success_counter=$((success_counter+1))
                 lastModified=$(date -u +"%FT%H:%M:%SZ")
                 local reason="user successfully registered"
+                responseMessage="INFO: $reason"
                 log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
                 echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
               else
                 # FAIL:
                 fail_counter=$((fail_counter+1))
                 local reason="failed registering user"
+                responseMessage="ERROR: $reason"
                 inviteStatus="FAILED"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
                 echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
@@ -1257,58 +1259,70 @@ function process_input_file() {
 
           log_debug "email: ${email} - User exists, doing deletion logic"
 
-          #bash array of roles to remove via api call
+          local USE_PUT=0
+
+          local default_caseworker_role_provided=false
+          local default_caseworker_role_already_assigned=false
+
+          #declare empty bash array of roles to remove
           local rolesToRemoveArray=()
 
-          #store api fetched roles into a bash array
+          #declare empty bash array to store api fetched roles
           local rolesFromApiArray=()
 
+          #populate array with fetched api roles
           for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
-                rolesFromApiArray+=("${apiRole}")
+            if [ "$apiRole" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
+                default_caseworker_role_already_assigned=true
+            fi
+            rolesFromApiArray+=("${apiRole}")
           done
 
+          #add the expanded roles if required (i.e. ia_roles etc.)
           rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
 
           log_debug "Computed roles to delete: ${rolesFromCSV}"
 
           for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+            if [ "$csvRole" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
+                default_caseworker_role_provided=true
+            fi
             for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
-              #add csv role to array excluding default role
+              #add csv role to array excluding DEFAULT_CASEWORKER_ROLE
               if [ "$csvRole" == "$apiRole" ] && [ "$csvRole" != "${DEFAULT_CASEWORKER_ROLE}" ]; then
                 rolesToRemoveArray+=("${csvRole}")
               fi
             done
           done
 
-          #remove the roles fetched from api
+          #remove the roles to be deleted from api roles (assuming deletion to succeed)
           for del in "${rolesToRemoveArray[@]}"
           do
              rolesFromApiArray=(${rolesFromApiArray[@]/$del})
           done
 
-          local USE_PUT=0
-
-          #Below code is to delete caseworker role is there are no other service specific roles available
+          #Check if any more caseworker-* roles remain for the user
+          #if not then safe to remove caseworker
           local otherServiceRole=false
           for role in "${rolesFromApiArray[@]}"
           do
-              if [ "${role}" == "${DEFAULT_CASEWORKER_ROLE}-*" ] && [$otherServiceRole == false ] ; then
+              if [ "${role}" == "${DEFAULT_CASEWORKER_ROLE}-*" ]; then
                   otherServiceRole=true
+                  break
               fi
           done
-          if [  $otherServiceRole==false ]; then
+          if [[ "$otherServiceRole" = false ]]; then
               rolesFromApiArray=(${rolesFromApiArray[@]/${DEFAULT_CASEWORKER_ROLE}})
+              if [[ "$default_caseworker_role_already_assigned" = true ]]; then
+                #no other caseworker- roles, remove caseworker also
+                rolesToRemoveArray+=("${DEFAULT_CASEWORKER_ROLE}")
+              fi
           fi
 
-          local array_count=${#rolesFromApiArray[@]}
+          local rolesFromApiArray_count=${#rolesFromApiArray[@]}
 
-          if [ $array_count == 0 ]; then
+          if [ $rolesFromApiArray_count == 0 ]; then
             USE_PUT=1
-            #if [  "${rolesFromApiArray[0]}" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
-              #after removing roles only role left is the default role
-              #we can therefore use put, to set roles to an empty array
-              #USE_PUT=1
-            #fi
           fi
 
           log_debug "Assigned roles to remove: ${rolesToRemoveArray[@]}"
@@ -1860,7 +1874,6 @@ if [[ "$is_test" = false ]]; then
   read -p "Please enter ccd idam-admin username: " ADMIN_USER
   ADMIN_USER_PWD=$(read_password_with_asterisk "Please enter ccd idam-admin password: ")
   IDAM_CLIENT_SECRET=$(read_password_with_asterisk $'\nPlease enter idam oauth2 secret for ccd-bulk-user-register client: ')
-  CSV_PROCESSED_DIR_NAME="../outputs/$(date -u +"%F")"
 fi
 
 # Check if a param is set to a valid value
