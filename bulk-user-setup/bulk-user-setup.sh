@@ -1281,7 +1281,7 @@ function process_input_file() {
           #add the expanded roles if required (i.e. ia_roles etc.)
           rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
 
-          log_debug "Computed roles to delete: ${rolesFromCSV}"
+          log_debug "Computed/expanded CSV roles to delete: ${rolesFromCSV}"
 
           for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
             if [ "$csvRole" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
@@ -1296,24 +1296,27 @@ function process_input_file() {
           done
 
           #remove the roles to be deleted from api roles (assuming deletion to succeed)
-          for del in "${rolesToRemoveArray[@]}"
-          do
-             rolesFromApiArray=(${rolesFromApiArray[@]/$del})
-          done
+          #for del in "${rolesToRemoveArray[@]}"
+          #do
+          #   rolesFromApiArray=( "${rolesFromApiArray[@]/$del}" )
+          #done
+
+          rolesFromApiArray=($(removeFromArray2 "${rolesFromApiArray}" "${rolesToRemoveArray}"))
 
           #Check if any more caseworker-* roles remain for the user
           #if not then safe to remove caseworker
           local otherServiceRole=false
           for role in "${rolesFromApiArray[@]}"
           do
-              if [ "${role}" == "${DEFAULT_CASEWORKER_ROLE}-*" ]; then
+              if [[ "${role}" == "${DEFAULT_CASEWORKER_ROLE}-"* ]]; then
                   otherServiceRole=true
                   break
               fi
           done
+
           if [[ "$otherServiceRole" = false ]]; then
-              rolesFromApiArray=(${rolesFromApiArray[@]/${DEFAULT_CASEWORKER_ROLE}})
               if [[ "$default_caseworker_role_already_assigned" = true ]]; then
+                rolesFromApiArray=($(removeFromArray2 "${rolesFromApiArray}" "${DEFAULT_CASEWORKER_ROLE}"))
                 #no other caseworker- roles, remove caseworker also
                 rolesToRemoveArray+=("${DEFAULT_CASEWORKER_ROLE}")
               fi
@@ -1321,14 +1324,19 @@ function process_input_file() {
 
           local rolesFromApiArray_count=${#rolesFromApiArray[@]}
 
+          log_debug "default_caseworker_role_provided = ${default_caseworker_role_provided}"
+          log_debug "default_caseworker_role_already_assigned = ${default_caseworker_role_already_assigned}"
+          log_debug "rolesFromApiArray_count after role deletions would be: ${rolesFromApiArray_count}"
+          log_debug "Any more caseworker- roles = ${otherServiceRole}"
+          log_debug "Assigned roles to remove: ${rolesToRemoveArray[*]}"
+
           if [ $rolesFromApiArray_count == 0 ]; then
             USE_PUT=1
           fi
 
-          log_debug "Assigned roles to remove: ${rolesToRemoveArray[@]}"
-
           if [ $userActiveState == "true" ]; then
             if [ $USE_PUT -eq 1 ]; then
+              log_debug "After processing required role deletions, no roles would remain, using PUT to remove ALL roles and then disable the user"
               submit_response=$(put_user_roles "$userId" "[]")
 
               # seperate submit_response reponse
@@ -1526,6 +1534,43 @@ function contains() {
     }
     echo "n"
     return 1
+}
+
+function removeFromArray {
+    local rolesToRemoveArray=$1
+    local rolesFromApiArray=$2
+
+    TEMP_ARRAY=()
+    for roleToRemove in "${rolesToRemoveArray[@]}"; do
+      for roleFromApi in "${rolesFromApiArray[@]}"; do
+          KEEP=true
+          if [[ ${roleToRemove} == ${roleFromApi} ]]; then
+              KEEP=false
+              break
+          fi
+      done
+      if ${KEEP}; then
+          TEMP_ARRAY+=(${roleToRemove})
+      fi
+    done
+    rolesFromApiArray=("${TEMP_ARRAY[@]}")
+    unset TEMP_ARRAY
+    echo "${rolesFromApiArray}"
+}
+
+function removeFromArray2 {
+    rolesFromApiArray=$1
+    rolesToRemoveArray=$2
+
+    for removeRole in "${rolesToRemoveArray[@]}"; do
+      for i in "${!rolesFromApiArray[@]}"; do
+        if [[ ${rolesFromApiArray[i]} = $removeRole ]]; then
+          unset 'rolesFromApiArray[i]'
+        fi
+      done
+    done
+
+    echo "${rolesFromApiArray[@]}"
 }
 
 function addRolesToCSVRoles {
