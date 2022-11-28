@@ -1281,7 +1281,7 @@ function process_input_file() {
           #add the expanded roles if required (i.e. ia_roles etc.)
           rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
 
-          log_debug "Computed/expanded CSV roles to delete: ${rolesFromCSV}"
+          log_debug "Computed/expanded CSV roles supplied for deletion: ${rolesFromCSV}"
 
           for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
             if [ "$csvRole" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
@@ -1326,8 +1326,8 @@ function process_input_file() {
 
           log_debug "default_caseworker_role_provided = ${default_caseworker_role_provided}"
           log_debug "default_caseworker_role_already_assigned = ${default_caseworker_role_already_assigned}"
-          log_debug "rolesFromApiArray_count after role deletions would be: ${rolesFromApiArray_count}"
-          log_debug "Any more caseworker- roles = ${otherServiceRole}"
+          log_debug "Any more caseworker- roles remaining = ${otherServiceRole}"
+          log_debug "rolesFromApiArray_count after deletions would be: ${rolesFromApiArray_count}"
           log_debug "Assigned roles to remove: ${rolesToRemoveArray[*]}"
 
           if [ $rolesFromApiArray_count == 0 ]; then
