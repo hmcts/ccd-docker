@@ -1800,23 +1800,80 @@ function addRequiredMandatoryRole {
 
 function checkMasterCaseworkerRoles
 {
+    #log_debug "Checking local master caseworker roles against API fetched caseworker roles"
+    IFS=$'\n' read -d '' -r -a caseworkerRolesMasterArray < ./caseworker-roles-master.txt
 
-    IFS=$'\n' read -d '' -r -a lines < ./caseworker-roles-master.txt
-    for line in "${lines[@]}"
-    do
-        echo "${line}"
+    local rawRolesResponse=$(get_roles)
+    local apiCaseworkerRolesBashArray=() #declare empty shell array
+    local inLocalNotInRemote=()
+    local inRemoteNotInLocal=()
+    local FOUND=false
+
+    if [[ $rawRolesResponse != *"HTTP-"* ]]; then
+        for rawRoleName in $(echo "${rawRolesResponse}" | jq .[].name); do
+            #printf "%s\n" "${rawRoleName}"
+            if [[ "$rawRoleName" == *"$DEFAULT_CASEWORKER_ROLE"* ]]; then
+                #role=$(convertToLowerCase "${rawRoleName}")
+                #remove white space in between role
+                #role="${role// /}"
+                rawRoleName="${rawRoleName%\"}"
+                rawRoleName="${rawRoleName#\"}"
+                apiCaseworkerRolesBashArray+=("${rawRoleName}")
+            fi
+        done
+    fi
+
+    for caseworkerRoleMaster in "${caseworkerRolesMasterArray[@]}"; do
+      for apiCaseWorkerRole in "${apiCaseworkerRolesBashArray[@]}"; do
+          FOUND=false
+          if [[ "${caseworkerRoleMaster}" == "${apiCaseWorkerRole}" ]]; then
+              FOUND=true
+              break
+          fi
+      done
+      if [[ "$FOUND" = false ]]; then
+          inLocalNotInRemote+=(${caseworkerRoleMaster})
+      fi
     done
 
-    local rawAllRoles=$(get_roles)
+    for apiCaseWorkerRole in "${apiCaseworkerRolesBashArray[@]}"; do
+      for caseworkerRoleMaster in "${caseworkerRolesMasterArray[@]}"; do
+          FOUND=false
+          if [[ ${apiCaseWorkerRole} == ${caseworkerRoleMaster} ]]; then
+              FOUND=true
+              break
+          fi
+      done
+      if [[ "$FOUND" = false ]]; then
+          inRemoteNotInLocal+=(${apiCaseWorkerRole})
+      fi
+    done
 
-    if [[ $rawAllRoles != *"HTTP-"* ]]; then
-        for role in $(echo "${rawRoles}" | jq -r '.[]'); do
-            #    if [ $csvRole == $apiRole ]; then
-            #      found=1
-            #      log_debug "email: ${email}, role: $csvRole  - already assigned"
-            #    fi
-            echo "something"
-        done
+    #differencesArray=(`echo ${apiRolesBashArray[@]} ${caseworkerRolesMasterArray[@]} | tr ' ' '\n' | sort | uniq -u `)
+
+    #if (( ${#differencesArray[@]} )); then
+        #array is not empty
+        #echo "${differencesArray[*]}" >&2
+        #printf "%s\n\n" "The following roles are not found in local master caseworker role file:"
+        #printf "%s\n" "${differencesArray[@]}"
+    #fi
+
+    printf "\n\n%s\n\n" "Comparison of local (master file) caseworker roles against remote (API) caseworker roles:"
+
+    if (( ${#inLocalNotInRemote[@]} )); then
+        #array is not empty
+        printf "\n\n%s\n\n" "The following local caseworker roles are not found in remote:"
+        printf "%s\n" "${inLocalNotInRemote[@]}"
+    else
+        printf "\n\n%s\n\n" "Local file has up-to-date caseworker roles when compared to remote (API) caseworker roles"
+    fi
+
+    if (( ${#inRemoteNotInLocal[@]} )); then
+        #array is not empty
+        printf "\n\n%s\n\n" "The following remote caseworker roles are not found in local file:"
+        printf "%s\n" "${inRemoteNotInLocal[@]}"
+    else
+        printf "\n\n%s\n\n" "Remote (API) has up-to-date caseworker roles when compared to local caseworker roles"
     fi
 }
 
@@ -1943,9 +2000,8 @@ then
     exit 1
 fi
 
-#checkMasterCaseworkerRoles
-#exit 0
 
 # read csv(s) and call curl in a loop for each record
 process_folder_recurse "${CSV_DIR_PATH}"
+checkMasterCaseworkerRoles
 unset https_proxy;
