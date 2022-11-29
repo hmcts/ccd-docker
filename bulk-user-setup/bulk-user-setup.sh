@@ -1811,7 +1811,6 @@ function checkMasterCaseworkerRoles
 
     if [[ $rawRolesResponse != *"HTTP-"* ]]; then
         for rawRoleName in $(echo "${rawRolesResponse}" | jq .[].name); do
-            #printf "%s\n" "${rawRoleName}"
             if [[ "$rawRoleName" == *"$DEFAULT_CASEWORKER_ROLE"* ]]; then
                 #role=$(convertToLowerCase "${rawRoleName}")
                 #remove white space in between role
@@ -1858,22 +1857,43 @@ function checkMasterCaseworkerRoles
         #printf "%s\n" "${differencesArray[@]}"
     #fi
 
-    printf "\n\n%s\n\n" "Comparison of local (master file) caseworker roles against remote (API) caseworker roles:"
+    local strInLocalNotInRemote="The following local caseworker roles are not found in remote:"
+    local strInRemoteNotInLocal="The following remote caseworker roles are not found in local file:"
+    local strLocalUptoDate="Local file has up-to-date caseworker roles when compared to remote (API) caseworker roles"
+    local strRemoteUptoDate="Remote (API) has up-to-date caseworker roles when compared to local caseworker roles"
+    local strHeading="Comparison of local (master file) caseworker roles against remote (API) caseworker roles:"
+
+    printf "\n\n%s\n\n" "${strHeading}"
+    log_info "${strHeading}"
 
     if (( ${#inLocalNotInRemote[@]} )); then
         #array is not empty
-        printf "\n\n%s\n\n" "The following local caseworker roles are not found in remote:"
+        printf "\n\n%s\n\n" "${strInLocalNotInRemote}"
         printf "%s\n" "${inLocalNotInRemote[@]}"
+
+        log_info "${strInLocalNotInRemote}"
+        #output array contents as a string for logging
+        printf -v tmpVAR "%s\n" "${inLocalNotInRemote[@]}"
+        tmpVAR=${tmpVAR%?}
+        log_info "${tmpVAR}"
     else
-        printf "\n\n%s\n\n" "Local file has up-to-date caseworker roles when compared to remote (API) caseworker roles"
+        printf "\n\n%s\n\n" "${strLocalUptoDate}"
+        log_info "${strLocalUptoDate}"
     fi
 
     if (( ${#inRemoteNotInLocal[@]} )); then
         #array is not empty
-        printf "\n\n%s\n\n" "The following remote caseworker roles are not found in local file:"
+        printf "\n\n%s\n\n" "$strInRemoteNotInLocal"
         printf "%s\n" "${inRemoteNotInLocal[@]}"
+
+        log_info "$strInRemoteNotInLocal"
+        #output array contents as a string for logging
+        printf -v tmpVAR "%s\n" "${inRemoteNotInLocal[@]}"
+        tmpVAR=${tmpVAR%?}
+        log_info "${tmpVAR}"
     else
-        printf "\n\n%s\n\n" "Remote (API) has up-to-date caseworker roles when compared to local caseworker roles"
+        printf "\n\n%s\n\n" "${strRemoteUptoDate}"
+        log_info "${strRemoteUptoDate}"
     fi
 }
 
