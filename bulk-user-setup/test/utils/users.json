@@ -27,6 +27,8 @@
   {"email": "ccd.test.delete.user14@hmcts.gov.uk", "roles": "caseworker,caseworker-role-one,caseworker-role-two,payment", "lastName": "deleteln14", "firstName": "deletefn14"},
   {"email": "ccd.test.delete.user15@hmcts.gov.uk", "roles": "caseworker,caseworker-role-one,caseworker-role-two,payment", "lastName": "deleteln15", "firstName": "deletefn15"},
   {"email": "ccd.test.delete.user16@hmcts.gov.uk", "roles": "caseworker,caseworker-role-one,caseworker-role-two,payment", "lastName": "deleteln16", "firstName": "deletefn16"},
+  {"email": "ccd.test.delete.user17@hmcts.gov.uk", "roles": "caseworker", "lastName": "deleteln17", "firstName": "deletefn17"},
+  {"email": "ccd.test.delete.user17@hmcts.gov.uk", "roles": "caseworker,payment", "lastName": "deleteln18", "firstName": "deletefn18"},
   {"email": "ccd.test.common.user1@hmcts.gov.uk", "roles": "''", "lastName": "commonln1", "firstName": "commonfn1"},
   {"email": "ccd.test.common.user2@hmcts.gov.uk", "roles": "''", "lastName": "commonln2", "firstName": "commonfn2"},
   {"email": "ccd.test.common.user3@hmcts.gov.uk", "roles": "''", "lastName": "commonln3", "firstName": "commonfn3"},
