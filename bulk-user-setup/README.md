@@ -7,16 +7,22 @@ The script requires the following bash utilities. Please install them depending 
 2. [csvkit](https://formulae.brew.sh/formula/csvkit) - collection of CSV tools 
 
 ----
+The script will prompt for the following information dependent on what is passed to the prompt for 'environment to use':
 
-The script will prompt for the following information:
+default environment is assumed to be 'local', for testing against the local docker environment no further prompts will be displayed
+as all the required information is contained within 'bulk-user-setup.config'
 
-* path to the CSV input file (Directory path)
-* ccd _idam-admin_ username
-* ccd _idam-admin_ password
-* idam oauth2 secret for _ccd-bulk-user-management_ client - 
-* environment - will be prod in production environment
+1. environment (default if nothing provided is 'local')
 
-To get the oauth2 secret for idam client run the following:
+If any other environment is passed i.e. 'prod' the following prompts will appear:
+
+2. directory path containing csv input files (only enter the directory path)
+3. ccd idam-admin username
+4. ccd idam-admin password
+5. idam oauth2 secret for ccd-bulk-user-register client -
+
+
+To get the oauth2 secret for idam client against the prod environment run the following:
 
 az login (if not already logged in to Azure)
 az keyvault secret show --vault-name ccd-prod --name ccd_bulk_user_management_secret
@@ -67,21 +73,22 @@ The import CSV file is renamed by the process to discourage its accidental re-us
 
 ## Local docker testing setup
 
-Run the following scripts to create client and required users and roles for local testing.
+Run the following scripts to create the client and required users and roles for local testing.
 
 1. open terminal ensuring to change directory into root folder "bulk-user-setup"
-2. execute ./test/utils/add-idam-clients.sh
-3. execute ./test/utils/add-idam-roles.sh
-   (Roles to be added are defined in the file: roles.json)
-4. execute ./test/utils/add-users.sh (note: if CREATE_TEST_USERS=1 is set in 'bulk-user-setup.config' there is no need to create the users separately as 
-   the add-users.sh script will be called from the main bulk-user-setup.sh script)
-   (Users to be added are defined in the file: users.json. Please ensure roles are created before assigning to users via the add-users.sh 
-    script. To add a user without any roles, pass the roles as "''" as can be seen in the example file included in this repo.)
+2. execute ./test/utils/add-idam-clients.sh (this needs to be done the first time only)
+3. execute ./test/utils/add-idam-roles.sh (this should be executed the first time and any time new roles need to be added)
+   ** Roles to be added are defined in the file: roles.json
+4. execute ./test/utils/add-users.sh (see below first)
+   ** note: if CREATE_TEST_USERS=true is set in 'bulk-user-setup.config' there is no need to create the users separately as 
+      the add-users.sh script will be called from the main bulk-user-setup.sh script)
+   ** Users to be added are defined in the file: users.json. Please ensure roles are created before assigning to them to users
+   ** To add a user without any roles, pass the roles as "''" as can be seen in the example file included in this repo
 
    Before running the main script make sure the input csv file(s) are copied to bulk-user-setup/test/inputs folder.
-   Note: In 'bulk-user-setup.config' the variable CREATE_TEST_USERS=1 implies test users will be created prior to processing any input file
+   ** Note: In 'bulk-user-setup.config' the variable CREATE_TEST_USERS=true implies test users will be created prior to processing any input file
 5. execute ./bulk-user-setup.sh
-   For testing in local, enter 'local' when prompted for environment
+   ** For testing in local, enter 'local' when prompted for environment
 
 After running the main script input files copied to bulk-user-setup/test/inputs will be processed in turn (only files with extension .csv will be considered)
 Generated output and backup of input files will be copied to ../outputs/{DateTime} (i.e. /bulk-user-setup/test/outputs/{DateTime}) folder.

@@ -1800,8 +1800,17 @@ function addRequiredMandatoryRole {
 
 function checkMasterCaseworkerRoles
 {
-    #log_debug "Checking local master caseworker roles against API fetched caseworker roles"
-    IFS=$'\n' read -d '' -r -a caseworkerRolesMasterArray < ./caseworker-roles-master.txt
+    local masterCaseworkerRoleFile=""
+
+    log_info "Checking local master caseworker roles against API fetched caseworker roles"
+
+    if [[ "$is_test" = true ]]; then
+        masterCaseworkerRoleFile="caseworker-roles-local-testing.txt"
+    else
+        masterCaseworkerRoleFile="caseworker-roles-master.txt"
+    fi
+
+    IFS=$'\n' read -d '' -r -a caseworkerRolesMasterArray < ./"${masterCaseworkerRoleFile}"
 
     local rawRolesResponse=$(get_roles)
     local apiCaseworkerRolesBashArray=() #declare empty shell array
@@ -1863,12 +1872,12 @@ function checkMasterCaseworkerRoles
     local strRemoteUptoDate="Remote (API) has up-to-date caseworker roles when compared to local caseworker roles"
     local strHeading="Comparison of local (master file) caseworker roles against remote (API) caseworker roles:"
 
-    printf "\n\n%s\n\n" "${strHeading}"
+    printf "%s\n" "${strHeading}"
     log_info "${strHeading}"
 
     if (( ${#inLocalNotInRemote[@]} )); then
         #array is not empty
-        printf "\n\n%s\n\n" "${strInLocalNotInRemote}"
+        printf "%s\n" "${strInLocalNotInRemote}"
         printf "%s\n" "${inLocalNotInRemote[@]}"
 
         log_info "${strInLocalNotInRemote}"
@@ -1877,13 +1886,13 @@ function checkMasterCaseworkerRoles
         tmpVAR=${tmpVAR%?}
         log_info "${tmpVAR}"
     else
-        printf "\n\n%s\n\n" "${strLocalUptoDate}"
+        printf "%s\n" "${strLocalUptoDate}"
         log_info "${strLocalUptoDate}"
     fi
 
     if (( ${#inRemoteNotInLocal[@]} )); then
         #array is not empty
-        printf "\n\n%s\n\n" "$strInRemoteNotInLocal"
+        printf "%s\n" "$strInRemoteNotInLocal"
         printf "%s\n" "${inRemoteNotInLocal[@]}"
 
         log_info "$strInRemoteNotInLocal"
@@ -1892,7 +1901,7 @@ function checkMasterCaseworkerRoles
         tmpVAR=${tmpVAR%?}
         log_info "${tmpVAR}"
     else
-        printf "\n\n%s\n\n" "${strRemoteUptoDate}"
+        printf "%s\n" "${strRemoteUptoDate}"
         log_info "${strRemoteUptoDate}"
     fi
 }
@@ -2020,8 +2029,11 @@ then
     exit 1
 fi
 
-
 # read csv(s) and call curl in a loop for each record
 process_folder_recurse "${CSV_DIR_PATH}"
-checkMasterCaseworkerRoles
+if [[ "$ENABLE_CASEWORKER_CHECKS" = true ]]; then
+    echo "Checking caseworker roles .."
+    checkMasterCaseworkerRoles
+fi
+
 unset https_proxy;
