@@ -116,8 +116,12 @@ other = https://idam-api.${other}.platform.hmcts.net
 To use this bulk script in any environment other than local the following should be changed (if required):
 
 1. Open a terminal session at the root directory 'bulk-user-setup'
-2. In 'bulk-user-setup.config' change CREATE_TEST_USERS=1 to CREATE_TEST_USERS=0
+2. In 'bulk-user-setup.config' change CREATE_TEST_USERS=true to CREATE_TEST_USERS=false
 3. Issue the command ./bulk-user-setup.sh
 4. Provide inputs as required
 5. Finally check output (results and logs to understand console output other than success, i.e. skipped, failed executions)
+6. if ENABLE_CASEWORKER_CHECKS=true is set within 'bulk-user-setup.config', the script will (after processing the CSV input files) 
+   check the local master caseworker file (caseworker-roles-master.txt) against the remote caseworker roles fetched via a GET api call
+   Comparison results will be outputted to the console and log file. There is no automated process for updating the local master file.
+   Refer to the output and decide if the missing caseworker roles need to be added to the processing logic.
 
