@@ -1802,13 +1802,14 @@ function checkMasterCaseworkerRoles
 {
     local masterCaseworkerRoleFile=""
 
-    log_info "Checking local master caseworker roles against API fetched caseworker roles"
-
     if [[ "$is_test" = true ]]; then
         masterCaseworkerRoleFile="caseworker-roles-local-testing.txt"
     else
         masterCaseworkerRoleFile="caseworker-roles-master.txt"
     fi
+
+    log_info "Local master caseworker file: ./"${masterCaseworkerRoleFile}""
+    printf "%s\n" "Local master caseworker file: ./"${masterCaseworkerRoleFile}""
 
     IFS=$'\n' read -d '' -r -a caseworkerRolesMasterArray < ./"${masterCaseworkerRoleFile}"
 
@@ -1866,19 +1867,19 @@ function checkMasterCaseworkerRoles
         #printf "%s\n" "${differencesArray[@]}"
     #fi
 
-    local strInLocalNotInRemote="The following local caseworker roles are not found in remote:"
-    local strInRemoteNotInLocal="The following remote caseworker roles are not found in local file:"
-    local strLocalUptoDate="Local file has up-to-date caseworker roles when compared to remote (API) caseworker roles"
-    local strRemoteUptoDate="Remote (API) has up-to-date caseworker roles when compared to local caseworker roles"
+    local strInLocalNotInRemote="Local vs Remote caseworker roles out of synch, the following local caseworker roles are not found in remote:"
+    local strInRemoteNotInLocal="Remote vs Local caseworker roles out of sync, the following remote caseworker roles are not defined in local file:"
+    local strLocalUptoDate="Local vs Remote caseworker roles: UP-TO-DATE"
+    local strRemoteUptoDate="Remote vs Local caseworker roles: UP-TO-DATE"
     local strHeading="Comparison of local (master file) caseworker roles against remote (API) caseworker roles:"
 
-    printf "%s\n" "${strHeading}"
-    log_info "${strHeading}"
+    #printf "%s\n" "${strHeading}"
+    #log_info "${strHeading}"
 
     if (( ${#inLocalNotInRemote[@]} )); then
         #array is not empty
-        printf "%s\n" "${strInLocalNotInRemote}"
-        printf "%s\n" "${inLocalNotInRemote[@]}"
+        printf "%s\n" "${RED}${strInLocalNotInRemote}${NORMAL}"
+        printf "%s\n${RED}${NORMAL}" "${inLocalNotInRemote[@]}"
 
         log_info "${strInLocalNotInRemote}"
         #output array contents as a string for logging
@@ -1886,14 +1887,14 @@ function checkMasterCaseworkerRoles
         tmpVAR=${tmpVAR%?}
         log_info "${tmpVAR}"
     else
-        printf "%s\n" "${strLocalUptoDate}"
+        printf "%s\n" "${GREEN}${strLocalUptoDate}${NORMAL}"
         log_info "${strLocalUptoDate}"
     fi
 
     if (( ${#inRemoteNotInLocal[@]} )); then
         #array is not empty
-        printf "%s\n" "$strInRemoteNotInLocal"
-        printf "%s\n" "${inRemoteNotInLocal[@]}"
+        printf "%s\n" "${RED}$strInRemoteNotInLocal${NORMAL}"
+        printf "%s\n${RED}${NORMAL}" "${inRemoteNotInLocal[@]}"
 
         log_info "$strInRemoteNotInLocal"
         #output array contents as a string for logging
@@ -1901,7 +1902,7 @@ function checkMasterCaseworkerRoles
         tmpVAR=${tmpVAR%?}
         log_info "${tmpVAR}"
     else
-        printf "%s\n" "${strRemoteUptoDate}"
+        printf "%s\n" "${GREEN}${strRemoteUptoDate}${NORMAL}"
         log_info "${strRemoteUptoDate}"
     fi
 }
@@ -2033,6 +2034,7 @@ fi
 process_folder_recurse "${CSV_DIR_PATH}"
 if [[ "$ENABLE_CASEWORKER_CHECKS" = true ]]; then
     echo "Checking caseworker roles .."
+    log_info "Checking caseworker roles .."
     checkMasterCaseworkerRoles
 fi
 
