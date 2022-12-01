@@ -1107,6 +1107,7 @@ function process_input_file() {
               local response_array=($submit_response)
               local inviteStatus=${response_array[0]}
               local responseMessage=${response_array[1]}
+
               if [ $inviteStatus == "SUCCESS" ]; then
                 # SUCCESS:
                 success_counter=$((success_counter+1))
@@ -1133,12 +1134,12 @@ function process_input_file() {
                     responseMessage="ERROR: user active state could not be set to true"
                   fi
                 fi
-
               else
                 # FAIL:
                 fail_counter=$((fail_counter+1))
                 inviteStatus="FAILED"
                 local reason="failed assigning one or more roles"
+                responseMessage="ERROR: $responseMessage"
                 echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
               fi
