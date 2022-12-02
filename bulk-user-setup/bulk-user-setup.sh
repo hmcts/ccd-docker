@@ -1140,6 +1140,9 @@ function process_input_file() {
                 inviteStatus="FAILED"
                 local reason="failed assigning one or more roles"
                 responseMessage="ERROR: $responseMessage"
+                if [[ $responseMessage = *"account is stale"* ]]; then
+                    responseMessage="$responseMessage INFO: user needs to reset their password themselves for the account to be reactivated"
+                fi
                 echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
               fi
