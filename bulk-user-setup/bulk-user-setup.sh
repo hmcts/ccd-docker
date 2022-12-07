@@ -984,7 +984,7 @@ function process_input_file() {
 
               #rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
 
-              if [ $(checkShouldAddDefaultRole "${rolesFromCSV}") -eq 1 ]; then
+              if [ $(checkShouldAddDefaultRoles "${rolesFromCSV}") -eq 1 ]; then
                 log_debug "Adding default roles"
                 rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${DEFAULT_ROLES}")
               else
@@ -1027,10 +1027,10 @@ function process_input_file() {
                 # FAIL:
                 fail_counter=$((fail_counter+1))
                 local reason="failed registering user"
-                responseMessage="ERROR: $reason"
+                responseMessage="ERROR: $responseMessage"
                 inviteStatus="FAILED"
-                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
                 echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
               fi
             fi
           fi
@@ -1058,7 +1058,7 @@ function process_input_file() {
 
             #rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
 
-            if [ $(checkShouldAddDefaultRole "${rolesFromCSV}") -eq 1 ]; then
+            if [ $(checkShouldAddDefaultRoles "${rolesFromCSV}") -eq 1 ]; then
               log_debug "Adding default roles"
               rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${DEFAULT_ROLES}")
             else
@@ -1582,8 +1582,21 @@ function addRolesToCSVRoles {
   local strDefaultRoles=$2
   local defaultRolesArray=( $(splitStringToArray "|" "${strDefaultRoles}") )
 
+  #for role in "${defaultRolesArray[@]}"; do
+  #  rolesFromCSV=$(echo "${rolesFromCSV}" | jq --arg new "$role" '. += [$new]')
+  #done
+
   for role in "${defaultRolesArray[@]}"; do
-    rolesFromCSV=$(echo "${rolesFromCSV}" | jq --arg new "$role" '. += [$new]')
+    local shouldAdd=1
+    for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+        if [ "${csvRole}" == "$role" ]; then
+            shouldAdd=0
+            break
+        fi
+    done
+    if [ $shouldAdd -eq 1 ]; then
+        rolesFromCSV=$(echo "${rolesFromCSV}" | jq --arg new "$role" '. += [$new]')
+    fi
   done
 
   echo "${rolesFromCSV}"
@@ -1694,23 +1707,42 @@ function checkShouldAddRole {
   echo $shouldAdd
 }
 
-function checkShouldAddDefaultRole {
+function checkShouldAddDefaultRoles {
   local rolesFromCSV=$1
   local rolesToCheckForArray=( $(splitStringToArray "|" "${DEFAULT_ROLES}") )
+  local countRolesToCheckForArray=${#rolesToCheckForArray[@]}
 
-  local shouldAdd=0
+  local counter=0
+  local shouldAdd=1
+  local default_type_role_found=0
 
   for role in "${rolesToCheckForArray[@]}"; do
     for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
-      if [[ "${csvRole}" =~ .*"$role".* ]]; then
-        shouldAdd=1
-        break
-      fi
+        #if [[ "${csvRole}" =~ .*"$role".* ]]; then
+        if [[ "${csvRole}" == *"$role"* ]]; then
+            default_type_role_found=1
+            break
+        fi
     done
-    if [ $shouldAdd -eq 1 ]; then
-      break
+    if [ $default_type_role_found -eq 1 ]; then
+        break
     fi
   done
+
+  if [ $default_type_role_found -eq 1 ]; then
+    for role in "${rolesToCheckForArray[@]}"; do
+          for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+            if [ "${csvRole}" == "$role" ]; then
+              counter=$((counter+1))
+            fi
+          done
+     done
+     if [ $counter -eq $countRolesToCheckForArray ]; then
+         shouldAdd=0
+     fi
+  else
+    shouldAdd=0
+  fi
 
   echo $shouldAdd
 }
@@ -1871,9 +1903,9 @@ function checkMasterCaseworkerRoles
         #printf "%s\n" "${differencesArray[@]}"
     #fi
 
-    local strInLocalNotInRemote="Local vs Remote caseworker roles out of synch, the following local caseworker roles are not found in remote:"
-    local strInRemoteNotInLocal="Remote vs Local caseworker roles out of sync, the following remote caseworker roles are not defined in local file:"
-    local strLocalUptoDate="Local vs Remote caseworker roles: UP-TO-DATE"
+    local strInLocalNotInRemote="Local and Remote caseworker roles out of synch, the following local caseworker roles are not found in remote:"
+    local strInRemoteNotInLocal="Remote and Local caseworker roles out of sync, the following remote caseworker roles are not found in local file:"
+    local strLocalUptoDate="Local and Remote caseworker roles: UP-TO-DATE"
     local strRemoteUptoDate="Remote vs Local caseworker roles: UP-TO-DATE"
     local strHeading="Comparison of local (master file) caseworker roles against remote (API) caseworker roles:"
 
