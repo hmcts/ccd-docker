@@ -745,10 +745,11 @@ function process_input_file() {
       if [ "$inviteStatus" != "SUCCESS" ]; then
 
         # regardless if operation (add/remove) we should always check if the user already exists or not
+
         local rawReturnedValue=$(get_user "$email")
         #local rawReturnedValue=$(get_user_api_v1 "${email}")
 
-        if [[ $rawReturnedValue != *"HTTP-"* ]]; then
+        if [[ $rawReturnedValue != *"HTTP-"* ]] && [[ $rawReturnedValue != *"ERROR"* ]]; then
           local userId=$(echo $rawReturnedValue | jq --raw-output '.id')
           #if using /api/v1 to find user by email, it returns an array or users which is empty if no user found
           #if found, we need to ensure we get the first element
