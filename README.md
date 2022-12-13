@@ -49,10 +49,10 @@ Note:
 if you experience any error with the above command, try `az login` first for [Azure Authentication for pulling latest docker images](#azure-authentication-for-pulling-latest-docker-images)
 
 
-3. If ccd-docker already setup and all images/volumes exists and database points to Postgres9 then prior to pulling images run the below commands to delete existing images and volumes.
-  
-   If ccd-docker not setup proceed to step 4.
+3. **THIS STEP IS ONLY REQUIRED IF YOU NEED TO MIGRATE TO POSTGRES V11.** Proceeded to step 4 if this is your first time setting up ccd-docker
 
+- If ccd-docker has been previously setup, images/volumes and the database may point to **Postgres9**. Prior to pulling images run the below commands to **delete** existing images and volumes.
+- [Guide on migrating to V11](PostgresV11.md)
 ```bash
 ./ccd compose down
 ```
