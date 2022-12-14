@@ -633,7 +633,7 @@ function convert_input_file_to_json() {
   local input_as_json=$(echo $raw_csv_as_json \
     | jq -r -c 'map({
         "idamUser": {
-          "email": .email,
+          "email": (try(.email | sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) // null),
           "firstName": .firstName,
           "lastName": .lastName,
           "roles": (try(.roles | split("|") | walk( if type == "string" then (sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) else . end)) // null),
