@@ -973,66 +973,87 @@ function process_input_file() {
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
             echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
           else
+            local bRolesDiscarded=false
+            local discardedRolesMessage=""
+
             if [ $(checkAllowedRole "${rolesFromCSV}" "${MANUAL_ROLES}") -eq 1 ]; then
-              # FAIL:
-              fail_counter=$((fail_counter+1))
-              local reason="One or more roles defined cannot be assigned using this script"
-              responseMessage="ERROR: $reason"
-              inviteStatus="FAILED"
-              log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-              echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
-            else
+                local discardedRoles=$(returnNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
+                rolesFromCSV=$(stripNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
+                discardedRolesMessage="WARN: the following role(s) can only be added by eJust 3rd Line support via Snow: "
+                discardedRolesMessage="$discardedRolesMessage ${discardedRoles[*]}"
+                log_warn "file: ${filename} , action: ${operation} , email: ${email} , status: ${discardedRolesMessage}"
+                bRolesDiscarded=true
+            fi
 
-              #rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
+            #rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
 
-              if [ $(checkShouldAddDefaultRoles "${rolesFromCSV}") -eq 1 ]; then
+            if [ $(checkShouldAddDefaultRoles "${rolesFromCSV}") -eq 1 ]; then
                 log_debug "Adding default roles"
                 rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${DEFAULT_ROLES}")
-              else
+            else
                 log_debug "Skipping addition of default roles"
-              fi
+            fi
 
-              log_debug "Final roles to apply: ${rolesFromCSV}"
+            log_debug "Final roles to apply: ${rolesFromCSV}"
 
-              if [[ "$firstName" == "null" ]]; then
+            if [[ "$firstName" == "null" ]]; then
                 log_debug "firstName is empty setting to ' '"
                 idamUserJson=$(echo $idamUserJson | jq '.firstName = " "')
-              elif [[ "$lastName" == "null" ]]; then
+            elif [[ "$lastName" == "null" ]]; then
                 log_debug "lastName is empty setting to ' '"
                 idamUserJson=$(echo $idamUserJson | jq '.lastName = " "')
-              fi
+            fi
 
-              #Need to update the roles in idamUserJson
-              idamUserJson=$(echo $idamUserJson | jq --argjson rolesFromCSV "${rolesFromCSV}" '.roles = $rolesFromCSV')
-
-              log_debug "idamUserJson: ${idamUserJson}"
-
-              # make call to IDAM
-              submit_response=$(submit_user_registation "$idamUserJson")
-
-              # seperate submit_user_registation reponse
-              IFS=$'\n'
-              local response_array=($submit_response)
-              local inviteStatus=${response_array[0]}
-              local responseMessage=${response_array[1]}
-
-              if [ $inviteStatus == "SUCCESS" ]; then
-                # SUCCESS:
-                success_counter=$((success_counter+1))
-                lastModified=$(date -u +"%FT%H:%M:%SZ")
-                local reason="user successfully registered"
-                responseMessage="INFO: $reason"
-                log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
-              else
+            if [ "${rolesFromCSV}" = "[]" ]; then
                 # FAIL:
                 fail_counter=$((fail_counter+1))
-                local reason="failed registering user"
-                responseMessage="ERROR: $responseMessage"
+                local reason="No resulting roles to apply"
+                responseMessage="ERROR: $reason"
+
+                if [[ "$bRolesDiscarded" = true ]]; then
+                    responseMessage="$responseMessage $discardedRolesMessage"
+                fi
+
                 inviteStatus="FAILED"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${responseMessage}${NORMAL}"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
-              fi
+            else
+                #Need to update the roles in idamUserJson
+                idamUserJson=$(echo $idamUserJson | jq --argjson rolesFromCSV "${rolesFromCSV}" '.roles = $rolesFromCSV')
+
+                log_debug "idamUserJson: ${idamUserJson}"
+
+                # make call to IDAM
+                submit_response=$(submit_user_registation "$idamUserJson")
+
+                # seperate submit_user_registation reponse
+                IFS=$'\n'
+                local response_array=($submit_response)
+                local inviteStatus=${response_array[0]}
+                local responseMessage=${response_array[1]}
+
+                if [ $inviteStatus == "SUCCESS" ]; then
+                    # SUCCESS:
+                    success_counter=$((success_counter+1))
+                    lastModified=$(date -u +"%FT%H:%M:%SZ")
+                    local reason="user successfully registered"
+                    responseMessage="INFO: $reason"
+
+                    if [[ "$bRolesDiscarded" = true ]]; then
+                        responseMessage="$responseMessage $discardedRolesMessage"
+                    fi
+
+                    log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                    echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+                else
+                    # FAIL:
+                    fail_counter=$((fail_counter+1))
+                    local reason="failed registering user"
+                    responseMessage="ERROR: $responseMessage"
+                    inviteStatus="FAILED"
+                    echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+                    log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
+                fi
             fi
           fi
 
@@ -1045,117 +1066,127 @@ function process_input_file() {
 
           log_debug "email: ${email} - User exists, doing role addition logic"
 
+          local bRolesDiscarded=false
+          local discardedRolesMessage=""
+
           if [ $(checkAllowedRole "${rolesFromCSV}" "${MANUAL_ROLES}") -eq 1 ]; then
-            # FAIL:
-            fail_counter=$((fail_counter+1))
-            local reason="One or more roles defined cannot be assigned using this script"
-            responseMessage="ERROR: $reason"
-            inviteStatus="FAILED"
-            log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+            local discardedRoles=$(returnNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
+            rolesFromCSV=$(stripNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
+            discardedRolesMessage="WARN: the following role(s) can only be added by eJust 3rd Line support via Snow: "
+            discardedRolesMessage="$discardedRolesMessage ${discardedRoles[*]}"
+            log_warn "file: ${filename} , action: ${operation} , email: ${email} , status: ${discardedRolesMessage}"
+            bRolesDiscarded=true
+          fi
+
+          combinedCsvApiRoles=$(echo $rolesFromCSV $usersRolesFromApi | jq '.[]' | jq -s)
+
+          #rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
+
+          if [ $(checkShouldAddDefaultRoles "${rolesFromCSV}") -eq 1 ]; then
+            log_debug "Adding default roles"
+            rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${DEFAULT_ROLES}")
           else
+            log_debug "Skipping addition of default roles"
+          fi
 
-            combinedCsvApiRoles=$(echo $rolesFromCSV $usersRolesFromApi | jq '.[]' | jq -s)
+          ARRAY=() #declare empty shell array
 
-            #rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
-
-            if [ $(checkShouldAddDefaultRoles "${rolesFromCSV}") -eq 1 ]; then
-              log_debug "Adding default roles"
-              rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${DEFAULT_ROLES}")
-            else
-              log_debug "Skipping addition of default roles"
-            fi
-
-            ARRAY=() #declare empty shell array
-
-            #start - logic to add only the unique roles in csv by comparing already assigned roles
-            for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
-              local found=0
-              for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
-                if [ $csvRole == $apiRole ]; then
-                  found=1
-                  log_debug "email: ${email}, role: $csvRole  - already assigned"
-                fi
-              done
-              if [ $found -eq 0 ]; then
-                #Convert to lower-case if required
-                csvRole=$(convertToLowerCase "${csvRole}")
-                log_debug "email: ${email}, role: $csvRole  - Unique (TO BE ADDED)"
-                #Add unique role to be added to bash array
-                ARRAY+=("${csvRole}")
+          #start - logic to add only the unique roles in csv by comparing already assigned roles
+          for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+            local found=0
+            for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
+              if [ $csvRole == $apiRole ]; then
+                found=1
+                log_debug "email: ${email}, role: $csvRole  - already assigned"
               fi
             done
-            #echo "Bash array of unique roles is (CALC): " ${ARRAY[*]}
-            #end - logic to add only the unique roles in csv by comparing already assigned roles
+            if [ $found -eq 0 ]; then
+              #Convert to lower-case if required
+              csvRole=$(convertToLowerCase "${csvRole}")
+              log_debug "email: ${email}, role: $csvRole  - Unique (TO BE ADDED)"
+              #Add unique role to be added to bash array
+              ARRAY+=("${csvRole}")
+            fi
+          done
+          #echo "Bash array of unique roles is (CALC): " ${ARRAY[*]}
+          #end - logic to add only the unique roles in csv by comparing already assigned roles
 
-            arr='[]'  # Empty JSON array
-            for x in "${ARRAY[@]}"; do
-              arr=$(jq -n --arg x "$x" --argjson arr "$arr" '$arr + [$x]')
-            done
+          arr='[]'  # Empty JSON array
+          for x in "${ARRAY[@]}"; do
+            arr=$(jq -n --arg x "$x" --argjson arr "$arr" '$arr + [$x]')
+          done
 
-            uniqueRolesJson=$(echo ${arr} | jq 'map( {"name" : . } ) | unique')
-            #echo "JSON array of unique roles is (CALC): " $uniqueRolesJson
+          uniqueRolesJson=$(echo ${arr} | jq 'map( {"name" : . } ) | unique')
+          #echo "JSON array of unique roles is (CALC): " $uniqueRolesJson
 
-            log_debug "Final roles to apply: ${uniqueRolesJson}"
+          log_debug "Final roles to apply: ${uniqueRolesJson}"
 
-            if [ "${uniqueRolesJson}" != "[]" ]; then
-              # make call to IDAM to update roles for existing user
-              submit_response=$(post_user_roles "$userId" "$uniqueRolesJson")
-              #echo $submit_response
+          if [ "${uniqueRolesJson}" != "[]" ]; then
+            # make call to IDAM to update roles for existing user
+            submit_response=$(post_user_roles "$userId" "$uniqueRolesJson")
+            #echo $submit_response
 
-              # seperate submit_response reponse
-              IFS=$'\n'
-              local response_array=($submit_response)
-              local inviteStatus=${response_array[0]}
-              local responseMessage=${response_array[1]}
+            # seperate submit_response reponse
+            IFS=$'\n'
+            local response_array=($submit_response)
+            local inviteStatus=${response_array[0]}
+            local responseMessage=${response_array[1]}
 
-              if [ $inviteStatus == "SUCCESS" ]; then
-                # SUCCESS:
-                success_counter=$((success_counter+1))
-                lastModified=$(date -u +"%FT%H:%M:%SZ")
-                inviteStatus="SUCCESS"
-                local reason="role(s) successfully assigned"
-                echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason"
-                log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+            if [ $inviteStatus == "SUCCESS" ]; then
+              # SUCCESS:
+              success_counter=$((success_counter+1))
+              lastModified=$(date -u +"%FT%H:%M:%SZ")
+              inviteStatus="SUCCESS"
+              local reason="role(s) successfully assigned"
+              echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason"
+              log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              responseMessage=""
+              #Set user activate state to true if false
+              if [ $userActiveState == "false" ]; then
+                log_debug "email: ${email} - User activate state=false, activating user"
+                #user activate state is false, need to call patch user api to set to true first
+                #note, update_user is a PATCH call, but we cannot modify any roles using this endpoint
+                body='{"active":true}'
+                submit_response=$(update_user "${userId}" "${body}")
 
-                #Set user activate state to true if false
-                if [ $userActiveState == "false" ]; then
-                  log_debug "email: ${email} - User activate state=false, activating user"
-                  #user activate state is false, need to call patch user api to set to true first
-                  #note, update_user is a PATCH call, but we cannot modify any roles using this endpoint
-                  body='{"active":true}'
-                  submit_response=$(update_user "${userId}" "${body}")
-
-                  if [[ "$submit_response" == *"$email"* ]]; then
-                    log_info "file: ${filename} , email: ${email} - SUCCESS, user active state set to true"
-                    isActive="TRUE"
-                    responseMessage="INFO: user has been activated"
-                  else
-                    log_error "file: ${filename} , email: ${email} - FAILED, user active state could not be set"
-                    responseMessage="ERROR: user active state could not be set to true"
-                  fi
+                if [[ "$submit_response" == *"$email"* ]]; then
+                  log_info "file: ${filename} , email: ${email} - SUCCESS, user active state set to true"
+                  isActive="TRUE"
+                  responseMessage="INFO: user has been activated"
+                else
+                  log_error "file: ${filename} , email: ${email} - FAILED, user active state could not be set"
+                  responseMessage="ERROR: user active state could not be set to true"
                 fi
-              else
-                # FAIL:
-                fail_counter=$((fail_counter+1))
-                inviteStatus="FAILED"
-                local reason="failed assigning one or more roles"
-                responseMessage="ERROR: $responseMessage"
-                if [[ $responseMessage = *"account is stale"* ]]; then
-                    responseMessage="$responseMessage INFO: user needs to reset their password themselves for the account to be reactivated"
-                fi
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
-                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
+              fi
+
+              if [[ "$bRolesDiscarded" = true ]]; then
+                  responseMessage="$responseMessage $discardedRolesMessage"
               fi
             else
-              # SKIP:
-              skipped_counter=$((skipped_counter+1))
-              inviteStatus="SKIPPED"
-              local reason="required roles are already assigned, no role amendments required"
-              responseMessage="WARN: $reason"
-              log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-              echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+              # FAIL:
+              fail_counter=$((fail_counter+1))
+              inviteStatus="FAILED"
+              local reason="failed assigning one or more roles"
+              responseMessage="ERROR: $responseMessage"
+              if [[ $responseMessage = *"account is stale"* ]]; then
+                  responseMessage="$responseMessage INFO: user needs to reset their password themselves for the account to be reactivated"
+              fi
+              echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+              log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
             fi
+          else
+            # SKIP:
+            skipped_counter=$((skipped_counter+1))
+            inviteStatus="SKIPPED"
+            local reason="required roles are already assigned, no role amendments required"
+            responseMessage="WARN: $reason"
+
+            if [[ "$bRolesDiscarded" = true ]]; then
+              responseMessage="$responseMessage $discardedRolesMessage"
+            fi
+
+            log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+            echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
           fi
 
           # prepare output (NB: escape generated values for CSV)
@@ -1677,6 +1708,57 @@ function checkAllowedRole {
   done
 
   echo $notAllowedRoleFound
+}
+
+function stripNotAllowedRoles {
+  local rolesFromCSV=$1
+  local rolesToCheckFor=$2
+  local notAllowedRolesArray=( $(splitStringToArray "|" "${rolesToCheckFor}") )
+
+  local rolesFromCsvAsArray=()
+  local finalRoles=()
+
+  for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+    rolesFromCsvAsArray+=("${csvRole}")
+  done
+
+  for role in "${rolesFromCsvAsArray[@]}"; do
+    notAllowedRoleFound=0
+    for notAllowedRole in "${notAllowedRolesArray[@]}"; do
+        if [ "${role}" == "$notAllowedRole" ]; then
+            notAllowedRoleFound=1
+            break
+        fi
+    done
+    if [ $notAllowedRoleFound -eq 0 ]; then
+      finalRoles+=("${role}")
+    fi
+  done
+
+
+  if [ ${#finalRoles[@]} -eq 0 ]; then
+    rolesFromCSV="[]"
+  else
+    rolesFromCSV=$(printf '%s\n' "${finalRoles[@]}" | jq -R . | jq -s .)
+  fi
+  echo "${rolesFromCSV}"
+}
+
+function returnNotAllowedRoles {
+  local rolesFromCSV=$1
+  local rolesToCheckFor=$2
+  local notAllowedRolesArray=( $(splitStringToArray "|" "${rolesToCheckFor}") )
+  local rolesDiscardedArray=()
+
+  for notAllowedRole in "${notAllowedRolesArray[@]}"; do
+    for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+        if [ "${notAllowedRole}" == "$csvRole" ]; then
+            rolesDiscardedArray+=("${notAllowedRole}")
+        fi
+    done
+  done
+
+  echo "${rolesDiscardedArray[@]}"
 }
 
 function checkShouldAddRole {

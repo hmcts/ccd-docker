@@ -3,7 +3,7 @@ add,ccd.test.add.user0@hmcts.gov.uk,fn1,ln1,,FALSE,FAILED,,User not found. Roles
 add,ccd.test.add.user0@hmcts.gov.uk,,,manage-translations|caseworker-role-one,FALSE,FAILED,,User not found. Both first name and last name cannot be empty
 add,ccd.test.add.user01@hmcts.gov.uk,fn01,ln01,caseworker-role-one|caseworker-role-two,FALSE,SUCCESS,,User not found. should add caseworker role if there are other caseworker related roles to be added
 add,ccd.test.add.user02@hmcts.gov.uk,fn02,ln02,manage-translations,FALSE,SUCCESS,,User not found. should NOT add caseworker role if there are no other caseworker related roles to be added
-add,ccd.test.add.user03@hmcts.gov.uk,fn03,ln03,manage-translations|caseworker-role-one|judiciary,FALSE,FAILED,,User not found. judiciary (or any other special roles?) cannot be assigned via script
+add,ccd.test.add.user03@hmcts.gov.uk,fn03,ln03,manage-translations|caseworker-role-one|judiciary,FALSE,SUCCESS,,"add all roles except judiciary, warn about judiciary"
 add,ccd.test.add.user04@hmcts.gov.uk,fn04,ln04,caseworker-role-three|caseworker-role-four,FALSE,SUCCESS,,User not found. User 1 added with some roles
 add,ccd.test.add.user04@hmcts.gov.uk,fn04,ln04,caseworker-role-two,FALSE,SUCCESS,re-run of script where status = SUCCESS,User not found. User 1 added with different roles for the second time
 add,ccd.test.add.user05@hmcts.gov.uk,fn05,,caseworker-role-five|caseworker-role-six,FALSE,SUCCESS,,"User not found. If only first name present, keep space for last name"
@@ -12,14 +12,16 @@ add,ccd.test.add.user1@hmcts.gov.uk,fn1,ln1,,TRUE,FAILED,User is inactive,roles 
 add,ccd.test.add.user2@hmcts.gov.uk,,,caseworker-role-two,TRUE,SUCCESS,user inactive and no roles or only caseworker,Both first name and last name ignored
 add,ccd.test.add.user3@hmcts.gov.uk,,,caseworker-role-three|caseworker-role-four,TRUE,SUCCESS,user inactive no roles,Should activate the user and add all the roles including caseworker role
 add,ccd.test.add.user4@hmcts.gov.uk,,,manage-translations,TRUE,SUCCESS,user inactive no roles,Should activate the user and add all the roles and no caseworker role
-add,ccd.test.add.user5@hmcts.gov.uk,,,caseworker-role-five|judiciary,TRUE,FAILED,user inactive with or without roles, judiciary (or any other special roles?) cannot be assigned via script
+add,ccd.test.add.user5@hmcts.gov.uk,,,caseworker-role-five|judiciary,TRUE,SUCCESS,user inactive with or without roles,"add all roles except judiciary, warn about judiciary"
 add,ccd.test.add.user6@hmcts.gov.uk,,,,TRUE,FAILED,user exists,User found. Roles are mandatory
 add,ccd.test.add.user7@hmcts.gov.uk,,,caseworker-role-five|caseworker-role-six,TRUE,SUCCESS,user exists,User found. Both first name and last name ignored
 add,ccd.test.add.user8@hmcts.gov.uk,,,caseworker-role-two|caseworker-role-three,TRUE,SUCCESS,user exists with no roles,User found. should add caseworker role if there are other caseworker related roles to be added
 add,ccd.test.add.user9@hmcts.gov.uk,,,manage-translations,TRUE,SUCCESS,,User found. should NOT add caseworker role if there are no other caseworker related roles to be added
-add,ccd.test.add.user10@hmcts.gov.uk,,,caseworker-role-six|judiciary,TRUE,FAILED,,User found. judiciary (or any other special roles?) cannot be assigned via script
+add,ccd.test.add.user10@hmcts.gov.uk,,,caseworker-role-six|judiciary,TRUE,SUCCESS,,"add all roles except judiciary, warn about judiciary"
 add,ccd.test.add.user07@hmcts.gov.uk,fn07,ln07,caseworker|caseworker-role-six,FALSE,SUCCESS,user exists with no roles,User not found. Caseworker role mentioned in the roles
 add,ccd.test.add.user11@hmcts.gov.uk,,,caseworker|caseworker-role-six,TRUE,SUCCESS,user inactive no roles,User is inactive. Caseworker role mentioned in the roles
 add,ccd.test.add.user12@hmcts.gov.uk,,,caseworker|caseworker-role-six,TRUE,SUCCESS,"user exists, active no roles",User found. Caseworker role mentioned in the roles
 add,ccd.test.add.user13@hmcts.gov.uk,,,caseworker|caseworker-role-six,TRUE,SKIPPED,"user exists, active all roles already assigned",nothing to change
 add,ccd.test.add.user07@hmcts.gov.uk,fn07,ln07,caseworker-role-two|ia-roles,FALSE,FAILED,user does not exist,User does not exist. Should fail as ia-roles does not exist
+add,ccd.test.add.user08@hmcts.gov.uk,fn08,ln08,judiciary,FALSE,FAILED,user does not exist,"skip judicary, fail cannot create user with no roles to apply"
+add,ccd.test.add.user13@hmcts.gov.uk,,,judiciary,TRUE,SKIPPED,user exists with or without roles,"skip judicary, Skip as no roles to apply"
