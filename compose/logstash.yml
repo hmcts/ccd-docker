@@ -6,7 +6,7 @@ services:
     container_name: ccd-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
-      - DATA_STORE_URL=jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/ccd_data?stringtype=unspecified&ssl=false
+      - DATA_STORE_URL=jdbc:postgresql://ccd-shared-database:5432/ccd_data?stringtype=unspecified&ssl=false
       - DATA_STORE_USER=ccd
       - DATA_STORE_PASS=ccd
       - ES_HOSTS=http://ccd-elasticsearch:9200
