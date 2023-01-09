@@ -16,5 +16,11 @@ delete,ccd.test.delete.user13@hmcts.gov.uk,,,caseworker-role-two,TRUE,SUCCESS,"u
 delete,ccd.test.delete.user14@hmcts.gov.uk,,,caseworker-role-two,TRUE,SUCCESS,"user exists with caseworker-role-one, caseworker-role-two, caseworker and  payment",should remove only caseworker-role-two user should remain active
 delete,ccd.test.delete.user15@hmcts.gov.uk,,,caseworker-role-one|caseworker-role-two,TRUE,SUCCESS,"user exists with caseworker-role-one, caseworker-role-two, caseworker and  payment",should remove all caseworker roles leave payment user should remain active
 delete,ccd.test.delete.user16@hmcts.gov.uk,,,caseworker|caseworker-role-one|caseworker-role-two,TRUE,SUCCESS,"user exists with caseworker-role-one, caseworker-role-two, caseworker and  payment",should remove all caseworker roles leave payment user should remain active
-delete,ccd.test.delete.user17@hmcts.gov.uk,,,caseworker,TRUE,SUCCESS,"user exists with caseworker",should remove caseworker role and deactivate the user
-delete,ccd.test.delete.user18@hmcts.gov.uk,,,caseworker,TRUE,SUCCESS,"user exists with caseworker and payment",should remove caseworker role leave payment user should remain active
+delete,ccd.test.delete.user17@hmcts.gov.uk,,,caseworker,TRUE,SUCCESS,user exists with caseworker,should remove caseworker role and deactivate the user
+delete,ccd.test.delete.user18@hmcts.gov.uk,,,caseworker,TRUE,SUCCESS,user exists with caseworker and payment,should remove caseworker role leave payment user should remain active
+delete,ccd.test.delete.user19@hmcts.gov.uk,,,all-roles,TRUE,SUCCESS,user exists with or without roles,should remove ALL roles user should be de-actived
+delete,ccd.test.delete.user20@hmcts.gov.uk,,,ia-roles,TRUE,SUCCESS,user exists with all ia-roles and all sscs roles,should remove all ia-roles but none of the sscs roles or caseworker default role
+delete,ccd.test.delete.user21@hmcts.gov.uk,,,employment-roles,TRUE,SUCCESS,"user exists and active with some employment roles, other caseworker roles and caseworker role",should leave caseworker role and remain active
+delete,ccd.test.delete.user22@hmcts.gov.uk,,,employment-roles|ia-roles|cwd-user|payments,TRUE,SUCCESS,"user exists with some employment roles, some ia-roles, cwd-user, payment and caseworker role",should remove all roles and deactive the user
+delete,ccd.test.delete.user23@hmcts.gov.uk,,,employment-roles|ia-roles|cwd-user|payments,TRUE,SUCCESS,user exists with NO roles assigned,should deactivate the user
+delete,ccd.test.delete.user24@hmcts.gov.uk,,,caseworker-role-two,TRUE,SUCCESS,user exists with only caseworker role,should remove caseworker and deactivate the user

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-source ./bulk-user-setup.config > out.log 2> /dev/null
+# source ./bulk-user-setup.config > out.log 2> /dev/null
+source ./bulk-user-setup.config 2> /dev/null
 
 is_test=false
 
@@ -819,7 +820,7 @@ function process_input_file() {
           responseMessage="ERROR: $reason"
           inviteStatus="FAILED"
           log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-          echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}${reason}${NORMAL}"
+          echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}${reason}${NORMAL}"
 
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -833,7 +834,7 @@ function process_input_file() {
           responseMessage="ERROR: $reason"
           inviteStatus="FAILED"
           log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-          echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+          echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -848,7 +849,7 @@ function process_input_file() {
             responseMessage="ERROR: $reason"
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+            echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
             # prepare output (NB: escape generated values for CSV)
             input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -863,7 +864,7 @@ function process_input_file() {
             responseMessage="ERROR: $reason"
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+            echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
             # prepare output (NB: escape generated values for CSV)
             input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -877,7 +878,7 @@ function process_input_file() {
             responseMessage="ERROR: $reason"
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+            echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
             # prepare output (NB: escape generated values for CSV)
             input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -916,7 +917,7 @@ function process_input_file() {
                   responseMessage=""
                   inviteStatus="SUCCESS"
                   log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                  echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+                  echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
 
                   # prepare output (NB: escape generated values for CSV)
                   input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email] | @csv')
@@ -928,7 +929,7 @@ function process_input_file() {
                   responseMessage="ERROR: $reason"
                   inviteStatus="FAILED"
                   log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-                  echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+                  echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
                   # prepare output (NB: escape generated values for CSV)
                   input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -953,7 +954,7 @@ function process_input_file() {
                 responseMessage=""
                 inviteStatus="SUCCESS"
                 log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+                echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
 
                 # prepare output (NB: escape generated values for CSV)
                 input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email] | @csv')
@@ -971,7 +972,7 @@ function process_input_file() {
             responseMessage="ERROR: $reason"
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+            echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
           else
             local bRolesDiscarded=false
             local discardedRolesMessage=""
@@ -1015,7 +1016,7 @@ function process_input_file() {
                 fi
 
                 inviteStatus="FAILED"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${responseMessage}${NORMAL}"
+                echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${responseMessage}${NORMAL}"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
             else
                 #Need to update the roles in idamUserJson
@@ -1044,14 +1045,14 @@ function process_input_file() {
                     fi
 
                     log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                    echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+                    echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
                 else
                     # FAIL:
                     fail_counter=$((fail_counter+1))
                     local reason="failed registering user"
                     responseMessage="ERROR: $responseMessage"
                     inviteStatus="FAILED"
-                    echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+                    echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
                     log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
                 fi
             fi
@@ -1138,7 +1139,7 @@ function process_input_file() {
               lastModified=$(date -u +"%FT%H:%M:%SZ")
               inviteStatus="SUCCESS"
               local reason="role(s) successfully assigned"
-              echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason"
+              echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
               log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               responseMessage=""
               #Set user activate state to true if false
@@ -1171,7 +1172,7 @@ function process_input_file() {
               if [[ $responseMessage = *"account is stale"* ]]; then
                   responseMessage="$responseMessage INFO: user needs to reset their password themselves for the account to be reactivated"
               fi
-              echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+              echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
               log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
             fi
           else
@@ -1186,7 +1187,7 @@ function process_input_file() {
             fi
 
             log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+            echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
           fi
 
           # prepare output (NB: escape generated values for CSV)
@@ -1207,7 +1208,7 @@ function process_input_file() {
                 responseMessage="ERROR: $reason"
                 inviteStatus="FAILED"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+                echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
               else
                 log_debug "email: ${email} - doing firstname/lastname update"
 
@@ -1233,14 +1234,14 @@ function process_input_file() {
                   inviteStatus="SUCCESS"
                   local reason="user firstname/lastname successfully updated"
                   log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                  echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+                  echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
                 else
                   # FAIL:
                   fail_counter=$((fail_counter+1))
                   inviteStatus="FAILED"
                   local reason="failed updating user firstname/lastname"
                   log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-                  echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+                  echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
                 fi
               fi
             else
@@ -1250,7 +1251,7 @@ function process_input_file() {
               local reason="no changes in firstname/lastname detected, nothing to update"
               responseMessage="WARN: $reason"
               log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-              echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+              echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
             fi
           else
             # SKIP:
@@ -1259,7 +1260,7 @@ function process_input_file() {
             local reason="${UserExistsNotActive}"
             responseMessage="WARN: $reason"
             log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
+            echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
           fi
 
           # prepare output (NB: escape generated values for CSV)
@@ -1274,7 +1275,7 @@ function process_input_file() {
           local reason="User does not exist, cannot process $operation operation"
           responseMessage="WARN: $reason"
           log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-          echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+          echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
 
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -1289,7 +1290,7 @@ function process_input_file() {
           responseMessage="ERROR: $reason"
           inviteStatus="FAILED"
           log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-          echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+          echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "delete" ]; then
 
@@ -1306,68 +1307,85 @@ function process_input_file() {
           #declare empty bash array to store api fetched roles
           local rolesFromApiArray=()
 
-          #populate array with fetched api roles
-          for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
-            if [ "$apiRole" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
-                default_caseworker_role_already_assigned=true
-            fi
-            rolesFromApiArray+=("${apiRole}")
-          done
+          log_debug "Current assigned roles (based on API): ${usersRolesFromApi}"
 
-          #add the expanded roles if required (i.e. ia_roles etc.)
-          rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
-
-          log_debug "Computed/expanded CSV roles supplied for deletion: ${rolesFromCSV}"
-
-          for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
-            if [ "$csvRole" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
-                default_caseworker_role_provided=true
-            fi
-            for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
-              #add csv role to array excluding DEFAULT_CASEWORKER_ROLE
-              if [ "$csvRole" == "$apiRole" ] && [ "$csvRole" != "${DEFAULT_CASEWORKER_ROLE}" ]; then
-                rolesToRemoveArray+=("${csvRole}")
-              fi
-            done
-          done
-
-          #remove the roles to be deleted from api roles (assuming deletion to succeed)
-          #for del in "${rolesToRemoveArray[@]}"
-          #do
-          #   rolesFromApiArray=( "${rolesFromApiArray[@]/$del}" )
-          #done
-
-          rolesFromApiArray=($(removeFromArray2 "${rolesFromApiArray}" "${rolesToRemoveArray}"))
-
-          #Check if any more caseworker-* roles remain for the user
-          #if not then safe to remove caseworker
-          local otherServiceRole=false
-          for role in "${rolesFromApiArray[@]}"
-          do
-              if [[ "${role}" == "${DEFAULT_CASEWORKER_ROLE}-"* ]]; then
-                  otherServiceRole=true
-                  break
-              fi
-          done
-
-          if [[ "$otherServiceRole" = false ]]; then
-              if [[ "$default_caseworker_role_already_assigned" = true ]]; then
-                rolesFromApiArray=($(removeFromArray2 "${rolesFromApiArray}" "${DEFAULT_CASEWORKER_ROLE}"))
-                #no other caseworker- roles, remove caseworker also
-                rolesToRemoveArray+=("${DEFAULT_CASEWORKER_ROLE}")
-              fi
-          fi
-
-          local rolesFromApiArray_count=${#rolesFromApiArray[@]}
-
-          log_debug "default_caseworker_role_provided = ${default_caseworker_role_provided}"
-          log_debug "default_caseworker_role_already_assigned = ${default_caseworker_role_already_assigned}"
-          log_debug "Any more caseworker- roles remaining = ${otherServiceRole}"
-          log_debug "rolesFromApiArray_count after deletions would be: ${rolesFromApiArray_count}"
-          log_debug "Assigned roles to remove: ${rolesToRemoveArray[*]}"
-
-          if [ $rolesFromApiArray_count == 0 ]; then
+          if [ $(checkContainsStringRole "${rolesFromCSV}" "${ALL_ROLES}") -eq 1 ]; then
+            log_debug "Operation: ${operation}, contains role:  ${ALL_ROLES}, PUT API call will be used to remove all roles and de-activate the user"
             USE_PUT=1
+          elif [ $(echo $usersRolesFromApi | jq -e '. | length') == 0 ]; then
+            log_debug "Operation: ${operation}, User currently has NO roles assigned, PUT API call will be used to de-activate the user"
+            USE_PUT=1
+          else
+            #populate array with fetched api roles
+            for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
+                if [ "$apiRole" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
+                    default_caseworker_role_already_assigned=true
+                fi
+                rolesFromApiArray+=("${apiRole}")
+            done
+
+            #add the expanded roles if required (i.e. ia_roles etc.)
+            rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
+
+            log_debug "Computed/expanded CSV roles supplied for deletion: ${rolesFromCSV}"
+
+            for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+                if [ "$csvRole" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
+                    default_caseworker_role_provided=true
+                fi
+                for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
+                    #add csv role to array excluding DEFAULT_CASEWORKER_ROLE
+                    if [ "$csvRole" == "$apiRole" ] && [ "$csvRole" != "${DEFAULT_CASEWORKER_ROLE}" ]; then
+                        rolesToRemoveArray+=("${csvRole}")
+                    fi
+                done
+            done
+
+            #remove the roles to be deleted from api roles (assuming deletion to succeed)
+            #for del in "${rolesToRemoveArray[@]}"
+            #do
+            #   rolesFromApiArray=( "${rolesFromApiArray[@]/$del}" )
+            #done
+
+            rolesFromApiArray=($(removeFromArray2 "${rolesFromApiArray}" "${rolesToRemoveArray}"))
+
+            #Check if any more caseworker-* roles remain for the user
+            #if not then safe to remove caseworker
+            local otherServiceRole=false
+            for role in "${rolesFromApiArray[@]}"
+            do
+                if [[ "${role}" == "${DEFAULT_CASEWORKER_ROLE}-"* ]]; then
+                    otherServiceRole=true
+                    break
+                fi
+            done
+
+            if [[ "$otherServiceRole" = false ]]; then
+                if [[ "$default_caseworker_role_already_assigned" = true ]]; then
+                    rolesFromApiArray=($(removeFromArray2 "${rolesFromApiArray}" "${DEFAULT_CASEWORKER_ROLE}"))
+                    #no other caseworker- roles, remove caseworker also
+                    rolesToRemoveArray+=("${DEFAULT_CASEWORKER_ROLE}")
+                fi
+            fi
+
+            local rolesFromApiArray_count=${#rolesFromApiArray[@]}
+
+            #local rolesFromApiArray_count=0
+            #for i in "${rolesFromApiArray[@]}"
+            #do
+            #   rolesFromApiArray_count=$((rolesFromApiArray_count+1))
+            #done
+
+            log_debug "default_caseworker_role_provided = ${default_caseworker_role_provided}"
+            log_debug "default_caseworker_role_already_assigned = ${default_caseworker_role_already_assigned}"
+            log_debug "Any more caseworker- roles remaining = ${otherServiceRole}"
+            log_debug "rolesFromApiArray_count after deletions would be: ${rolesFromApiArray_count}"
+            log_debug "API based roles remaining after deletions would be: ${rolesFromApiArray[*]}"
+            log_debug "Assigned roles to remove: ${rolesToRemoveArray[*]}"
+
+            if [ $rolesFromApiArray_count == 0 ]; then
+                USE_PUT=1
+            fi
           fi
 
           if [ $userActiveState == "true" ]; then
@@ -1383,42 +1401,62 @@ function process_input_file() {
 
               if [ $inviteStatus == "SUCCESS" ]; then
                 # SUCCESS:
+
+                local warnSetActiveStateMessage=""
+
+                #Set user activate state to false
+                if [ $userActiveState == "true" ]; then
+                    log_debug "email: ${email} - User activate state=true, de-activating user"
+                    body='{"active":false}'
+                    submit_response=$(update_user "${userId}" "${body}")
+
+                    # seperate submit_response reponse
+                    IFS=$'\n'
+                    local response_array=($submit_response)
+                    local inviteStatus=${response_array[0]}
+                    local responseMessage=${response_array[1]}
+
+                    if [[ "$submit_response" == *"$email"* ]]; then
+                      log_warn "file: ${filename} , email: ${email} - SUCCESS, user active state set to false"
+                      isActive="FALSE"
+                      responseMessage=""
+                      warnSetActiveStateMessage="WARN: user has been deactivated"
+                    else
+                      log_error "file: ${filename} , email: ${email} - FAILED, user active state could not be set to false, API Error: ${responseMessage}"
+                      responseMessage="WARN: user account is suspended"
+                      warnSetActiveStateMessage="WARN: failed deactivating user"
+                    fi
+                fi
+
                 success_counter=$((success_counter+1))
                 lastModified=$(date -u +"%FT%H:%M:%SZ")
                 inviteStatus="SUCCESS"
-                local reason="All specified roles were successfully removed from the user"
-                responseMessage=" "
-                echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
+                local reason="All roles were successfully removed from the user"
+
+                if [ $userActiveState == "true" ]; then
+                    echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}: ${YELLOW}${warnSetActiveStateMessage}"
+                else
+                    echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
+                fi
+
                 log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                responseMessage="${reason} ${responseMessage} ${warnSetActiveStateMessage}"
               else
                 # FAIL:
                 fail_counter=$((fail_counter+1))
                 inviteStatus="FAILED"
-                local reason="failed removing all roles"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+                local reason="Failed removing all roles"
+                echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
-              fi
-
-              #Set user activate state to false
-              if [ $userActiveState == "true" ] && [ $inviteStatus == "SUCCESS" ]; then
-                log_debug "email: ${email} - User activate state=true, de-activating user"
-                body='{"active":false}'
-                submit_response=$(update_user "${userId}" "${body}")
-
-                if [[ "$submit_response" == *"$email"* ]]; then
-                  log_warn "file: ${filename} , email: ${email} - SUCCESS, user active state set to false"
-                  responseMessage="INFO: user has been deactivated"
-                  isActive="FALSE"
-                else
-                  log_error "file: ${filename} , email: ${email} - FAILED, user active state could not be set"
-                  responseMessage="ERROR: user active state could not be set to false"
-                fi
               fi
             else
               local addedCounter=0
               local failedToAddCounter=0
 
               local rolesToRemoveArray_count=${#rolesToRemoveArray[@]}
+
+              local rolesDeleted=()
+              local rolesNotDeleted=()
 
               #for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
               for csvRole in "${rolesToRemoveArray[@]}"; do
@@ -1433,37 +1471,42 @@ function process_input_file() {
                   addedCounter=$((addedCounter+1))
                   local reason="role $csvRole successfully removed"
                   log_info "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                  rolesDeleted+=("${csvRole}")
                 else
                   # FAIL:
                   failedToAddCounter=$((failedToAddCounter+1))
                   local reason="failed removing role $csvRole"
                   log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
+                  rolesNotDeleted+=("${csvRole}")
                 fi
               done
 
               if [ $rolesToRemoveArray_count == 0 ]; then
+                # SKIPPED:
                 skipped_counter=$((skipped_counter+1))
                 inviteStatus="SKIPPED"
                 local reason="None of the roles defined are currently assigned to the user"
                 responseMessage="WARN: $reason"
                 log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+                echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
               elif [ "$failedToAddCounter" -gt 0 ] && [ "$addedCounter" -gt 0 ]; then
-                # FAIL:
+                # PARTIALLY-FAILED:
                 fail_counter=$((fail_counter+1))
                 lastModified=$(date -u +"%FT%H:%M:%SZ")
                 inviteStatus="PARTIALLY-FAILED"
                 local reason="Some roles could not be unassigned, please check logs for further information"
                 responseMessage="ERROR: $reason"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+                 "${alpha[@]}"
+                responseMessage="INFO: Roles successfully removed: "${rolesDeleted[@]}" ERROR: Roles failed removal: "${rolesNotDeleted[*]}""
+                echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
               elif [ "$failedToAddCounter" -eq 0 ] && [ "$addedCounter" -gt 0 ]; then
                 # SUCCESS:
                 success_counter=$((success_counter+1))
                 lastModified=$(date -u +"%FT%H:%M:%SZ")
                 inviteStatus="SUCCESS"
-                local reason="All specified roles were successfully removed from the user"
-                responseMessage=" "
+                local reason="Specified roles were successfully removed from the user"
+                responseMessage="INFO: Roles successfully removed: "${rolesDeleted[*]}""
                 echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
                 log_info "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               else
@@ -1472,7 +1515,7 @@ function process_input_file() {
                 inviteStatus="FAILED"
                 local reason="Roles could not be unassigned, please check logs for further information"
                 responseMessage="ERROR: $reason"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+                echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
               fi
             fi
@@ -1483,7 +1526,7 @@ function process_input_file() {
             local reason="${UserExistsNotActive}"
             responseMessage="WARN: $reason"
             log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
+            echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
           fi
 
           # prepare output (NB: escape generated values for CSV)
@@ -1498,7 +1541,7 @@ function process_input_file() {
         skipped_counter=$((skipped_counter+1))
         local reason="Request already processed previously"
         responseMessage="WARN: $reason"
-        echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
+        echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
         log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
 
         # prepare output
@@ -1525,7 +1568,7 @@ function process_input_file() {
 
     log_debug "End - processing input file ${filepath_input_original}"
 
-    echo "Process is complete: ${GREEN}success: ${success_counter}${NORMAL}, ${YELLOW}skipped: ${skipped_counter}${NORMAL}, ${RED}fail: ${fail_counter}${NORMAL}, total: ${total_counter}"
+    echo "${NORMAL}Process is complete: ${GREEN}success: ${success_counter}${NORMAL}, ${YELLOW}skipped: ${skipped_counter}${NORMAL}, ${RED}fail: ${fail_counter}${NORMAL}, total: ${total_counter}"
 
     if [ "$isResultColumnPresent" -eq 1 ]; then
         local testResult=""
@@ -1606,7 +1649,8 @@ function removeFromArray2 {
       done
     done
 
-    echo "${rolesFromApiArray[@]}"
+    #echo "${rolesFromApiArray[@]}"
+    echo "${rolesFromApiArray[*]}"
 }
 
 function addRolesToCSVRoles {
@@ -1708,6 +1752,22 @@ function checkAllowedRole {
   done
 
   echo $notAllowedRoleFound
+}
+
+function checkContainsStringRole {
+  local rolesFromCSV=$1
+  local roleToCheckFor=$2
+
+  local found=0
+
+  for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+    if [ "${csvRole}" == "$roleToCheckFor" ]; then
+      found=1
+      break
+    fi
+  done
+
+  echo $found
 }
 
 function stripNotAllowedRoles {
