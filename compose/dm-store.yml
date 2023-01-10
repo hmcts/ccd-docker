@@ -25,7 +25,7 @@ services:
       IDAM_SUPERUSER_EMAIL:
       IDAM_SECRET_KEY: "${IDAM_KEY_DM_STORE}"
       GOV_NOTIFY_API_KEY:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://${CCD_POSTGRES_11:-ccd-shared-database}:5432/evidence
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ccd-shared-database:5432/evidence
       SPRING_DATASOURCE_USERNAME: "${DB_USERNAME}"
       SPRING_DATASOURCE_PASSWORD: "${DB_PASSWORD}"
       ENABLE_AZURE_STORAGE_CONTAINER: "true"
@@ -57,7 +57,7 @@ services:
     #      debug mode
     #    JAVA_OPTS: -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=*:5005
     depends_on:
-      - ${CCD_POSTGRES_11:-ccd-shared-database}
+      - ccd-shared-database
       - service-auth-provider-api
       - azure-storage-emulator-azurite
     ports:
