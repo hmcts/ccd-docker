@@ -274,5 +274,66 @@
       }
     ],
     "overrideAll": true
+  },
+
+  {
+    "email": "master.caseworker.role1.basic@gmail.com",
+    "roleAssignments": [
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "Role1",
+        "grantType": "BASIC",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": null,
+        "authorisations": []
+      }
+    ],
+    "overrideAll": true
+  },
+
+  {
+    "email": "master.caseworker.role1.standard@gmail.com",
+    "roleAssignments": [
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "Role1",
+        "grantType": "STANDARD",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": null,
+        "authorisations": []
+      }
+    ],
+    "overrideAll": true
+  },
+
+  {
+    "email": "master.caseworker.role3.challenged@gmail.com",
+    "roleAssignments": [
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "Role1",
+        "grantType": "BASIC",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": null,
+        "authorisations": []
+      },
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "Role3",
+        "grantType": "CHALLENGED",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": { "region": "123" },
+        "authorisations": []
+      }
+    ],
+    "overrideAll": true
   }
 ]
