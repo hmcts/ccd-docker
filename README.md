@@ -49,18 +49,19 @@ Note:
 if you experience any error with the above command, try `az login` first for [Azure Authentication for pulling latest docker images](#azure-authentication-for-pulling-latest-docker-images)
 
 
+3. **THIS STEP IS ONLY REQUIRED IF YOU NEED TO MIGRATE TO POSTGRES V11.** Proceeded to step 4 if this is your first time setting up ccd-docker
 
-3. Add Postgres V11 DB settings - **THIS STEP IS ONLY REQUIRED IF YOU NEED TO MIGRATE TO POSTGRES V11**
-- [Postgres v11 database set-up](/PostgresV11-prerequisites.md)
-
-
+- If ccd-docker has been previously setup, images/volumes and the database may point to **Postgres9**. Prior to pulling images run the below commands to **delete** existing images and volumes.
+- [Guide on migrating to V11](PostgresV11.md)
+```bash
+./ccd compose down
+```
 
 4. Pull latest Docker images:
-
+   
 ```bash
 ./ccd compose pull
 ```
-
 
 5. Set up environment: 
 
@@ -68,9 +69,11 @@ Note:
 required only on the first run. Once executed, it doesn't need to be executed again
 
   a. Create docker network
-  ```bash
+  
+```bash
   ./ccd init
   ```
+  Ignore if we get error message ccd-network already exists while running above command
   
   b. Export environment variables
 
@@ -803,7 +806,11 @@ Also if a certain database has not been created you might need to create a new c
 * To enable **ccd-case-disposer**
   * `./ccd enable backend case-disposer`
   * Run docker-compose `./ccd compose up -d`
- 
+
+* To enable **ccd-next-hearing-date-updater**
+  * `./ccd enable backend ccd-next-hearing-date-updater`
+  * Run docker-compose `./ccd compose up -d`
+
 * To enable **ccd-case-document-am-api**
   * `./ccd enable backend frontend dm-store case-document-am`
   * run docker-compose `./ccd compose up -d`

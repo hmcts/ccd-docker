@@ -30,4 +30,5 @@
   { "role": "citizen", "security_classification": "PUBLIC" },
   { "role": "pui-caa", "security_classification": "PUBLIC" },
   { "role": "GS_profile", "security_classification": "PUBLIC" }
+  { "role": "next-hearing-date-admin", "security_classification": "PUBLIC" }
 ]

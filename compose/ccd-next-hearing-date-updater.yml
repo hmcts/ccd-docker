@@ -1,0 +1,32 @@
+---
+version: '2.4'
+
+services:
+  ccd-next-hearing-date-updater:
+    image: "${CCD_NEXT_HEARING_DATE_UPDATER_USE_LOCAL-hmctspublic.azurecr.io/}ccd/next-hearing-date-updater:${CCD_NEXT_HEARING_DATE_UPDATER_TAG:-latest}"
+    environment:
+      IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
+      CCD_NEXT_HEARING_DATE_UPDATER_SERVICE_IDAM_CLIENT_SECRET: AAAAAAAAAAAAAAAA
+      IDAM_NEXT_HEARING_DATE_SYSTEM_USER: "${CCD_NEXT_HEARING_DATE_USERNAME:-next.hearing.date.admin@gmail.com}"
+      IDAM_NEXT_HEARING_DATE_SYSTEM_PASSWORD: "${CCD_NEXT_HEARING_DATE_PASSWORD}"
+      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      IDAM_KEY_NEXT_HEARING_UPDATER: AAAAAAAAAAAAAAAA
+      HEARING_NEXT_DAY_CRON_JOB_PROCESSING_ENABLED: "true"
+      CCD_DATA_STORE_API_BASE_URL: http://ccd-data-store-api:4452
+      ES_QUERY_SIZE: 100
+      MAX_CSV_RECORDS: 10000
+      CASE_TYPES: FT_NextHearingDate
+      # Uncomment this line to enable JVM debugging and uncomment the port mapping below
+      #  JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+    #ports:
+      # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
+      # - 5005:5005
+    depends_on:
+      ccd-data-store-api:
+        condition: service_started
+    networks:
+      - ccd-network
+
+networks:
+  ccd-network:
+    external: true
