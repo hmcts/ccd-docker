@@ -654,6 +654,10 @@ function convert_input_file_to_json() {
   echo "$input_as_json"
 }
 
+function move_file() {
+  mv "$1" "$2" 2> /dev/null
+}
+
 function process_input_file() {
   local filepath_input_original=$1
 
@@ -688,7 +692,7 @@ function process_input_file() {
   # input file read ok ...
   # ... so move it to backup location
   if [ $? -eq 0 ]; then
-    mv "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null
+    move_file "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null
     if [ $? -eq 0 ]; then
       echo "Moved input file to backup location: ${BOLD}${filepath_input_newpath}${NORMAL}"
     else
