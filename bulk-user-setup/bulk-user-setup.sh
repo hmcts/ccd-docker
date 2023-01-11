@@ -692,7 +692,7 @@ function process_input_file() {
   # input file read ok ...
   # ... so move it to backup location
   if [ $? -eq 0 ]; then
-    move_file "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null
+    move_file $filepath_input_original $filepath_input_newpath 2> /dev/null
     if [ $? -eq 0 ]; then
       echo "Moved input file to backup location: ${BOLD}${filepath_input_newpath}${NORMAL}"
     else
