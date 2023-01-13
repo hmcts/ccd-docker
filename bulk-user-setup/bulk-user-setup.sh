@@ -635,6 +635,7 @@ function convert_input_file_to_json() {
     | jq -r -c 'map({
         "idamUser": {
           "email": (try(.email | sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) // null),
+          "id": .id,
           "firstName": .firstName,
           "lastName": .lastName,
           "roles": (try(.roles | split("|") | walk( if type == "string" then (sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) else . end)) // null),
@@ -739,6 +740,8 @@ function process_input_file() {
       local inviteStatus=$(echo $user | jq --raw-output '.extraCsvData.status')
 
       local result=$(echo $user | jq --raw-output '.extraCsvData.result')
+
+      local csvUserId=$(echo $user | jq --raw-output '.idamUser.id')
 
       log_debug "==============================================="
       log_debug "processing user with email: ${email}"
@@ -961,6 +964,70 @@ function process_input_file() {
                 timestamp=$(date -u +"%FT%H:%M:%SZ")
                 output_csv="$input_csv,\"$firstNameFromApi\",\"$lastNameFromApi\",\"$strApi_user_roles\",\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
             fi
+        elif [ "$operation" == "add" ] && [[ "$ENABLE_USERID_REGISTRATIONS" = true ]]; then
+            # add id logic here
+            if [ "$csvUserId" == "null" ]; then
+              # SKIP:
+              skipped_counter=$((skipped_counter+1))
+              inviteStatus="SKIPPED"
+              local reason="Field: 'id' required, but not provided"
+              responseMessage="WARN: $reason"
+
+              log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+            elif [ "$firstName" == "null" ] && [ "$lastName" == "null" ]; then
+                # FAIL:
+                fail_counter=$((fail_counter+1))
+                local reason="${BothFirstAndLastnameCannotBeEmpty}"
+                responseMessage="ERROR: $reason"
+                inviteStatus="FAILED"
+                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
+                echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+            else
+                if [ "$csvUserId" == "use-existing-user-id" ]; then
+                    log_debug "${email}, existing user with id: ${userId}"
+                    #replace json id with existing users id
+                    idamUserJson=$(echo $idamUserJson | jq --arg existingUserID "${userId}" '.id = ($existingUserID)')
+                fi
+                log_debug "idamUserJson: ${idamUserJson}"
+
+                # make call to IDAM
+                submit_response=$(submit_user_registation "$idamUserJson")
+
+                # seperate submit_user_registation reponse
+                IFS=$'\n'
+                local response_array=($submit_response)
+                local inviteStatus=${response_array[0]}
+                local responseMessage=${response_array[1]}
+
+                if [ $inviteStatus == "SUCCESS" ]; then
+                    # SUCCESS:
+                    success_counter=$((success_counter+1))
+                    lastModified=$(date -u +"%FT%H:%M:%SZ")
+                    local reason="user successfully registered"
+                    responseMessage="INFO: $reason"
+
+                    if [[ "$bRolesDiscarded" = true ]]; then
+                        responseMessage="$responseMessage $discardedRolesMessage"
+                    fi
+
+                    log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                    echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+                else
+                    # FAIL:
+                    fail_counter=$((fail_counter+1))
+                    local reason="failed registering user"
+                    responseMessage="ERROR: $responseMessage"
+                    inviteStatus="FAILED"
+                    echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+                    log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
+                fi
+            fi
+
+            # prepare output (NB: escape generated values for CSV)
+            input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+            timestamp=$(date -u +"%FT%H:%M:%SZ")
+            output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
         elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "add" ]; then
 
           log_debug "email: ${email} - User does not exist, doing add new user logic"
