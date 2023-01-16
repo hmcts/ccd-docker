@@ -539,23 +539,42 @@ function verify_csv_tools_are_available() {
 }
 
 function verify_json_format_includes_field() {
-  local json=$1
-  local field=$2
+   local json=$1
+   local field=$2
 
-  ## verify JSON array is not empty
-  if [ $(echo $json | jq -e '. | length') == 0 ]; then
-    echo "${RED}ERROR: input file conversion produced empty result.${NORMAL} Please check input file format."
-    log_error "file: ${filename} , ERROR: input file conversion produced empty result.Please check input file format."
-    exit 99
-  fi
+   ## verify JSON array is not empty
+   if [ $(echo $json | jq -e '. | length') == 0 ]; then
+     echo "${RED}ERROR: input file conversion produced empty result.${NORMAL} Please check input file format."
+     log_error "file: ${filename} , ERROR: input file conversion produced empty result.Please check input file format."
+     exit 99
+   fi
 
-  ## verify JSON format by checking JUST THE FIRST ITEM has the required field
-  if [ $(echo $json | jq "first(.[] | has(\"${field}\"))") == false ]; then
-    echo "${RED}file: ${filename} ,ERROR: Field not found in input:${NORMAL} ${field}"
-    log_error "file: ${filename} , ERROR: Field not found in input:${field}"
-    exit 99
-  fi
-}
+   ## verify JSON format by checking JUST THE FIRST ITEM has the required field
+   if [ $(echo $json | jq "first(.[] | has(\"${field}\"))") == false ]; then
+     echo "${RED}file: ${filename} ,ERROR: Field not found in input:${NORMAL} ${field}"
+     log_error "file: ${filename} , ERROR: Field not found in input:${field}"
+     exit 99
+   fi
+ }
+
+ function verify_json_format_does_not_include_field() {
+    local json=$1
+    local field=$2
+
+    ## verify JSON array is not empty
+    if [ $(echo $json | jq -e '. | length') == 0 ]; then
+      echo "${RED}ERROR: input file conversion produced empty result.${NORMAL} Please check input file format."
+      log_error "file: ${filename} , ERROR: input file conversion produced empty result.Please check input file format."
+      exit 99
+    fi
+
+    ## verify JSON format by checking JUST THE FIRST ITEM has the required field
+    if [ $(echo $json | jq "first(.[] | has(\"${field}\"))") == true ]; then
+      echo "${RED}file: ${filename} ,ERROR: Field found in input:${NORMAL} ${field}"
+      log_error "file: ${filename} , ERROR: Field found in input:${field}"
+      exit 99
+    fi
+  }
 
 function get_file_name_from_csv_path() {
   local original_filename=$1
@@ -627,6 +646,12 @@ function convert_input_file_to_json() {
   verify_json_format_includes_field "${raw_csv_as_json}" "firstName"
   verify_json_format_includes_field "${raw_csv_as_json}" "lastName"
   verify_json_format_includes_field "${raw_csv_as_json}" "roles"
+
+  if [[ "$ENABLE_USERID_REGISTRATIONS" = true ]]; then
+    verify_json_format_includes_field "${raw_csv_as_json}" "id"
+  else
+    verify_json_format_does_not_include_field "${raw_csv_as_json}" "id"
+  fi
 
   #"roles": (try(.roles | split("|") | walk( if type == "string" then (sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) else . end)) // null),
 

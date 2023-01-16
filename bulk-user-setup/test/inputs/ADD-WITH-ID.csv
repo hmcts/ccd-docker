@@ -5,4 +5,3 @@ add,ccd.test.add.user1@hmcts.gov.uk,fn1,ln1,caseworker|caseworker-role-one,use-e
 add,ccd.test.add.user03@hmcts.gov.uk,fn03,ln03,caseworker|caseworker-role-one,b2e98223-9ce6-4278-8707-d2e6ab8cc8c9,FALSE,SUCCESS,ENABLE_USERID_REGISTRATIONS=true,id is unique
 add,ccd.test.add.user04@hmcts.gov.uk,fn04,ln04,caseworker|caseworker-role-one,,FALSE,SKIPPED,ENABLE_USERID_REGISTRATIONS=true,id is MUST be provided
 add,ccd.test.add.user1@hmcts.gov.uk,fn1,ln1,caseworker|caseworker-role-one,b2e98223-9ce6-4278-8707-d2e6ab8cc8c9,TRUE,FAILED,ENABLE_USERID_REGISTRATIONS=true,"id is unique, conflict active user already exists"
-add,ccd.test.add.userXYZ@hmcts.gov.uk,fn1,ln1,caseworker|caseworker-role-one,f3e6eb49-f429-462c-9712-3fdf87f4b50c,TRUE,FAILED,"ENABLE_USERID_REGISTRATIONS=true,  id already exists",User with given id already exists
