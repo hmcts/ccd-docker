@@ -72,11 +72,19 @@
   {"email": "ts.service.translation-manage-load@gmail.com", "roles": "ccd-import,load-translations,manage-translations", "lastName": "Translations", "firstName": "Manage-Load"},
 
   {"email": "next.hearing.date.admin@gmail.com", "roles": "caseworker,next-hearing-date-admin", "lastName": "hearing", "firstName": "next-day"},
+
   {"email": "master.caa@gmail.com", "roles": "caseworker,caseworker-caa", "lastName": "caa", "firstName": "master"},
   {"email": "noc.approver@gmail.com", "roles": "caseworker-approver", "lastName": "noc", "firstName": "approver"},
 
   {"email": "hmc.hearing-manager@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "hearing-manager", "firstName": "hmc"},
   {"email": "hmc.hearing-viewer@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "hearing-viewer", "firstName": "hmc"},
   {"email": "hmc.listed-hearing-viewer@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "listed-hearing-viewer", "firstName": "hmc"},
-  {"email": "hmc.superuser@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "superuser", "firstName": "hmc"}
+  {"email": "hmc.superuser@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "superuser", "firstName": "hmc"},
+
+  {"email": "master.caseworker.staff@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "master.caseworker", "firstName": "staff"},
+  {"email": "master.caseworker.regional-staff@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "master.caseworker", "firstName": "regional-staff"},
+
+  {"email": "master.caseworker.role1.basic@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "master.caseworker", "firstName": "role1-basic"},
+  {"email": "master.caseworker.role1.standard@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "master.caseworker", "firstName": "role1-standard"},
+  {"email": "master.caseworker.role3.challenged@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "master.caseworker", "firstName": "role3-challenged"}
 ]

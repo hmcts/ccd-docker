@@ -38,7 +38,7 @@ services:
     ports:
       - 4544:4544
     depends_on:
-      - ${CCD_POSTGRES_11:-ccd-shared-database}
+      - ccd-shared-database
       - ccd-user-profile-api
     networks:
       - ccd-network
