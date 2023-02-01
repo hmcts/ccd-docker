@@ -24,3 +24,4 @@ delete,ccd.test.delete.user21@hmcts.gov.uk,,,employment-roles,TRUE,SUCCESS,"user
 delete,ccd.test.delete.user22@hmcts.gov.uk,,,employment-roles|ia-roles|cwd-user|payments,TRUE,SUCCESS,"user exists with some employment roles, some ia-roles, cwd-user, payment and caseworker role",should remove all roles and deactive the user
 delete,ccd.test.delete.user23@hmcts.gov.uk,,,employment-roles|ia-roles|cwd-user|payments,TRUE,SUCCESS,user exists with NO roles assigned,should deactivate the user
 delete,ccd.test.delete.user24@hmcts.gov.uk,,,caseworker-role-two,TRUE,SUCCESS,user exists with only caseworker role,should remove caseworker and deactivate the user
+delete,ccd.test.delete.user25@hmcts.gov.uk,,,caseworker-role-one,TRUE,SUCCESS,user exists with payments|payments-refund|payments-refund-approve|caseworker|caseworker-role-one,should remove caseworker and other default delete roles and deactivate the user

@@ -808,7 +808,6 @@ function process_input_file() {
 
         if [ $(echo $rolesFromCSV | jq -e '. | length') != 0 ]; then
           rolesFromCSV=$(convertJsonStringArrayToLowerCase "${rolesFromCSV}")
-          #log_debug "original roles from CSV (in lower case): ${rolesFromCSV}"
         fi
 
         if [ "$operation" == "find" ] || [ "$operation" == "delete" ]; then
@@ -1082,7 +1081,7 @@ function process_input_file() {
 
             if [ $(checkShouldAddDefaultRoles "${rolesFromCSV}") -eq 1 ]; then
                 log_debug "Adding default roles"
-                rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${DEFAULT_ROLES}")
+                rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${ADD_ROLES_BY_DEFAULT}")
             else
                 log_debug "Skipping addition of default roles"
             fi
@@ -1159,6 +1158,8 @@ function process_input_file() {
 
           log_debug "email: ${email} - User exists, doing role addition logic"
 
+          log_debug "Current assigned roles (based on API): ${usersRolesFromApi}"
+
           local bRolesDiscarded=false
           local discardedRolesMessage=""
 
@@ -1177,7 +1178,7 @@ function process_input_file() {
 
           if [ $(checkShouldAddDefaultRoles "${rolesFromCSV}") -eq 1 ]; then
             log_debug "Adding default roles"
-            rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${DEFAULT_ROLES}")
+            rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${ADD_ROLES_BY_DEFAULT}")
           else
             log_debug "Skipping addition of default roles"
           fi
@@ -1401,7 +1402,7 @@ function process_input_file() {
 
           log_debug "Current assigned roles (based on API): ${usersRolesFromApi}"
 
-          if [ $(checkContainsStringRole "${rolesFromCSV}" "${ALL_ROLES}") -eq 1 ]; then
+          if [ $(checkJsonContainsStringRole "${rolesFromCSV}" "${ALL_ROLES}") -eq 1 ]; then
             log_debug "Operation: ${operation}, contains role:  ${ALL_ROLES}, PUT API call will be used to remove all roles and de-activate the user"
             USE_PUT=1
           elif [ $(echo $usersRolesFromApi | jq -e '. | length') == 0 ]; then
@@ -1410,7 +1411,7 @@ function process_input_file() {
           else
             #populate array with fetched api roles
             for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
-                if [ "$apiRole" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
+                if [ "$apiRole" == "${ADD_ROLES_BY_DEFAULT}" ]; then
                     default_caseworker_role_already_assigned=true
                 fi
                 rolesFromApiArray+=("${apiRole}")
@@ -1422,22 +1423,20 @@ function process_input_file() {
             log_debug "Computed/expanded CSV roles supplied for deletion: ${rolesFromCSV}"
 
             for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
-                if [ "$csvRole" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
+                if [ "$csvRole" == "${ADD_ROLES_BY_DEFAULT}" ]; then
                     default_caseworker_role_provided=true
                 fi
-                for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
-                    #add csv role to array excluding DEFAULT_CASEWORKER_ROLE
-                    if [ "$csvRole" == "$apiRole" ] && [ "$csvRole" != "${DEFAULT_CASEWORKER_ROLE}" ]; then
-                        rolesToRemoveArray+=("${csvRole}")
-                    fi
-                done
+                if [ $(checkArrayContainsStringRole "${IGNORED_ROLES_FROM_USER_DELETE_REQUEST}" "${csvRole}") -eq 1 ]; then
+                    log_debug "Ignoring supplied role: ${ignoreRole}"
+                else
+                    for apiRole in "${rolesFromApiArray[@]}"; do
+                        if [ "$csvRole" == "$apiRole" ]; then
+                            rolesToRemoveArray+=("${csvRole}")
+                            break
+                        fi
+                    done
+                fi
             done
-
-            #remove the roles to be deleted from api roles (assuming deletion to succeed)
-            #for del in "${rolesToRemoveArray[@]}"
-            #do
-            #   rolesFromApiArray=( "${rolesFromApiArray[@]/$del}" )
-            #done
 
             rolesFromApiArray=($(removeFromArray2 "${rolesFromApiArray}" "${rolesToRemoveArray}"))
 
@@ -1446,27 +1445,24 @@ function process_input_file() {
             local otherServiceRole=false
             for role in "${rolesFromApiArray[@]}"
             do
-                if [[ "${role}" == "${DEFAULT_CASEWORKER_ROLE}-"* ]]; then
+                if [[ "${role}" == "${ADD_ROLES_BY_DEFAULT}-"* ]]; then
                     otherServiceRole=true
                     break
                 fi
             done
 
+            local rolesToDeleteByDefaultArray=( $(splitStringToArray "|" "${DELETE_ROLES_BY_DEFAULT}") )
+
             if [[ "$otherServiceRole" = false ]]; then
-                if [[ "$default_caseworker_role_already_assigned" = true ]]; then
-                    rolesFromApiArray=($(removeFromArray2 "${rolesFromApiArray}" "${DEFAULT_CASEWORKER_ROLE}"))
-                    #no other caseworker- roles, remove caseworker also
-                    rolesToRemoveArray+=("${DEFAULT_CASEWORKER_ROLE}")
-                fi
+                for apiRole in "${rolesFromApiArray[@]}"; do
+                    if [ $(checkArrayContainsStringRole "${DELETE_ROLES_BY_DEFAULT}" "${apiRole}") -eq 1 ]; then
+                        rolesFromApiArray=($(removeFromArray2 "${rolesFromApiArray}" "${apiRole}"))
+                        rolesToRemoveArray+=("${apiRole}")
+                    fi
+                done
             fi
 
             local rolesFromApiArray_count=${#rolesFromApiArray[@]}
-
-            #local rolesFromApiArray_count=0
-            #for i in "${rolesFromApiArray[@]}"
-            #do
-            #   rolesFromApiArray_count=$((rolesFromApiArray_count+1))
-            #done
 
             log_debug "default_caseworker_role_provided = ${default_caseworker_role_provided}"
             log_debug "default_caseworker_role_already_assigned = ${default_caseworker_role_already_assigned}"
@@ -1846,7 +1842,24 @@ function checkAllowedRole {
   echo $notAllowedRoleFound
 }
 
-function checkContainsStringRole {
+function checkArrayContainsStringRole {
+    # $1 is ex, IGNORED_ROLES_FROM_USER_DELETE_REQUEST
+    local stringArray=( $(splitStringToArray "|" "$1") )
+    local roleToCheckFor=$2
+
+    local found=0
+
+    for stringCheck in "${stringArray[@]}"; do
+        if [ "$roleToCheckFor" == "${stringCheck}" ]; then
+            found=1
+            break
+        fi
+    done
+
+    echo $found
+}
+
+function checkJsonContainsStringRole {
   local rolesFromCSV=$1
   local roleToCheckFor=$2
 
@@ -1944,7 +1957,8 @@ function checkShouldAddRole {
 
 function checkShouldAddDefaultRoles {
   local rolesFromCSV=$1
-  local rolesToCheckForArray=( $(splitStringToArray "|" "${DEFAULT_ROLES}") )
+  local rolesToCheckForArray=( $(splitStringToArray "|" "${ADD_ROLES_BY_DEFAULT}") )
+  local addRolesToIgnoreByDefaultArray=( $(splitStringToArray "|" "${IGNORED_ROLES_FROM_USER_ADD_REQUEST}") )
   local countRolesToCheckForArray=${#rolesToCheckForArray[@]}
 
   local counter=0
@@ -1953,8 +1967,9 @@ function checkShouldAddDefaultRoles {
 
   for role in "${rolesToCheckForArray[@]}"; do
     for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
-        #if [[ "${csvRole}" =~ .*"$role".* ]]; then
-        if [[ "${csvRole}" == *"$role"* ]]; then
+        if [ $(checkArrayContainsStringRole "${IGNORED_ROLES_FROM_USER_ADD_REQUEST}" "${csvRole}") -eq 1 ]; then
+            log_debug "Ignoring role ${csvRole}"
+        elif [[ "${csvRole}" == *"$role"* ]]; then
             default_type_role_found=1
             break
         fi
@@ -2092,7 +2107,7 @@ function checkMasterCaseworkerRoles
 
     if [[ $rawRolesResponse != *"HTTP-"* ]]; then
         for rawRoleName in $(echo "${rawRolesResponse}" | jq .[].name); do
-            if [[ "$rawRoleName" == *"$DEFAULT_CASEWORKER_ROLE"* ]]; then
+            if [[ "$rawRoleName" == *"$ADD_ROLES_BY_DEFAULT"* ]]; then
                 #role=$(convertToLowerCase "${rawRoleName}")
                 #remove white space in between role
                 #role="${role// /}"

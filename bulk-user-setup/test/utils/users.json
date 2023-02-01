@@ -35,6 +35,7 @@
   {"email": "ccd.test.delete.user22@hmcts.gov.uk", "roles": "caseworker,caseworker-ia,caseworker-ia-caseofficer,cwd-user,payments,caseworker-employment,caseworker-employment-londonsouth", "lastName": "deleteln22", "firstName": "deletefn22"},
   {"email": "ccd.test.delete.user23@hmcts.gov.uk", "roles": "''", "lastName": "deleteln23", "firstName": "deletefn23"},
   {"email": "ccd.test.delete.user24@hmcts.gov.uk", "roles": "caseworker", "lastName": "deleteln24", "firstName": "deletefn24"},
+  {"email": "ccd.test.delete.user25@hmcts.gov.uk", "roles": "payments,payments-refund,payments-refund-approver,caseworker,caseworker-role-one", "lastName": "deleteln25", "firstName": "deletefn25"},
   {"email": "ccd.test.common.user1@hmcts.gov.uk", "roles": "''", "lastName": "commonln1", "firstName": "commonfn1"},
   {"email": "ccd.test.common.user2@hmcts.gov.uk", "roles": "''", "lastName": "commonln2", "firstName": "commonfn2"},
   {"email": "ccd.test.common.user3@hmcts.gov.uk", "roles": "''", "lastName": "commonln3", "firstName": "commonfn3"},
