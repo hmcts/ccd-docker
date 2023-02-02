@@ -697,7 +697,7 @@ function process_input_file() {
     LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp_day}")"
   fi
 
-  log_debug "Start - processing input file ${filepath_input_original}"
+  log_debug "****** Start - processing input file ${filepath_input_original}"
 
   if [[ "$is_test" = true ]]; then
     echo 'Test outputs of resulting files!'
@@ -1654,7 +1654,7 @@ function process_input_file() {
       echo "$output_csv" >> "$filepath_output_newpath"
     done
 
-    log_debug "End - processing input file ${filepath_input_original}"
+    log_debug "****** End - processing input file ${filepath_input_original}"
 
     echo "${NORMAL}Process is complete: ${GREEN}success: ${success_counter}${NORMAL}, ${YELLOW}skipped: ${skipped_counter}${NORMAL}, ${RED}fail: ${fail_counter}${NORMAL}, total: ${total_counter}"
 
