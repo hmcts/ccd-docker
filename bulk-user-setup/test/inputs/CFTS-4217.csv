@@ -1,0 +1,6 @@
+operation,email,firstName,lastName,roles
+add,Sharon.Fagan@justice.gov.uk,Sharon,Fagan,caseworker-publiclaw | caseworker-publiclaw-courtadmin
+add,Lauren.Wong@justice.gov.uk  ,Lauren,Wong,caseworker-publiclaw | caseworker-publiclaw-courtadmin
+add,Terry.Earnshaw1@justice.gov.uk,Terry,Earnshaw,caseworker-publiclaw | caseworker-publiclaw-courtadmin
+add,Glyn.Austen.JP@ejudiciary.net,Glyn,Austen,caseworker-publiclaw | caseworker-publiclaw-magistrate
+add,sarah.sands@Justice.gov.uk,Sarah,Sands,caseworker-publiclaw | caseworker-publiclaw-judiciary

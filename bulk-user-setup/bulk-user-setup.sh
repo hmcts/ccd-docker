@@ -640,6 +640,13 @@ function convert_input_file_to_json() {
   # read from CSV by using CSVJSON
   local raw_csv_as_json=$(csvjson --datetime-format "." "$file")
 
+  ## verify raw csv as json is not empty
+  if [ -z "$raw_csv_as_json" ]; then
+    echo "${RED}file: ${filename} ,ERROR: input file conversion produced empty result.${NORMAL} Please check input file format."
+    log_error "file: ${filename} , ERROR: input file conversion produced empty result.Please check input file format."
+    exit 99
+  fi
+
   # verify JSON format  (ie. check mandatory fields are present)
   verify_json_format_includes_field "${raw_csv_as_json}" "operation"
   verify_json_format_includes_field "${raw_csv_as_json}" "email"
