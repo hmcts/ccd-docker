@@ -1427,7 +1427,7 @@ function process_input_file() {
                     default_caseworker_role_provided=true
                 fi
                 if [ $(checkArrayContainsStringRole "${IGNORED_ROLES_FROM_USER_DELETE_REQUEST}" "${csvRole}") -eq 1 ]; then
-                    log_debug "Ignoring supplied role: ${ignoreRole}"
+                    log_debug "Ignoring supplied role: ${csvRole}"
                 else
                     for apiRole in "${rolesFromApiArray[@]}"; do
                         if [ "$csvRole" == "$apiRole" ]; then
@@ -2042,6 +2042,14 @@ function validateEmailAddress {
   else
       false
   fi
+}
+
+#not used yet
+function stripSpecialCharacters {
+  local stringInput=$1
+  regex="^[a-z0-9!#\$%&'*+/=?^_\`{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_\`{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?\$"
+
+  echo "${stringInput//$regex/}"
 }
 
 function validateRoleString() {
