@@ -640,8 +640,25 @@ function convert_input_file_to_json() {
   # read from CSV by using CSVJSON
   local raw_csv_as_json=$(csvjson --datetime-format "." "$file")
 
+  #To get output from the csvjson library call
+  #local raw_csv_as_json=$(csvjson --datetime-format "." "$file" 2>&1)
+
   ## verify raw csv as json is not empty
   if [ -z "$raw_csv_as_json" ]; then
+    #printf "%s\n" "${RED}file: ${filename} conversion to JSON produced empty result${NORMAL}"
+    #printf "%s\n" "${RED}attempting to convert to UTF-8${NORMAL}"
+
+    #iconv -f ISO-8859-1 -t UTF-8 -c "$file" > "$file-utf8.csv" && mv "$file-utf8.csv" "$file" #&& sleep 3
+
+    #raw_csv_as_json=$(csvjson --datetime-format "." "$file")
+
+    #if [ -z "$raw_csv_as_json" ]; then
+    #    echo "${RED}file: ${filename} ,ERROR: input file conversion produced empty result.${NORMAL} Please check input file format."
+    #    log_error "file: ${filename} , ERROR: input file conversion produced empty result.Please check input file format."
+    #    exit 99
+    #fi
+    #printf "%s\n" "${raw_csv_as_json}"
+
     echo "${RED}file: ${filename} ,ERROR: input file conversion produced empty result.${NORMAL} Please check input file format."
     log_error "file: ${filename} , ERROR: input file conversion produced empty result.Please check input file format."
     exit 99
@@ -686,6 +703,7 @@ function convert_input_file_to_json() {
       })' ) # NB: extraCsvData element included in JSON to help preserve csv data when skipping an already complete record (i.e. inviteStatus="success")
 
   echo "$input_as_json"
+
 }
 
 function process_input_file() {
