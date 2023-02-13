@@ -579,8 +579,10 @@ function verify_json_format_includes_field() {
 function get_file_name_from_csv_path() {
   local original_filename=$1
 
-  local dirname=$(dirname "${original_filename}")
-  local basename=$(basename "${original_filename}")
+  local dirname
+  dirname=$(dirname "${original_filename}")
+  local basename
+  basename=$(basename "${original_filename}")
   local filename="${basename%.*}"
   local extension="${basename##*.}"
 
@@ -591,8 +593,10 @@ function generate_csv_path_with_insert() {
   local original_filename=$1
   local insert=$2
 
-  local dirname=$(dirname "${original_filename}")
-  local basename=$(basename "${original_filename}")
+  local dirname
+  dirname=$(dirname "${original_filename}")
+  local basename
+  basename=$(basename "${original_filename}")
   local filename="${basename%.*}"
   local extension="${basename##*.}"
 
@@ -611,8 +615,10 @@ function generate_log_path_with_insert() {
   local original_filename=$1
   local insert=$2
 
-  local dirname=$(dirname "${original_filename}")
-  local basename=$(basename "${original_filename}")
+  local dirname
+  dirname=$(dirname "${original_filename}")
+  local basename
+  basename=$(basename "${original_filename}")
   local filename="${basename%.*}"
   local extension="${basename##*.}"
 
@@ -638,7 +644,8 @@ function convert_input_file_to_json() {
   verify_file_exists "$file"
 
   # read from CSV by using CSVJSON
-  local raw_csv_as_json=$(csvjson --datetime-format "." "$file")
+  local raw_csv_as_json
+  raw_csv_as_json=$(csvjson --datetime-format "." "$file")
 
   #To get output from the csvjson library call
   #local raw_csv_as_json=$(csvjson --datetime-format "." "$file" 2>&1)
@@ -680,7 +687,8 @@ function convert_input_file_to_json() {
   #"roles": (try(.roles | split("|") | walk( if type == "string" then (sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) else . end)) // null),
 
   # then reformat JSON using JQ
-  local input_as_json=$(echo $raw_csv_as_json \
+  local input_as_json
+  input_as_json=$(echo $raw_csv_as_json \
     | jq -r -c 'map({
         "idamUser": {
           "email": (try(.email | sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) // null),
@@ -710,15 +718,20 @@ function process_input_file() {
   local filepath_input_original=$1
 
   # generate new paths for input and output files
-  local datestamp=$(date -u +"%FT%H%M%SZ")
-  local filepath_input_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "_Input_${datestamp}")
-  local filepath_output_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "_Output_${datestamp}")
-  local filename=$(get_file_name_from_csv_path "$filepath_input_original")
+  local datestamp
+  datestamp=-$(date -u +"%FT%H%M%SZ")
+  local filepath_input_newpath
+  filepath_input_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "_Input_${datestamp}")
+  local filepath_output_newpath
+  filepath_output_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "_Output_${datestamp}")
+  local filename
+  filename=$(get_file_name_from_csv_path "$filepath_input_original")
 
   if [[ "$LOG_PER_INPUT_FILE" = true ]]; then
     LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp}")"
   else
-    local datestamp_day=$(date -u +"%F")
+    local datestamp_day
+    datestamp_day=$(date -u +"%F")
     LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp_day}")"
   fi
 
@@ -761,37 +774,47 @@ function process_input_file() {
       local lastModified=" "
 
       # extract CSV fields from json to use in output
-      local email=$(echo $user | jq --raw-output '.idamUser.email')
+      local email
+      email=$(echo $user | jq --raw-output '.idamUser.email')
       email=$(trim "$email") #trim leading and trailing spaces from email string
       email=$(convertToLowerCase "$email")
 
-      local firstName=$(echo $user | jq --raw-output '.idamUser.firstName')
+      local firstName
+      firstName=$(echo $user | jq --raw-output '.idamUser.firstName')
       firstName=$(trim "$firstName") #trim leading and trailing spaces from firstname string
 
-      local lastName=$(echo $user | jq --raw-output '.idamUser.lastName')
+      local lastName
+      lastName=$(echo $user | jq --raw-output '.idamUser.lastName')
       lastName=$(trim "$lastName") #trim leading and trailing spaces from lastName string
 
-      local operation=$(echo $user | jq --raw-output '.extraCsvData.operation')
+      local operation
+      operation=$(echo $user | jq --raw-output '.extraCsvData.operation')
       operation=$(trim "$operation")
       operation=$(convertToLowerCase "$operation")
 
       # leading and trailing spaces between roles is taken care in the function call to convert_input_file_to_json
-      local rolesFromCSV=$(echo $user | jq --raw-output '.idamUser.roles')
+      local rolesFromCSV
+      rolesFromCSV=$(echo $user | jq --raw-output '.idamUser.roles')
 
       #raw roles as string
-      local strRolesFromCSV=$(echo $user | jq --raw-output '.extraCsvData.roles')
+      local strRolesFromCSV
+      strRolesFromCSV=$(echo $user | jq --raw-output '.extraCsvData.roles')
       strRolesFromCSV=$(trim "$strRolesFromCSV")
 
       # load formatted user JSON ready to send to IDAM
-      local idamUserJson=$(echo $user | jq -c --raw-output '.idamUser')
+      local idamUserJson
+      idamUserJson=$(echo $user | jq -c --raw-output '.idamUser')
 
       #inviteStatus from input CSV can take value SUCCESS
       #required so we do not send another registration request if one is already pending
-      local inviteStatus=$(echo $user | jq --raw-output '.extraCsvData.status')
+      local inviteStatus
+      inviteStatus=$(echo $user | jq --raw-output '.extraCsvData.status')
 
-      local result=$(echo $user | jq --raw-output '.extraCsvData.result')
+      local result
+      result=$(echo $user | jq --raw-output '.extraCsvData.result')
 
-      local csvUserId=$(echo $user | jq --raw-output '.idamUser.id')
+      local csvUserId
+      csvUserId=$(echo $user | jq --raw-output '.idamUser.id')
 
       log_debug "==============================================="
       log_debug "processing user with email: ${email}"
@@ -800,29 +823,36 @@ function process_input_file() {
 
         # regardless if operation (add/remove) we should always check if the user already exists or not
 
-        local rawReturnedValue=$(get_user "$email")
+        local rawReturnedValue
+        rawReturnedValue=$(get_user "$email")
         #local rawReturnedValue=$(get_user_api_v1 "${email}")
 
         if [[ $rawReturnedValue != *"HTTP-"* ]] && [[ $rawReturnedValue != *"ERROR"* ]]; then
-          local userId=$(echo $rawReturnedValue | jq --raw-output '.id')
+          local userId
+          userId=$(echo $rawReturnedValue | jq --raw-output '.id')
           #if using /api/v1 to find user by email, it returns an array or users which is empty if no user found
           #if found, we need to ensure we get the first element
           #local userId=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.id')
 
-          local userActiveState=$(echo $rawReturnedValue | jq --raw-output '.active') # i.e. ACTIVE
+          local userActiveState
+          userActiveState=$(echo $rawReturnedValue | jq --raw-output '.active') # i.e. ACTIVE
           isActive="${userActiveState}"
           #local userActiveState=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.active')
 
           #local userRecordType=$(echo $userObject | jq --raw-output '.recordType') # i.e. LIVE
 
-          local firstNameFromApi=$(echo $rawReturnedValue | jq --raw-output '.forename')
+          local firstNameFromApi
+          firstNameFromApi=$(echo $rawReturnedValue | jq --raw-output '.forename')
           #local firstNameFromApi=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.forename')
 
-          local lastNameFromApi=$(echo $rawReturnedValue | jq --raw-output '.surname')
+          local lastNameFromApi
+          lastNameFromApi=$(echo $rawReturnedValue | jq --raw-output '.surname')
           #local lastNameFromApi=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.surname')
 
-          local rawUserRoles=$(get_user_roles "$userId" )
-          local usersRolesFromApi=$(echo $rawUserRoles | jq --raw-output '.roles')
+          local rawUserRoles=
+          rawUserRoles=$(get_user_roles "$userId" )
+          local usersRolesFromApi
+          usersRolesFromApi=$(echo $rawUserRoles | jq --raw-output '.roles')
 
           #log_debug "email: ${email}"
           #log_debug "user_id: ${userId}"
@@ -939,13 +969,17 @@ function process_input_file() {
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "find" ]; then
             if [[ "$ENABLE_SCOPE_USER_SEARCH" = true ]]; then
-                local api_v1_user=$(get_user_api_v1 "${email}")
+                local api_v1_user
+                api_v1_user=$(get_user_api_v1 "${email}")
 
                 if [[ $api_v1_user != *"HTTP-"* ]]; then
 
-                  local api_v1_user_firstname=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.forename')
-                  local api_v1_user_lastname=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.surname')
-                  local api_v1_user_roles=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.roles')
+                  local api_v1_user_firstname
+                  api_v1_user_firstname=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.forename')
+                  local api_v1_user_lastname
+                  api_v1_user_lastname=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.surname')
+                  local api_v1_user_roles
+                  api_v1_user_roles=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.roles')
                   isActive=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.active')
                   lastModified=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.lastModified')
 
@@ -1094,7 +1128,8 @@ function process_input_file() {
             local discardedRolesMessage=""
 
             if [ $(checkAllowedRole "${rolesFromCSV}" "${MANUAL_ROLES}") -eq 1 ]; then
-                local discardedRoles=$(returnNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
+                local discardedRoles
+                discardedRoles=$(returnNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
                 rolesFromCSV=$(stripNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
                 discardedRolesMessage="WARN: the following role(s) can only be added by eJust 3rd Line support via Snow: "
                 discardedRolesMessage="$discardedRolesMessage ${discardedRoles[*]}"
@@ -1189,7 +1224,8 @@ function process_input_file() {
           local discardedRolesMessage=""
 
           if [ $(checkAllowedRole "${rolesFromCSV}" "${MANUAL_ROLES}") -eq 1 ]; then
-            local discardedRoles=$(returnNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
+            local discardedRoles
+            discardedRoles=$(returnNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
             rolesFromCSV=$(stripNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
             discardedRolesMessage="WARN: the following role(s) can only be added by eJust 3rd Line support via Snow: "
             discardedRolesMessage="$discardedRolesMessage ${discardedRoles[*]}"
@@ -1957,7 +1993,8 @@ function checkShouldAddRole {
   local rolesToCheckForArray=( $(splitStringToArray "|" "${rolesToCheckFor}") )
 
   local countRolesToCheckForArray=${#rolesToCheckForArray[@]}
-  local countRolesFromCSV=$(echo $rolesFromCSV | jq -e '. | length');
+  local countRolesFromCSV
+  countRolesFromCSV=$(echo $rolesFromCSV | jq -e '. | length');
 
   local counter=0
   local shouldAdd=1
@@ -2132,7 +2169,8 @@ function checkMasterCaseworkerRoles
 
     IFS=$'\n' read -d '' -r -a caseworkerRolesMasterArray < ./"${masterCaseworkerRoleFile}"
 
-    local rawRolesResponse=$(get_roles)
+    local rawRolesResponse
+    rawRolesResponse=$(get_roles)
     local apiCaseworkerRolesBashArray=() #declare empty shell array
     local inLocalNotInRemote=()
     local inRemoteNotInLocal=()
