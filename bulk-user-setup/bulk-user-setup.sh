@@ -2307,7 +2307,7 @@ process_folder_recurse() {
 
 }
 
-read -p $'\nPlease enter environment (default is local): ' ENV
+read -r -p $'\nPlease enter environment (default is local): ' ENV
 
 ENV=${ENV:-local}
 
@@ -2321,8 +2321,8 @@ fi
 
 if [[ "$is_test" = false ]]; then
   # read input arguments
-  read -p "Please enter directory path containing csv input files: " CSV_DIR_PATH
-  read -p "Please enter ccd idam-admin username: " ADMIN_USER
+  read -r -p "Please enter directory path containing csv input files: " CSV_DIR_PATH
+  read -r -p "Please enter ccd idam-admin username: " ADMIN_USER
   ADMIN_USER_PWD=$(read_password_with_asterisk "Please enter ccd idam-admin password: ")
   IDAM_CLIENT_SECRET=$(read_password_with_asterisk $'\nPlease enter idam oauth2 secret for ccd-bulk-user-register client: ')
 fi
