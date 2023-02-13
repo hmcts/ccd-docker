@@ -1772,7 +1772,7 @@ function removeFromArray {
     for roleToRemove in "${rolesToRemoveArray[@]}"; do
       for roleFromApi in "${rolesFromApiArray[@]}"; do
           KEEP=true
-          if [[ ${roleToRemove} == ${roleFromApi} ]]; then
+          if [[ ${roleToRemove} == "${roleFromApi}" ]]; then
               KEEP=false
               break
           fi
@@ -1792,7 +1792,7 @@ function removeFromArray2 {
 
     for removeRole in "${rolesToRemoveArray[@]}"; do
       for i in "${!rolesFromApiArray[@]}"; do
-        if [[ ${rolesFromApiArray[i]} = $removeRole ]]; then
+        if [[ ${rolesFromApiArray[i]} = "$removeRole" ]]; then
           unset 'rolesFromApiArray[i]'
         fi
       done
@@ -2205,7 +2205,7 @@ function checkMasterCaseworkerRoles
     for apiCaseWorkerRole in "${apiCaseworkerRolesBashArray[@]}"; do
       for caseworkerRoleMaster in "${caseworkerRolesMasterArray[@]}"; do
           FOUND=false
-          if [[ ${apiCaseWorkerRole} == ${caseworkerRoleMaster} ]]; then
+          if [[ ${apiCaseWorkerRole} == "${caseworkerRoleMaster}" ]]; then
               FOUND=true
               break
           fi
