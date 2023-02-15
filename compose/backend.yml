@@ -43,6 +43,8 @@ services:
       ELASTIC_SEARCH_ENABLED: "${ES_ENABLED_DOCKER}"
       ELASTIC_SEARCH_HOST: "ccd-elasticsearch"
       ELASTIC_SEARCH_FAIL_ON_IMPORT: "true"
+      TS_TRANSLATION_SERVICE_HOST: ${TS_TRANSLATION_SERVICE_HOST:-http://ts-translation-service:4650}
+      WELSH_TRANSLATION_ENABLED: ${WELSH_TRANSLATION_ENABLED:-false}
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
       # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
     ports:
