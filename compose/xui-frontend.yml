@@ -6,7 +6,7 @@ services:
     image: "${XUI_MANAGE_CASES_USE_LOCAL-hmctspublic.azurecr.io/}xui/webapp:${XUI_MANAGE_CASES_TAG:-latest}"
     container_name: xui-manage-cases
     environment:
-      FEATURE_APP_INSIGHTS_ENABLED: "true"
+      FEATURE_APP_INSIGHTS_ENABLED: "false"
       FEATURE_SECURE_COOKIE_ENABLED: "false"
       FEATURE_REDIS_ENABLED: "false"
       JURISDICTIONS: AUTOTEST1,DIVORCE,PROBATE,BEFTA_JURISDICTION_3,BEFTA_JURISDICTION_2,BEFTA_JURISDICTION_1,IA,SSCS,BEFTA_MASTER
@@ -16,8 +16,10 @@ services:
       XUI_ENV: local
 
       SERVICES_DOCUMENTS_API: http://dm-store:8080
+      SERVICES_DOCUMENTS_API_V2: http://ccd-case-document-am-api:4455
       SERVICES_PAYMENTS_URL: http://wiremock:8080
       SERVICES_EM_ANNO_API: http://ccd-api-gateway:3453
+      SERVICES_EM_DOCASSEMBLY_API: http://ccd-api-gateway:3453
       SERVICES_CCD_COMPONENT_API: http://ccd-api-gateway:3453
       SERVICES_CCD_DATA_STORE_API: http://ccd-data-store-api:4452
       SERVICES_IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
@@ -25,6 +27,7 @@ services:
       SERVICES_IDAM_LOGIN_URL: "${IDAM_STUB_LOCALHOST:-http://localhost:3501}"
       SERVICES_IDAM_INDEX_URL: /
       SERVICES_IDAM_OAUTH_CALLBACK_URL: /oauth2/callback
+      SERVICES_ROLE_ASSIGNMENT_API: "${ROLE_ASSIGNMENT_URL:-http://am-role-assignment-service:4096}"
       SERVICES_S2S: http://service-auth-provider-api:8080
       REDISCLOUD_URL: http://localhost:6780
       SYSTEM_USER_NAME: "dummy"
@@ -32,6 +35,8 @@ services:
 
       HEALTH_CCD_COMPONENT_API: http://ccd-api-gateway:3453/health
       HEALTH_CCD_DATA_API: http://ccd-data-store-api:4452/health
+      HEALTH_DOCUMENTS_API: http://ccd-case-document-am-api:4455/health
+      HEALTH_ROLE_ASSIGNMENT_API: "${ROLE_ASSIGNMENT_URL:-http://am-role-assignment-service:4096}/health"
 
       APPINSIGHTS_INSTRUMENTATIONKEY: TESTVAR
       IDAM_SECRET: "${BEFTA_OAUTH2_CLIENT_SECRET_OF_XUIWEBAPP:-OOOOOOOOOOOOOOOO}"
