@@ -6,8 +6,9 @@ version: '2.4'
 services:
   fr-am:
     ports:
-      - 8080:8080
       - 1389:1389
+    expose:
+      - "8080"
     environment:
       JAVA_OPTS: -Xms128m -Xmx512m
 

@@ -62,6 +62,7 @@ services:
       - azure-storage-emulator-azurite
     ports:
       - 4506:8080
+      - 8080:8080
     #   debug port exposed
     #   - 5006:5005
     networks:
