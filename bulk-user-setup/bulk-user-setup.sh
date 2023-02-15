@@ -671,6 +671,30 @@ function convert_input_file_to_json() {
     exit 99
   fi
 
+  #To get output from the csvjson library call
+  #local raw_csv_as_json=$(csvjson --datetime-format "." "$file" 2>&1)
+
+  ## verify raw csv as json is not empty
+  if [ -z "$raw_csv_as_json" ]; then
+    #printf "%s\n" "${RED}file: ${filename} conversion to JSON produced empty result${NORMAL}"
+    #printf "%s\n" "${RED}attempting to convert to UTF-8${NORMAL}"
+
+    #iconv -f ISO-8859-1 -t UTF-8 -c "$file" > "$file-utf8.csv" && mv "$file-utf8.csv" "$file" #&& sleep 3
+
+    #raw_csv_as_json=$(csvjson --datetime-format "." "$file")
+
+    #if [ -z "$raw_csv_as_json" ]; then
+    #    echo "${RED}file: ${filename} ,ERROR: input file conversion produced empty result.${NORMAL} Please check input file format."
+    #    log_error "file: ${filename} , ERROR: input file conversion produced empty result.Please check input file format."
+    #    exit 99
+    #fi
+    #printf "%s\n" "${raw_csv_as_json}"
+
+    echo "${RED}file: ${filename} ,ERROR: input file conversion produced empty result.${NORMAL} Please check input file format."
+    log_error "file: ${filename} , ERROR: input file conversion produced empty result.Please check input file format."
+    exit 99
+  fi
+
   # verify JSON format  (ie. check mandatory fields are present)
   verify_json_format_includes_field "${raw_csv_as_json}" "operation"
   verify_json_format_includes_field "${raw_csv_as_json}" "email"
@@ -815,6 +839,8 @@ function process_input_file() {
 
       local csvUserId
       csvUserId=$(echo $user | jq --raw-output '.idamUser.id')
+
+      local csvUserId=$(echo $user | jq --raw-output '.idamUser.id')
 
       log_debug "==============================================="
       log_debug "processing user with email: ${email}"
