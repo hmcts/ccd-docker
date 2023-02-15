@@ -19,20 +19,20 @@ services:
       IDAM_SERVICE_NAME: ccd_admin
       IDAM_OAUTH2_CLIENT_ID : ccd_admin
       ADMINWEB_LOGIN_URL: "${IDAM_STUB_LOCALHOST:-http://localhost:3501}/login"
-      ADMINWEB_IMPORT_URL: http://ccd-definition-store-api:4451/import
-      ADMINWEB_JURISDICTIONS_URL : http://ccd-definition-store-api:4451/api/data/jurisdictions
+      ADMINWEB_IMPORT_URL: http://host.docker.internal:4451/import # http://ccd-definition-store-api:4451/import
+      ADMINWEB_JURISDICTIONS_URL : http://host.docker.internal:4451/api/data/jurisdictions # http://ccd-definition-store-api:4451/api/data/jurisdictions
       ADMINWEB_USER_PROFILE_URL : http://ccd-user-profile-api:4453/users
       ADMINWEB_SAVE_USER_PROFILE_URL : http://ccd-user-profile-api:4453/users/save
-      ADMINWEB_USER_ROLE_URL : http://ccd-definition-store-api:4451/api/user-role
-      ADMIN_ALL_USER_ROLES_URL : http://ccd-definition-store-api:4451/api/user-roles
-      ADMINWEB_CREATE_DEFINITION_URL : http://ccd-definition-store-api:4451/api/draft
-      ADMINWEB_UPDATE_DEFINITION_URL : http://ccd-definition-store-api:4451/api/draft/save
-      ADMINWEB_DELETE_DEFINITION_URL : http://ccd-definition-store-api:4451/api/draft
-      ADMINWEB_DEFINITIONS_URL : http://ccd-definition-store-api:4451/api/drafts
-      ADMINWEB_WHOAMI_URL : http://ccd-definition-store-api:4451/api/idam/profile
-      ADMINWEB_AUTHORIZATION_URL : http://ccd-definition-store-api:4451/api/idam/adminweb/authorization
-      ADMINWEB_IMPORT_AUDITS_URL : http://ccd-definition-store-api:4451/api/import-audits
-      ADMINWEB_ELASTIC_INDEX_URL : http://ccd-definition-store-api:4451/elastic-support/index
+      ADMINWEB_USER_ROLE_URL : http://host.docker.internal:4451/api/user-role # http://ccd-definition-store-api:4451/api/user-role
+      ADMIN_ALL_USER_ROLES_URL : http://host.docker.internal:4451/api/user-role # http://ccd-definition-store-api:4451/api/user-roles
+      ADMINWEB_CREATE_DEFINITION_URL : http://host.docker.internal:4451/api/draft # http://ccd-definition-store-api:4451/api/draft
+      ADMINWEB_UPDATE_DEFINITION_URL : http://host.docker.internal:4451/api/draft/save # http://ccd-definition-store-api:4451/api/draft/save
+      ADMINWEB_DELETE_DEFINITION_URL : http://host.docker.internal:4451/api/draft # http://ccd-definition-store-api:4451/api/draft
+      ADMINWEB_DEFINITIONS_URL : http://host.docker.internal:4451/api/drafts # http://ccd-definition-store-api:4451/api/drafts
+      ADMINWEB_WHOAMI_URL : http://host.docker.internal:4451/api/idam/profile # http://ccd-definition-store-api:4451/api/idam/profile
+      ADMINWEB_AUTHORIZATION_URL : http://host.docker.internal:4451/api/idam/adminweb/authorization # http://ccd-definition-store-api:4451/api/idam/adminweb/authorization
+      ADMINWEB_IMPORT_AUDITS_URL : http://host.docker.internal:4451/api/import-audits # http://ccd-definition-store-api:4451/api/import-audits
+      ADMINWEB_ELASTIC_INDEX_URL : http://host.docker.internal:4451/elastic-support/index # http://ccd-definition-store-api:4451/elastic-support/index
       ADMINWEB_GET_DICTIONARY_URL: http://ts-translation-service:4650/dictionary
       ADMINWEB_ROLES_WHITELIST : "ccd-import,ccd-import-validate"
       APPINSIGHTS_INSTRUMENTATIONKEY: key
@@ -59,14 +59,14 @@ services:
       IDAM_OAUTH2_TOKEN_ENDPOINT: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}/oauth2/token"
       CORS_ORIGIN_WHITELIST: http://localhost:3455
       ADDRESS_LOOKUP_TOKEN:
-      PROXY_AGGREGATED: http://ccd-data-store-api:4452
-      PROXY_DATA: http://ccd-data-store-api:4452
+      PROXY_AGGREGATED: http://host.docker.internal:4452 # http://ccd-data-store-api:4452
+      PROXY_DATA: http://host.docker.internal:4452 # http://ccd-data-store-api:4452
       PROXY_CASE_ACTIVITY: http://host.docker.internal:3460
       PROXY_PRINT_SERVICE: http://host.docker.internal:3200
       PROXY_PAYMENTS: "${PROXY_PAYMENTS_STUB:-http://localhost:9999/payments}"
-      PROXY_DEFINITION_IMPORT: http://ccd-definition-store-api:4451
-      PROXY_DEFINITION_DATA: http://ccd-definition-store-api:4451/api/data
-      PROXY_DEFINITION_DISPLAY: http://ccd-definition-store-api:4451/api/display
+      PROXY_DEFINITION_IMPORT: http://host.docker.internal:4451 # http://ccd-definition-store-api:4451
+      PROXY_DEFINITION_DATA: http://host.docker.internal:4451/api/data # http://ccd-definition-store-api:4451/api/data
+      PROXY_DEFINITION_DISPLAY: http://host.docker.internal:4451/api/display # http://ccd-definition-store-api:4451/api/display
       APPINSIGHTS_INSTRUMENTATIONKEY: key
     ports:
       - 3453:3453

@@ -11,7 +11,7 @@ services:
       IDAM_OIDC_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       S2S_URL: http://service-auth-provider-api:8080
       DM_STORE_BASE_URL: http://dm-store:8080
-      CCD_DATA_STORE_API_BASE_URL: http://ccd-data-store-api:4452
+      CCD_DATA_STORE_API_BASE_URL: http://host.docker.internal:4452 # http://ccd-data-store-api:4452
       REFORM_SERVICE_NAME: ccd-case-document-am-api
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
