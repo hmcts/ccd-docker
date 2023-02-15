@@ -605,9 +605,6 @@ function generate_csv_path_with_insert() {
     extension="csv"
   fi
 
-  if [[ ! -e "${dirname}/${CSV_PROCESSED_DIR_NAME}" ]]; then
-    mkdir -pv "${dirname}/${CSV_PROCESSED_DIR_NAME}"
-  fi
   echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/${filename}${insert}.${extension}"
 }
 
@@ -757,8 +754,7 @@ function process_input_file() {
   # input file read ok ...
   # ... so move it to backup location
   if [ $? -eq 0 ]; then
-    move_file $filepath_input_original $filepath_input_newpath 2> /dev/null
-    if [ $? -eq 0 ]; then
+    if mv "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null; then
       echo "Moved input file to backup location: ${BOLD}${filepath_input_newpath}${NORMAL}"
     else
      echo "${RED}ERROR: Aborted as unable to move input file to backup location:${NORMAL} ${filepath_input_newpath}"
@@ -2333,14 +2329,25 @@ function log_error {
 # Logging Functions - End
 ##########################
 
+createOutputDirectory() {
+  local original_filename=$1
+  local dirname
+  dirname=$(dirname "${original_filename}")
+  
+  if [[ ! -d "${dirname}/${CSV_PROCESSED_DIR_NAME}" ]]; then
+    mkdir -p "${dirname}/${CSV_PROCESSED_DIR_NAME}"
+  fi
+  }
+
 # loop & process any .csv files found
 process_folder_recurse() {
 
   TIMEFORMAT="The input was processed in: %3lR"
+  createOutputDirectory "$1"
 
   for i in "$1"/*.csv;do
     if [ -f "$i" ]; then
-      time process_input_file "${i}"
+      time process_input_file "$i" 
     fi
   done
 
