@@ -711,10 +711,6 @@ function convert_input_file_to_json() {
 
 }
 
-function move_file() {
-  mv "$1" "$2" 2> /dev/null
-}
-
 function process_input_file() {
   local filepath_input_original=$1
 
