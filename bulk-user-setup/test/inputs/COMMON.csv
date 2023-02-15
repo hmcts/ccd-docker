@@ -44,3 +44,4 @@ delete,,,,,NA,FAILED,,Empty email id
 delete,ccd.test.common.user1@hmcts.gov.uk,fn1,ln1,caseworker-role-six|caseworker_role_six,TRUE,SUCCESS,user exists,WARN first and last name given but not required
 Update,ccd.test.common.user1@hmcts.gov.uk,fn1,ln1,caseworker-role-six|caseworker_role_six,,FAILED,,Invalid Operation name
 ,ccd.test.common.user1@hmcts.gov.uk,fn1,ln1,caseworker-role-six|caseworker_role_six,,FAILED,,Empty Operation name
+add, ccd.test.common.user0@hmcts.gov.uk ,fn0 ,ln0,caseworker-role-one||caseworker-role-two | |caseworker-role-three|,FALSE,SUCCESS,user does not exist,Roles with empty delimeter or ending in delimiter should work

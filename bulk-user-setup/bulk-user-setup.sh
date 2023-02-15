@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-source ./bulk-user-setup.config > out.log 2> /dev/null
+# source ./bulk-user-setup.config > out.log 2> /dev/null
+source ./bulk-user-setup.config 2> /dev/null
 
 is_test=false
 
@@ -538,29 +539,50 @@ function verify_csv_tools_are_available() {
 }
 
 function verify_json_format_includes_field() {
-  local json=$1
-  local field=$2
+   local json=$1
+   local field=$2
 
-  ## verify JSON array is not empty
-  if [ $(echo $json | jq -e '. | length') == 0 ]; then
-    echo "${RED}ERROR: input file conversion produced empty result.${NORMAL} Please check input file format."
-    log_error "file: ${filename} , ERROR: input file conversion produced empty result.Please check input file format."
-    exit 99
-  fi
+   ## verify JSON array is not empty
+   if [ $(echo $json | jq -e '. | length') == 0 ]; then
+     echo "${RED}ERROR: input file conversion produced empty result.${NORMAL} Please check input file format."
+     log_error "file: ${filename} , ERROR: input file conversion produced empty result.Please check input file format."
+     exit 99
+   fi
 
-  ## verify JSON format by checking JUST THE FIRST ITEM has the required field
-  if [ $(echo $json | jq "first(.[] | has(\"${field}\"))") == false ]; then
-    echo "${RED}file: ${filename} ,ERROR: Field not found in input:${NORMAL} ${field}"
-    log_error "file: ${filename} , ERROR: Field not found in input:${field}"
-    exit 99
-  fi
-}
+   ## verify JSON format by checking JUST THE FIRST ITEM has the required field
+   if [ $(echo $json | jq "first(.[] | has(\"${field}\"))") == false ]; then
+     echo "${RED}file: ${filename} ,ERROR: Field not found in input:${NORMAL} ${field}"
+     log_error "file: ${filename} , ERROR: Field not found in input:${field}"
+     exit 99
+   fi
+ }
+
+ function verify_json_format_does_not_include_field() {
+    local json=$1
+    local field=$2
+
+    ## verify JSON array is not empty
+    if [ $(echo $json | jq -e '. | length') == 0 ]; then
+      echo "${RED}ERROR: input file conversion produced empty result.${NORMAL} Please check input file format."
+      log_error "file: ${filename} , ERROR: input file conversion produced empty result.Please check input file format."
+      exit 99
+    fi
+
+    ## verify JSON format by checking JUST THE FIRST ITEM has the required field
+    if [ $(echo $json | jq "first(.[] | has(\"${field}\"))") == true ]; then
+      echo "${RED}file: ${filename} ,ERROR: Field found in input:${NORMAL} ${field}"
+      log_error "file: ${filename} , ERROR: Field found in input:${field}"
+      exit 99
+    fi
+  }
 
 function get_file_name_from_csv_path() {
   local original_filename=$1
 
-  local dirname=$(dirname "${original_filename}")
-  local basename=$(basename "${original_filename}")
+  local dirname
+  dirname=$(dirname "${original_filename}")
+  local basename
+  basename=$(basename "${original_filename}")
   local filename="${basename%.*}"
   local extension="${basename##*.}"
 
@@ -571,8 +593,10 @@ function generate_csv_path_with_insert() {
   local original_filename=$1
   local insert=$2
 
-  local dirname=$(dirname "${original_filename}")
-  local basename=$(basename "${original_filename}")
+  local dirname
+  dirname=$(dirname "${original_filename}")
+  local basename
+  basename=$(basename "${original_filename}")
   local filename="${basename%.*}"
   local extension="${basename##*.}"
 
@@ -591,8 +615,10 @@ function generate_log_path_with_insert() {
   local original_filename=$1
   local insert=$2
 
-  local dirname=$(dirname "${original_filename}")
-  local basename=$(basename "${original_filename}")
+  local dirname
+  dirname=$(dirname "${original_filename}")
+  local basename
+  basename=$(basename "${original_filename}")
   local filename="${basename%.*}"
   local extension="${basename##*.}"
 
@@ -618,7 +644,32 @@ function convert_input_file_to_json() {
   verify_file_exists "$file"
 
   # read from CSV by using CSVJSON
-  local raw_csv_as_json=$(csvjson --datetime-format "." "$file")
+  local raw_csv_as_json
+  raw_csv_as_json=$(csvjson --datetime-format "." "$file")
+
+  #To get output from the csvjson library call
+  #local raw_csv_as_json=$(csvjson --datetime-format "." "$file" 2>&1)
+
+  ## verify raw csv as json is not empty
+  if [ -z "$raw_csv_as_json" ]; then
+    #printf "%s\n" "${RED}file: ${filename} conversion to JSON produced empty result${NORMAL}"
+    #printf "%s\n" "${RED}attempting to convert to UTF-8${NORMAL}"
+
+    #iconv -f ISO-8859-1 -t UTF-8 -c "$file" > "$file-utf8.csv" && mv "$file-utf8.csv" "$file" #&& sleep 3
+
+    #raw_csv_as_json=$(csvjson --datetime-format "." "$file")
+
+    #if [ -z "$raw_csv_as_json" ]; then
+    #    echo "${RED}file: ${filename} ,ERROR: input file conversion produced empty result.${NORMAL} Please check input file format."
+    #    log_error "file: ${filename} , ERROR: input file conversion produced empty result.Please check input file format."
+    #    exit 99
+    #fi
+    #printf "%s\n" "${raw_csv_as_json}"
+
+    echo "${RED}file: ${filename} ,ERROR: input file conversion produced empty result.${NORMAL} Please check input file format."
+    log_error "file: ${filename} , ERROR: input file conversion produced empty result.Please check input file format."
+    exit 99
+  fi
 
   # verify JSON format  (ie. check mandatory fields are present)
   verify_json_format_includes_field "${raw_csv_as_json}" "operation"
@@ -627,13 +678,21 @@ function convert_input_file_to_json() {
   verify_json_format_includes_field "${raw_csv_as_json}" "lastName"
   verify_json_format_includes_field "${raw_csv_as_json}" "roles"
 
+  if [[ "$ENABLE_USERID_REGISTRATIONS" = true ]]; then
+    verify_json_format_includes_field "${raw_csv_as_json}" "id"
+  else
+    verify_json_format_does_not_include_field "${raw_csv_as_json}" "id"
+  fi
+
   #"roles": (try(.roles | split("|") | walk( if type == "string" then (sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) else . end)) // null),
 
   # then reformat JSON using JQ
-  local input_as_json=$(echo $raw_csv_as_json \
+  local input_as_json
+  input_as_json=$(echo $raw_csv_as_json \
     | jq -r -c 'map({
         "idamUser": {
           "email": (try(.email | sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) // null),
+          "id": .id,
           "firstName": .firstName,
           "lastName": .lastName,
           "roles": (try(.roles | split("|") | walk( if type == "string" then (sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) else . end)) // null),
@@ -652,6 +711,7 @@ function convert_input_file_to_json() {
       })' ) # NB: extraCsvData element included in JSON to help preserve csv data when skipping an already complete record (i.e. inviteStatus="success")
 
   echo "$input_as_json"
+
 }
 
 function move_file() {
@@ -662,19 +722,24 @@ function process_input_file() {
   local filepath_input_original=$1
 
   # generate new paths for input and output files
-  local datestamp=$(date -u +"%FT%H%M%SZ")
-  local filepath_input_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "_Input_${datestamp}")
-  local filepath_output_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "_Output_${datestamp}")
-  local filename=$(get_file_name_from_csv_path "$filepath_input_original")
+  local datestamp
+  datestamp=-$(date -u +"%FT%H%M%SZ")
+  local filepath_input_newpath
+  filepath_input_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "_Input_${datestamp}")
+  local filepath_output_newpath
+  filepath_output_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "_Output_${datestamp}")
+  local filename
+  filename=$(get_file_name_from_csv_path "$filepath_input_original")
 
   if [[ "$LOG_PER_INPUT_FILE" = true ]]; then
     LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp}")"
   else
-    local datestamp_day=$(date -u +"%F")
+    local datestamp_day
+    datestamp_day=$(date -u +"%F")
     LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp_day}")"
   fi
 
-  log_debug "Start - processing input file ${filepath_input_original}"
+  log_debug "****** Start - processing input file ${filepath_input_original}"
 
   if [[ "$is_test" = true ]]; then
     echo 'Test outputs of resulting files!'
@@ -713,35 +778,47 @@ function process_input_file() {
       local lastModified=" "
 
       # extract CSV fields from json to use in output
-      local email=$(echo $user | jq --raw-output '.idamUser.email')
+      local email
+      email=$(echo $user | jq --raw-output '.idamUser.email')
       email=$(trim "$email") #trim leading and trailing spaces from email string
       email=$(convertToLowerCase "$email")
 
-      local firstName=$(echo $user | jq --raw-output '.idamUser.firstName')
+      local firstName
+      firstName=$(echo $user | jq --raw-output '.idamUser.firstName')
       firstName=$(trim "$firstName") #trim leading and trailing spaces from firstname string
 
-      local lastName=$(echo $user | jq --raw-output '.idamUser.lastName')
+      local lastName
+      lastName=$(echo $user | jq --raw-output '.idamUser.lastName')
       lastName=$(trim "$lastName") #trim leading and trailing spaces from lastName string
 
-      local operation=$(echo $user | jq --raw-output '.extraCsvData.operation')
+      local operation
+      operation=$(echo $user | jq --raw-output '.extraCsvData.operation')
       operation=$(trim "$operation")
       operation=$(convertToLowerCase "$operation")
 
       # leading and trailing spaces between roles is taken care in the function call to convert_input_file_to_json
-      local rolesFromCSV=$(echo $user | jq --raw-output '.idamUser.roles')
+      local rolesFromCSV
+      rolesFromCSV=$(echo $user | jq --raw-output '.idamUser.roles')
 
       #raw roles as string
-      local strRolesFromCSV=$(echo $user | jq --raw-output '.extraCsvData.roles')
+      local strRolesFromCSV
+      strRolesFromCSV=$(echo $user | jq --raw-output '.extraCsvData.roles')
       strRolesFromCSV=$(trim "$strRolesFromCSV")
 
       # load formatted user JSON ready to send to IDAM
-      local idamUserJson=$(echo $user | jq -c --raw-output '.idamUser')
+      local idamUserJson
+      idamUserJson=$(echo $user | jq -c --raw-output '.idamUser')
 
       #inviteStatus from input CSV can take value SUCCESS
       #required so we do not send another registration request if one is already pending
-      local inviteStatus=$(echo $user | jq --raw-output '.extraCsvData.status')
+      local inviteStatus
+      inviteStatus=$(echo $user | jq --raw-output '.extraCsvData.status')
 
-      local result=$(echo $user | jq --raw-output '.extraCsvData.result')
+      local result
+      result=$(echo $user | jq --raw-output '.extraCsvData.result')
+
+      local csvUserId
+      csvUserId=$(echo $user | jq --raw-output '.idamUser.id')
 
       log_debug "==============================================="
       log_debug "processing user with email: ${email}"
@@ -750,29 +827,36 @@ function process_input_file() {
 
         # regardless if operation (add/remove) we should always check if the user already exists or not
 
-        local rawReturnedValue=$(get_user "$email")
+        local rawReturnedValue
+        rawReturnedValue=$(get_user "$email")
         #local rawReturnedValue=$(get_user_api_v1 "${email}")
 
         if [[ $rawReturnedValue != *"HTTP-"* ]] && [[ $rawReturnedValue != *"ERROR"* ]]; then
-          local userId=$(echo $rawReturnedValue | jq --raw-output '.id')
+          local userId
+          userId=$(echo $rawReturnedValue | jq --raw-output '.id')
           #if using /api/v1 to find user by email, it returns an array or users which is empty if no user found
           #if found, we need to ensure we get the first element
           #local userId=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.id')
 
-          local userActiveState=$(echo $rawReturnedValue | jq --raw-output '.active') # i.e. ACTIVE
+          local userActiveState
+          userActiveState=$(echo $rawReturnedValue | jq --raw-output '.active') # i.e. ACTIVE
           isActive="${userActiveState}"
           #local userActiveState=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.active')
 
           #local userRecordType=$(echo $userObject | jq --raw-output '.recordType') # i.e. LIVE
 
-          local firstNameFromApi=$(echo $rawReturnedValue | jq --raw-output '.forename')
+          local firstNameFromApi
+          firstNameFromApi=$(echo $rawReturnedValue | jq --raw-output '.forename')
           #local firstNameFromApi=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.forename')
 
-          local lastNameFromApi=$(echo $rawReturnedValue | jq --raw-output '.surname')
+          local lastNameFromApi
+          lastNameFromApi=$(echo $rawReturnedValue | jq --raw-output '.surname')
           #local lastNameFromApi=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.surname')
 
-          local rawUserRoles=$(get_user_roles "$userId" )
-          local usersRolesFromApi=$(echo $rawUserRoles | jq --raw-output '.roles')
+          local rawUserRoles=
+          rawUserRoles=$(get_user_roles "$userId" )
+          local usersRolesFromApi
+          usersRolesFromApi=$(echo $rawUserRoles | jq --raw-output '.roles')
 
           #log_debug "email: ${email}"
           #log_debug "user_id: ${userId}"
@@ -783,7 +867,6 @@ function process_input_file() {
 
         if [ $(echo $rolesFromCSV | jq -e '. | length') != 0 ]; then
           rolesFromCSV=$(convertJsonStringArrayToLowerCase "${rolesFromCSV}")
-          #log_debug "original roles from CSV (in lower case): ${rolesFromCSV}"
         fi
 
         if [ "$operation" == "find" ] || [ "$operation" == "delete" ]; then
@@ -823,7 +906,7 @@ function process_input_file() {
           responseMessage="ERROR: $reason"
           inviteStatus="FAILED"
           log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-          echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}${reason}${NORMAL}"
+          echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}${reason}${NORMAL}"
 
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -837,7 +920,7 @@ function process_input_file() {
           responseMessage="ERROR: $reason"
           inviteStatus="FAILED"
           log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-          echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+          echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -852,7 +935,7 @@ function process_input_file() {
             responseMessage="ERROR: $reason"
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+            echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
             # prepare output (NB: escape generated values for CSV)
             input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -867,7 +950,7 @@ function process_input_file() {
             responseMessage="ERROR: $reason"
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+            echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
             # prepare output (NB: escape generated values for CSV)
             input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -881,7 +964,7 @@ function process_input_file() {
             responseMessage="ERROR: $reason"
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+            echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
             # prepare output (NB: escape generated values for CSV)
             input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -890,13 +973,17 @@ function process_input_file() {
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "find" ]; then
             if [[ "$ENABLE_SCOPE_USER_SEARCH" = true ]]; then
-                local api_v1_user=$(get_user_api_v1 "${email}")
+                local api_v1_user
+                api_v1_user=$(get_user_api_v1 "${email}")
 
                 if [[ $api_v1_user != *"HTTP-"* ]]; then
 
-                  local api_v1_user_firstname=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.forename')
-                  local api_v1_user_lastname=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.surname')
-                  local api_v1_user_roles=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.roles')
+                  local api_v1_user_firstname
+                  api_v1_user_firstname=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.forename')
+                  local api_v1_user_lastname
+                  api_v1_user_lastname=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.surname')
+                  local api_v1_user_roles
+                  api_v1_user_roles=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.roles')
                   isActive=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.active')
                   lastModified=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.lastModified')
 
@@ -920,7 +1007,7 @@ function process_input_file() {
                   responseMessage=""
                   inviteStatus="SUCCESS"
                   log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                  echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+                  echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
 
                   # prepare output (NB: escape generated values for CSV)
                   input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email] | @csv')
@@ -932,7 +1019,7 @@ function process_input_file() {
                   responseMessage="ERROR: $reason"
                   inviteStatus="FAILED"
                   log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-                  echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+                  echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
                   # prepare output (NB: escape generated values for CSV)
                   input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -957,13 +1044,77 @@ function process_input_file() {
                 responseMessage=""
                 inviteStatus="SUCCESS"
                 log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+                echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
 
                 # prepare output (NB: escape generated values for CSV)
                 input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email] | @csv')
                 timestamp=$(date -u +"%FT%H:%M:%SZ")
                 output_csv="$input_csv,\"$firstNameFromApi\",\"$lastNameFromApi\",\"$strApi_user_roles\",\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
             fi
+        elif [ "$operation" == "add" ] && [[ "$ENABLE_USERID_REGISTRATIONS" = true ]]; then
+            # add id logic here
+            if [ "$csvUserId" == "null" ]; then
+              # SKIP:
+              skipped_counter=$((skipped_counter+1))
+              inviteStatus="SKIPPED"
+              local reason="Field: 'id' required, but not provided"
+              responseMessage="WARN: $reason"
+
+              log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+            elif [ "$firstName" == "null" ] && [ "$lastName" == "null" ]; then
+                # FAIL:
+                fail_counter=$((fail_counter+1))
+                local reason="${BothFirstAndLastnameCannotBeEmpty}"
+                responseMessage="ERROR: $reason"
+                inviteStatus="FAILED"
+                log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
+                echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+            else
+                if [ "$csvUserId" == "use-existing-user-id" ]; then
+                    log_debug "${email}, existing user with id: ${userId}"
+                    #replace json id with existing users id
+                    idamUserJson=$(echo $idamUserJson | jq --arg existingUserID "${userId}" '.id = ($existingUserID)')
+                fi
+                log_debug "idamUserJson: ${idamUserJson}"
+
+                # make call to IDAM
+                submit_response=$(submit_user_registation "$idamUserJson")
+
+                # seperate submit_user_registation reponse
+                IFS=$'\n'
+                local response_array=($submit_response)
+                local inviteStatus=${response_array[0]}
+                local responseMessage=${response_array[1]}
+
+                if [ $inviteStatus == "SUCCESS" ]; then
+                    # SUCCESS:
+                    success_counter=$((success_counter+1))
+                    lastModified=$(date -u +"%FT%H:%M:%SZ")
+                    local reason="user successfully registered"
+                    responseMessage="INFO: $reason"
+
+                    if [[ "$bRolesDiscarded" = true ]]; then
+                        responseMessage="$responseMessage $discardedRolesMessage"
+                    fi
+
+                    log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                    echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+                else
+                    # FAIL:
+                    fail_counter=$((fail_counter+1))
+                    local reason="failed registering user"
+                    responseMessage="ERROR: $responseMessage"
+                    inviteStatus="FAILED"
+                    echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+                    log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
+                fi
+            fi
+
+            # prepare output (NB: escape generated values for CSV)
+            input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+            timestamp=$(date -u +"%FT%H:%M:%SZ")
+            output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
         elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "add" ]; then
 
           log_debug "email: ${email} - User does not exist, doing add new user logic"
@@ -975,13 +1126,14 @@ function process_input_file() {
             responseMessage="ERROR: $reason"
             inviteStatus="FAILED"
             log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+            echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
           else
             local bRolesDiscarded=false
             local discardedRolesMessage=""
 
             if [ $(checkAllowedRole "${rolesFromCSV}" "${MANUAL_ROLES}") -eq 1 ]; then
-                local discardedRoles=$(returnNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
+                local discardedRoles
+                discardedRoles=$(returnNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
                 rolesFromCSV=$(stripNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
                 discardedRolesMessage="WARN: the following role(s) can only be added by eJust 3rd Line support via Snow: "
                 discardedRolesMessage="$discardedRolesMessage ${discardedRoles[*]}"
@@ -993,7 +1145,7 @@ function process_input_file() {
 
             if [ $(checkShouldAddDefaultRoles "${rolesFromCSV}") -eq 1 ]; then
                 log_debug "Adding default roles"
-                rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${DEFAULT_ROLES}")
+                rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${ADD_ROLES_BY_DEFAULT}")
             else
                 log_debug "Skipping addition of default roles"
             fi
@@ -1019,7 +1171,7 @@ function process_input_file() {
                 fi
 
                 inviteStatus="FAILED"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${responseMessage}${NORMAL}"
+                echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${responseMessage}${NORMAL}"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
             else
                 #Need to update the roles in idamUserJson
@@ -1048,14 +1200,14 @@ function process_input_file() {
                     fi
 
                     log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                    echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+                    echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
                 else
                     # FAIL:
                     fail_counter=$((fail_counter+1))
                     local reason="failed registering user"
                     responseMessage="ERROR: $responseMessage"
                     inviteStatus="FAILED"
-                    echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+                    echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
                     log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
                 fi
             fi
@@ -1070,11 +1222,14 @@ function process_input_file() {
 
           log_debug "email: ${email} - User exists, doing role addition logic"
 
+          log_debug "Current assigned roles (based on API): ${usersRolesFromApi}"
+
           local bRolesDiscarded=false
           local discardedRolesMessage=""
 
           if [ $(checkAllowedRole "${rolesFromCSV}" "${MANUAL_ROLES}") -eq 1 ]; then
-            local discardedRoles=$(returnNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
+            local discardedRoles
+            discardedRoles=$(returnNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
             rolesFromCSV=$(stripNotAllowedRoles "${rolesFromCSV}" "${MANUAL_ROLES}")
             discardedRolesMessage="WARN: the following role(s) can only be added by eJust 3rd Line support via Snow: "
             discardedRolesMessage="$discardedRolesMessage ${discardedRoles[*]}"
@@ -1088,7 +1243,7 @@ function process_input_file() {
 
           if [ $(checkShouldAddDefaultRoles "${rolesFromCSV}") -eq 1 ]; then
             log_debug "Adding default roles"
-            rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${DEFAULT_ROLES}")
+            rolesFromCSV=$(addRolesToCSVRoles "${rolesFromCSV}" "${ADD_ROLES_BY_DEFAULT}")
           else
             log_debug "Skipping addition of default roles"
           fi
@@ -1142,7 +1297,7 @@ function process_input_file() {
               lastModified=$(date -u +"%FT%H:%M:%SZ")
               inviteStatus="SUCCESS"
               local reason="role(s) successfully assigned"
-              echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason"
+              echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
               log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               responseMessage=""
               #Set user activate state to true if false
@@ -1175,7 +1330,7 @@ function process_input_file() {
               if [[ $responseMessage = *"account is stale"* ]]; then
                   responseMessage="$responseMessage INFO: user needs to reset their password themselves for the account to be reactivated"
               fi
-              echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+              echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
               log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
             fi
           else
@@ -1190,7 +1345,7 @@ function process_input_file() {
             fi
 
             log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+            echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
           fi
 
           # prepare output (NB: escape generated values for CSV)
@@ -1211,7 +1366,7 @@ function process_input_file() {
                 responseMessage="ERROR: $reason"
                 inviteStatus="FAILED"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+                echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
               else
                 log_debug "email: ${email} - doing firstname/lastname update"
 
@@ -1237,14 +1392,14 @@ function process_input_file() {
                   inviteStatus="SUCCESS"
                   local reason="user firstname/lastname successfully updated"
                   log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                  echo "${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+                  echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
                 else
                   # FAIL:
                   fail_counter=$((fail_counter+1))
                   inviteStatus="FAILED"
                   local reason="failed updating user firstname/lastname"
                   log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-                  echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+                  echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
                 fi
               fi
             else
@@ -1254,7 +1409,7 @@ function process_input_file() {
               local reason="no changes in firstname/lastname detected, nothing to update"
               responseMessage="WARN: $reason"
               log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-              echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+              echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
             fi
           else
             # SKIP:
@@ -1263,7 +1418,7 @@ function process_input_file() {
             local reason="${UserExistsNotActive}"
             responseMessage="WARN: $reason"
             log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
+            echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
           fi
 
           # prepare output (NB: escape generated values for CSV)
@@ -1278,7 +1433,7 @@ function process_input_file() {
           local reason="User does not exist, cannot process $operation operation"
           responseMessage="WARN: $reason"
           log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-          echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+          echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
 
           # prepare output (NB: escape generated values for CSV)
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -1293,7 +1448,7 @@ function process_input_file() {
           responseMessage="ERROR: $reason"
           inviteStatus="FAILED"
           log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-          echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+          echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "delete" ]; then
 
@@ -1310,68 +1465,80 @@ function process_input_file() {
           #declare empty bash array to store api fetched roles
           local rolesFromApiArray=()
 
-          #populate array with fetched api roles
-          for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
-            if [ "$apiRole" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
-                default_caseworker_role_already_assigned=true
-            fi
-            rolesFromApiArray+=("${apiRole}")
-          done
+          log_debug "Current assigned roles (based on API): ${usersRolesFromApi}"
 
-          #add the expanded roles if required (i.e. ia_roles etc.)
-          rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
-
-          log_debug "Computed/expanded CSV roles supplied for deletion: ${rolesFromCSV}"
-
-          for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
-            if [ "$csvRole" == "${DEFAULT_CASEWORKER_ROLE}" ]; then
-                default_caseworker_role_provided=true
-            fi
-            for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
-              #add csv role to array excluding DEFAULT_CASEWORKER_ROLE
-              if [ "$csvRole" == "$apiRole" ] && [ "$csvRole" != "${DEFAULT_CASEWORKER_ROLE}" ]; then
-                rolesToRemoveArray+=("${csvRole}")
-              fi
-            done
-          done
-
-          #remove the roles to be deleted from api roles (assuming deletion to succeed)
-          #for del in "${rolesToRemoveArray[@]}"
-          #do
-          #   rolesFromApiArray=( "${rolesFromApiArray[@]/$del}" )
-          #done
-
-          rolesFromApiArray=($(removeFromArray2 "${rolesFromApiArray}" "${rolesToRemoveArray}"))
-
-          #Check if any more caseworker-* roles remain for the user
-          #if not then safe to remove caseworker
-          local otherServiceRole=false
-          for role in "${rolesFromApiArray[@]}"
-          do
-              if [[ "${role}" == "${DEFAULT_CASEWORKER_ROLE}-"* ]]; then
-                  otherServiceRole=true
-                  break
-              fi
-          done
-
-          if [[ "$otherServiceRole" = false ]]; then
-              if [[ "$default_caseworker_role_already_assigned" = true ]]; then
-                rolesFromApiArray=($(removeFromArray2 "${rolesFromApiArray}" "${DEFAULT_CASEWORKER_ROLE}"))
-                #no other caseworker- roles, remove caseworker also
-                rolesToRemoveArray+=("${DEFAULT_CASEWORKER_ROLE}")
-              fi
-          fi
-
-          local rolesFromApiArray_count=${#rolesFromApiArray[@]}
-
-          log_debug "default_caseworker_role_provided = ${default_caseworker_role_provided}"
-          log_debug "default_caseworker_role_already_assigned = ${default_caseworker_role_already_assigned}"
-          log_debug "Any more caseworker- roles remaining = ${otherServiceRole}"
-          log_debug "rolesFromApiArray_count after deletions would be: ${rolesFromApiArray_count}"
-          log_debug "Assigned roles to remove: ${rolesToRemoveArray[*]}"
-
-          if [ $rolesFromApiArray_count == 0 ]; then
+          if [ $(checkJsonContainsStringRole "${rolesFromCSV}" "${ALL_ROLES}") -eq 1 ]; then
+            log_debug "Operation: ${operation}, contains role:  ${ALL_ROLES}, PUT API call will be used to remove all roles and de-activate the user"
             USE_PUT=1
+          elif [ $(echo $usersRolesFromApi | jq -e '. | length') == 0 ]; then
+            log_debug "Operation: ${operation}, User currently has NO roles assigned, PUT API call will be used to de-activate the user"
+            USE_PUT=1
+          else
+            #populate array with fetched api roles
+            for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
+                if [ "$apiRole" == "${ADD_ROLES_BY_DEFAULT}" ]; then
+                    default_caseworker_role_already_assigned=true
+                fi
+                rolesFromApiArray+=("${apiRole}")
+            done
+
+            #add the expanded roles if required (i.e. ia_roles etc.)
+            rolesFromCSV=$(addPreDefinedRolesToCSVRoles "${rolesFromCSV}")
+
+            log_debug "Computed/expanded CSV roles supplied for deletion: ${rolesFromCSV}"
+
+            for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+                if [ "$csvRole" == "${ADD_ROLES_BY_DEFAULT}" ]; then
+                    default_caseworker_role_provided=true
+                fi
+                if [ $(checkArrayContainsStringRole "${IGNORED_ROLES_FROM_USER_DELETE_REQUEST}" "${csvRole}") -eq 1 ]; then
+                    log_debug "Ignoring supplied role: ${csvRole}"
+                else
+                    for apiRole in "${rolesFromApiArray[@]}"; do
+                        if [ "$csvRole" == "$apiRole" ]; then
+                            rolesToRemoveArray+=("${csvRole}")
+                            break
+                        fi
+                    done
+                fi
+            done
+
+            rolesFromApiArray=($(removeFromArray2 "${rolesFromApiArray}" "${rolesToRemoveArray}"))
+
+            #Check if any more caseworker-* roles remain for the user
+            #if not then safe to remove caseworker
+            local otherServiceRole=false
+            for role in "${rolesFromApiArray[@]}"
+            do
+                if [[ "${role}" == "${ADD_ROLES_BY_DEFAULT}-"* ]]; then
+                    otherServiceRole=true
+                    break
+                fi
+            done
+
+            local rolesToDeleteByDefaultArray=( $(splitStringToArray "|" "${DELETE_ROLES_BY_DEFAULT}") )
+
+            if [[ "$otherServiceRole" = false ]]; then
+                for apiRole in "${rolesFromApiArray[@]}"; do
+                    if [ $(checkArrayContainsStringRole "${DELETE_ROLES_BY_DEFAULT}" "${apiRole}") -eq 1 ]; then
+                        rolesFromApiArray=($(removeFromArray2 "${rolesFromApiArray}" "${apiRole}"))
+                        rolesToRemoveArray+=("${apiRole}")
+                    fi
+                done
+            fi
+
+            local rolesFromApiArray_count=${#rolesFromApiArray[@]}
+
+            log_debug "default_caseworker_role_provided = ${default_caseworker_role_provided}"
+            log_debug "default_caseworker_role_already_assigned = ${default_caseworker_role_already_assigned}"
+            log_debug "Any more caseworker- roles remaining = ${otherServiceRole}"
+            log_debug "rolesFromApiArray_count after deletions would be: ${rolesFromApiArray_count}"
+            log_debug "API based roles remaining after deletions would be: ${rolesFromApiArray[*]}"
+            log_debug "Assigned roles to remove: ${rolesToRemoveArray[*]}"
+
+            if [ $rolesFromApiArray_count == 0 ]; then
+                USE_PUT=1
+            fi
           fi
 
           if [ $userActiveState == "true" ]; then
@@ -1387,42 +1554,62 @@ function process_input_file() {
 
               if [ $inviteStatus == "SUCCESS" ]; then
                 # SUCCESS:
+
+                local warnSetActiveStateMessage=""
+
+                #Set user activate state to false
+                if [ $userActiveState == "true" ]; then
+                    log_debug "email: ${email} - User activate state=true, de-activating user"
+                    body='{"active":false}'
+                    submit_response=$(update_user "${userId}" "${body}")
+
+                    # seperate submit_response reponse
+                    IFS=$'\n'
+                    local response_array=($submit_response)
+                    local inviteStatus=${response_array[0]}
+                    local responseMessage=${response_array[1]}
+
+                    if [[ "$submit_response" == *"$email"* ]]; then
+                      log_warn "file: ${filename} , email: ${email} - SUCCESS, user active state set to false"
+                      isActive="FALSE"
+                      responseMessage=""
+                      warnSetActiveStateMessage="WARN: user has been deactivated"
+                    else
+                      log_error "file: ${filename} , email: ${email} - FAILED, user active state could not be set to false, API Error: ${responseMessage}"
+                      responseMessage="WARN: user account is suspended"
+                      warnSetActiveStateMessage="WARN: failed deactivating user"
+                    fi
+                fi
+
                 success_counter=$((success_counter+1))
                 lastModified=$(date -u +"%FT%H:%M:%SZ")
                 inviteStatus="SUCCESS"
-                local reason="All specified roles were successfully removed from the user"
-                responseMessage=" "
-                echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
+                local reason="All roles were successfully removed from the user"
+
+                if [ $userActiveState == "true" ]; then
+                    echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}: ${YELLOW}${warnSetActiveStateMessage}"
+                else
+                    echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
+                fi
+
                 log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                responseMessage="${reason} ${responseMessage} ${warnSetActiveStateMessage}"
               else
                 # FAIL:
                 fail_counter=$((fail_counter+1))
                 inviteStatus="FAILED"
-                local reason="failed removing all roles"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+                local reason="Failed removing all roles"
+                echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
-              fi
-
-              #Set user activate state to false
-              if [ $userActiveState == "true" ] && [ $inviteStatus == "SUCCESS" ]; then
-                log_debug "email: ${email} - User activate state=true, de-activating user"
-                body='{"active":false}'
-                submit_response=$(update_user "${userId}" "${body}")
-
-                if [[ "$submit_response" == *"$email"* ]]; then
-                  log_warn "file: ${filename} , email: ${email} - SUCCESS, user active state set to false"
-                  responseMessage="INFO: user has been deactivated"
-                  isActive="FALSE"
-                else
-                  log_error "file: ${filename} , email: ${email} - FAILED, user active state could not be set"
-                  responseMessage="ERROR: user active state could not be set to false"
-                fi
               fi
             else
               local addedCounter=0
               local failedToAddCounter=0
 
               local rolesToRemoveArray_count=${#rolesToRemoveArray[@]}
+
+              local rolesDeleted=()
+              local rolesNotDeleted=()
 
               #for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
               for csvRole in "${rolesToRemoveArray[@]}"; do
@@ -1437,37 +1624,42 @@ function process_input_file() {
                   addedCounter=$((addedCounter+1))
                   local reason="role $csvRole successfully removed"
                   log_info "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                  rolesDeleted+=("${csvRole}")
                 else
                   # FAIL:
                   failedToAddCounter=$((failedToAddCounter+1))
                   local reason="failed removing role $csvRole"
                   log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
+                  rolesNotDeleted+=("${csvRole}")
                 fi
               done
 
               if [ $rolesToRemoveArray_count == 0 ]; then
+                # SKIPPED:
                 skipped_counter=$((skipped_counter+1))
                 inviteStatus="SKIPPED"
                 local reason="None of the roles defined are currently assigned to the user"
                 responseMessage="WARN: $reason"
                 log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+                echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
               elif [ "$failedToAddCounter" -gt 0 ] && [ "$addedCounter" -gt 0 ]; then
-                # FAIL:
+                # PARTIALLY-FAILED:
                 fail_counter=$((fail_counter+1))
                 lastModified=$(date -u +"%FT%H:%M:%SZ")
                 inviteStatus="PARTIALLY-FAILED"
                 local reason="Some roles could not be unassigned, please check logs for further information"
                 responseMessage="ERROR: $reason"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+                 "${alpha[@]}"
+                responseMessage="INFO: Roles successfully removed: "${rolesDeleted[@]}" ERROR: Roles failed removal: "${rolesNotDeleted[*]}""
+                echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
               elif [ "$failedToAddCounter" -eq 0 ] && [ "$addedCounter" -gt 0 ]; then
                 # SUCCESS:
                 success_counter=$((success_counter+1))
                 lastModified=$(date -u +"%FT%H:%M:%SZ")
                 inviteStatus="SUCCESS"
-                local reason="All specified roles were successfully removed from the user"
-                responseMessage=" "
+                local reason="Specified roles were successfully removed from the user"
+                responseMessage="INFO: Roles successfully removed: "${rolesDeleted[*]}""
                 echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}$reason${NORMAL}"
                 log_info "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               else
@@ -1476,7 +1668,7 @@ function process_input_file() {
                 inviteStatus="FAILED"
                 local reason="Roles could not be unassigned, please check logs for further information"
                 responseMessage="ERROR: $reason"
-                echo "${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+                echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
                 log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
               fi
             fi
@@ -1487,7 +1679,7 @@ function process_input_file() {
             local reason="${UserExistsNotActive}"
             responseMessage="WARN: $reason"
             log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
+            echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
           fi
 
           # prepare output (NB: escape generated values for CSV)
@@ -1502,7 +1694,7 @@ function process_input_file() {
         skipped_counter=$((skipped_counter+1))
         local reason="Request already processed previously"
         responseMessage="WARN: $reason"
-        echo "${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
+        echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
         log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
 
         # prepare output
@@ -1527,9 +1719,9 @@ function process_input_file() {
       echo "$output_csv" >> "$filepath_output_newpath"
     done
 
-    log_debug "End - processing input file ${filepath_input_original}"
+    log_debug "****** End - processing input file ${filepath_input_original}"
 
-    echo "Process is complete: ${GREEN}success: ${success_counter}${NORMAL}, ${YELLOW}skipped: ${skipped_counter}${NORMAL}, ${RED}fail: ${fail_counter}${NORMAL}, total: ${total_counter}"
+    echo "${NORMAL}Process is complete: ${GREEN}success: ${success_counter}${NORMAL}, ${YELLOW}skipped: ${skipped_counter}${NORMAL}, ${RED}fail: ${fail_counter}${NORMAL}, total: ${total_counter}"
 
     if [ "$isResultColumnPresent" -eq 1 ]; then
         local testResult=""
@@ -1584,7 +1776,7 @@ function removeFromArray {
     for roleToRemove in "${rolesToRemoveArray[@]}"; do
       for roleFromApi in "${rolesFromApiArray[@]}"; do
           KEEP=true
-          if [[ ${roleToRemove} == ${roleFromApi} ]]; then
+          if [[ ${roleToRemove} == "${roleFromApi}" ]]; then
               KEEP=false
               break
           fi
@@ -1604,13 +1796,14 @@ function removeFromArray2 {
 
     for removeRole in "${rolesToRemoveArray[@]}"; do
       for i in "${!rolesFromApiArray[@]}"; do
-        if [[ ${rolesFromApiArray[i]} = $removeRole ]]; then
+        if [[ ${rolesFromApiArray[i]} = "$removeRole" ]]; then
           unset 'rolesFromApiArray[i]'
         fi
       done
     done
 
-    echo "${rolesFromApiArray[@]}"
+    #echo "${rolesFromApiArray[@]}"
+    echo "${rolesFromApiArray[*]}"
 }
 
 function addRolesToCSVRoles {
@@ -1714,6 +1907,39 @@ function checkAllowedRole {
   echo $notAllowedRoleFound
 }
 
+function checkArrayContainsStringRole {
+    # $1 is ex, IGNORED_ROLES_FROM_USER_DELETE_REQUEST
+    local stringArray=( $(splitStringToArray "|" "$1") )
+    local roleToCheckFor=$2
+
+    local found=0
+
+    for stringCheck in "${stringArray[@]}"; do
+        if [ "$roleToCheckFor" == "${stringCheck}" ]; then
+            found=1
+            break
+        fi
+    done
+
+    echo $found
+}
+
+function checkJsonContainsStringRole {
+  local rolesFromCSV=$1
+  local roleToCheckFor=$2
+
+  local found=0
+
+  for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
+    if [ "${csvRole}" == "$roleToCheckFor" ]; then
+      found=1
+      break
+    fi
+  done
+
+  echo $found
+}
+
 function stripNotAllowedRoles {
   local rolesFromCSV=$1
   local rolesToCheckFor=$2
@@ -1771,7 +1997,8 @@ function checkShouldAddRole {
   local rolesToCheckForArray=( $(splitStringToArray "|" "${rolesToCheckFor}") )
 
   local countRolesToCheckForArray=${#rolesToCheckForArray[@]}
-  local countRolesFromCSV=$(echo $rolesFromCSV | jq -e '. | length');
+  local countRolesFromCSV
+  countRolesFromCSV=$(echo $rolesFromCSV | jq -e '. | length');
 
   local counter=0
   local shouldAdd=1
@@ -1796,7 +2023,8 @@ function checkShouldAddRole {
 
 function checkShouldAddDefaultRoles {
   local rolesFromCSV=$1
-  local rolesToCheckForArray=( $(splitStringToArray "|" "${DEFAULT_ROLES}") )
+  local rolesToCheckForArray=( $(splitStringToArray "|" "${ADD_ROLES_BY_DEFAULT}") )
+  local addRolesToIgnoreByDefaultArray=( $(splitStringToArray "|" "${IGNORED_ROLES_FROM_USER_ADD_REQUEST}") )
   local countRolesToCheckForArray=${#rolesToCheckForArray[@]}
 
   local counter=0
@@ -1805,8 +2033,9 @@ function checkShouldAddDefaultRoles {
 
   for role in "${rolesToCheckForArray[@]}"; do
     for csvRole in $(echo "${rolesFromCSV}" | jq -r '.[]'); do
-        #if [[ "${csvRole}" =~ .*"$role".* ]]; then
-        if [[ "${csvRole}" == *"$role"* ]]; then
+        if [ $(checkArrayContainsStringRole "${IGNORED_ROLES_FROM_USER_ADD_REQUEST}" "${csvRole}") -eq 1 ]; then
+            log_debug "Ignoring role ${csvRole}"
+        elif [[ "${csvRole}" == *"$role"* ]]; then
             default_type_role_found=1
             break
         fi
@@ -1881,6 +2110,14 @@ function validateEmailAddress {
   fi
 }
 
+#not used yet
+function stripSpecialCharacters {
+  local stringInput=$1
+  regex="^[a-z0-9!#\$%&'*+/=?^_\`{|}~-]+(\.[a-z0-9!#$%&'*+/=?^_\`{|}~-]+)*@([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]*[a-z0-9])?\$"
+
+  echo "${stringInput//$regex/}"
+}
+
 function validateRoleString() {
 
   local roleString=$1
@@ -1936,7 +2173,8 @@ function checkMasterCaseworkerRoles
 
     IFS=$'\n' read -d '' -r -a caseworkerRolesMasterArray < ./"${masterCaseworkerRoleFile}"
 
-    local rawRolesResponse=$(get_roles)
+    local rawRolesResponse
+    rawRolesResponse=$(get_roles)
     local apiCaseworkerRolesBashArray=() #declare empty shell array
     local inLocalNotInRemote=()
     local inRemoteNotInLocal=()
@@ -1944,7 +2182,7 @@ function checkMasterCaseworkerRoles
 
     if [[ $rawRolesResponse != *"HTTP-"* ]]; then
         for rawRoleName in $(echo "${rawRolesResponse}" | jq .[].name); do
-            if [[ "$rawRoleName" == *"$DEFAULT_CASEWORKER_ROLE"* ]]; then
+            if [[ "$rawRoleName" == *"$ADD_ROLES_BY_DEFAULT"* ]]; then
                 #role=$(convertToLowerCase "${rawRoleName}")
                 #remove white space in between role
                 #role="${role// /}"
@@ -1971,7 +2209,7 @@ function checkMasterCaseworkerRoles
     for apiCaseWorkerRole in "${apiCaseworkerRolesBashArray[@]}"; do
       for caseworkerRoleMaster in "${caseworkerRolesMasterArray[@]}"; do
           FOUND=false
-          if [[ ${apiCaseWorkerRole} == ${caseworkerRoleMaster} ]]; then
+          if [[ ${apiCaseWorkerRole} == "${caseworkerRoleMaster}" ]]; then
               FOUND=true
               break
           fi
@@ -2111,7 +2349,7 @@ process_folder_recurse() {
 
 }
 
-read -p $'\nPlease enter environment (default is local): ' ENV
+read -r -p $'\nPlease enter environment (default is local): ' ENV
 
 ENV=${ENV:-local}
 
@@ -2125,8 +2363,8 @@ fi
 
 if [[ "$is_test" = false ]]; then
   # read input arguments
-  read -p "Please enter directory path containing csv input files: " CSV_DIR_PATH
-  read -p "Please enter ccd idam-admin username: " ADMIN_USER
+  read -r -p "Please enter directory path containing csv input files: " CSV_DIR_PATH
+  read -r -p "Please enter ccd idam-admin username: " ADMIN_USER
   ADMIN_USER_PWD=$(read_password_with_asterisk "Please enter ccd idam-admin password: ")
   IDAM_CLIENT_SECRET=$(read_password_with_asterisk $'\nPlease enter idam oauth2 secret for ccd-bulk-user-register client: ')
 fi
