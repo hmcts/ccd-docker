@@ -2,11 +2,6 @@
 version: '2.4'
 
 services:
-  ccd-api-gateway:
-    environment:
-      PROXY_DOCUMENT_MANAGEMENT: http://dm-store:8080
-    depends_on:
-      - dm-store
 
   ccd-data-store-api:
     environment:

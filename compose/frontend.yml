@@ -67,6 +67,7 @@ services:
       PROXY_DEFINITION_IMPORT: http://host.docker.internal:4451 # http://ccd-definition-store-api:4451
       PROXY_DEFINITION_DATA: http://host.docker.internal:4451/api/data # http://ccd-definition-store-api:4451/api/data
       PROXY_DEFINITION_DISPLAY: http://host.docker.internal:4451/api/display # http://ccd-definition-store-api:4451/api/display
+      PROXY_DOCUMENT_MANAGEMENT: http://dm-store:8080
       APPINSIGHTS_INSTRUMENTATIONKEY: key
     ports:
       - 3453:3453
