@@ -1,6 +1,12 @@
 version: '2.4'
 
 services:
+
+  ccd-definition-store-api:
+    environment:
+      TS_TRANSLATION_SERVICE_HOST: ${TS_TRANSLATION_SERVICE_HOST:-http://ts-translation-service:4650}
+      WELSH_TRANSLATION_ENABLED: ${WELSH_TRANSLATION_ENABLED:-true}
+
   ts-translation-service:
     build:
       context: .
