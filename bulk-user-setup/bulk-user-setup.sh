@@ -589,7 +589,7 @@ function get_file_name_from_csv_path() {
   echo "${filename}.${extension}"
 }
 
-function generate_csv_path_with_insert() {
+function generate_path_with_insert() {
   local original_filename=$1
   local insert=$2
 
@@ -601,39 +601,14 @@ function generate_csv_path_with_insert() {
   local extension="${basename##*.}"
 
   # add default CSV extension if none was found
-  if [ "$extension" = "" ] || [ "$filename" = "$basename" ]; then
+  if [[ $3 = "csv_file" ]] && [ "$extension" = "" ] || [ "$filename" = "$basename" ]; then
     extension="csv"
   fi
-
-  if [[ ! -e "${dirname}/${CSV_PROCESSED_DIR_NAME}" ]]; then
-    mkdir -pv "${dirname}/${CSV_PROCESSED_DIR_NAME}"
-  fi
-  echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/${filename}${insert}.${extension}"
-}
-
-function generate_log_path_with_insert() {
-  local original_filename=$1
-  local insert=$2
-
-  local dirname
-  dirname=$(dirname "${original_filename}")
-  local basename
-  basename=$(basename "${original_filename}")
-  local filename="${basename%.*}"
-  local extension="${basename##*.}"
-
-  extension="log"
-
-  if [[ ! -e "${dirname}/${CSV_PROCESSED_DIR_NAME}" ]]; then
-    mkdir -pv "${dirname}/${CSV_PROCESSED_DIR_NAME}"
+  if [[ $3 = "log" ]]; then
+    extension=$EXTENTION_FOR_LOGFILE
   fi
 
-  if [[ "$LOG_PER_INPUT_FILE" = true ]]; then
-    echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/${filename}${insert}.${extension}"
-  else
-    echo "${dirname}/${CSV_PROCESSED_DIR_NAME}/"BULK-SCRIPT-OUTPUT"${insert}.${extension}"
-  fi
-
+  echo "$OUTPUT_DIRECTORY/${filename}${insert}.${extension}"
 }
 
 function convert_input_file_to_json() {
@@ -745,21 +720,17 @@ function process_input_file() {
   local datestamp
   datestamp=-$(date -u +"%FT%H%M%SZ")
   local filepath_input_newpath
-  filepath_input_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "_Input_${datestamp}")
+  filepath_input_newpath=$(generate_path_with_insert "$filepath_input_original" "_Input_${datestamp}" "csv_file")
   local filepath_output_newpath
-  filepath_output_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "_Output_${datestamp}")
+  filepath_output_newpath=$(generate_path_with_insert "$filepath_input_original" "_Output_${datestamp}" "csv_file")
   local filename
   filename=$(get_file_name_from_csv_path "$filepath_input_original")
 
   if [[ "$LOG_PER_INPUT_FILE" = true ]]; then
-    LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp}")"
-  else
-    local datestamp_day
-    datestamp_day=$(date -u +"%F")
-    LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp_day}")"
+    LOGFILE="$(generate_path_with_insert "$filepath_input_original" "${datestamp}" "log")"
   fi
 
-  log_debug "****** Start - processing input file ${filepath_input_original}"
+  log_debug "****** Start - processing input file \"${filepath_input_original}\""
 
   if [[ "$is_test" = true ]]; then
     echo 'Test outputs of resulting files!'
@@ -770,15 +741,10 @@ function process_input_file() {
   fi
 
   # convert input file to json
-  json=$(convert_input_file_to_json "${filepath_input_original}")
-
-  # check_exit_code_for_error $? "$json"
-
-  # input file read ok ...
-  # ... so move it to backup location
-  if [ $? -eq 0 ]; then
-    mv "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null
-    if [ $? -eq 0 ]; then
+  if json=$(convert_input_file_to_json "${filepath_input_original}"); then
+    if mv "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null; then
+      # input file read ok ...
+      # ... so move it to backup location
       echo "Moved input file to backup location: ${BOLD}${filepath_input_newpath}${NORMAL}"
     else
      echo "${RED}ERROR: Aborted as unable to move input file to backup location:${NORMAL} ${filepath_input_newpath}"
@@ -1741,7 +1707,7 @@ function process_input_file() {
       echo "$output_csv" >> "$filepath_output_newpath"
     done
 
-    log_debug "****** End - processing input file ${filepath_input_original}"
+    log_debug "****** End - processing input file \"${filepath_input_original}\""
 
     echo "${NORMAL}Process is complete: ${GREEN}success: ${success_counter}${NORMAL}, ${YELLOW}skipped: ${skipped_counter}${NORMAL}, ${RED}fail: ${fail_counter}${NORMAL}, total: ${total_counter}"
 
@@ -2355,14 +2321,31 @@ function log_error {
 # Logging Functions - End
 ##########################
 
+createOutputDirectory() {
+  local dirname
+  dirname=$(dirname "$1")
+  local outputDir="${dirname}"/$CSV_PROCESSED_DIR_NAME
+  
+  if [[ ! -d "${outputDir}" ]]; then
+    mkdir -p "${outputDir}"
+    OUTPUT_DIRECTORY="${outputDir}"
+  fi
+
+  if [[ "$LOG_PER_INPUT_FILE" = false ]] && [[ -d "$OUTPUT_DIRECTORY" ]]; then
+    # $LOGFILE will be overwritten if LOG_PER_INPUT_FILE is true 
+    LOGFILE="${outputDir}"/BULK-SCRIPT-OUTPUT_$CURRENT_DATE.${EXTENTION_FOR_LOGFILE}
+  fi
+}
+
 # loop & process any .csv files found
 process_folder_recurse() {
 
   TIMEFORMAT="The input was processed in: %3lR"
+  createOutputDirectory "$1"
 
   for i in "$1"/*.csv;do
     if [ -f "$i" ]; then
-      time process_input_file "${i}"
+      time process_input_file "$i" 
     fi
   done
 
