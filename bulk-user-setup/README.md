@@ -82,6 +82,8 @@ Run the following scripts to create the client and required users and roles for 
 4. execute ./test/utils/add-users.sh (see below first)
    ** note: if CREATE_TEST_USERS=true is set in 'bulk-user-setup.config' there is no need to create the users separately as 
       the add-users.sh script will be called from the main bulk-user-setup.sh script)
+      Since the search user api now uses the /api/v1 elastic search end-point please wait some time between creating the test users
+      and running the test cases (due to cache commits etc.)
    ** Users to be added are defined in the file: users.json. Please ensure roles are created before assigning to them to users
    ** To add a user without any roles, pass the roles as "''" as can be seen in the example file included in this repo
 

@@ -19,8 +19,6 @@ function get_idam_url() {
 }
 
 function get_idam_token() {
-
-  if [[ "$ENABLE_SCOPE_USER_SEARCH" = true ]]; then
     curl_result=$(
         curl -w $"\n%{http_code}" --silent --show-error -X POST "${IDAM_URL}/o/token" \
             -H "accept: application/json" \
@@ -32,19 +30,6 @@ function get_idam_token() {
             --data-urlencode "password=${ADMIN_USER_PWD}" \
             --data-urlencode "scope=openid roles create-user manage-user search-user"
         )
-  else
-    curl_result=$(
-        curl -w $"\n%{http_code}" --silent --show-error -X POST "${IDAM_URL}/o/token" \
-            -H "accept: application/json" \
-            -H "Content-Type: application/x-www-form-urlencoded" \
-            --data-urlencode "client_id=${CLIENT_ID}" \
-            --data-urlencode "client_secret=${IDAM_CLIENT_SECRET}" \
-            --data-urlencode "grant_type=password" \
-            --data-urlencode "username=${ADMIN_USER}" \
-            --data-urlencode "password=${ADMIN_USER_PWD}" \
-            --data-urlencode "scope=openid roles create-user manage-user"
-      )
-  fi
 
   exit_code=$?
   if ! [ $exit_code -eq 0 ]; then
@@ -285,10 +270,11 @@ function put_user_roles() {
 
 function get_user_api_v1() {
   local EMAIL=$1
-  EMAIL="email%3A%20%22$EMAIL%22"
+  #?query=email:"james.bond@hmcts.net"
+  local ES_EMAIL_QUERY="email%3A%22${EMAIL}%22"
 
   curl_result=$(
-    curl -w $"\n%{http_code}" --silent -X GET -G "${IDAM_URL}/api/v1/users?query=$EMAIL" -H "accept: */*" -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
+    curl -w $"\n%{http_code}" --silent -X GET -G "${IDAM_URL}/api/v1/users?query=${ES_EMAIL_QUERY}" -H "accept: */*" -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
   )
 
   exit_code=$?
@@ -407,6 +393,46 @@ function get_user_roles() {
   fi
   echo "$response"
 
+}
+
+function get_user_by_id() {
+  local USERID=$1
+
+  curl_result=$(
+    curl -w $"\n%{http_code}" --silent -X GET "${IDAM_URL}/api/v1/users/${USERID}" -H "accept: */*" -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
+  )
+
+  exit_code=$?
+  if [ $exit_code -eq 0 ]; then
+
+    # seperate body and status into an array
+    IFS=$'\n' response_array=($curl_result)
+
+    array_length=${#response_array[@]}
+    if [ $array_length -eq 1 ]; then
+      response_body='' # clear body
+      response_status=${response_array[0]}
+    else
+      response_body=${response_array[0]}
+      response_status=${response_array[${array_length}-1]}
+    fi
+
+    if [ $(( response_status )) -gt 199 ] && [ $(( response_status )) -lt 300 ]; then
+      # SUCCESS:
+      response=${response_body}
+    else
+      # FAIL:
+      response="HTTP-${response_status}
+      ${response_body}"
+      echo "HTTP-${response_status}
+      ERROR: Request for roles of user UserID ${USERID} failed with http response: HTTP-${response_status}"
+    fi
+  else
+    # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
+    response="CURL-${exit_code}
+    ERROR: Request for roles of user UserID ${USERID} failed with curl exit code: ${exit_code}"
+  fi
+  echo "$response"
 }
 
 function get_roles() {
@@ -671,10 +697,14 @@ function convert_input_file_to_json() {
   verify_json_format_includes_field "${raw_csv_as_json}" "lastName"
   verify_json_format_includes_field "${raw_csv_as_json}" "roles"
 
+  #if [[ "$ENABLE_USERID_REGISTRATIONS" = true ]]; then
+  #  verify_json_format_includes_field "${raw_csv_as_json}" "id"
+  #else
+  #  verify_json_format_does_not_include_field "${raw_csv_as_json}" "id"
+  #fi
+
   if [[ "$ENABLE_USERID_REGISTRATIONS" = true ]]; then
     verify_json_format_includes_field "${raw_csv_as_json}" "id"
-  else
-    verify_json_format_does_not_include_field "${raw_csv_as_json}" "id"
   fi
 
   #"roles": (try(.roles | split("|") | walk( if type == "string" then (sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) else . end)) // null),
@@ -685,6 +715,7 @@ function convert_input_file_to_json() {
         "idamUser": {
           "email": (try(.email | sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) // null),
           "id": .id,
+          "ssoId": .ssoId,
           "firstName": .firstName,
           "lastName": .lastName,
           "roles": (try(.roles | split("|") | walk( if type == "string" then (sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) else . end)) // null),
@@ -740,13 +771,17 @@ function process_input_file() {
   # input file read ok ...
   # ... so move it to backup location
   if [ $? -eq 0 ]; then
-    mv "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null
-    if [ $? -eq 0 ]; then
-      echo "Moved input file to backup location: ${BOLD}${filepath_input_newpath}${NORMAL}"
-    else
-     echo "${RED}ERROR: Aborted as unable to move input file to backup location:${NORMAL} ${filepath_input_newpath}"
-     exit 1
-    fi
+
+    #if [[ "$is_test" = false ]]; then
+       mv "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null
+        if [ $? -eq 0 ]; then
+          echo "Moved input file to backup location: ${BOLD}${filepath_input_newpath}${NORMAL}"
+        else
+         echo "${RED}ERROR: Aborted as unable to move input file to backup location:${NORMAL} ${filepath_input_newpath}"
+         exit 1
+        fi
+    #fi
+
     # write headers to output file
     echo "operation,email,firstName,lastName,roles,isActive,lastModified,status,responseMessage" >> "$filepath_output_newpath"
 
@@ -792,6 +827,7 @@ function process_input_file() {
       local result=$(echo $user | jq --raw-output '.extraCsvData.result')
 
       local csvUserId=$(echo $user | jq --raw-output '.idamUser.id')
+      local csvSSOId=$(echo $user | jq --raw-output '.idamUser.ssoId')
 
       log_debug "==============================================="
       log_debug "processing user with email: ${email}"
@@ -800,29 +836,62 @@ function process_input_file() {
 
         # regardless if operation (add/remove) we should always check if the user already exists or not
 
-        local rawReturnedValue=$(get_user "$email")
-        #local rawReturnedValue=$(get_user_api_v1 "${email}")
+        #assume 404 user not found as search api returns an empty array when not found
+        local rawReturnedValue="HTTP-404"
 
-        if [[ $rawReturnedValue != *"HTTP-"* ]] && [[ $rawReturnedValue != *"ERROR"* ]]; then
-          local userId=$(echo $rawReturnedValue | jq --raw-output '.id')
-          #if using /api/v1 to find user by email, it returns an array or users which is empty if no user found
-          #if found, we need to ensure we get the first element
-          #local userId=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.id')
+         #use new api to search user by elasticsearch query
+        local rawReturnedValueArray=$(get_user_api_v1 "${email}")
 
-          local userActiveState=$(echo $rawReturnedValue | jq --raw-output '.active') # i.e. ACTIVE
+        if [[ ${rawReturnedValueArray} != *"HTTP-"* ]] && [[ ${rawReturnedValueArray} != *"ERROR"* ]]; then
+            if [ $(echo $rawReturnedValueArray | jq -e '. | length') != 0 ]; then
+                #array not empty, perform logic
+                if [ "$csvSSOId" != "null" ]; then
+                    #loop through all the returned users to find the correct one matching the ssoId provided
+
+                    for userJson in $(echo "$rawReturnedValueArray" | jq -c -r '.[]'); do
+                        local apiSSOId=$(echo $userJson | jq --raw-output '.ssoId')
+                        if [ "${apiSSOId}" = "${csvSSOId}" ]; then
+                            #correct user object found
+                            rawReturnedValue=${userJson}
+                            break
+                        fi
+                    done
+                else
+                    #elastic search seems to return same user mutliple times
+                    #for userJson in $(echo "$rawReturnedValueArray" | jq -c -r '.[]'); do
+
+                    #    local userJsonId=$(echo $userJson | jq --raw-output '.id')
+                    #    local rawUserById=$(get_user_by_id "$userJsonId" )
+
+                    #    if [[ ${rawUserById} != *"HTTP-"* ]] && [[ ${rawUserById} != *"ERROR"* ]]; then
+                    #        rawReturnedValue="${rawUserById}"
+                    #        break
+                    #    fi
+                    #done
+
+                    #get the first item from the array
+                    rawReturnedValue=$(echo $rawReturnedValueArray | jq '.[]' | jq --slurp '.[0]')
+                fi
+            fi
+        fi
+
+        #echo "${rawReturnedValue}"
+
+        if [[ ${rawReturnedValue} != *"HTTP-"* ]] && [[ ${rawReturnedValue} != *"ERROR"* ]]; then
+          local userId=$(echo ${rawReturnedValue} | jq --raw-output '.id')
+          local userActiveState=$(echo ${rawReturnedValue} | jq --raw-output '.active') # i.e. ACTIVE
           isActive="${userActiveState}"
-          #local userActiveState=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.active')
 
           #local userRecordType=$(echo $userObject | jq --raw-output '.recordType') # i.e. LIVE
 
-          local firstNameFromApi=$(echo $rawReturnedValue | jq --raw-output '.forename')
-          #local firstNameFromApi=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.forename')
+          local firstNameFromApi=$(echo ${rawReturnedValue} | jq --raw-output '.forename')
+          local lastNameFromApi=$(echo ${rawReturnedValue} | jq --raw-output '.surname')
 
-          local lastNameFromApi=$(echo $rawReturnedValue | jq --raw-output '.surname')
-          #local lastNameFromApi=$(echo $$rawReturnedValue | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.surname')
+          #local rawUserRoles=$(get_user_roles "$userId" )
+          #local usersRolesFromApi=$(echo $rawUserRoles | jq --raw-output '.roles')
 
-          local rawUserRoles=$(get_user_roles "$userId" )
-          local usersRolesFromApi=$(echo $rawUserRoles | jq --raw-output '.roles')
+          local usersRolesFromApi=$(echo $rawReturnedValue | jq --raw-output '.roles')
+          lastModified=$(echo $rawReturnedValue | jq --raw-output '.lastModified')
 
           #log_debug "email: ${email}"
           #log_debug "user_id: ${userId}"
@@ -938,88 +1007,39 @@ function process_input_file() {
             output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "find" ]; then
-            if [[ "$ENABLE_SCOPE_USER_SEARCH" = true ]]; then
-                local api_v1_user=$(get_user_api_v1 "${email}")
+            local strApi_v1_user_roles=""
 
-                if [[ $api_v1_user != *"HTTP-"* ]]; then
-
-                  local api_v1_user_firstname=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.forename')
-                  local api_v1_user_lastname=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.surname')
-                  local api_v1_user_roles=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.roles')
-                  isActive=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.active')
-                  lastModified=$(echo $api_v1_user | jq '.[]' | jq --slurp '.[0]' | jq --raw-output '.lastModified')
-
-                  local strApi_v1_user_roles=""
-
-                  for apiRole in $(echo "${api_v1_user_roles}" | jq -r '.[]'); do
-                      if [ "${strApi_v1_user_roles}" = "" ]; then
-                        strApi_v1_user_roles="${apiRole}"
-                      else
-                        strApi_v1_user_roles="$strApi_v1_user_roles|${apiRole}"
-                      fi
-                  done
-
-                  #echo "roles $api_v1_user_roles"
-
-                  # SUCCESS:
-                  success_counter=$((success_counter+1))
-                  local reason="User details successfully retrieved"
-                  #for success there is no need to output into the responseMessage column
-                  #responseMessage=$api_v1_user
-                  responseMessage=""
-                  inviteStatus="SUCCESS"
-                  log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                  echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
-
-                  # prepare output (NB: escape generated values for CSV)
-                  input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email] | @csv')
-                  timestamp=$(date -u +"%FT%H:%M:%SZ")
-                  output_csv="$input_csv,\"$api_v1_user_firstname\",\"$api_v1_user_lastname\",\"$strApi_v1_user_roles\",\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
+            for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
+                if [ "${strApi_v1_user_roles}" = "" ]; then
+                    strApi_v1_user_roles="${apiRole}"
                 else
-                  fail_counter=$((fail_counter+1))
-                  local reason="User not found using api/v1/users?query=email:"${email}" endpoint"
-                  responseMessage="ERROR: $reason"
-                  inviteStatus="FAILED"
-                  log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-                  echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
-
-                  # prepare output (NB: escape generated values for CSV)
-                  input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
-                  timestamp=$(date -u +"%FT%H:%M:%SZ")
-                  output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
+                    strApi_v1_user_roles="$strApi_v1_user_roles|${apiRole}"
                 fi
-            else
-                local strApi_user_roles=""
+            done
 
-                for apiRole in $(echo "${usersRolesFromApi}" | jq -r '.[]'); do
-                    if [ "${strApi_user_roles}" = "" ]; then
-                        strApi_user_roles="${apiRole}"
-                    else
-                        strApi_user_roles="$strApi_user_roles|${apiRole}"
-                    fi
-                done
+            #echo "roles $usersRolesFromApi"
 
-                # SUCCESS:
-                success_counter=$((success_counter+1))
-                local reason="User details successfully retrieved"
-                #for success there is no need to output into the responseMessage column
-                responseMessage=""
-                inviteStatus="SUCCESS"
-                log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+            # SUCCESS:
+            success_counter=$((success_counter+1))
+            local reason="User details successfully retrieved"
+            #for success there is no need to output into the responseMessage column
+            responseMessage=""
+            inviteStatus="SUCCESS"
+            log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+            echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
 
-                # prepare output (NB: escape generated values for CSV)
-                input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email] | @csv')
-                timestamp=$(date -u +"%FT%H:%M:%SZ")
-                output_csv="$input_csv,\"$firstNameFromApi\",\"$lastNameFromApi\",\"$strApi_user_roles\",\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
-            fi
+            # prepare output (NB: escape generated values for CSV)
+            input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email] | @csv')
+            timestamp=$(date -u +"%FT%H:%M:%SZ")
+            output_csv="$input_csv,\"$firstNameFromApi\",\"$lastNameFromApi\",\"$strApi_v1_user_roles\",\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
+
         elif [ "$operation" == "add" ] && [[ "$ENABLE_USERID_REGISTRATIONS" = true ]]; then
             # add id logic here
             if [ "$csvUserId" == "null" ]; then
               # SKIP:
               skipped_counter=$((skipped_counter+1))
               inviteStatus="SKIPPED"
-              local reason="Field: 'id' required, but not provided"
+              local reason="Field: 'userId' required, but not provided"
               responseMessage="WARN: $reason"
 
               log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
@@ -1077,6 +1097,22 @@ function process_input_file() {
             input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
             timestamp=$(date -u +"%FT%H:%M:%SZ")
             output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
+
+        elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "add" ] && [ "$csvSSOId" != "null" ]; then
+
+            #user with given ssoID not found
+            fail_counter=$((fail_counter+1))
+            local reason="${userNotFound} with provided ssoID"
+            responseMessage="ERROR: $reason"
+            inviteStatus="FAILED"
+            log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
+            echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+
+            # prepare output (NB: escape generated values for CSV)
+            input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+            timestamp=$(date -u +"%FT%H:%M:%SZ")
+            output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
+
         elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "add" ]; then
 
           log_debug "email: ${email} - User does not exist, doing add new user logic"

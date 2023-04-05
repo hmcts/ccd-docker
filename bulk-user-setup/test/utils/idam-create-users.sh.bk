@@ -84,6 +84,35 @@ create_user_request() {
   echo "$response"
 }
 
+delete_user_request() {
+  response=$(curl --insecure --show-error --silent --output /dev/null --write-out "%{http_code}" -X DELETE \
+    "${IDAM_API_BASE_URL:-http://localhost:5000}"/testing-support/accounts/"${email}")
+  echo "$response"
+}
+
+# if user exists
+#   check roles ✅
+#   if roles are the same do nothing ✅
+#   otherwise delete ✅
+#   and create user ✅ with same id ❌ <-- Apparently having the same id doesn't matter on local
+
+recreate_user() {
+  printf "%s%s\n" "Deleting IDAM user: " "${email}"
+  deleteResponse=$(delete_user_request)
+  if [[ "$deleteResponse" -ne 200 && "$deleteResponse" -ne 204 ]]; then
+      printf "%s%s\n" "Unexpected HTTP status code from IDAM: " "${deleteResponse}"
+      #exit 1
+  elif [[ "$deleteResponse" -eq 404 ]]; then
+      printf "%s%s%s\n" "User " "${email}" " doesn't exist"
+  elif [[ "$deleteResponse" -eq 200 ]]; then
+      printf "%s%s%s\n" "User " "${email}" " deleted"
+  fi
+
+  printf "%s%s\n" "Creating/Re-Creating IDAM user: " "${email}"
+  createResponse=$(create_user_request)
+  echo $createResponse
+}
+
 function get_user() {
   local EMAIL=$1
 
@@ -168,49 +197,6 @@ function update_user() {
 
 }
 
-function put_user_roles() {
-  #Replaces the entire set of role grants to the user
-
-  local USER=$1
-  local ROLES=$2
-
-  curl_result=$(
-    curl -w $"\n%{http_code}" --silent -X PUT "${IDAM_URL}/api/v1/users/${USER}/roles" -H "accept: application/json" -H "Content-Type: application/json" \
-    -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}" \
-    -d "${ROLES}"
-  )
-
-  exit_code=$?
-  if [ $exit_code -eq 0 ]; then
-    # seperate body and status into an array
-    IFS=$'\n' response_array=($curl_result)
-
-    array_length=${#response_array[@]}
-    if [ $array_length -eq 1 ]; then
-      response_body='' # clear body
-      response_status=${response_array[0]}
-    else
-      response_body=${response_array[0]}
-      response_status=${response_array[${array_length}-1]}
-    fi
-
-    if [ $(( response_status )) -gt 199 ] && [ $(( response_status )) -lt 300 ]; then
-      # SUCCESS:
-      response="SUCCESS
-      ${response_body}"
-    else
-      # FAIL:
-      response="HTTP-${response_status}
-      ${response_body}"
-    fi
-  else
-    # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
-    response="CURL-${exit_code}
-    ERROR: User ${USER} role update request has failed with curl exit code: ${exit_code}"
-  fi
-  echo "$response"
-}
-
 ######################
 ## MAIN
 ######################
@@ -239,87 +225,38 @@ surname=${3:-"Tester"}
 firstName=${4:-${email}}
 active=${5:-"true"}
 
+
 IFS=',' read -ra roles <<<"${rolesStr}"
 
-getUserResponse=$(get_user "$email")
+rolesJson=''
+for role in "${roles[@]}"; do
+  if [[ -n ${rolesJson} ]]; then
+    rolesJson="${rolesJson},"
+  fi
+  rolesJson=${rolesJson}'{"code":"'${role}'"}'
+done
 
-if [[ ${getUserResponse} != *"HTTP-"* ]] && [[ ${getUserResponse} != *"ERROR"* ]]; then
-    #user found
-    echo "User with email ${email} successfully found"
+recreateResponse=$(recreate_user)
+IFS=$'\n' arr=($recreateResponse)
+array_length=${#arr[@]}
+http_body=${arr[0]}
+http_status=${arr[${array_length}-1]}
 
-    userId=$(echo $getUserResponse | jq --raw-output '.id')
+# Unfortunately trying to create the same user throws 403, so we don't know what went wrong
 
-    #remove the roles attribute from teh existing user as patch does not allow role update
-    body=$(echo $getUserResponse | jq 'del(.roles)')
-
-    #update all attributes to match test case
-    body=$(echo $body | jq --arg email "${email}" '.email = ($email)')
-    body=$(echo $body | jq --arg surname "${surname}" '.surname = ($surname)')
-    body=$(echo $body | jq --arg firstName "${firstName}" '.forename = ($firstName)')
-    body=$(echo $body | jq --argjson active "${active}" '.active = ($active)' )
-
-    update_user_response=$(update_user "${userId}" "${body}")
-    if [[ ${update_user_response} != *"HTTP-"* ]] && [[ ${update_user_response} != *"ERROR"* ]]; then
-        echo "User details for ${email} successfully updated"
-
-        #update the roles to match test case using PUT
-
-        isRoleStringEmpty=true
-
-        rolesJson=''
-        for role in "${roles[@]}"; do
-          if [[ -n ${rolesJson} ]]; then
-            isRoleStringEmpty=false
-            rolesJson="${rolesJson},"
-          fi
-          rolesJson=${rolesJson}'{"name":"'${role}'"}'
-        done
-
-        if [[ "$isRoleStringEmpty" = true ]]; then
-            rolesJson="[]"
-        else
-            rolesJson="[${rolesJson}]"
-        fi
-
-        put_user_roles_response=$(put_user_roles "${userId}" "${rolesJson}")
-        if [[ ${put_user_roles_response} != *"HTTP-"* ]] && [[ ${put_user_roles_response} != *"ERROR"* ]]; then
-            echo "User roles for ${email} successfully updated"
-        else
-            echo "Failed updating roles for ${email}, roles ${rolesJson}"
-        fi
-    else
-        echo "Failed updating user ${email}"
-    fi
+if [ ${http_status} -ne 201 ]; then
+  printf "%s%s\n" "Unexpected HTTP status code from IDAM: " "${recreateResponse}"
+  exit 1
 else
-    #create user
+  printf "%s%s%s\n" "User " "${email}" " - added to IDAM"
 
-    rolesJson=''
-    for role in "${roles[@]}"; do
-      if [[ -n ${rolesJson} ]]; then
-        rolesJson="${rolesJson},"
-      fi
-      rolesJson=${rolesJson}'{"code":"'${role}'"}'
-    done
-
-    create_user_request_response=$(create_user_request)
-
-    IFS=$'\n' arr=($create_user_request_response)
-    array_length=${#arr[@]}
-    http_body=${arr[0]}
-    http_status=${arr[${array_length}-1]}
-
-    if [ ${http_status} -ne 201 ]; then
-        echo "Failed creating user ${email}"
-    else
-        echo "Successfully created user ${email}"
-        if [ "${active}" == "false" ]; then
-            getUserResponse=$(get_user "$email")
-            if [[ ${getUserResponse} != *"HTTP-"* ]] && [[ ${getUserResponse} != *"ERROR"* ]]; then
-                userId=$(echo $getUserResponse | jq --raw-output '.id')
-                echo "Setting active state to false for user ${email}"
-                body='{"active":false}'
-                submit_response=$(update_user "${userId}" "${body}")
-            fi
-        fi
+  if [ "${active}" == "false" ]; then
+    rawReturnedValue=$(get_user "$email")
+    if [[ $rawReturnedValue != *"HTTP-"* ]]; then
+      userId=$(echo $rawReturnedValue | jq --raw-output '.id')
+      printf "%s%s%s\n" "Setting active state to false for user " "${email}" ""
+      body='{"active":false}'
+      submit_response=$(update_user "${userId}" "${body}")
     fi
+  fi
 fi
