@@ -992,6 +992,21 @@ function process_input_file() {
             timestamp=$(date -u +"%FT%H:%M:%SZ")
             output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
 
+        elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$csvSSOId" != "null" ]; then
+
+            #user with given ssoID not found
+            fail_counter=$((fail_counter+1))
+            local reason="${userNotFound} with provided ssoID"
+            responseMessage="ERROR: $reason"
+            inviteStatus="FAILED"
+            log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
+            echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+
+            # prepare output (NB: escape generated values for CSV)
+            input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+            timestamp=$(date -u +"%FT%H:%M:%SZ")
+            output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
+
         elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "find" ]; then
 
             fail_counter=$((fail_counter+1))
@@ -1092,21 +1107,6 @@ function process_input_file() {
                     log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason} - ${responseMessage}"
                 fi
             fi
-
-            # prepare output (NB: escape generated values for CSV)
-            input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
-            timestamp=$(date -u +"%FT%H:%M:%SZ")
-            output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
-
-        elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "add" ] && [ "$csvSSOId" != "null" ]; then
-
-            #user with given ssoID not found
-            fail_counter=$((fail_counter+1))
-            local reason="${userNotFound} with provided ssoID"
-            responseMessage="ERROR: $reason"
-            inviteStatus="FAILED"
-            log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-            echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
 
             # prepare output (NB: escape generated values for CSV)
             input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
@@ -1304,7 +1304,8 @@ function process_input_file() {
                 body='{"active":true}'
                 submit_response=$(update_user "${userId}" "${body}")
 
-                if [[ "$submit_response" == *"$email"* ]]; then
+                #if [[ "$submit_response" == *"$email"* ]]; then
+                if [[ $submit_response =~ .*email.* ]]; then
                   log_info "file: ${filename} , email: ${email} - SUCCESS, user active state set to true"
                   isActive="TRUE"
                   responseMessage="INFO: user has been activated"
@@ -1376,12 +1377,14 @@ function process_input_file() {
 
                 submit_response=$(update_user "${userId}" "${body}")
 
-                # seperate submit_response reponse
+                # seperate submit_response
                 IFS=$'\n'
                 local response_array=($submit_response)
                 local inviteStatus=${response_array[0]}
                 local responseMessage=${response_array[1]}
-                if [[ "$submit_response" == *"$email"* ]]; then
+
+                #if [[ "${submit_response}" == *"${email}"* ]]; then
+                if [[ $submit_response =~ .*email.* ]]; then
                   # SUCCESS:
                   success_counter=$((success_counter+1))
                   lastModified=$(date -u +"%FT%H:%M:%SZ")
@@ -1565,7 +1568,8 @@ function process_input_file() {
                     local inviteStatus=${response_array[0]}
                     local responseMessage=${response_array[1]}
 
-                    if [[ "$submit_response" == *"$email"* ]]; then
+                    #if [[ "$submit_response" == *"$email"* ]]; then
+                    if [[ $submit_response =~ .*email.* ]]; then
                       log_warn "file: ${filename} , email: ${email} - SUCCESS, user active state set to false"
                       isActive="FALSE"
                       responseMessage=""
