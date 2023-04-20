@@ -75,20 +75,48 @@ The import CSV file is renamed by the process to discourage its accidental re-us
 
 Run the following scripts to create the client and required users and roles for local testing.
 
+****************************************************************************************************************************************************************************
+** Testing ssoID logic can only be currently performed in the Demo environment. This is due to a limitation on local
+   as the idam_api for search user does not return the ssoId attributes when using local docker instance image
+   
+   To test in demo, ensure the required demo test accounts are created first using the steps below
+   a. Connect to the VPN
+   b. Open a browser tab to 'https://idam-api.demo.platform.hmcts.net/swagger-ui/index.html?urls.primaryName=Testing%20Support#/Testing%20Support/createTestAccount'
+   c. click try-it out
+   d. Enter body payload, example:
+        {
+            "email": "ccd.test.add.ssoid@eJudiciary.net",
+            "forename": "test",
+            "surname": "tester",   
+            "password": "Password123!",   
+            "ssoId": "72b606e0-dd56-4c49-9335-2b0bd8f56f86",   
+            "ssoProvider": "eJudiciary.net" 
+        }
+    e.  When executing the ./bulk-user-setup.sh, enter the following details for the demo environment 'ccd-bulk-user-register' service:
+        environment: demo
+        directory path: <enter absolute path and file name of input file to test in demo>
+        username: test.demo.bulkscript@hmcts.net
+        passowrd: Password123!
+        oauth2 secret: 43sWCiNy4zjk6ryX4fMkkTd4fXAvPNur
+****************************************************************************************************************************************************************************
+
 1. open terminal ensuring to change directory into root folder "bulk-user-setup"
 2. execute ./test/utils/add-idam-clients.sh (this needs to be done the first time only)
 3. execute ./test/utils/add-idam-roles.sh (this should be executed the first time and any time new roles need to be added)
    ** Roles to be added are defined in the file: roles.json
 4. execute ./test/utils/add-users.sh (see below first)
-   ** note: if CREATE_TEST_USERS=true is set in 'bulk-user-setup.config' there is no need to create the users separately as 
-      the add-users.sh script will be called from the main bulk-user-setup.sh script)
-      Since the search user api now uses the /api/v1 elastic search end-point please wait some time between creating the test users
-      and running the test cases (due to cache commits etc.)
+
    ** Users to be added are defined in the file: users.json. Please ensure roles are created before assigning to them to users
    ** To add a user without any roles, pass the roles as "''" as can be seen in the example file included in this repo
 
-   Before running the main script make sure the input csv file(s) are copied to bulk-user-setup/test/inputs folder.
-   ** Note: In 'bulk-user-setup.config' the variable CREATE_TEST_USERS=true implies test users will be created prior to processing any input file
+   ** Note: In 'bulk-user-setup.config' the variable CREATE_TEST_USERS=true implies test users will be created 
+      prior to processing any input file
+   
+   ** Since the search user api now uses the /api/v1 elastic search end-point, CREATE_TEST_USERS is set to false
+      please wait some time between creating the test users and running the test cases (due to cache commits etc.)
+
+   ** Before running the main script make sure the input csv file(s) are copied to bulk-user-setup/test/inputs folder.
+   
 5. execute ./bulk-user-setup.sh
    ** For testing in local, enter 'local' when prompted for environment
 

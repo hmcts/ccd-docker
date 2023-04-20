@@ -9,6 +9,6 @@
   {"roles": "caseworker-civil,caseworker-civil-staff"},
   {"roles": "payments,payments-refund,payments-refund-approver"},
   {"roles": "manage-translations"},
-  {"roles": "caseworker-probate,caseworker-probate-pcqextractor,caseworker-probate-issuer,caseworker-probate-solicitor,caseworker-probate-systemupdate,caseworker-probate-charity,caseworker-probate-superuser,caseworker-probate-scheduler,caseworker-probate-caseofficer,caseworker-probate-registrar,caseworker-probate-caseadmin"}
-
+  {"roles": "caseworker-probate,caseworker-probate-pcqextractor,caseworker-probate-issuer,caseworker-probate-solicitor,caseworker-probate-systemupdate,caseworker-probate-charity,caseworker-probate-superuser,caseworker-probate-scheduler,caseworker-probate-caseofficer,caseworker-probate-registrar,caseworker-probate-caseadmin"},
+  {"roles": "caseworker-divorce,caseworker-divorce-bulkscan,caseworker-divorce-courtadmin,caseworker-divorce-courtadmin-la,caseworker-divorce-courtadmin_beta,caseworker-divorce-judge,caseworker-divorce-pcqextractor,caseworker-divorce-solicitor,caseworker-divorce-superuser"}
 ]

@@ -1,0 +1,8 @@
+operation,email,firstName,lastName,roles,userExists,result,prerequisite,comment
+add,ccd.test.add.ssoid@eJudiciary.net,,,caseworker-test-public|caseworker-test-senior,TRUE,SUCCESS,,"user exists, sso id not provided"
+add,ccd.test.add.ssoid@eJudiciary.net,fn1,ln1,caseworker-test-public|caseworker-test-senior,TRUE,SUCCESS,,"user exists, sso id not provided"
+updatename,ccd.test.add.ssoid@eJudiciary.net,updatedfn,updatedln,caseworker-test-public|caseworker-test-senior,TRUE,SUCCESS,,"user exists, sso id not provided"
+updatename,ccd.test.add.ssoid@eJudiciary.net,updatedfn,updatedln,caseworker-test-public|caseworker-test-senior,TRUE,SUCCESS,,"user exists, sso id not provided"
+find,ccd.test.add.ssoid@eJudiciary.net,,,caseworker-test-public|caseworker-test-senior,TRUE,SUCCESS,,"user exists, sso id not provided"
+find,ccd.test.add.ssoid@eJudiciary.net,,,caseworker-test-public|caseworker-test-senior,TRUE,SUCCESS,,"user exists, sso id not provided"
+find,ccd.test.add.ssoid@eJudiciary.net,,,caseworker-test-public|caseworker-test-senior,TRUE,SUCCESS,,"user exists, sso id not provided"
