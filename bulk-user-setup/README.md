@@ -96,8 +96,8 @@ Run the following scripts to create the client and required users and roles for 
         environment: demo
         directory path: <enter absolute path and file name of input file to test in demo>
         username: test.demo.bulkscript@hmcts.net
-        passowrd: Password123!
-        oauth2 secret: 43sWCiNy4zjk6ryX4fMkkTd4fXAvPNur
+        password: Password123!
+        oauth2 secret: <get from Az keyvault-secrets (env: demo, key-name: ccd-bulk-user-oauth2-client-secret)>
 ****************************************************************************************************************************************************************************
 
 1. open terminal ensuring to change directory into root folder "bulk-user-setup"
