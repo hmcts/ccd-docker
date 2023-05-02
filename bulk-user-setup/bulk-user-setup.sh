@@ -270,7 +270,6 @@ function put_user_roles() {
 
 function get_user_api_v1() {
   local EMAIL=$1
-  #?query=email:"james.bond@hmcts.net"
   local ES_EMAIL_QUERY="email%3A%22${EMAIL}%22"
 
   curl_result=$(
