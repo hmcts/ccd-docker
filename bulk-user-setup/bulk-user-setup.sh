@@ -269,11 +269,19 @@ function put_user_roles() {
 }
 
 function get_user_api_v1() {
-  local EMAIL=$1
-  local ES_EMAIL_QUERY="email%3A%22${EMAIL}%22"
+  #local EMAIL=$1
+  local ARG=$1
+  local QUERY=""
+  #local ES_EMAIL_QUERY="email%3A%22${EMAIL}%22"
+
+  if [[ "$ARG" == *"@"* ]]; then
+    QUERY="email%3A%22${ARG}%22"
+  else
+    QUERY="ssoId%3A%22${ARG}%22"
+  fi
 
   curl_result=$(
-    curl -w $"\n%{http_code}" --silent -X GET -G "${IDAM_URL}/api/v1/users?query=${ES_EMAIL_QUERY}" -H "accept: */*" -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
+    curl -w $"\n%{http_code}" --silent -X GET -G "${IDAM_URL}/api/v1/users?query=${QUERY}" -H "accept: */*" -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
   )
 
   exit_code=$?
@@ -839,8 +847,13 @@ function process_input_file() {
         #assume 404 user not found as search api returns an empty array when not found
         local rawReturnedValue="HTTP-404"
 
-         #use new api to search user by elasticsearch query
-        local rawReturnedValueArray=$(get_user_api_v1 "${email}")
+        if [ "$csvSSOId" != "null" ]; then
+            #use new api to search user by elasticsearch query
+            local rawReturnedValueArray=$(get_user_api_v1 "${csvSSOId}")
+        else
+            #use new api to search user by elasticsearch query
+            local rawReturnedValueArray=$(get_user_api_v1 "${email}")
+        fi
 
         if [[ ${rawReturnedValueArray} != *"HTTP-"* ]] && [[ ${rawReturnedValueArray} != *"ERROR"* ]]; then
             if [ $(echo $rawReturnedValueArray | jq -e '. | length') != 0 ]; then
@@ -1351,6 +1364,74 @@ function process_input_file() {
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
           output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$outputSSOId\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
+
+        elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "updateemail" ]; then
+            if [ "$csvSSOId" != "null" ]; then
+                log_debug "ssoID: ${csvSSOId} - User exists, doing update email logic"
+            else
+                log_debug "email: ${email} - User exists, doing update email logic"
+            fi
+
+            local emailFromApi=$(echo ${rawReturnedValue} | jq --raw-output '.email')
+
+            if [ $userActiveState == "true" ]; then
+                if [ "${email}" != "${emailFromApi}" ]; then
+                    if [ "$email" == "null" ]; then
+                        # FAIL:
+                        fail_counter=$((fail_counter+1))
+                        local reason="Email cannot be empty"
+                        responseMessage="ERROR: $reason"
+                        inviteStatus="FAILED"
+                        log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
+                        echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason${NORMAL}"
+                    else
+                        log_debug "email: ${email} - doing email update"
+
+                        body='{"email": "'${email}'"}'
+
+                        submit_response=$(update_user "${userId}" "${body}")
+
+                        # seperate submit_response
+                        IFS=$'\n'
+                        local response_array=($submit_response)
+                        local inviteStatus=${response_array[0]}
+                        local responseMessage=${response_array[1]}
+
+                        if [[ $submit_response =~ .*email.* ]]; then
+                          # SUCCESS:
+                          success_counter=$((success_counter+1))
+                          lastModified=$(date -u +"%FT%H:%M:%SZ")
+                          inviteStatus="SUCCESS"
+                          local reason="user email successfully updated"
+                          log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                          echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+                        else
+                          # FAIL:
+                          fail_counter=$((fail_counter+1))
+                          inviteStatus="FAILED"
+                          local reason="failed updating user email"
+                          log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
+                          echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+                        fi
+                    fi
+                else
+                    # SKIP:
+                    skipped_counter=$((skipped_counter+1))
+                    inviteStatus="SKIPPED"
+                    local reason="no changes in email, nothing to update"
+                    responseMessage="WARN: $reason"
+                    log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                    echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+                fi
+            else
+                # SKIP:
+                skipped_counter=$((skipped_counter+1))
+                inviteStatus="SKIPPED"
+                local reason="${UserExistsNotActive}"
+                responseMessage="WARN: $reason"
+                log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${inviteStatus} - ${reason}${NORMAL}"
+            fi
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "updatename" ]; then
 
