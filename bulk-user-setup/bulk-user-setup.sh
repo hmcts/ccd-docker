@@ -280,6 +280,8 @@ function get_user_api_v1() {
     QUERY="ssoId%3A%22${ARG}%22"
   fi
 
+  log_debug "THE QUERY IS:  ${QUERY}"
+
   curl_result=$(
     curl -w $"\n%{http_code}" --silent -X GET -G "${IDAM_URL}/api/v1/users?query=${QUERY}" -H "accept: */*" -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
   )
@@ -836,6 +838,7 @@ function process_input_file() {
 
       local csvUserId=$(echo $user | jq --raw-output '.idamUser.id')
       local csvSSOId=$(echo $user | jq --raw-output '.idamUser.ssoId')
+      csvSSOId=$(trim "$csvSSOId") #trim leading and trailing spaces from csvSSOId string
 
       log_debug "==============================================="
       log_debug "processing user with email: ${email}"
