@@ -1099,7 +1099,7 @@ Running x86 on M1 chip apple devices:
 if having trouble emulating x86 images try installing rosetta via the terminal using 
   > softwareupdate --install-rosetta
 
-and enabling the following settings in docker desktop under
+and enabling the following settings in docker desktop (version 4.16.1 or greater) under
   > Settings > General > Virtualization framework
 
   > Settings > Features in development > Use Rosetta for x86/amd64
