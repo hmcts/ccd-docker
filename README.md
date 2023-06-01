@@ -9,6 +9,7 @@
 - [Under the hood](#under-the-hood-speedboat)
 - [Containers](#containers)
 - [Local development](#local-development)
+- [Running on Apple Silicon](#running-on-apple-silicon)
 - [Troubleshooting](#troubleshooting)
 - [Migrate existing v9.6 PostgreSQL database to v11](/PostgresV11.md)
 - [Variables](#variables)
@@ -1091,6 +1092,18 @@ We will need to install the az cli using Python PIP.
 2. Setup the Python(version 2.x/3.x) on windows machine. PIP is bundled with Python.
 3. Execute the command "pip install azure-cli" using command line. It takes about 20 minutes to install the azure cli.
 4. Verify the installation using the command az --version.
+
+## Running on Apple Silicon (ARM64)
+
+Running x86 on M1 chip apple devices:
+if having trouble emulating x86 images try installing rosetta via the terminal using 
+  > softwareupdate --install-rosetta
+
+and enabling the following settings in docker desktop (version 4.16.1 or greater) under
+  > Settings > General > Virtualization framework
+
+  > Settings > Features in development > Use Rosetta for x86/amd64
+  emulation on Apple Silicon
 
 ## Troubleshooting
 
