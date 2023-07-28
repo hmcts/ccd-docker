@@ -95,9 +95,11 @@ Run the following scripts to create the client and required users and roles for 
     e.  When executing the ./bulk-user-setup.sh, enter the following details for the demo environment 'ccd-bulk-user-register' service:
         environment: demo
         directory path: <enter absolute path and file name of input file to test in demo>
-        username: test.demo.bulkscript@hmcts.net
+        username: test1.demo.bulkscript@hmcts.net
         password: Password123!
         oauth2 secret: <get from Az keyvault-secrets (env: demo, key-name: ccd-bulk-user-oauth2-client-secret)>
+        If an account does not exist in demo (i.e. if the above is not used within 90 days the password will expire and a new account may be required)
+        create the account such that it has the following roles: ccd-admin, ccd-import, idam-user-dashboard--access
 ****************************************************************************************************************************************************************************
 
 1. open terminal ensuring to change directory into root folder "bulk-user-setup"
