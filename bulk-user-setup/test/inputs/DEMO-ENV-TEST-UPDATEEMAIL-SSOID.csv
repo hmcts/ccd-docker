@@ -1,0 +1,5 @@
+operation,email,firstName,lastName,roles,ssoId,userExists,result,prerequisite,comment
+updateemail,ccd.test.ssoid@eJudiciary.net,,,rolenotrequired,72b606e0-dd56-4c49-9335-2b0bd8f56f86,TRUE,SKIPPED,,"user exists, sso id is correct, email is correct, skip nothing to change"
+updateemail,ccd.test.ssoid@eJudiciary.net,fn1,ln1,caseworker-test-public|caseworker-test-senior,a6c25c74-e590-4a9c-b429-04759b1639ab,TRUE,FAILED,,"user exists, sso id is incorrect"
+updateemail,ccd.test.ssoid-patched@eJudiciary.net,,,caseworker-test-public|caseworker-test-senior,72b606e0-dd56-4c49-9335-2b0bd8f56f86,TRUE,SUCCESS,,"user exists, sso id is correct email is incorrect, change email"
+updateemail,ccd.test.ssoid-patched@eJudiciary.net,,,caseworker-test-public|caseworker-test-senior,,TRUE,SKIPPED,,"user exists, sso id not provided email is correct, skip nothing to change"

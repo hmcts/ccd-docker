@@ -1,0 +1,8 @@
+operation,email,firstName,lastName,roles,ssoId,userExists,result,prerequisite,comment
+add,ccd.test.add.ssoid@eJudiciary.net,,,caseworker-test-public|caseworker-test-senior,72b606e0-dd56-4c49-9335-2b0bd8f56f86,TRUE,SUCCESS,,"user exists, sso id is correct, no roles assigned"
+add,ccd.test.add.ssoid@eJudiciary.net,fn1,ln1,caseworker-test-public|caseworker-test-senior,82b606e0-dd56-4c49-9335-2b0bd8f56f87,TRUE,FAILED,,"user exists, sso id is incorrect"
+updatename,ccd.test.add.ssoid@eJudiciary.net,updatedfn,updatedln,caseworker-test-public|caseworker-test-senior,72b606e0-dd56-4c49-9335-2b0bd8f56f86,TRUE,SUCCESS,,"user exists, sso id is correct"
+updatename,ccd.test.add.ssoid@eJudiciary.net,updatedfn,updatedln,caseworker-test-public|caseworker-test-senior,82b606e0-dd56-4c49-9335-2b0bd8f56f87,TRUE,FAILED,,"user exists, sso id is incorrect"
+find,ccd.test.add.ssoid@eJudiciary.net,,,caseworker-test-public|caseworker-test-senior,72b606e0-dd56-4c49-9335-2b0bd8f56f86,TRUE,SUCCESS,,"user exists, sso id is correct"
+find,ccd.test.add.ssoid@eJudiciary.net,,,caseworker-test-public|caseworker-test-senior,82b606e0-dd56-4c49-9335-2b0bd8f56f87,TRUE,FAILED,,"user exists, sso id is incorrect"
+find,ccd.test.add.ssoid@eJudiciary.net,,,caseworker-test-public|caseworker-test-senior,,TRUE,SUCCESS,,"user exists, sso id not provided"
