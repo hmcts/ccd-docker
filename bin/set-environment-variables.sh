@@ -18,8 +18,9 @@ function set_env_variables_from_file() {
             if [[ "Darwin" == "$osName" ]];then
                 command="export $key=$value"
                 $command
-            else 
-                setx "$key" $(echo $value | sed -e 's/\r//g')
+            else
+                command="export $key=$value"
+                $command
             fi
         done < "$file"
     else

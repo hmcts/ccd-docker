@@ -1,0 +1,101 @@
+---
+version: '2.4'
+#add non core CCD services here
+
+services:
+  rd-professional-api:
+    image: hmctspublic.azurecr.io/rd/professional-api:latest
+    container_name: rd-professional-api
+    environment:
+      POSTGRES_USERNAME: "${DB_USERNAME}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_HOST: ccd-shared-database
+      POSTGRES_PORT: 5432
+      S2S_URL: http://service-auth-provider-api:8080
+      USER_PROFILE_URL: http://rd-user-profile-api:5602
+      OIDC_ISSUER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}/openam/oauth2/hmcts"
+      OPEN_ID_API_BASE_URI: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}/o"
+      IDAM_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
+      CCD_URL: http://ccd-user-profile-api:4453
+      AUTH_IDAM_CLIENT_BASEURL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
+      LAUNCH_DARKLY_ENV: aat
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    ports:
+      - 5601:8090
+    depends_on:
+      - ccd-shared-database
+    networks:
+      - ccd-network
+
+  rd-user-profile-api:
+    image: hmctspublic.azurecr.io/rd/user-profile-api:latest
+    container_name: rd-user-profile-api
+    environment:
+      POSTGRES_USERNAME: "${DB_USERNAME}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_HOST: ccd-shared-database
+      POSTGRES_PORT: 5432
+      CCD_URL: http://ccd-user-profile-api:4453
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    ports:
+      - 5602:8090
+    depends_on:
+      - ccd-shared-database
+    networks:
+      - ccd-network
+
+  am-org-role-mapping-service:
+    image: hmctspublic.azurecr.io/am/org-role-mapping-service:latest
+    container_name: am-org-role-mapping-service
+    environment:
+      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      IDAM_USER_URL: http://idam-api:5000
+      OIDC_ISSUER_URL: http://idam-api:5000}/openam/oauth2/hmcts
+      OPEN_ID_API_BASE_URI: "http://idam-api:5000/o"
+      S2S_URL: http://service-auth-provider-api:8080
+      AM_ORG_ROLE_MAPPING_S2S_AUTHORISED_SERVICES: ccd_gw,am_org_role_mapping_service,am_role_assignment_service,xui_webapp,am_role_assignment_refresh_batch
+      ROLE_ASSIGNMENT_APP_URL: http://am-role-assignment-service:4096
+      JUDICIAL_BOOKING_APP_URL: http://am-judicial-booking-service-aat.service.core-compute-aat.internal
+      CASE_WORKER_REF_APP_URL: http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal
+      JUDICIAL_REF_APP_URL: http://rd-judicial-api-aat.service.core-compute-aat.internal
+      JUDICIAL_REF_APP_V2_ACTIVE: "false"
+      JUDICIAL_REF_APP_V2_FILTER_AUTHS_BY_APP_ID: "false"
+      LAUNCH_DARKLY_ENV: aat
+      LD_SDK_KEY: sdk-28c71191-54b1-4d81-8c8d-add52b134bc7
+      AMQP_HOST: rd-servicebus-aat.servicebus.windows.net
+      AMQP_SHARED_ACCESS_KEY_NAME: SendAndListenSharedAccessKey
+      AMQP_ENABLED: "false"
+      TRUST_ALL_CERTS: "true"
+      CRD_TOPIC_NAME: rd-caseworker-topic-aat
+      CRD_SUBSCRIPTION_NAME: rd-caseworker-subscription-aat
+      JRD_TOPIC_NAME: rd-judicial-topic-aat
+      JRD_SUBSCRIPTION_NAME: rd-judicial-subscription-aat
+      ORG_ROLE_MAPPING_IDAM_ADMIN_USERID: orm.admin@hmcts.NET
+      ORG_ROLE_MAPPING_DB_PORT: 5432
+      ORG_ROLE_MAPPING_DB_NAME: org_role_mapping
+      ORG_ROLE_MAPPING_DB_HOST: ccd-shared-database
+      ORG_ROLE_MAPPING_DB_USERNAME: "${DB_USERNAME}"
+      ORG_ROLE_MAPPING_DB_PASSWORD: "${DB_PASSWORD}"
+      ORG_ROLE_MAPPING_DB_OPTIONS: "?stringtype=unspecified"
+      REFRESH_JOB:
+      TESTING_SUPPORT_ENABLED: "true"
+      APPLICATION_LOGGING_LEVEL: INFO
+      RUN_LD_ON_STARTUP: "true"
+    ports:
+      - 4098:4098
+    networks:
+      - ccd-network
+    depends_on:
+      - ccd-shared-database
+    links:
+      - ccd-shared-database
+
+networks:
+  ccd-network:
+    external: true
