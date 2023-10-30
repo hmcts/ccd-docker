@@ -16,6 +16,82 @@
 - [Remarks](#remarks)
 - [License](#license)
 
+## Group Access - quick setup
+
+1. checkout ga-ccd-docker from https://github.com/hmcts/ga-ccd-docker
+2.
+```bash
+./ccd login
+```
+3.
+```bash
+source ./bin/set-environment-variables.sh
+```
+check with 
+```bash
+echo $DB_USERNAME 								
+```
+should return **ccd** 
+
+if this returns blank (3) has not worked
+
+4.	
+```bash
+./ccd compose down								
+./ccd compose pull								
+./ccd init
+./ccd compose up -d								
+```
+check with
+```bash
+curl http://localhost:5000/health								
+```
+wait for idam if not healthy after 5 mins, keep doing 
+
+./ccd compose up -d
+
+then do
+```bash
+export IDAM_ADMIN_USER=idamOwner@hmcts.net && export IDAM_ADMIN_PASSWORD=Ref0rmIsFun							ccd	Pa55word11
+```
+
+5.
+```bash
+./bin/add-idam-clients.sh								
+./bin/add-idam-roles.sh								
+./bin/add-users.sh								
+./bin/add-ccd-roles.sh
+./bin/add-role-assignments.sh
+```
+
+6. 
+checkout								
+ccd-definition-store-api from https://github.com/hmcts/ccd-definition-store-api
+```bash
+source ../ga-ccd-docker/bin/set-environment-variables.sh								
+./gradlew clean smoke
+```
+
+7.
+go to xui on http://localhost:3455
+
+login credentials:
+
+
+|             User             |     PWD     |
+|:----------------------------:|:-----------:|
+| befta.caseworker.1@gmail.com | Pa55word11  |
+
+You should be aable to see the Case List page - with no cases yet
+
+Go ahead and create a case of type
+
+See newly created case in case list
+
+**END OF GROUP ACCESS SETUP**
+
+---
+
 ## Prerequisites
 
 - [JDK 11](https://openjdk.java.net/projects/jdk/11/)
