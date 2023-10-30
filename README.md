@@ -32,7 +32,7 @@ docker network rm $(docker network ls -q)
 #### 1. checkout 
 checkout ga-ccd-docker from https://github.com/hmcts/ga-ccd-docker
 
-#### 2. login
+#### 2. env login
 ```bash
 ./ccd login
 ```
@@ -115,7 +115,21 @@ Go ahead and create a case of type
 
 See newly created case in case list
 
-**END OF GROUP ACCESS SETUP**
+### HELPER connect to local db
+eg ccd_data (the ccd-data-store)
+
+
+|          Attribute           |   Value    |
+|:----------------------------:|:----------:|
+| host | localhost |
+| port | 5050 |
+| db | ccd_data |
+| user | ccd |
+| pwd | Pa55word11 |
+
+
+
+**xxxxxxxxxx---END OF GROUP ACCESS SETUP---xxxxxxxxxx**
 
 ---
 
