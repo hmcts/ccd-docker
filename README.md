@@ -17,62 +17,87 @@
 - [License](#license)
 
 ## Group Access - quick setup
+### HELPER 
+to completely clear out your current docker setup:
 
-1. checkout ga-ccd-docker from https://github.com/hmcts/ga-ccd-docker
-2.
+```bash
+docker container rm $(docker container ls -a -q)
+docker image rm $(docker image ls -a -q)
+docker volume rm $(docker volume ls -q)
+docker network rm $(docker network ls -q)
+```
+
+### STEPS
+
+#### 1. checkout 
+checkout ga-ccd-docker from https://github.com/hmcts/ga-ccd-docker
+
+#### 2. login
 ```bash
 ./ccd login
 ```
-3.
+
+#### 3. env vars 
 ```bash
 source ./bin/set-environment-variables.sh
 ```
 check with 
 ```bash
-echo $DB_USERNAME 								
+echo $DB_USERNAME
 ```
 should return **ccd** 
 
 if this returns blank (3) has not worked
 
-4.	
+#### 4. build and run
 ```bash
-./ccd compose down								
-./ccd compose pull								
+./ccd compose down
+./ccd compose pull
 ./ccd init
-./ccd compose up -d								
+./ccd compose up -d
 ```
+you may need to kill process if the last cmd fails, eg:
+```bash
+sudo kill -9 `sudo lsof -t -i:5432`
+```
+
+
 check with
 ```bash
-curl http://localhost:5000/health								
+curl http://localhost:5000/health
 ```
-wait for idam if not healthy after 5 mins, keep doing 
 
+if not healthy after 5 mins, keep doing 
+```bash
 ./ccd compose up -d
+```
+You may need to repeat that cmd if containers are not starting properly
 
 then do
 ```bash
-export IDAM_ADMIN_USER=idamOwner@hmcts.net && export IDAM_ADMIN_PASSWORD=Ref0rmIsFun							ccd	Pa55word11
+export IDAM_ADMIN_USER=idamOwner@hmcts.net && export IDAM_ADMIN_PASSWORD=Ref0rmIsFun
 ```
 
-5.
+#### 5. user and services setup
 ```bash
-./bin/add-idam-clients.sh								
-./bin/add-idam-roles.sh								
-./bin/add-users.sh								
+./bin/add-idam-clients.sh
+./bin/add-idam-roles.sh
+./bin/add-users.sh
 ./bin/add-ccd-roles.sh
 ./bin/add-role-assignments.sh
 ```
 
-6. 
+#### 6. default ccd definition setup
 checkout								
 ccd-definition-store-api from https://github.com/hmcts/ccd-definition-store-api
+
+_from that repository:_
 ```bash
-source ../ga-ccd-docker/bin/set-environment-variables.sh								
+source ../ga-ccd-docker/bin/set-environment-variables.sh
 ./gradlew clean smoke
 ```
 
-7.
+#### 7. XUI access
 go to xui on http://localhost:3455
 
 login credentials:
@@ -82,7 +107,9 @@ login credentials:
 |:----------------------------:|:-----------:|
 | befta.caseworker.1@gmail.com | Pa55word11  |
 
-You should be aable to see the Case List page - with no cases yet
+You should be able to see the Case List page - with no cases yet
+
+if the page is ust grey, try [6. default ccd definition setup](6.-default-ccd-definition-setup). again
 
 Go ahead and create a case of type
 
