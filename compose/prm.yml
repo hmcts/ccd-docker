@@ -56,7 +56,7 @@ services:
     environment:
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       IDAM_USER_URL: http://idam-api:5000
-      OIDC_ISSUER_URL: http://idam-api:5000}/openam/oauth2/hmcts
+      OIDC_ISSUER_URL: http://idam-api:5000/openam/oauth2/hmcts
       OPEN_ID_API_BASE_URI: "http://idam-api:5000/o"
       S2S_URL: http://service-auth-provider-api:8080
       AM_ORG_ROLE_MAPPING_S2S_AUTHORISED_SERVICES: ccd_gw,am_org_role_mapping_service,am_role_assignment_service,xui_webapp,am_role_assignment_refresh_batch
