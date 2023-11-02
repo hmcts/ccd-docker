@@ -115,6 +115,16 @@ Go ahead and create a case of type
 
 See newly created case in case list
 
+To update your ccd definition, make changes to the xls file for that exmaple case type and re-import into ccd
+ie, from ga-ccd-docker repo:
+
+update the ccd-definition-store-api image you may be using in the backend.yml, then
+
+
+```bash
+./bin/ccd-import-definition.sh /home/sanjay/Downloads/CCD_BEFTA_JURISDICTION1.xlsx
+```
+
 ### HELPER connect to local db
 eg ccd_data (the ccd-data-store)
 
