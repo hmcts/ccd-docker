@@ -94,6 +94,7 @@ ccd-definition-store-api from https://github.com/hmcts/ccd-definition-store-api
 _from that repository:_
 ```bash
 source ../ga-ccd-docker/bin/set-environment-variables.sh
+export TEST_URL=http://localhost:4451
 ./gradlew clean smoke
 ```
 
