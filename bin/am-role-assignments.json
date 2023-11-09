@@ -335,5 +335,22 @@
       }
     ],
     "overrideAll": true
+  },
+  {
+    "email": "befta.caseworker.1@gmail.com",
+    "roleAssignments": [
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "Role1",
+        "grantType": "STANDARD",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes":
+        {"caseGroupId": "caseGroupId1"},
+        "authorisations": []
+      }
+    ],
+    "overrideAll": true
   }
 ]
