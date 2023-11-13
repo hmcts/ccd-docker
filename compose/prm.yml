@@ -13,11 +13,11 @@ services:
       POSTGRES_PORT: 5432
       S2S_URL: http://service-auth-provider-api:8080
       USER_PROFILE_URL: http://rd-user-profile-api:5602
-      OIDC_ISSUER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}/openam/oauth2/hmcts"
-      OPEN_ID_API_BASE_URI: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}/o"
-      IDAM_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
+      OIDC_ISSUER_URL: "${IDAM_STUB_SERVICE_NAME:-http://rse-idam-simulator:5000}/openam/oauth2/hmcts"
+      OPEN_ID_API_BASE_URI: "${IDAM_STUB_SERVICE_NAME:-http://rse-idam-simulator:5000}/o"
+      IDAM_URL: "${IDAM_STUB_SERVICE_NAME:-http://rse-idam-simulator:5000}"
       CCD_URL: http://ccd-user-profile-api:4453
-      AUTH_IDAM_CLIENT_BASEURL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
+      AUTH_IDAM_CLIENT_BASEURL: "${IDAM_STUB_SERVICE_NAME:-http://rse-idam-simulator:5000}"
       LAUNCH_DARKLY_ENV: aat
     healthcheck:
       interval: 10s
@@ -39,6 +39,10 @@ services:
       POSTGRES_HOST: ccd-shared-database
       POSTGRES_PORT: 5432
       CCD_URL: http://ccd-user-profile-api:4453
+      OIDC_ISSUER_URL: "${IDAM_STUB_SERVICE_NAME:-http://rse-idam-simulator:5000}/openam/oauth2/hmcts"
+      OPEN_ID_API_BASE_URI: "${IDAM_STUB_SERVICE_NAME:-http://rse-idam-simulator:5000}/o"
+      IDAM_URL: "${IDAM_STUB_SERVICE_NAME:-http://rse-idam-simulator:5000}"
+      AUTH_IDAM_CLIENT_BASEURL: "${IDAM_STUB_SERVICE_NAME:-http://rse-idam-simulator:5000}"
     healthcheck:
       interval: 10s
       timeout: 10s
@@ -55,9 +59,9 @@ services:
     container_name: am-org-role-mapping-service
     environment:
       IDAM_S2S_URL: http://service-auth-provider-api:8080
-      IDAM_USER_URL: http://idam-api:5000
-      OIDC_ISSUER_URL: http://idam-api:5000/openam/oauth2/hmcts
-      OPEN_ID_API_BASE_URI: "http://idam-api:5000/o"
+      IDAM_USER_URL: http://rse-idam-simulator:5000
+      OIDC_ISSUER_URL: http://rse-idam-simulator:5000/openam/oauth2/hmcts
+      OPEN_ID_API_BASE_URI: "http://rse-idam-simulator:5000/o"
       S2S_URL: http://service-auth-provider-api:8080
       AM_ORG_ROLE_MAPPING_S2S_AUTHORISED_SERVICES: ccd_gw,am_org_role_mapping_service,am_role_assignment_service,xui_webapp,am_role_assignment_refresh_batch
       ROLE_ASSIGNMENT_APP_URL: http://am-role-assignment-service:4096

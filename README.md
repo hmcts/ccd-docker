@@ -73,15 +73,8 @@ if not healthy after 5 mins, keep doing
 ```
 You may need to repeat that cmd if containers are not starting properly
 
-then do
-```bash
-export IDAM_ADMIN_USER=idamOwner@hmcts.net && export IDAM_ADMIN_PASSWORD=Ref0rmIsFun
-```
-
 #### 5. user and services setup
 ```bash
-./bin/add-idam-clients.sh
-./bin/add-idam-roles.sh
 ./bin/add-users.sh
 ./bin/add-ccd-roles.sh
 ./bin/add-role-assignments.sh
