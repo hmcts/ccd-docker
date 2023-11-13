@@ -7,7 +7,7 @@ services:
     container_name: rse-idam-simulator
     ports:
       - "5000:5000"
-      - "5005:5005"
+      # - "5005:5005"
     environment:
       # these environment variables are used by java-logging library
       ROOT_APPENDER:
@@ -24,7 +24,7 @@ services:
       SERVER_PORT: 5000
       SIMULATOR_OPENID_BASE_URL: http://rse-idam-simulator:5000
       SIMULATOR_OPENID_BASE_URL_OUTSIDE_NETWORK: http://localhost:5000
-      JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      # JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     networks:
       - ccd-network
 
