@@ -5,6 +5,7 @@ services:
   rse-idam-simulator:
     image: "hmctspublic.azurecr.io/hmcts/rse/rse-idam-simulator:latest"
     container_name: rse-idam-simulator
+    user: root
     ports:
       - "5000:5000"
       # - "5005:5005"
@@ -24,9 +25,16 @@ services:
       SERVER_PORT: 5000
       SIMULATOR_OPENID_BASE_URL: http://rse-idam-simulator:5000
       SIMULATOR_OPENID_BASE_URL_OUTSIDE_NETWORK: http://localhost:5000
+      SIMULATOR_STORAGE_TYPE: persistent
+      SIMULATOR_STORAGE_PERSISTENT_FILE: /opt/app/data/users.db
       # JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+    volumes:
+      - idam-simulator-data:/opt/app/data
     networks:
       - ccd-network
+
+volumes:
+  idam-simulator-data:
 
 networks:
   ccd-network:
