@@ -19,6 +19,8 @@ services:
       CCD_URL: http://ccd-user-profile-api:4453
       AUTH_IDAM_CLIENT_BASEURL: "${IDAM_STUB_SERVICE_NAME:-http://rse-idam-simulator:5000}"
       LAUNCH_DARKLY_ENV: aat
+      ACCOUNT_NAME: devstoreaccount1 # dummy value
+      ACCOUNT_KEY: Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw== # dummy value
     healthcheck:
       interval: 10s
       timeout: 10s
