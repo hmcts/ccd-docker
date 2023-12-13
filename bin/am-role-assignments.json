@@ -347,7 +347,40 @@
         "classification": "PUBLIC",
         "readOnly": false,
         "attributes":
-        {"caseGroupId": "caseGroupId1"},
+        {"caseAccessGroupId": "caseAccessGroupId1"},
+        "authorisations": []
+      }
+    ],
+    "overrideAll": true
+  },
+  {
+    "email": "befta.caseworker.2@gmail.com",
+    "roleAssignments": [
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "Role1",
+        "grantType": "STANDARD",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes":
+        {"caseAccessGroupId": "caseAccessGroupId2"},
+        "authorisations": []
+      }
+    ],
+    "overrideAll": true
+  },
+  {
+    "email": "befta.caseworker.3@gmail.com",
+    "roleAssignments": [
+      {
+        "roleType": "ORGANISATION",
+        "roleName": "Role1",
+        "grantType": "STANDARD",
+        "roleCategory": "PROFESSIONAL",
+        "classification": "PUBLIC",
+        "readOnly": false,
+        "attributes": {},
         "authorisations": []
       }
     ],

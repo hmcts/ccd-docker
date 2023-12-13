@@ -2,7 +2,7 @@
   {"email": "befta.pui.caa.1@gmail.com", "roles": "pui-caa", "lastName": "CAA", "firstName": "Pui"},
   {"email": "ccd.docker.default@hmcts.net", "roles": "ccd-import", "lastName": "Default CCD_Docker"},
 
-  {"email": "auto.test.cnp@gmail.com", "roles": "caseworker,caseworker-autotest1,ccd-import", "lastName": "testsurname"},
+  {"email": "auto.test.cnp@gmail.com", "roles": "citizen,caseworker,caseworker-autotest1,ccd-import", "lastName": "testsurname"},
   {"email": "auto.test.cnp+private@gmail.com", "roles": "caseworker,caseworker-autotest1,caseworker-autotest1-private"},
   {"email": "auto.test.cnp+senior@gmail.com", "roles": "caseworker,caseworker-autotest1,caseworker-autotest1-senior"},
   {"email": "auto.test.cnp+solc@gmail.com", "roles": "caseworker,caseworker-autotest1,caseworker-autotest1-solicitor"},
@@ -19,15 +19,17 @@
   {"email": "befta.citizen.2@gmail.com", "roles": "citizen"},
   {"email": "befta.citizen.3@gmail.com", "roles": "citizen"},
 
+  {"email": "local-prd-admin@gmail.com", "roles": "prd-admin,pui-user-manager"},
+  {"email": "befta.org.1@gmail.com", "roles": "pui-organisation-manager,pui-case-manager,pui-user-manager"},
   {"email": "befta.caseworker.1@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_1"},
   {"email": "befta.caseworker.1.noprofile@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_1", "lastName": "testsurname", "firstName": "testfirstname"},
 
-  {"email": "befta.caseworker.2@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_2"},
+  {"email": "befta.caseworker.2@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_1"},
   {"email": "befta.caseworker.2.solicitor.1@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_2,caseworker-befta_jurisdiction_2-solicitor_1"},
   {"email": "befta.caseworker.2.solicitor.2@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_2,caseworker-befta_jurisdiction_2-solicitor_2"},
   {"email": "befta.caseworker.2.solicitor.3@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_2,caseworker-befta_jurisdiction_2-solicitor_3"},
 
-  {"email": "befta.caseworker.3@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_3"},
+  {"email": "befta.caseworker.3@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_1"},
   {"email": "befta.solicitor.3@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_3,caseworker-befta_jurisdiction_3-solicitor"},
   {"email": "befta.solicitor.4@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_3,caseworker-befta_jurisdiction_3-solicitor"},
 

@@ -129,7 +129,7 @@ update the ccd-definition-store-api image you may be using in the backend.yml, t
 
 
 ```bash
-./bin/ccd-import-definition.sh /home/sanjay/Downloads/CCD_BEFTA_JURISDICTION1.xlsx
+./bin/ccd-import-definition.sh /home/sanjay/Downloads/CCD_BEFTA_JURISDICTION1_GA-22_23_24.xlsx
 ```
 
 ### HELPER connect to local db
