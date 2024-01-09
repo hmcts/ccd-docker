@@ -1,0 +1,10 @@
+version: '2.4'
+services:
+  ccd-redis:
+    image: "redis:alpine"
+    container_name: ccd-redis
+    command: redis-server
+    ports:
+      - 6379:6379
+    networks:
+      - ccd-network
