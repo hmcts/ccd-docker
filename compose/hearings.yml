@@ -95,6 +95,7 @@ services:
       IDAM_OIDC_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
       SCOPE: api://d49d7fa2-6904-4223-a907-3b8992af4190/.default
+      S2S_URL: "${SERVICE_AUTH_PROVIDER_API_BASE_URL:-http://service-auth-provider-api:8080}"
       SERVICE_AUTH_PROVIDER_API_BASE_URL: "${SERVICE_AUTH_PROVIDER_API_BASE_URL:-http://service-auth-provider-api:8080}"
 
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
