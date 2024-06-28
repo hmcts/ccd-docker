@@ -785,7 +785,7 @@ function process_input_file() {
   # input file read ok ...
   # ... so move it to backup location
   if [ $? -eq 0 ]; then
-    local dirname=$(dirname "${original_filename}")
+
     #if [[ "$is_test" = false ]]; then
        # below line failed to move file
        #mv "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null
