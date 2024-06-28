@@ -755,6 +755,10 @@ function process_input_file() {
   local filepath_output_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "_Output_${datestamp}")
   local filename=$(get_file_name_from_csv_path "$filepath_input_original")
 
+  # fix for bug moving the original file to output folder with new name
+  # i.e. rename working 'output' naming to input
+  local filepath_input_newpath2=${filepath_output_newpath/Output/Input}
+
   if [[ "$LOG_PER_INPUT_FILE" = true ]]; then
     LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp}")"
   else
@@ -764,13 +768,14 @@ function process_input_file() {
 
   log_debug "****** Start - processing input file ${filepath_input_original}"
 
-  if [[ "$is_test" = true ]]; then
+  #if [[ "$is_test" = true ]]; then
     echo 'Test outputs of resulting files!'
     echo $filepath_input_original
     echo $filepath_input_newpath
     echo $filepath_output_newpath
+    echo $filepath_input_newpath2
     echo $IDAM_ACCESS_TOKEN
-  fi
+  #fi
 
   # convert input file to json
   json=$(convert_input_file_to_json "${filepath_input_original}")
@@ -780,9 +785,14 @@ function process_input_file() {
   # input file read ok ...
   # ... so move it to backup location
   if [ $? -eq 0 ]; then
-
+    local dirname=$(dirname "${original_filename}")
     #if [[ "$is_test" = false ]]; then
-       mv "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null
+       # below line failed to move file
+       #mv "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null
+
+       # quick fix for file move and rename
+       mv "$filepath_input_original" "$filepath_input_newpath2" 2> /dev/null
+
         if [ $? -eq 0 ]; then
           echo "Moved input file to backup location: ${BOLD}${filepath_input_newpath}${NORMAL}"
         else
