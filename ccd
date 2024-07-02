@@ -10,6 +10,12 @@ function project_config() {
     project=$1
     config=$2
     case $project in
+        hearings|hearing-service|cft-hearing-service|hmc-cft-hearing-service)
+            name=hearings
+            repository="git@github.com:hmcts/hmc-cft-hearing-service.git"
+            envPrefix="HMC_HEARING_SERVICE"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
         ccd-data-store-api|data-store-api|data-store|datastore|data-store)
             name=ccd-data-store-api
             repository="git@github.com:hmcts/ccd-data-store-api.git"
@@ -98,7 +104,7 @@ function project_config() {
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api, ts-translation-service, ccd-next-hearing-date-updater"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api, ts-translation-service, ccd-next-hearing-date-updater, hmc-cft-hearing-service"
             exit 1 ;;
     esac
     case $config in
@@ -370,7 +376,7 @@ function usage() {
     echo "  unset <project...> - remove project override(s)"
     echo "  branches <project...> - list available branches"
     echo "  status - list current overrides and their status against upstream"
-    echo "  update <project...> - update project overide to match upstream branch; and build"
+    echo "  update <project...> - update project override to match upstream branch; and build"
     echo "  enable <project>|defaults|show - enable a compose file"
     echo "  disable <project> - disable a compose file"
     echo "  compose [<docker-compose command> [options]] - wrap docker compose for your configuration"
