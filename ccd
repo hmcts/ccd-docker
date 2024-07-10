@@ -10,6 +10,12 @@ function project_config() {
     project=$1
     config=$2
     case $project in
+        operational|operational-reports|hmc-operational-reports|reports-runner)
+            name=operational
+            repository="git@github.com:hmcts/hmc-operational-reports-runner.git"
+            envPrefix="HMC_OPERATIONAL_REPORTS_RUNNER"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
         hearings|hearing-service|cft-hearing-service|hmc-cft-hearing-service)
             name=hearings
             repository="git@github.com:hmcts/hmc-cft-hearing-service.git"
@@ -104,7 +110,7 @@ function project_config() {
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api, ts-translation-service, ccd-next-hearing-date-updater, hmc-cft-hearing-service"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api, ts-translation-service, ccd-next-hearing-date-updater, hmc-cft-hearing-service", hmc-operational-reports-runner
             exit 1 ;;
     esac
     case $config in

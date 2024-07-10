@@ -58,7 +58,7 @@ services:
     volumes:
       - ./../resources/wiremock:/home/wiremock:rw
     ports:
-      - 4459:8080
+      - 4458:8080
     networks:
       - ccd-network
 
@@ -79,6 +79,8 @@ services:
       FH_BASE_URL: https://login.microsoftonline.com
       FH_GET_TOKEN_URL: /531ff96d-0ae9-462a-8d2d-bec7c0b42082/oauth2/v2.0/token
       GRANT_TYPE: client_credentials
+      # temporarily switch off role access check while testing
+      HMC_ACCESS_CONTROL_ENABLED: false
       #inbound queue
       HMC_QUEUE_CONNECTION_STRING: "${HMC_SERVICE_BUS_INBOUND_CONNECTION_STRING}"
       HMC_SERVICE_BUS_QUEUE: "${HMC_SERVICE_BUS_INBOUND_QUEUE}"
