@@ -28,7 +28,7 @@
 | 12+ GB   | 6+    |
 
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) - minimum version 2.0.57
-- [jq Json Processor](https://stedolan.github.io/jq)
+- [jq Json Processor](https://ghcr.io/jqlang/jq)
 - Mac users, set your default shell to bash `chsh -s /bin/bash`
 
 *The following documentation assumes that the current directory is `ccd-docker`.*

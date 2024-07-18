@@ -38,7 +38,7 @@ function get_idam_token() {
     exit $exit_code
   fi
 
-  # seperate body and status into an array
+  # separate body and status into an array
   IFS=$'\n' arr=($curl_result)
 
   array_length=${#arr[@]}
@@ -196,7 +196,7 @@ function delete_user_role() {
 
   exit_code=$?
   if [ $exit_code -eq 0 ]; then
-    # seperate body and status into an array
+    # separate body and status into an array
     IFS=$'\n' response_array=($curl_result)
 
     array_length=${#response_array[@]}
@@ -239,7 +239,7 @@ function put_user_roles() {
 
   exit_code=$?
   if [ $exit_code -eq 0 ]; then
-    # seperate body and status into an array
+    # separate body and status into an array
     IFS=$'\n' response_array=($curl_result)
 
     array_length=${#response_array[@]}
@@ -288,7 +288,7 @@ function get_user_api_v1() {
 
   exit_code=$?
   if [ $exit_code -eq 0 ]; then
-    # seperate body and status into an array
+    # separate body and status into an array
     IFS=$'\n' response_array=($curl_result)
 
     array_length=${#response_array[@]}
@@ -331,7 +331,7 @@ function get_user() {
 
   exit_code=$?
   if [ $exit_code -eq 0 ]; then
-    # seperate body and status into an array
+    # separate body and status into an array
     IFS=$'\n' response_array=($curl_result)
 
     array_length=${#response_array[@]}
@@ -373,7 +373,7 @@ function get_user_roles() {
   exit_code=$?
   if [ $exit_code -eq 0 ]; then
 
-    # seperate body and status into an array
+    # separate body and status into an array
     IFS=$'\n' response_array=($curl_result)
 
     array_length=${#response_array[@]}
@@ -414,7 +414,7 @@ function get_user_by_id() {
   exit_code=$?
   if [ $exit_code -eq 0 ]; then
 
-    # seperate body and status into an array
+    # separate body and status into an array
     IFS=$'\n' response_array=($curl_result)
 
     array_length=${#response_array[@]}
@@ -453,7 +453,7 @@ function get_roles() {
   exit_code=$?
   if [ $exit_code -eq 0 ]; then
 
-    # seperate body and status into an array
+    # separate body and status into an array
     IFS=$'\n' response_array=($curl_result)
 
     array_length=${#response_array[@]}
@@ -497,7 +497,7 @@ function update_user() {
   exit_code=$?
   if [ $exit_code -eq 0 ]; then
 
-    # seperate body and status into an array
+    # separate body and status into an array
     IFS=$'\n' response_array=($curl_result)
 
     array_length=${#response_array[@]}
@@ -1299,7 +1299,7 @@ function process_input_file() {
             submit_response=$(post_user_roles "$userId" "$uniqueRolesJson")
             #echo $submit_response
 
-            # seperate submit_response reponse
+            # separate submit_response reponse
             IFS=$'\n'
             local response_array=($submit_response)
             local inviteStatus=${response_array[0]}
@@ -1394,7 +1394,7 @@ function process_input_file() {
 
                         submit_response=$(update_user "${userId}" "${body}")
 
-                        # seperate submit_response
+                        # separate submit_response
                         IFS=$'\n'
                         local response_array=($submit_response)
                         local inviteStatus=${response_array[0]}
