@@ -768,14 +768,14 @@ function process_input_file() {
 
   log_debug "****** Start - processing input file ${filepath_input_original}"
 
-  #if [[ "$is_test" = true ]]; then
+  if [[ "$is_test" = true ]]; then
     echo 'Test outputs of resulting files!'
     echo $filepath_input_original
     echo $filepath_input_newpath
     echo $filepath_output_newpath
     echo $filepath_input_newpath2
     echo $IDAM_ACCESS_TOKEN
-  #fi
+  fi
 
   # convert input file to json
   json=$(convert_input_file_to_json "${filepath_input_original}")
@@ -786,7 +786,7 @@ function process_input_file() {
   # ... so move it to backup location
   if [ $? -eq 0 ]; then
 
-    #if [[ "$is_test" = false ]]; then
+    if [[ "$is_test" = false ]]; then
        # below line failed to move file
        #mv "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null
 
@@ -799,7 +799,7 @@ function process_input_file() {
          echo "${RED}ERROR: Aborted as unable to move input file to backup location:${NORMAL} ${filepath_input_newpath}"
          exit 1
         fi
-    #fi
+    fi
 
     # write headers to output file
     echo "operation,email,firstName,lastName,roles,isActive,lastModified,ssoID,status,responseMessage" >> "$filepath_output_newpath"
