@@ -755,6 +755,10 @@ function process_input_file() {
   local filepath_output_newpath=$(generate_csv_path_with_insert "$filepath_input_original" "_Output_${datestamp}")
   local filename=$(get_file_name_from_csv_path "$filepath_input_original")
 
+  # fix for bug moving the original file to output folder with new name
+  # i.e. rename working 'output' naming to input
+  local filepath_input_newpath2=${filepath_output_newpath/Output/Input}
+
   if [[ "$LOG_PER_INPUT_FILE" = true ]]; then
     LOGFILE="$(generate_log_path_with_insert "$filepath_input_original" "${datestamp}")"
   else
@@ -769,6 +773,7 @@ function process_input_file() {
     echo $filepath_input_original
     echo $filepath_input_newpath
     echo $filepath_output_newpath
+    echo $filepath_input_newpath2
     echo $IDAM_ACCESS_TOKEN
   fi
 
@@ -781,15 +786,20 @@ function process_input_file() {
   # ... so move it to backup location
   if [ $? -eq 0 ]; then
 
-    #if [[ "$is_test" = false ]]; then
-       mv "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null
+    if [[ "$is_test" = false ]]; then
+       # below line failed to move file
+       #mv "$filepath_input_original" "$filepath_input_newpath" 2> /dev/null
+
+       # quick fix for file move and rename
+       mv "$filepath_input_original" "$filepath_input_newpath2" 2> /dev/null
+
         if [ $? -eq 0 ]; then
-          echo "Moved input file to backup location: ${BOLD}${filepath_input_newpath}${NORMAL}"
+          echo "Moved input file to backup location: ${BOLD}${filepath_input_newpath2}${NORMAL}"
         else
-         echo "${RED}ERROR: Aborted as unable to move input file to backup location:${NORMAL} ${filepath_input_newpath}"
+         echo "${RED}ERROR: Aborted as unable to move input file to backup location:${NORMAL} ${filepath_input_newpath2}"
          exit 1
         fi
-    #fi
+    fi
 
     # write headers to output file
     echo "operation,email,firstName,lastName,roles,isActive,lastModified,ssoID,status,responseMessage" >> "$filepath_output_newpath"
