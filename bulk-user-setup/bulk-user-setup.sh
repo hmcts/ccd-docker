@@ -794,9 +794,9 @@ function process_input_file() {
        mv "$filepath_input_original" "$filepath_input_newpath2" 2> /dev/null
 
         if [ $? -eq 0 ]; then
-          echo "Moved input file to backup location: ${BOLD}${filepath_input_newpath}${NORMAL}"
+          echo "Moved input file to backup location: ${BOLD}${filepath_input_newpath2}${NORMAL}"
         else
-         echo "${RED}ERROR: Aborted as unable to move input file to backup location:${NORMAL} ${filepath_input_newpath}"
+         echo "${RED}ERROR: Aborted as unable to move input file to backup location:${NORMAL} ${filepath_input_newpath2}"
          exit 1
         fi
     fi
