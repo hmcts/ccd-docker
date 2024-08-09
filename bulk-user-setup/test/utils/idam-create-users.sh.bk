@@ -166,7 +166,7 @@ function update_user() {
   exit_code=$?
   if [ $exit_code -eq 0 ]; then
 
-    # seperate body and status into an array
+    # separate body and status into an array
     IFS=$'\n' response_array=($curl_result)
 
     array_length=${#response_array[@]}

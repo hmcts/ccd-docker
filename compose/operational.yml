@@ -1,0 +1,37 @@
+version: '2.4'
+
+services:
+  hmc-operational-reports-runner:
+    image: "${HMC_OPERATIONAL_REPORTS_RUNNER_USE_LOCAL-hmctspublic.azurecr.io/}ccd/reports-runner:${HMC_OPERATIONAL_REPORTS_RUNNER_TAG:-latest}"
+    container_name: operational-reports-runner
+    environment:
+      SERVER_PORT: 4459
+      APPINSIGHTS_INSTRUMENTATIONKEY: "SomeRandomStringForLocalDocker"
+      NOTIFY_HMC_API_KEY: team_and_guest_list-339063cc-26db-4374-bfad-40edc9033d83-dd0f01c6-6d7b-4e76-869c-d823f3ab780b
+      NOTIFY_ERROR_TEMPLATE_ID: 952167ce-a823-432f-9a2c-f5a2a28076d9
+      NOTIFY_ERROR_EMAIL_ADDRESS: rebecca.baker@hmcts.net
+      NOTIFY_ERROR_REPLY_TO_EMAIL_ADDRESS: 8276915e-dfbc-4791-adbc-5e553607b2bd
+      NOTIFY_AWAITING_ACTUALS_TEMPLATE_ID: 952167ce-a823-432f-9a2c-f5a2a28076d9
+      NOTIFY_AWAITING_ACTUALS_EMAIL_ADDRESS: mark.dathorne@hmcts.net
+      NOTIFY_AWAITING_ACTUALS_REPLY_TO_EMAIL_ADDRESS: 276915e-dfbc-4791-adbc-5e553607b2bd
+      CFT_HEARING_SERVICE_DB_USERNAME: hmc
+      CFT_HEARING_SERVICE_DB_PASSWORD: hmc
+      CFT_HEARING_SERVICE_DB_HOST: "ccd-shared-database"
+      CFT_HEARING_SERVICE_DB_PORT: 5432
+      CFT_HEARING_SERVICE_DB_NAME:  hmc_cft_hearing_service
+      # these environment variables are used by java-logging library
+      ROOT_APPENDER:
+      JSON_CONSOLE_PRETTY_PRINT:
+      ROOT_LOGGING_LEVEL:
+      REFORM_SERVICE_TYPE:
+      REFORM_SERVICE_NAME:
+      REFORM_TEAM:
+      REFORM_ENVIRONMENT:
+      LOGBACK_DATE_FORMAT:
+      LOGBACK_REQUIRE_THREAD:
+      LOGBACK_REQUIRE_ALERT_LEVEL: false
+      LOGBACK_REQUIRE_ERROR_CODE: false
+    ports:
+      - 4459:4459
+    networks:
+      - ccd-network

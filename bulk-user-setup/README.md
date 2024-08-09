@@ -2,7 +2,7 @@
 
 The script requires the following bash utilities. Please install them depending on your OS.
 
-1. jq - [Json Processor](https://stedolan.github.io/jq)
+1. jq - [Json Processor](https://ghcr.io/jqlang/jq)
 
 2. [csvkit](https://formulae.brew.sh/formula/csvkit) - collection of CSV tools 
 
