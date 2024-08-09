@@ -830,6 +830,11 @@ Also if a certain database has not been created you might need to create a new c
   * verify that cft-hearing-service is up and running by `curl localhost:4651/health`
   * this will include the inbound and outbound adapters
 
+* To enable **hmc-operational-reports-runner**
+  * `./ccd enable backend operational`
+  * run docker-compose `./ccd compose up -d`
+  * verify that hmc-operational-reports-runner is up and running by `curl localhost:4651/health`
+
 ## Under the hood :speedboat:
 
 ### Set
