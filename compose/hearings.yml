@@ -96,7 +96,7 @@ services:
       IDAM_OAUTH2_DATA_STORE_CLIENT_SECRET: idam_data_store_client_secret
       IDAM_OIDC_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
-      SCOPE: api://d49d7fa2-6904-4223-a907-3b8992af4190/.default
+      SCOPE: "${SCOPE}"
       S2S_URL: "${SERVICE_AUTH_PROVIDER_API_BASE_URL:-http://service-auth-provider-api:8080}"
       SERVICE_AUTH_PROVIDER_API_BASE_URL: "${SERVICE_AUTH_PROVIDER_API_BASE_URL:-http://service-auth-provider-api:8080}"
 
