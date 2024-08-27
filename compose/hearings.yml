@@ -77,7 +77,7 @@ services:
       CLIENT_ID: "${CLIENT_ID}"
       CLIENT_SECRET: "${CLIENT_SECRET}"
       FH_BASE_URL: https://login.microsoftonline.com
-      FH_GET_TOKEN_URL: /531ff96d-0ae9-462a-8d2d-bec7c0b42082/oauth2/v2.0/token
+      FH_GET_TOKEN_URL: "${FH_GET_TOKEN_URL}"
       GRANT_TYPE: client_credentials
       # temporarily switch off role access check while testing
       HMC_ACCESS_CONTROL_ENABLED: false
