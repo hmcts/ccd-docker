@@ -25,8 +25,15 @@ services:
       HMI_BASE_URL: "${HMI_BASE_URL}"
       HMI_SOURCE_SYSTEM: "CFT"
       HMI_DESTINATION_SYSTEM: "MOCK"
+      CFT_HEARING_SERVICE_DB_HOST: "ccd-shared-database"
+      CFT_HEARING_SERVICE_DB_PORT: 5432
+      CFT_HEARING_SERVICE_DB_NAME: hmc_cft_hearing_service
+      # Uncomment this line to enable JVM debugging and uncomment the port mapping below
+      # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
     ports:
       - 4558:4558
+      # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
+      # - 5005:5005
     depends_on:
       - hmc-wiremock
     networks:
@@ -45,8 +52,12 @@ services:
       HMC_SERVICE_BUS_CONNECTION_STRING: "${HMC_SERVICE_BUS_INBOUND_CONNECTION_STRING}"
       IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://docker.for.mac.localhost:5000}"
       S2S_URL: http://service-auth-provider-api:8080
+      # Uncomment this line to enable JVM debugging and uncomment the port mapping below
+      # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -X
     ports:
       - 4559:4559
+      # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
+      # - 5005:5005
     depends_on:
       - hmc-wiremock
     networks:
