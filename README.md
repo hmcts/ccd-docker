@@ -28,7 +28,7 @@
 | 12+ GB   | 6+    |
 
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) - minimum version 2.0.57
-- [jq Json Processor](https://stedolan.github.io/jq)
+- [jq Json Processor](https://ghcr.io/jqlang/jq)
 - Mac users, set your default shell to bash `chsh -s /bin/bash`
 
 *The following documentation assumes that the current directory is `ccd-docker`.*
@@ -113,6 +113,7 @@ The following optional containers will not start successfully until `idam-api` c
 * `case-document-am`
 * `frontend`
 * `xui-frontend`
+* 'hearings'
 
 If `idam-api` is not up and running and accepting connections
 you may see errors in the `definition-store-api` and `data-store-api` containers, such as
@@ -753,6 +754,7 @@ By default, `ccd-docker` runs the most commonly used backend and frontend projec
   * **ccd-data-store-api**: CCD's cases repository
   * **ccd-test-stubs-service**: CCD's testing support for stubbing http calls (service callbacks etc)
   * **am-role-assignment-service**: Users' role assignments for access management
+  * **cft-hearing-service**: Hearing Service API
 * Front-end:
   * **idam-web-public**: SIDAM's login UI
   * **ccd-api-gateway**: Proxy with SIDAM and S2S integration
@@ -821,6 +823,17 @@ Also if a certain database has not been created you might need to create a new c
   * `./ccd enable backend ts-translation-service`
   * run docker-compose `./ccd compose up -d`
   * verify that ts-translation-service is up and running by `curl localhost:4650/health`
+
+* To enable **cft-hearing-service**
+  * `./ccd enable backend hearings`
+  * run docker-compose `./ccd compose up -d`
+  * verify that cft-hearing-service is up and running by `curl localhost:4651/health`
+  * this will include the inbound and outbound adapters
+
+* To enable **hmc-operational-reports-runner**
+  * `./ccd enable backend operational`
+  * run docker-compose `./ccd compose up -d`
+  * verify that hmc-operational-reports-runner is up and running by `curl localhost:4651/health`
 
 ## Under the hood :speedboat:
 

@@ -1,0 +1,127 @@
+---
+version: '2.4'
+
+services:
+  hmc-hmi-outbound-adapter:
+    image: "${HMC_HMI_OUTBOUND_ADAPTER_USE_LOCAL-hmctspublic.azurecr.io/}hmc/hmi-outbound-adapter:${HMC_HMI_OUTBOUND_ADAPTER_TAG:-latest}"
+    container_name: hmi-outbound-adapter
+    environment:
+      SERVER_PORT: 4558
+      REFORM_SERVICE_NAME: hmc-hmi-outbound-adapter
+      REFORM_ENVIRONMENT: local
+      APPINSIGHTS_INSTRUMENTATION_KEY: key
+      WIREMOCK_URL: "${WIREMOCK_STUB_SERVICE_NAME:-http://hmc-wiremock:4459}"
+      HMC_SERVICE_BUS_OUTBOUND_QUEUE: "${HMC_SERVICE_BUS_OUTBOUND_QUEUE}"
+      HMC_SERVICE_BUS_INBOUND_QUEUE: "${HMC_SERVICE_BUS_INBOUND_QUEUE}"
+      HMC_SERVICE_BUS_INBOUND_CONNECTION_STRING: "${HMC_SERVICE_BUS_INBOUND_CONNECTION_STRING}"
+      HMC_SERVICE_BUS_OUTBOUND_CONNECTION_STRING: "${HMC_SERVICE_BUS_OUTBOUND_CONNECTION_STRING}"
+      #HMI/LA connection details
+      FH_BASE_URL: "${FH_BASE_URL}"
+      FH_GET_TOKEN_URL: "${FH_GET_TOKEN_URL}"
+      CLIENT_ID: "${CLIENT_ID}"
+      CLIENT_SECRET: "${CLIENT_SECRET}"
+      SCOPE: "${SCOPE}"
+      GRANT_TYPE: "client_credentials"
+      HMI_BASE_URL: "${HMI_BASE_URL}"
+      HMI_SOURCE_SYSTEM: "CFT"
+      HMI_DESTINATION_SYSTEM: "MOCK"
+      CFT_HEARING_SERVICE_DB_HOST: "ccd-shared-database"
+      CFT_HEARING_SERVICE_DB_PORT: 5432
+      CFT_HEARING_SERVICE_DB_NAME: hmc_cft_hearing_service
+      # Uncomment this line to enable JVM debugging and uncomment the port mapping below
+      # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
+    ports:
+      - 4558:4558
+      # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
+      # - 5005:5005
+    depends_on:
+      - hmc-wiremock
+    networks:
+      - ccd-network
+
+  hmc-hmi-inbound-adapter:
+    image: "${HMC_HMI_INBOUND_ADAPTER_USE_LOCAL-hmctspublic.azurecr.io/}hmc/hmi-inbound-adapter:${HMC_HMI_INBOUND_ADAPTER_TAG:-latest}"
+    container_name: hmi-inbound-adapter
+    environment:
+      SERVER_PORT: 4559
+      REFORM_SERVICE_NAME: hmc-hmi-inbound-adapter
+      REFORM_ENVIRONMENT: local
+      APPINSIGHTS_INSTRUMENTATION_KEY: key
+      CFT_HEARING_SERVICE_URL: "${CFT_HEARING_SERVICE_URL:-http://hmc-cft-hearing-service:4561}"
+      HMC_SERVICE_BUS_QUEUE: "${HMC_SERVICE_BUS_INBOUND_QUEUE}"
+      HMC_SERVICE_BUS_CONNECTION_STRING: "${HMC_SERVICE_BUS_INBOUND_CONNECTION_STRING}"
+      IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://docker.for.mac.localhost:5000}"
+      S2S_URL: http://service-auth-provider-api:8080
+      # Uncomment this line to enable JVM debugging and uncomment the port mapping below
+      # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -X
+    ports:
+      - 4559:4559
+      # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
+      # - 5005:5005
+    depends_on:
+      - hmc-wiremock
+    networks:
+      - ccd-network
+
+  hmc-wiremock:
+    image: rodolpheche/wiremock
+    container_name: hmc-wiremock
+    volumes:
+      - ./../resources/wiremock:/home/wiremock:rw
+    ports:
+      - 4458:8080
+    networks:
+      - ccd-network
+
+  hmc-cft-hearing-service:
+    image: "${HMC_CFT_HEARING_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}hmc/cft-hearing-service:${HMC_CFT_HEARING_SERVICE_TAG:-latest}"
+    container_name: cft-hearing-service
+    environment:
+      SERVER_PORT: 4561
+      APPINSIGHTS_INSTRUMENTATION_KEY: key
+      CFT_HEARING_SERVICE_DB_PASSWORD: hmc
+      CFT_HEARING_SERVICE_DB_USERNAME: hmc
+      CFT_HEARING_SERVICE_DB_HOST: "ccd-shared-database"
+      CFT_HEARING_SERVICE_DB_PORT: 5432
+      CFT_HEARING_SERVICE_DB_NAME: hmc_cft_hearing_service
+      CFT_HEARING_SERVICE_S2S_AUTHORISED_SERVICES: xui_webapp,hmc_hmi_inbound_adapter,sscs,fis_hmc_api
+      CLIENT_ID: "${CLIENT_ID}"
+      CLIENT_SECRET: "${CLIENT_SECRET}"
+      FH_BASE_URL: https://login.microsoftonline.com
+      FH_GET_TOKEN_URL: "${FH_GET_TOKEN_URL}"
+      GRANT_TYPE: client_credentials
+      # temporarily switch off role access check while testing
+      HMC_ACCESS_CONTROL_ENABLED: false
+      #inbound queue
+      HMC_QUEUE_CONNECTION_STRING: "${HMC_SERVICE_BUS_INBOUND_CONNECTION_STRING}"
+      HMC_SERVICE_BUS_QUEUE: "${HMC_SERVICE_BUS_INBOUND_QUEUE}"
+      #outbound queue
+      HMC_OUTBOUND_QUEUE_CONNECTION_STRING: "${HMC_SERVICE_BUS_OUTBOUND_CONNECTION_STRING}"
+      HMC_OUTBOUND_SERVICE_BUS_QUEUE: "${HMC_SERVICE_BUS_OUTBOUND_QUEUE}"
+      #topic connection
+      HMC_SERVICE_BUS_CONNECTION_STRING: "${HMC_SERVICE_BUS_CONNECTION_STRING}"
+      HMC_SERVICE_BUS_TOPIC: "${HMC_SERVICE_BUS_TOPIC}"
+      HMC_SERVICE_BUS_SUBSCRIPTION: "${HMC_SERVICE_BUS_SUBSCRIPTION}"
+      IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
+      IDAM_API_BASE_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
+      IDAM_OAUTH2_DATA_STORE_CLIENT_SECRET: idam_data_store_client_secret
+      IDAM_OIDC_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
+      IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
+      SCOPE: "${SCOPE}"
+      S2S_URL: "${SERVICE_AUTH_PROVIDER_API_BASE_URL:-http://service-auth-provider-api:8080}"
+      SERVICE_AUTH_PROVIDER_API_BASE_URL: "${SERVICE_AUTH_PROVIDER_API_BASE_URL:-http://service-auth-provider-api:8080}"
+
+      # Uncomment this line to enable JVM debugging and uncomment the port mapping below
+      #  JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+    ports:
+      - 4561:4561
+      # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
+      # - 5005:5005
+    depends_on:
+      - ccd-data-store-api
+    networks:
+      - ccd-network
+
+networks:
+  ccd-network:
+    external: true
