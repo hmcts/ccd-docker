@@ -1387,7 +1387,7 @@ function process_input_file() {
 
             local emailFromApi=$(echo ${rawReturnedValue} | jq --raw-output '.email')
 
-            if [ $userActiveState == "true" ]; then
+            if [ $userActiveState == "true" ] || [ $PROCESS_INACTIVE_USER = "true" ]; then
                 if [ "${email}" != "${emailFromApi}" ]; then
                     if [ "$email" == "null" ]; then
                         # FAIL:
@@ -1450,7 +1450,7 @@ function process_input_file() {
 
           log_debug "email: ${email} - User exists, doing update firstname lastname logic"
 
-          if [ $userActiveState == "true" ]; then
+          if [ $userActiveState == "true" ] || [ $PROCESS_INACTIVE_USER = "true" ]; then
             if [ "${firstName}" != "${firstNameFromApi}" ] || [ "$lastName" != "${lastNameFromApi}" ]; then
               if [ "$firstName" == "null" ] && [ "$lastName" == "null" ]; then
                 # FAIL:
@@ -1636,7 +1636,7 @@ function process_input_file() {
             fi
           fi
 
-          if [ $userActiveState == "true" ]; then
+          if [ $userActiveState == "true" ] || [ $PROCESS_INACTIVE_USER = "true" ]; then
             if [ $USE_PUT -eq 1 ]; then
               log_debug "After processing required role deletions, no roles would remain, using PUT to remove ALL roles and then disable the user"
               submit_response=$(put_user_roles "$userId" "[]")
