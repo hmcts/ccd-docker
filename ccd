@@ -16,7 +16,7 @@ function project_config() {
             envPrefix="HMC_OPERATIONAL_REPORTS_RUNNER"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
-        hearings|hearing-service|cft-hearing-service|hmc-cft-hearing-service)
+        hmc-cft-hearing-service|hearings|hearing-service|cft-hearing-service)
             name=hearings
             repository="git@github.com:hmcts/hmc-cft-hearing-service.git"
             envPrefix="HMC_HEARING_SERVICE"
