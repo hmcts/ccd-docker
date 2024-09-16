@@ -2,7 +2,7 @@ version: '2.4'
 
 services:
   hmc-operational-reports-runner:
-    image: "${HMC_OPERATIONAL_REPORTS_RUNNER_USE_LOCAL-hmctspublic.azurecr.io/}hmc/operational-reports-runner:${HMC_OPERATIONAL_REPORTS_RUNNER_TAG:-latest}"
+    image: "${HMC_OPERATIONAL_REPORTS_USE_LOCAL-hmctspublic.azurecr.io/}hmc/operational-reports-runner:${HMC_OPERATIONAL_REPORTS_TAG:-latest}"
     container_name: operational-reports-runner
     environment:
       SERVER_PORT: 4459

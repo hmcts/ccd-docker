@@ -124,7 +124,7 @@ Caused by: org.springframework.web.client.ResourceAccessException:
         nested exception is java.net.ConnectException: Connection refused (Connection refused)
 ```
 
-If you the containers fail to start with these error, ensure `idam-api` is running using
+If the containers fail to start with these error, ensure `idam-api` is running using
 
  ```bash
 curl http://localhost:5000/health

@@ -3,7 +3,7 @@ version: '2.4'
 
 services:
   hmc-hmi-outbound-adapter:
-    image: "${HMC_HMI_OUTBOUND_ADAPTER_USE_LOCAL-hmctspublic.azurecr.io/}hmc/hmi-outbound-adapter:${HMC_HMI_OUTBOUND_ADAPTER_TAG:-latest}"
+    image: "${HMC_OUTBOUND_ADAPTER_USE_LOCAL-hmctspublic.azurecr.io/}hmc/hmi-outbound-adapter:${HMC_OUTBOUND_ADAPTER_TAG:-latest}"
     container_name: hmi-outbound-adapter
     environment:
       SERVER_PORT: 4558
@@ -40,7 +40,7 @@ services:
       - ccd-network
 
   hmc-hmi-inbound-adapter:
-    image: "${HMC_HMI_INBOUND_ADAPTER_USE_LOCAL-hmctspublic.azurecr.io/}hmc/hmi-inbound-adapter:${HMC_HMI_INBOUND_ADAPTER_TAG:-latest}"
+    image: "${HMC_INBOUND_ADAPTER_USE_LOCAL-hmctspublic.azurecr.io/}hmc/hmi-inbound-adapter:${HMC_INBOUND_ADAPTER_TAG:-latest}"
     container_name: hmi-inbound-adapter
     environment:
       SERVER_PORT: 4559
@@ -74,7 +74,7 @@ services:
       - ccd-network
 
   hmc-cft-hearing-service:
-    image: "${HMC_CFT_HEARING_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}hmc/cft-hearing-service:${HMC_CFT_HEARING_SERVICE_TAG:-latest}"
+    image: "${HMC_HEARING_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}hmc/cft-hearing-service:${HMC_HEARING_SERVICE_TAG:-latest}"
     container_name: cft-hearing-service
     environment:
       SERVER_PORT: 4561

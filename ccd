@@ -10,13 +10,13 @@ function project_config() {
     project=$1
     config=$2
     case $project in
-        operational|operational-reports|hmc-operational-reports|reports-runner)
+        operational-reports|reports-runner)
             name=operational
             repository="git@github.com:hmcts/hmc-operational-reports-runner.git"
-            envPrefix="HMC_OPERATIONAL_REPORTS_RUNNER"
+            envPrefix="HMC_OPERATIONAL_REPORTS"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
-        hmc-cft-hearing-service|hearings|hearing-service|cft-hearing-service)
+        cft-hearing-service|hearing-service)
             name=hearings
             repository="git@github.com:hmcts/hmc-cft-hearing-service.git"
             envPrefix="HMC_HEARING_SERVICE"
@@ -130,7 +130,7 @@ function project_config() {
             echo $buildCommand
             ;;
         *)
-            echo "Config is one of name, repository, tagEnv, useLocalEnv or buildCommand. '$config' is unkown"
+            echo "Config is one of name, repository, tagEnv, useLocalEnv or buildCommand. '$config' is unknown"
             exit 1
             ;;
     esac
@@ -298,7 +298,18 @@ function docker_build() {
           (cd $workspace && docker build . -t ccd/next-hearing-date-updater:$tagName || exit $?)
     fi
 
-    if [[ $project != "xui-manage-cases" && $project != "am-role-assignment-service" && $project != "ts-translation-service" && $project != "ccd-next-hearing-date-updater" ]]; then
+    if [[ $project == "cft-hearing-service" || $project == "hearing-service" ]]; then
+          (cd $workspace && docker build . -t hmc/cft-hearing-service:$tagName || exit $?)
+    fi
+
+    if [[ $project == "operational-reports" || $project == "reports-runner" ]]; then
+          (cd $workspace && docker build . -t hmc/operational-reports-runner:$tagName || exit $?)
+    fi
+
+    if [[ $project != "xui-manage-cases" && $project != "am-role-assignment-service"
+    && $project != "ts-translation-service" && $project != "ccd-next-hearing-date-updater"
+    && $project != "hearing-service" && $project != "cft-hearing-service"
+    && $project != "operational-reports" && $project != "reports-runner" ]]; then
       (cd $workspace && docker build . -t ccd/$imageName:$tagName || exit $?)
     fi
 
