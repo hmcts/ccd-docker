@@ -1243,6 +1243,52 @@ function process_input_file() {
           timestamp=$(date -u +"%FT%H:%M:%SZ")
           output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$outputSSOId\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
 
+        elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "suspend" ]; then
+
+          log_debug "email: ${email} - User exists, doing suspend user logic"
+
+          #Set user activate state to false if true
+          if [ $userActiveState == "true" ]; then
+            log_debug "email: ${email} - User activate state=true, deactivating user"
+            body='{"active":false}'
+            submit_response=$(update_user "${userId}" "${body}")
+
+            if [[ $submit_response =~ .*email.* ]]; then
+              # SUCCESS:
+              isActive="FALSE"
+              success_counter=$((success_counter+1))
+              inviteStatus="SUCCESS"
+              lastModified=$(date -u +"%FT%H:%M:%SZ")
+              local reason="User successfully deactivated"
+              responseMessage="INFO: $reason"
+
+              log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+            else
+              fail_counter=$((fail_counter+1))
+              inviteStatus="FAILED"
+              local reason="User active state could not be set to false"
+              responseMessage="ERROR: $reason"
+
+              log_error "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+            fi
+          else
+              # SKIP:
+              skipped_counter=$((skipped_counter+1))
+              inviteStatus="SKIPPED"
+              local reason="${UserExistsNotActive}"
+              responseMessage="WARN: $reason"
+
+              log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+          fi
+
+          # prepare output (NB: escape generated values for CSV)
+          input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+          timestamp=$(date -u +"%FT%H:%M:%SZ")
+          output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$outputSSOId\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
+
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "add" ]; then
 
           log_debug "email: ${email} - User exists, doing role addition logic"
