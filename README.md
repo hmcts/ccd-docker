@@ -1108,15 +1108,17 @@ We will need to install the az cli using Python PIP.
 
 ## Running on Apple Silicon (ARM64)
 
-Running x86 on M1 chip apple devices:
+Rosetta is now Generally Available for all users on macOS 13 or later. It provides faster emulation of Intel-based images on Apple Silicon (M1 & M2...). To use Rosetta, see Settings. Rosetta is enabled by default on macOS 14.1 and later.
+
 if having trouble emulating x86 images try installing rosetta via the terminal using 
   > softwareupdate --install-rosetta
 
 and enabling the following settings in docker desktop (version 4.16.1 or greater) under
-  > Settings > General > Virtualization framework
+  > Settings > General > Use Virtualization framework
 
-  > Settings > Features in development > Use Rosetta for x86/amd64
-  emulation on Apple Silicon
+  > Settings > General >
+  Use Rosetta for x86_64/amd64 emulation on Apple Silicon
+
 
 ## Troubleshooting
 

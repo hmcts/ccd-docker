@@ -74,7 +74,7 @@ services:
       - ccd-network
 
   hmc-cft-hearing-service:
-    image: "${HMC_HEARING_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}hmc/cft-hearing-service:${HMC_HEARING_SERVICE_TAG:-latest}"
+    image: "${HMC_CFT_HEARING_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}hmc/cft-hearing-service:${HMC_CFT_HEARING_SERVICE_TAG:-latest}"
     container_name: cft-hearing-service
     environment:
       SERVER_PORT: 4561
