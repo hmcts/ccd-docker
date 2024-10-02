@@ -329,7 +329,7 @@ function docker_build() {
     && $project != "ts-translation-service" && $project != "ccd-next-hearing-date-updater"
     && $project != "hearing-service" && $project != "cft-hearing-service"
     && $project != "operational-reports" && $project != "reports-runner" 
-    && $project != "outbound-adapter" && $project != "inbound-adapter"]]; then
+    && $project != "outbound-adapter" && $project != "inbound-adapter" ]]; then
       (cd $workspace && docker build . -t ccd/$imageName:$tagName || exit $?)
     fi
 
