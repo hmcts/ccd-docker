@@ -328,8 +328,8 @@ function docker_build() {
     if [[ $project != "xui-manage-cases" && $project != "am-role-assignment-service"
     && $project != "ts-translation-service" && $project != "ccd-next-hearing-date-updater"
     && $project != "hearing-service" && $project != "cft-hearing-service"
-    && $project != "outbound-adapter" && $project != "inbound-adapter"
-    ]]; then
+    && $project != "operational-reports" && $project != "reports-runner" 
+    && $project != "outbound-adapter" && $project != "inbound-adapter"]]; then
       (cd $workspace && docker build . -t ccd/$imageName:$tagName || exit $?)
     fi
 
