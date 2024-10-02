@@ -31,7 +31,7 @@
   {"email": "befta.solicitor.3@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_3,caseworker-befta_jurisdiction_3-solicitor"},
   {"email": "befta.solicitor.4@gmail.com", "roles": "caseworker,caseworker-befta_jurisdiction_3,caseworker-befta_jurisdiction_3-solicitor"},
 
-  {"email": "master.caseworker@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "befta", "firstName": "master"},
+  {"email": "master.caseworker@gmail.com", "roles": "caseworker,caseworker-befta_master", "lastName": "Master", "firstName": "Befta"},
 
   {"email": "master.solicitor.1@gmail.com", "roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor_1", "lastName": "befta", "firstName": "solicitor1"},
   {"email": "master.solicitor.2@gmail.com","roles": "caseworker,caseworker-befta_master,caseworker-befta_master-solicitor_2", "lastName": "befta", "firstName": "solicitor2"},
