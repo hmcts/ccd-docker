@@ -10,17 +10,17 @@ services:
       APPINSIGHTS_INSTRUMENTATION_KEY: key
       CFT_HEARING_SERVICE_DB_HOST: "${CFT_HEARING_SERVICE_DB_HOST:-ccd-shared-database}"
       CFT_HEARING_SERVICE_DB_PORT: "${CFT_HEARING_SERVICE_DB_PORT:-5432}"
-      CFT_HEARING_SERVICE_DB_NAME: "${CFT_HEARING_SERVICE_DB_NAME:-hmc}"
+      CFT_HEARING_SERVICE_DB_NAME: "${CFT_HEARING_SERVICE_DB_NAME:-hmc-cft-hearing-service}"
       #HMI/LA connection details
       CLIENT_ID: "${CLIENT_ID}"
       CLIENT_SECRET: "${CLIENT_SECRET}"
       FH_BASE_URL: "${FH_BASE_URL}"
       FH_GET_TOKEN_URL: "${FH_GET_TOKEN_URL}"
+      GRANT_TYPE: "client_credentials"
       HMC_SERVICE_BUS_OUTBOUND_QUEUE: "${HMC_SERVICE_BUS_OUTBOUND_QUEUE}"
       HMC_SERVICE_BUS_INBOUND_QUEUE: "${HMC_SERVICE_BUS_INBOUND_QUEUE}"
       HMC_SERVICE_BUS_INBOUND_CONNECTION_STRING: "${HMC_SERVICE_BUS_INBOUND_CONNECTION_STRING}"
       HMC_SERVICE_BUS_OUTBOUND_CONNECTION_STRING: "${HMC_SERVICE_BUS_OUTBOUND_CONNECTION_STRING}"
-      GRANT_TYPE: "client_credentials"
       HMI_BASE_URL: "${HMI_BASE_URL}"
       HMI_SOURCE_SYSTEM: "CFT"
       HMI_DESTINATION_SYSTEM: "MOCK"
@@ -112,7 +112,7 @@ services:
       SERVICE_AUTH_PROVIDER_API_BASE_URL: "${SERVICE_AUTH_PROVIDER_API_BASE_URL:-http://service-auth-provider-api:8080}"
 
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
-      #  JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      # JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     ports:
       - 4561:4561
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
