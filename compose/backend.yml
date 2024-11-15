@@ -6,12 +6,12 @@ services:
   ccd-user-profile-api:
     image: "${CCD_USER_PROFILE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/user-profile-api:${CCD_USER_PROFILE_API_TAG:-latest}"
     environment:
-      USER_PROFILE_DB_HOST: "${CCD_POSTGRES_11:-ccd-shared-database}"
+      USER_PROFILE_DB_HOST: ccd-shared-database
       USER_PROFILE_DB_PORT: 5432
       USER_PROFILE_DB_USERNAME: "${DB_USERNAME}"
       USER_PROFILE_DB_PASSWORD: "${DB_PASSWORD}"
       USER_PROFILE_DB_USE_SSL: "${DB_USE_SSL}"
-      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      IDAM_S2S_URL: "${SERVICE_AUTH_PROVIDER_API_BASE_URL:-http://service-auth-provider-api:8080}"
       REFORM_SERVICE_NAME: ccd-user-profile-api
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
@@ -19,14 +19,14 @@ services:
     ports:
       - 4453:4453
     depends_on:
-      - ${CCD_POSTGRES_11:-ccd-shared-database}
+      - ccd-shared-database
     networks:
       - ccd-network
 
   ccd-definition-store-api:
     image: "${CCD_DEFINITION_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
     environment:
-      DEFINITION_STORE_DB_HOST: "${CCD_POSTGRES_11:-ccd-shared-database}"
+      DEFINITION_STORE_DB_HOST: ccd-shared-database
       DEFINITION_STORE_DB_PORT: 5432
       DEFINITION_STORE_DB_USERNAME: "${DB_USERNAME}"
       DEFINITION_STORE_DB_PASSWORD: "${DB_PASSWORD}"
@@ -35,7 +35,7 @@ services:
       DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin,aac_manage_case_assignment,ccd_case_disposer
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
       IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
-      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
       REFORM_SERVICE_NAME: ccd-definition-store-api
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
@@ -50,16 +50,16 @@ services:
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
       # - 5005:5005
     depends_on:
-      # Uncomment this line to enable ccd test stub service
-      #     ccd-test-stubs-service:
-      #       condition: service_started
+# Uncomment this line to enable ccd test stub service
+#     ccd-test-stubs-service:
+#       condition: service_started
       idam-api:
         condition: service_started
-      #      ccd-shared-database:
-      #        condition: service_started
-      # Uncomment this line to enable ccd-shared-database with Postgres version 11
-      ccd-shared-database-v11:
+      ccd-shared-database:
         condition: service_started
+# Uncomment this line to enable ccd-shared-database with Postgres version 11
+#      ccd-shared-database-v11:
+#        condition: service_started
       ccd-user-profile-api:
         condition: service_started
     networks:
@@ -69,20 +69,20 @@ services:
     image: "${CCD_DATA_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
     environment:
       CASE_DOCUMENT_AM_URL: http://ccd-case-document-am-api:4455
-      DATA_STORE_DB_HOST: "${CCD_POSTGRES_11:-ccd-shared-database}"
+      DATA_STORE_DB_HOST: ccd-shared-database
       DATA_STORE_DB_PORT: 5432
       DATA_STORE_DB_USERNAME: "${DB_USERNAME}"
       DATA_STORE_DB_PASSWORD: "${DB_PASSWORD}"
       DATA_STORE_DB_USE_SSL: "${DB_USE_SSL}"
       DATA_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DATA_STORE}"
       DATA_STORE_TOKEN_SECRET: iuasbcuasdcbasdgcasdgcuysachjsacyasdgjcgasdj
-      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps,aac_manage_case_assignment,xui_webapp,ccd_case_document_am_api,am_role_assignment_service
+      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps,aac_manage_case_assignment,xui_webapp,ccd_case_document_am_api,am_role_assignment_service,ccd_next_hearing_date_updater,hmc_cft_hearing_service,cft_hearing_service
       DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
       IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}" # For backward compatibility with older images
       IDAM_API_BASE_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
       IDAM_OIDC_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
-      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
       IDAM_OAUTH2_DATA_STORE_CLIENT_SECRET: idam_data_store_client_secret
       REFORM_SERVICE_NAME: ccd-data-store-api
       REFORM_TEAM: ccd
@@ -96,6 +96,8 @@ services:
       ENABLE_ATTRIBUTE_BASED_ACCESS_CONTROL: "${ENABLE_ATTRIBUTE_BASED_ACCESS_CONTROL:-true}"
       ENABLE_PSEUDO_ROLE_ASSIGNMENTS_GENERATION: "${ENABLE_PSEUDO_ROLE_ASSIGNMENTS_GENERATION:-true}"
       ENABLE_PSEUDO_ACCESS_PROFILES_GENERATION: "${ENABLE_PSEUDO_ACCESS_PROFILES_GENERATION:-true}"
+      TESTING_SUPPORT_ENABLED: "${TESTING_SUPPORT_ENABLED:-true}"
+      MIGRATIONS_ENDPOINT_ENABLED: "${MIGRATIONS_ENDPOINT_ENABLED:-true}"
       REFERENCE_DATA_API_URL: "${REFERENCE_DATA_API_URL:-http://ccd-test-stubs-service:5555}"
       ROLE_ASSIGNMENT_URL: "${ROLE_ASSIGNMENT_URL:-http://am-role-assignment-service:4096}"
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
@@ -105,15 +107,12 @@ services:
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
       # - 5005:5005
     depends_on:
-      # Uncomment this line to enable ccd test stub service
-      #     ccd-test-stubs-service:
-      #       condition: service_started
+# Uncomment this line to enable ccd test stub service
+#     ccd-test-stubs-service:
+#       condition: service_started
       idam-api:
         condition: service_started
-      #      ccd-shared-database:
-      #        condition: service_started
-      # Uncomment this line to enable ccd-shared-database with Postgres version 11
-      ccd-shared-database-v11:
+      ccd-shared-database:
         condition: service_started
       ccd-user-profile-api:
         condition: service_started
@@ -125,7 +124,7 @@ services:
   am-role-assignment-service:
     image: "${AM_ROLE_ASSIGNMENT_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}am/role-assignment-service:${AM_ROLE_ASSIGNMENT_SERVICE_TAG:-latest}"
     environment:
-       ROLE_ASSIGNMENT_DB_HOST: "${CCD_POSTGRES_11:-ccd-shared-database}"
+       ROLE_ASSIGNMENT_DB_HOST: ccd-shared-database
        ROLE_ASSIGNMENT_DB_NAME: role_assignment
        ROLE_ASSIGNMENT_DB_PORT: 5432
        ROLE_ASSIGNMENT_DB_USERNAME: "${DB_USERNAME}"
@@ -135,9 +134,9 @@ services:
        LD_SDK_KEY:
        ROLE_ASSIGNMENT_IDAM_KEY:
        ROLE_ASSIGNMENT_TOKEN_SECRET:
-       ROLE_ASSIGNMENT_S2S_AUTHORISED_SERVICES: ccd_gw,am_role_assignment_service,am_org_role_mapping_service,wa_task_management_api,xui_webapp,ccd_data,aac_manage_case_assignment,ccd_case_disposer
+       ROLE_ASSIGNMENT_S2S_AUTHORISED_SERVICES: ccd_gw,am_role_assignment_service,am_org_role_mapping_service,wa_task_management_api,xui_webapp,ccd_data,aac_manage_case_assignment,hmc_cft_hearing_service,cft_hearing_service,ccd_case_disposer
        IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
-       IDAM_S2S_URL: http://service-auth-provider-api:8080
+       IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
        OPEN_ID_API_BASE_URI: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}/o"
        OIDC_ISSUER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}/openam/oauth2/hmcts"
        ROLE_ASSIGNMENT_IDAM_CLIENT_ID: am_role_assignment
@@ -158,15 +157,12 @@ services:
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
       # - 5005:5005
     depends_on:
-      # Uncomment this line to enable ccd test stub service
-      #     ccd-test-stubs-service:
-      #       condition: service_started
+# Uncomment this line to enable ccd test stub service
+#     ccd-test-stubs-service:
+#       condition: service_started
       idam-api:
         condition: service_started
-      #      ccd-shared-database:
-      #        condition: service_started
-      # Uncomment this line to enable ccd-shared-database with Postgres version 11
-      ccd-shared-database-v11:
+      ccd-shared-database:
         condition: service_started
       ccd-data-store-api:
         condition: service_started
@@ -197,33 +193,18 @@ services:
       MICROSERVICEKEYS_BULK_SCAN_PROCESSOR: "${IDAM_KEY_BULK_SCAN_PROCESSOR}"
       MICROSERVICEKEYS_BULK_SCAN_ORCHESTRATOR: "${IDAM_KEY_BULK_SCAN_ORCHESTRATOR}"
       MICROSERVICEKEYS_AM_ROLE_ASSIGNMENT_SERVICE: "${IDAM_KEY_AM_ROLE_ASSIGNMENT}"
+      MICROSERVICEKEYS_HMC_CFT_HEARING_SERVICE: "${IDAM_KEY_CFT_HEARING_SERVICE}"
       MICROSERVICEKEYS_API_GW: "${IDAM_KEY_API_GW}"
       MICROSERVICEKEYS_HMC_HMI_INBOUND_ADAPTER: "${IDAM_KEY_API_HMI_INBOUND_ADAPTER}"
       MICROSERVICEKEYS_CCD_CASE_DISPOSER: "${IDAM_KEY_CCD_CASE_DISPOSER}"
+      MICROSERVICEKEYS_TS_TRANSLATION_SERVICE: "${IDAM_KEY_TS_TRANSLATION_SERVICE}"
+      MICROSERVICEKEYS_CCD_NEXT_HEARING_DATE_UPDATER: "${IDAM_KEY_NEXT_HEARING_UPDATER}"
       TESTING_SUPPORT_ENABLED: "true"
     networks:
       - ccd-network
-  #
-  #  ccd-shared-database:
-  #    build: ../database
-  #    healthcheck:
-  #      interval: 10s
-  #      timeout: 10s
-  #      retries: 10
-  #    environment:
-  #      DB_USERNAME:
-  #      DB_PASSWORD:
-  #      POSTGRES_HOST_AUTH_METHOD: trust
-  #    ports:
-  #      - 5050:5432
-  #    volumes:
-  #      - ccd-docker-ccd-shared-database-data:/var/lib/postgresql/data
-  #    networks:
-  #      - ccd-network
 
-  # Uncomment this section to enable ccd-shared-database with Postgres version 11.
-  ccd-shared-database-v11:
-    build: ../database-v11
+  ccd-shared-database:
+    build: ../database
     healthcheck:
       interval: 10s
       timeout: 10s
@@ -233,9 +214,9 @@ services:
       DB_PASSWORD:
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
-      - 5055:5432
+      - 5050:5432
     volumes:
-      - ccd-docker-ccd-shared-database-data-v11:/var/lib/postgresql/data
+      - ccd-docker-ccd-shared-database-data:/var/lib/postgresql/data
     networks:
       - ccd-network
 
@@ -254,7 +235,6 @@ services:
 
 volumes:
   ccd-docker-ccd-shared-database-data:
-  ccd-docker-ccd-shared-database-data-v11:
   wiremock:
 
 networks:

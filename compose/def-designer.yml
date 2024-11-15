@@ -28,7 +28,7 @@ services:
       DEFINITION_DESIGNER_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_admin
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
       IDAM_USER_URL: http://sidam-api:5000
-      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
       APPINSIGHTS_INSTRUMENTATIONKEY: key
@@ -38,7 +38,7 @@ services:
     ports:
       - 4544:4544
     depends_on:
-      - ${CCD_POSTGRES_11:-ccd-shared-database}
+      - ccd-shared-database
       - ccd-user-profile-api
     networks:
       - ccd-network

@@ -1,0 +1,14 @@
+operation,email,firstName,lastName,roles,userExists,result,prerequisite,comment
+updatename,ccd.test.updatename.user0@hmcts.gov.uk,fn0,ln0,,FALSE,SKIPPED,user does not exist,user does not exist
+updatename,ccd.test.updatename.user1@hmcts.gov.uk,fn1-1,ln1-1,manage-translations|caseworker|somerole,TRUE,SUCCESS,user exists with fn1 and ln1,ignore the roles if specified - put a warning log
+updatename,ccd.test.updatename.user2@hmcts.gov.uk,fn2,ln2,,TRUE,SKIPPED,user exists with fn2 and ln2,nothing to change
+updatename,ccd.test.updatename.user3@hmcts.gov.uk,fn3-3,,,TRUE,SUCCESS,user exists,change first name
+updatename,ccd.test.updatename.user4@hmcts.gov.uk,,ln4-4,,TRUE,SUCCESS,user exists,change last name
+updatename,ccd.test.updatename.user5@hmcts.gov.uk,fn5-5,ln5-5,,TRUE,SUCCESS,user exists,change first and last names
+updatename,ccd.test.updatename.user1@hmcts.gov.uk,,,,TRUE,FAILED,,no first and last names
+updatename,ccd.test.updatename.user1@hmcts.gov.uk, ,,,TRUE,FAILED,,first name is given as  (space)
+updatename,ccd.test.updatename.user1@hmcts.gov.uk, , ,,TRUE,FAILED,,last name is given as  (space)
+updatename,ccd.test.updatename.user1@hmcts.gov.uk, , ,,TRUE,FAILED,,both first and last name are given as    (space)
+updatename,ccd.test.updatename.user6@hmcts.gov.uk, ,ln6-6,,TRUE,SUCCESS,,first name is given as     (space) and last name has valid value
+updatename,ccd.test.updatename.user7@hmcts.gov.uk,fn7-7, ,,TRUE,SUCCESS,,last name is given as     (space) and first name has valid value
+updatename,ccd.test.updatename.user8@hmcts.gov.uk,fn8-8,ln8-8,,TRUE,SKIPPED,,user inactive - put a warning log

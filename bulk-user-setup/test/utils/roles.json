@@ -1,0 +1,14 @@
+[
+  {"roles": "caseworker,caseworker-role-one,caseworker-role-two,caseworker-role-three"},
+  {"roles": "caseworker-role-four,caseworker-role-five,caseworker-role-six"},
+  {"roles": "caseworker_role_three,caseworker_role_six"},
+  {"roles": "caseworker-ia,caseworker-ia-admofficer,caseworker-ia-bails,caseworker-ia-caseofficer,caseworker-ia-homeofficeapc,caseworker-ia-homeofficebail,caseworker-ia-homeofficelart,caseworker-ia-homeofficepou,caseworker-ia-iacjudge,caseworker-ia-judiciary,caseworker-ia-legalrep-solicitor,caseworker-ia-readonly,caseworker-ia-respondentofficer,caseworker-ia-srcaseofficer,caseworker-ia-system,caseworker-ia-system-access,caseworker-iac-bulkscan,caseworker-iac-systemupdate"},
+  {"roles": "caseworker-sscs,caseworker-sscs-anonymouscitizencaseworker-sscs-bulkscan,caseworker-sscs-callagent,caseworker-sscs-clerk,caseworker-sscs-dwpresponsewriter,caseworker-sscs-judge,caseworker-sscs-panelmember,caseworker-sscs-pcqextractor,caseworker-sscs-registrar,caseworker-sscs-superuser,caseworker-sscs-systemupdate"},
+  {"roles": "caseworker-employment,caseworker-employment-api,caseworker-employment-bristol,caseworker-employment-englandwales,caseworker-employment-etjudge,caseworker-employment-etjudge-englandwales,caseworker-employment-etjudge-scotland,caseworker-employment-leeds,caseworker-employment-legalrep-solicitor,caseworker-employment-londoncentral,caseworker-employment-londoneast,caseworker-employment-londonsouth,caseworker-employment-manchester,caseworker-employment-midlandseast,caseworker-employment-midlandswest,caseworker-employment-newcastle,caseworker-employment-scotland,caseworker-employment-wales,caseworker-employment-watford,caseworker-et-pcqextractor,caseworker-employment-etjudge-bristol,caseworker-employment-etjudge-leeds,caseworker-employment-etjudge-londoncentral,caseworker-employment-etjudge-londoneast,caseworker-employment-etjudge-londonsouth,caseworker-employment-etjudge-manchester,caseworker-employment-etjudge-midlandseast,caseworker-employment-etjudge-midlandswest,caseworker-employment-etjudge-newcastle,caseworker-employment-etjudge-wales,caseworker-employment-etjudge-watford,et-acas-api"},
+  {"roles": "cwd-user"},
+  {"roles": "caseworker-civil,caseworker-civil-staff"},
+  {"roles": "payments,payments-refund,payments-refund-approver"},
+  {"roles": "manage-translations"},
+  {"roles": "caseworker-probate,caseworker-probate-pcqextractor,caseworker-probate-issuer,caseworker-probate-solicitor,caseworker-probate-systemupdate,caseworker-probate-charity,caseworker-probate-superuser,caseworker-probate-scheduler,caseworker-probate-caseofficer,caseworker-probate-registrar,caseworker-probate-caseadmin"},
+  {"roles": "caseworker-divorce,caseworker-divorce-bulkscan,caseworker-divorce-courtadmin,caseworker-divorce-courtadmin-la,caseworker-divorce-courtadmin_beta,caseworker-divorce-judge,caseworker-divorce-pcqextractor,caseworker-divorce-solicitor,caseworker-divorce-superuser"}
+]

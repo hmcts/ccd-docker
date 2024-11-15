@@ -1,0 +1,2 @@
+operation,email,firstName,LastName,roles,userExists,result,prerequisite,comment
+add,ccd.test.user0@hmcts.gov.uk,fn1,ln1,,FALSE,FAILED,,User not found. Roles are mandatory

@@ -9,9 +9,9 @@ CLIENT_ID=${2}
 CLIENT_SECRET=${3}
 REDIRECT_URL=${4}
 SELF_REGISTRATION=${5:-"false"}
-SCOPE=${6:-"openid profile roles"}
+SCOPE=${6:-"openid roles create-user manage-user search-user"}
 
-apiToken=$(${dir}/idam-authenticate.sh "${IDAM_ADMIN_USER}" "${IDAM_ADMIN_PASSWORD}")
+apiToken=$(${dir}/../../../bin/utils/idam-authenticate.sh "${IDAM_ADMIN_USER}" "${IDAM_ADMIN_PASSWORD}")
 
 echo -e "\nCreating service with:\nLabel: ${LABEL}\nClient ID: ${CLIENT_ID}\nClient Secret: ${CLIENT_SECRET}\nRedirect URL: ${REDIRECT_URL}\n"
 
@@ -29,7 +29,7 @@ STATUS=$(curl --silent --output /dev/null --write-out '%{http_code}' -X POST -H 
 }')
 
 if [ $STATUS -eq 201 ]; then
-  echo "Service created successfully"
+  echo "Service created sucessfully"
 elif [ $STATUS -eq 409 ]; then
   echo "Service already exists!"
 else

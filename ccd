@@ -10,6 +10,30 @@ function project_config() {
     project=$1
     config=$2
     case $project in
+        operational-reports|reports-runner)
+            name=operational
+            repository="git@github.com:hmcts/hmc-operational-reports-runner.git"
+            envPrefix="HMC_OPERATIONAL_REPORTS"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+        cft-hearing-service|hearing-service)
+            name=hearings
+            repository="git@github.com:hmcts/hmc-cft-hearing-service.git"
+            envPrefix="HMC_HEARING_SERVICE"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+        outbound-adapter)
+            name=outbound
+            repository="git@github.com:hmcts/hmc-hmi-outbound-adapter.git"
+            envPrefix="HMC_OUTBOUND_ADAPTER"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+        inbound-adapter)
+            name=inbound
+            repository="git@github.com:hmcts/hmc-hmi-inbound-adapter.git"
+            envPrefix="HMC_INBOUND_ADAPTER"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
         ccd-data-store-api|data-store-api|data-store|datastore|data-store)
             name=ccd-data-store-api
             repository="git@github.com:hmcts/ccd-data-store-api.git"
@@ -20,6 +44,12 @@ function project_config() {
             name=ccd-ccd-case-document-am-api
             repository="git@github.com:hmcts/ccd-case-document-am-api.git"
             envPrefix="CCD_CASE_DOCUMENT_AM_API"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+        ts-translation-service|translation-service)
+            name=ts-translation-service
+            repository="git@github.com:hmcts/ts-translation-service.git"
+            envPrefix="TS_TRANSLATION_SERVICE"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         ccd-definition-store-api|definition-store-api|definition-store|def-store|defstore)
@@ -73,6 +103,12 @@ function project_config() {
             envPrefix="CCD_CASE_DISPOSER"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
+        ccd-next-hearing-date-updater|next-hearing-date-updater)
+            name=ccd-next-hearing-date-updater
+            repository="git@github.com:hmcts/ccd-next-hearing-date-updater.git"
+            envPrefix="CCD_NEXT_HEARING_DATE_UPDATER"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
         am-role-assignment-service|role-assignment-service|ras)
             name=am-role-assignment-service
             repository="git@github.com:hmcts/am-role-assignment-service.git"
@@ -86,7 +122,7 @@ function project_config() {
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api, ts-translation-service, ccd-next-hearing-date-updater, hearing-service, operational-reports, outbound-adapter, inbound-adapter"
             exit 1 ;;
     esac
     case $config in
@@ -106,7 +142,7 @@ function project_config() {
             echo $buildCommand
             ;;
         *)
-            echo "Config is one of name, repository, tagEnv, useLocalEnv or buildCommand. '$config' is unkown"
+            echo "Config is one of name, repository, tagEnv, useLocalEnv or buildCommand. '$config' is unknown"
             exit 1
             ;;
     esac
@@ -266,9 +302,38 @@ function docker_build() {
       (cd $workspace && docker build . -t am/role-assignment-service:$tagName || exit $?)
     fi
 
-    if [[ $project != "xui-manage-cases" ]]; then
+    if [[ $project == "ts-translation-service" ]]; then
+      (cd $workspace && docker build . -t ts/translation-service:$tagName || exit $?)
+    fi
+
+    if [[ $project == "ccd-next-hearing-date-updater" ]]; then
+          (cd $workspace && docker build . -t ccd/next-hearing-date-updater:$tagName || exit $?)
+    fi
+
+    if [[ $project == "outbound-adapter" ]]; then
+          (cd $workspace && docker build . -t hmc/hmi-outbound-adapter:$tagName || exit $?)
+    fi
+    if [[ $project == "inbound-adapter" ]]; then
+          (cd $workspace && docker build . -t hmc/hmi-inbound-adapter:$tagName || exit $?)
+    fi
+
+    if [[ $project == "cft-hearing-service" || $project == "hearing-service" ]]; then
+          (cd $workspace && docker build . -t hmc/cft-hearing-service:$tagName || exit $?)
+    fi
+
+    if [[ $project == "operational-reports" || $project == "reports-runner" ]]; then
+          (cd $workspace && docker build . -t hmc/operational-reports-runner:$tagName || exit $?)
+    fi
+
+    if [[ $project != "xui-manage-cases" && $project != "am-role-assignment-service"
+    && $project != "ts-translation-service" && $project != "ccd-next-hearing-date-updater"
+    && $project != "hearing-service" && $project != "cft-hearing-service"
+    && $project != "operational-reports" && $project != "reports-runner" 
+    && $project != "outbound-adapter" && $project != "inbound-adapter" ]]; then
       (cd $workspace && docker build . -t ccd/$imageName:$tagName || exit $?)
     fi
+
+
 }
 
 function available_compose_files() {
@@ -348,7 +413,7 @@ function usage() {
     echo "  unset <project...> - remove project override(s)"
     echo "  branches <project...> - list available branches"
     echo "  status - list current overrides and their status against upstream"
-    echo "  update <project...> - update project overide to match upstream branch; and build"
+    echo "  update <project...> - update project override to match upstream branch; and build"
     echo "  enable <project>|defaults|show - enable a compose file"
     echo "  disable <project> - disable a compose file"
     echo "  compose [<docker-compose command> [options]] - wrap docker compose for your configuration"

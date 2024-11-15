@@ -9,6 +9,7 @@
 - [Under the hood](#under-the-hood-speedboat)
 - [Containers](#containers)
 - [Local development](#local-development)
+- [Running on Apple Silicon](#running-on-apple-silicon)
 - [Troubleshooting](#troubleshooting)
 - [Migrate existing v9.6 PostgreSQL database to v11](/PostgresV11.md)
 - [Variables](#variables)
@@ -27,7 +28,7 @@
 | 12+ GB   | 6+    |
 
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) - minimum version 2.0.57
-- [jq Json Processor](https://stedolan.github.io/jq)
+- [jq Json Processor](https://ghcr.io/jqlang/jq)
 - Mac users, set your default shell to bash `chsh -s /bin/bash`
 
 *The following documentation assumes that the current directory is `ccd-docker`.*
@@ -49,18 +50,19 @@ Note:
 if you experience any error with the above command, try `az login` first for [Azure Authentication for pulling latest docker images](#azure-authentication-for-pulling-latest-docker-images)
 
 
+3. **THIS STEP IS ONLY REQUIRED IF YOU NEED TO MIGRATE TO POSTGRES V11.** Proceeded to step 4 if this is your first time setting up ccd-docker
 
-3. Add Postgres V11 DB settings - **THIS STEP IS ONLY REQUIRED IF YOU NEED TO MIGRATE TO POSTGRES V11**
-- [Postgres v11 database set-up](/PostgresV11-prerequisites.md)
-
-
+- If ccd-docker has been previously setup, images/volumes and the database may point to **Postgres9**. Prior to pulling images run the below commands to **delete** existing images and volumes.
+- [Guide on migrating to V11](PostgresV11.md)
+```bash
+./ccd compose down
+```
 
 4. Pull latest Docker images:
-
+   
 ```bash
 ./ccd compose pull
 ```
-
 
 5. Set up environment: 
 
@@ -68,9 +70,11 @@ Note:
 required only on the first run. Once executed, it doesn't need to be executed again
 
   a. Create docker network
-  ```bash
+  
+```bash
   ./ccd init
   ```
+  Ignore if we get error message ccd-network already exists while running above command
   
   b. Export environment variables
 
@@ -103,6 +107,14 @@ required only on the first run. Once executed, it doesn't need to be executed ag
 The `idam-api` container can be slow to start - both the `definition-store-api` and `data-store-api` containers will
 try to connect to the `idam-api` container when they start.
 
+The following optional containers will not start successfully until `idam-api` container has started.
+* `ts-translation-service`
+* `case-disposer`
+* `case-document-am`
+* `frontend`
+* `xui-frontend`
+* 'hearings'
+
 If `idam-api` is not up and running and accepting connections
 you may see errors in the `definition-store-api` and `data-store-api` containers, such as
 
@@ -112,7 +124,7 @@ Caused by: org.springframework.web.client.ResourceAccessException:
         nested exception is java.net.ConnectException: Connection refused (Connection refused)
 ```
 
-If you the containers fail to start with these error, ensure `idam-api` is running using
+If the containers fail to start with these error, ensure `idam-api` is running using
 
  ```bash
 curl http://localhost:5000/health
@@ -742,11 +754,25 @@ By default, `ccd-docker` runs the most commonly used backend and frontend projec
   * **ccd-data-store-api**: CCD's cases repository
   * **ccd-test-stubs-service**: CCD's testing support for stubbing http calls (service callbacks etc)
   * **am-role-assignment-service**: Users' role assignments for access management
+  * **cft-hearing-service**: Hearing Service API
 * Front-end:
   * **idam-web-public**: SIDAM's login UI
   * **ccd-api-gateway**: Proxy with SIDAM and S2S integration
 
 Optional compose files will allow other projects to be enabled on demand using the `enable` and `disable` commands.
+
+**Note on Running Optional Projects** 
+
+If this is the first time running these optional projects from ccd docker you will need to do `./ccd compose pull` after you have enable the optional project
+
+Also if a certain database has not been created you might need to create a new ccd shared database image. To do this you need to do this:
+
+* Run `/ccd compose down -v`
+* Then find the id of any ccd shared database using `docker images | grep ccd-shared-database`
+* Using the ids from previous command use  `docker image rm <id>`
+* Then run `./ccd compose up -d`
+
+**Optional Project Commands**
 
 * To enable **document-management-store-app**
   * `./ccd enable backend frontend dm-store`
@@ -783,12 +809,32 @@ Optional compose files will allow other projects to be enabled on demand using t
 * To enable **ccd-case-disposer**
   * `./ccd enable backend case-disposer`
   * Run docker-compose `./ccd compose up -d`
- 
+
+* To enable **ccd-next-hearing-date-updater**
+  * `./ccd enable backend ccd-next-hearing-date-updater`
+  * Run docker-compose `./ccd compose up -d`
+
 * To enable **ccd-case-document-am-api**
   * `./ccd enable backend frontend dm-store case-document-am`
   * run docker-compose `./ccd compose up -d`
   * verify that ccd-case-document-am-api is up and running by `curl localhost:4455/health`
-    
+
+* To enable **ts-translation-service**
+  * `./ccd enable backend ts-translation-service`
+  * run docker-compose `./ccd compose up -d`
+  * verify that ts-translation-service is up and running by `curl localhost:4650/health`
+
+* To enable **cft-hearing-service**
+  * `./ccd enable backend hearings`
+  * run docker-compose `./ccd compose up -d`
+  * verify that cft-hearing-service is up and running by `curl localhost:4651/health`
+  * this will include the inbound and outbound adapters
+
+* To enable **hmc-operational-reports-runner**
+  * `./ccd enable backend operational`
+  * run docker-compose `./ccd compose up -d`
+  * verify that hmc-operational-reports-runner is up and running by `curl localhost:4651/health`
+
 ## Under the hood :speedboat:
 
 ### Set
@@ -1060,6 +1106,20 @@ We will need to install the az cli using Python PIP.
 3. Execute the command "pip install azure-cli" using command line. It takes about 20 minutes to install the azure cli.
 4. Verify the installation using the command az --version.
 
+## Running on Apple Silicon (ARM64)
+
+Rosetta is now Generally Available for all users on macOS 13 or later. It provides faster emulation of Intel-based images on Apple Silicon (M1 & M2...). To use Rosetta, see Settings. Rosetta is enabled by default on macOS 14.1 and later.
+
+if having trouble emulating x86 images try installing rosetta via the terminal using 
+  > softwareupdate --install-rosetta
+
+and enabling the following settings in docker desktop (version 4.16.1 or greater) under
+  > Settings > General > Use Virtualization framework
+
+  > Settings > General >
+  Use Rosetta for x86_64/amd64 emulation on Apple Silicon
+
+
 ## Troubleshooting
 
 ccd-network could not be found error:
@@ -1086,25 +1146,25 @@ DM Store issues:
 ## Variables
 Here are the important variables exposed in the compose files:
 
-| Variable | Description |
-| -------- | ----------- |
-| IDAM_KEY_CCD_DATA_STORE | IDAM service-to-service secret key for `ccd_data` micro-service (CCD Data store), as registered in `service-auth-provider-api` |
-| IDAM_KEY_CCD_GATEWAY | IDAM service-to-service secret key for `ccd_gw` micro-service (CCD API Gateway), as registered in `service-auth-provider-api` |
-| IDAM_KEY_CCD_DEFINITION_STORE | IDAM service-to-service secret key for `ccd_definition` micro-service (CCD Definition store), as registered in `service-auth-provider-api` |
-| IDAM_KEY_CCD_ADMIN | IDAM service-to-service secret key for `ccd_admin` micro-service (CCD Admin Web), as registered in `service-auth-provider-api` |
-| DATA_STORE_S2S_AUTHORISED_SERVICES | List of micro-service names authorised to call this service, comma-separated, as registered in `service-auth-provider-api` |
-| DEFINITION_STORE_S2S_AUTHORISED_SERVICES | List of micro-services authorised to call this service, comma-separated, as registered in `service-auth-provider-api` |
-| USER_PROFILE_S2S_AUTHORISED_SERVICES | List of micro-services authorised to call this service, comma-separated, as registered in `service-auth-provider-api` |
-| DATA_STORE_TOKEN_SECRET | Secret for generation of internal event tokens |
-| APPINSIGHTS_INSTRUMENTATIONKEY | Secret for Microsoft Insights logging, can be a dummy string in local |
-| STORAGEACCOUNT_PRIMARY_CONNECTION_STRING | (If dm-store is enabled) Secret for Azure Blob Storage. It is pointing to dockerized Azure Blob Storage emulator. |
-| STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME | (If dm-store is enabled) Container name for Azure Blob Storage |
-| AM_DB | Access Management database name |
-| AM_DB_USERNAME | Access Management database username |
-| AM_DB_PASSWORD | Access Management database password |
+| Variable | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| -------- |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| IDAM_KEY_CCD_DATA_STORE | IDAM service-to-service secret key for `ccd_data` micro-service (CCD Data store), as registered in `service-auth-provider-api`                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| IDAM_KEY_CCD_GATEWAY | IDAM service-to-service secret key for `ccd_gw` micro-service (CCD API Gateway), as registered in `service-auth-provider-api`                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| IDAM_KEY_CCD_DEFINITION_STORE | IDAM service-to-service secret key for `ccd_definition` micro-service (CCD Definition store), as registered in `service-auth-provider-api`                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| IDAM_KEY_CCD_ADMIN | IDAM service-to-service secret key for `ccd_admin` micro-service (CCD Admin Web), as registered in `service-auth-provider-api`                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| DATA_STORE_S2S_AUTHORISED_SERVICES | List of micro-service names authorised to call this service, comma-separated, as registered in `service-auth-provider-api`                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| DEFINITION_STORE_S2S_AUTHORISED_SERVICES | List of micro-services authorised to call this service, comma-separated, as registered in `service-auth-provider-api`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| USER_PROFILE_S2S_AUTHORISED_SERVICES | List of micro-services authorised to call this service, comma-separated, as registered in `service-auth-provider-api`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| DATA_STORE_TOKEN_SECRET | Secret for generation of internal event tokens                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| APPINSIGHTS_INSTRUMENTATIONKEY | Secret for Microsoft Insights logging, can be a dummy string in local                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| STORAGEACCOUNT_PRIMARY_CONNECTION_STRING | (If dm-store is enabled) Secret for Azure Blob Storage. It is pointing to dockerized Azure Blob Storage emulator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME | (If dm-store is enabled) Container name for Azure Blob Storage                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| AM_DB | Access Management database name                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| AM_DB_USERNAME | Access Management database username                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| AM_DB_PASSWORD | Access Management database password                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | WIREMOCK_SERVER_MAPPINGS_PATH | Path to the WireMock mapping files. If not set, it will use the default mappings from the project repository. __Note__: If setting the variable, please keep all WireMock json stub files in a directory named _mappings_ and exclude this directory in the path. For e.g. if you place the _mappings_ in /home/user/mappings then export WIREMOCK_SERVER_MAPPINGS_PATH=/home/user. Stop the service and start service using command `./ccd compose up -d ccd-test-stub-service`. If switching back to repository mappings please unset the variable using command `unset WIREMOCK_SERVER_MAPPINGS_PATH` |
-| IDAM_KEY_CASE_DOCUMENT | IDAM service-to-service secret key for `ccd_case_document_am_api` micro-service (CCD Case Document Am Api), as registered in `service-auth-provider-api` |
-
+| IDAM_KEY_CASE_DOCUMENT | IDAM service-to-service secret key for `ccd_case_document_am_api` micro-service (CCD Case Document Am Api), as registered in `service-auth-provider-api`                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| IDAM_KEY_TS_TRANSLATION_SERVICE | IDAM service-to-service secret key for `ts-translation-service` micro-service (Ts Translation Service), as registered in `service-auth-provider-api`                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 ## Remarks
 
 - A container can be configured to call a localhost host resource with the localhost shortcut added for docker containers recently. However the shortcut must be set according the docker host operating system.
