@@ -1371,7 +1371,7 @@ function process_input_file() {
               log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
               responseMessage=""
               #Set user activate state to true if false
-              if [ $userActiveState == "false" ]; then
+              if [ $userActiveState == "false" ] && [ $SET_INACTIVE_USER_TO_ACTIVE = "true" ]; then
                 log_debug "email: ${email} - User activate state=false, activating user"
                 #user activate state is false, need to call patch user api to set to true first
                 #note, update_user is a PATCH call, but we cannot modify any roles using this endpoint
