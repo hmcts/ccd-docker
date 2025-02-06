@@ -319,6 +319,47 @@ function get_user_api_v1() {
 
 }
 
+function get_user_by_id_api_v1() {
+  #local EMAIL=$1
+  local ARG=$1
+
+  curl_result=$(
+    curl -w $"\n%{http_code}" --silent -X GET -G "${IDAM_URL}/api/v1/users/${ARG}" -H "accept: */*" -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
+  )
+
+  exit_code=$?
+  if [ $exit_code -eq 0 ]; then
+    # separate body and status into an array
+    IFS=$'\n' response_array=($curl_result)
+
+    array_length=${#response_array[@]}
+    if [ $array_length -eq 1 ]; then
+      response_body='' # clear body
+      response_status=${response_array[0]}
+    else
+      response_body=${response_array[0]}
+      response_status=${response_array[${array_length}-1]}
+    fi
+
+    if [ $(( response_status )) -gt 199 ] && [ $(( response_status )) -lt 300 ]; then
+      # SUCCESS:
+      response=${response_body}
+    else
+      # FAIL:
+      response="HTTP-${response_status}
+      ${response_body}"
+      echo "HTTP-${response_status}
+      ERROR: Request for User with id ${ARG} failed with http response: HTTP-${response_status}"
+    fi
+  else
+    # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
+    response="CURL-${exit_code}
+    ERROR: Request for User with id ${ARG} failed with curl exit code: ${exit_code}"
+  fi
+  echo "$response"
+
+}
+
 function get_user() {
   local EMAIL=$1
 
@@ -851,7 +892,11 @@ function process_input_file() {
       csvSSOId=$(trim "$csvSSOId") #trim leading and trailing spaces from csvSSOId string
 
       log_debug "==============================================="
-      log_debug "processing user with email: ${email}"
+      if [ "$email" != "null" ]; then
+        log_debug "processing user with email: ${email}"
+      elif [ "$csvUserId" != "null" ]; then
+        log_debug "processing user with id: ${csvUserId}"
+      fi
 
       if [ "$inviteStatus" != "SUCCESS" ]; then
 
@@ -863,6 +908,11 @@ function process_input_file() {
         if [ "$csvSSOId" != "null" ]; then
             #use new api to search user by elasticsearch query
             local rawReturnedValueArray=$(get_user_api_v1 "${csvSSOId}")
+        elif [ "$csvUserId" != "null" ]; then
+            local rawReturnedValueArray=$(get_user_by_id_api_v1 "${csvUserId}")
+            #log_debug "rawReturnedValueArray: ${rawReturnedValueArray}"
+            #email=$(echo ${rawReturnedValueArray} | jq --raw-output '.email')
+            #log_debug "the email is : ${email}"
         else
             #use new api to search user by elasticsearch query
             local rawReturnedValueArray=$(get_user_api_v1 "${email}")
@@ -871,7 +921,10 @@ function process_input_file() {
         if [[ ${rawReturnedValueArray} != *"HTTP-"* ]] && [[ ${rawReturnedValueArray} != *"ERROR"* ]]; then
             if [ $(echo $rawReturnedValueArray | jq -e '. | length') != 0 ]; then
                 #array not empty, perform logic
-                if [ "$csvSSOId" != "null" ]; then
+
+                if [ "$csvUserId" != "null" ]; then
+                    rawReturnedValue=$(echo $rawReturnedValueArray)
+                elif [ "$csvSSOId" != "null" ]; then
                     #loop through all the returned users to find the correct one matching the ssoId provided
 
                     for userJson in $(echo "$rawReturnedValueArray" | jq -c -r '.[]'); do
@@ -906,9 +959,16 @@ function process_input_file() {
         fi
 
         if [[ ${rawReturnedValue} != *"HTTP-"* ]] && [[ ${rawReturnedValue} != *"ERROR"* ]]; then
+
+          #log_debug "rawReturnedValue: ${rawReturnedValue}"
+
           local userId=$(echo ${rawReturnedValue} | jq --raw-output '.id')
           local userActiveState=$(echo ${rawReturnedValue} | jq --raw-output '.active') # i.e. ACTIVE
           isActive="${userActiveState}"
+
+          email=$(echo ${rawReturnedValue} | jq --raw-output '.email')
+          email=$(trim "$email")
+          email=$(convertToLowerCase "${email}")
 
           #local userRecordType=$(echo $userObject | jq --raw-output '.recordType') # i.e. LIVE
 
