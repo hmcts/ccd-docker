@@ -10,16 +10,28 @@ function project_config() {
     project=$1
     config=$2
     case $project in
-        operational|operational-reports|hmc-operational-reports|reports-runner)
+        operational-reports|reports-runner)
             name=operational
             repository="git@github.com:hmcts/hmc-operational-reports-runner.git"
-            envPrefix="HMC_OPERATIONAL_REPORTS_RUNNER"
+            envPrefix="HMC_OPERATIONAL_REPORTS"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
-        hmc-cft-hearing-service|hearings|hearing-service|cft-hearing-service)
+        cft-hearing-service|hearing-service)
             name=hearings
             repository="git@github.com:hmcts/hmc-cft-hearing-service.git"
             envPrefix="HMC_HEARING_SERVICE"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+        outbound-adapter)
+            name=outbound
+            repository="git@github.com:hmcts/hmc-hmi-outbound-adapter.git"
+            envPrefix="HMC_OUTBOUND_ADAPTER"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
+        inbound-adapter)
+            name=inbound
+            repository="git@github.com:hmcts/hmc-hmi-inbound-adapter.git"
+            envPrefix="HMC_INBOUND_ADAPTER"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         ccd-data-store-api|data-store-api|data-store|datastore|data-store)
@@ -110,7 +122,7 @@ function project_config() {
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api, ts-translation-service, ccd-next-hearing-date-updater, hmc-cft-hearing-service", hmc-operational-reports-runner
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api, ts-translation-service, ccd-next-hearing-date-updater, hearing-service, operational-reports, outbound-adapter, inbound-adapter"
             exit 1 ;;
     esac
     case $config in
@@ -130,7 +142,7 @@ function project_config() {
             echo $buildCommand
             ;;
         *)
-            echo "Config is one of name, repository, tagEnv, useLocalEnv or buildCommand. '$config' is unkown"
+            echo "Config is one of name, repository, tagEnv, useLocalEnv or buildCommand. '$config' is unknown"
             exit 1
             ;;
     esac
@@ -298,7 +310,26 @@ function docker_build() {
           (cd $workspace && docker build . -t ccd/next-hearing-date-updater:$tagName || exit $?)
     fi
 
-    if [[ $project != "xui-manage-cases" && $project != "am-role-assignment-service" && $project != "ts-translation-service" && $project != "ccd-next-hearing-date-updater" ]]; then
+    if [[ $project == "outbound-adapter" ]]; then
+          (cd $workspace && docker build . -t hmc/hmi-outbound-adapter:$tagName || exit $?)
+    fi
+    if [[ $project == "inbound-adapter" ]]; then
+          (cd $workspace && docker build . -t hmc/hmi-inbound-adapter:$tagName || exit $?)
+    fi
+
+    if [[ $project == "cft-hearing-service" || $project == "hearing-service" ]]; then
+          (cd $workspace && docker build . -t hmc/cft-hearing-service:$tagName || exit $?)
+    fi
+
+    if [[ $project == "operational-reports" || $project == "reports-runner" ]]; then
+          (cd $workspace && docker build . -t hmc/operational-reports-runner:$tagName || exit $?)
+    fi
+
+    if [[ $project != "xui-manage-cases" && $project != "am-role-assignment-service"
+    && $project != "ts-translation-service" && $project != "ccd-next-hearing-date-updater"
+    && $project != "hearing-service" && $project != "cft-hearing-service"
+    && $project != "operational-reports" && $project != "reports-runner"
+    && $project != "outbound-adapter" && $project != "inbound-adapter" ]]; then
       (cd $workspace && docker build . -t ccd/$imageName:$tagName || exit $?)
     fi
 
