@@ -1,5 +1,4 @@
 ---
-version: '2.4'
 
 services:
   xui-manage-cases:
@@ -20,9 +19,9 @@ services:
       SERVICES_EM_ANNO_API: http://ccd-api-gateway:3453
       SERVICES_CCD_COMPONENT_API: http://ccd-api-gateway:3453
       SERVICES_CCD_DATA_STORE_API: http://ccd-data-store-api:4452
-      SERVICES_IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
+      SERVICES_IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-sim:5000}"
       SERVICES_IDAM_CLIENT_ID: "${BEFTA_OAUTH2_CLIENT_ID_OF_XUIWEBAPP:-xuiwebapp}"
-      SERVICES_IDAM_LOGIN_URL: "${IDAM_STUB_LOCALHOST:-http://localhost:3501}"
+      SERVICES_IDAM_LOGIN_URL: "${IDAM_STUB_LOCALHOST:-http://localhost:5000}"
       SERVICES_IDAM_INDEX_URL: /
       SERVICES_IDAM_OAUTH_CALLBACK_URL: /oauth2/callback
       SERVICES_S2S: http://service-auth-provider-api:8080
@@ -43,6 +42,7 @@ services:
     depends_on:
       - ccd-api-gateway
       - ccd-data-store-api
+      - idam-sim
     networks:
       - ccd-network
 

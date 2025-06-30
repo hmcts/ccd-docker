@@ -1,4 +1,3 @@
-version: '2.4'
 services:
   ccd-elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
@@ -10,7 +9,7 @@ services:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - action.auto_create_index=.security*,.watches,.triggered_watches,.watcher-history-*,.logstash_dead_letter,.ml*
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms64m -Xmx512m"
     ulimits:
       memlock:
         soft: -1
