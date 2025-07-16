@@ -115,14 +115,8 @@ function project_config() {
             envPrefix="AM_ROLE_ASSIGNMENT_SERVICE"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
-        ccd-definition-designer-api|definition-designer-api|definition-designer|def-design|designer)
-            name=ccd-definition-designer-api
-            repository="git@github.com:hmcts/ccd-definition-designer-api.git"
-            envPrefix="CCD_DEFINITION_DESIGNER_API"
-            buildCommand=$GRADLE_ASSEMBLE_CMD
-            ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api, ts-translation-service, ccd-next-hearing-date-updater, hearing-service, operational-reports, outbound-adapter, inbound-adapter"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-case-document-am-api, ts-translation-service, ccd-next-hearing-date-updater, hearing-service, operational-reports, outbound-adapter, inbound-adapter"
             exit 1 ;;
     esac
     case $config in
@@ -409,6 +403,7 @@ function usage() {
     echo "Usage: $(basename $0) <command> [options]"
     echo
     echo "Commands:"
+    echo "  default - setup default compose files and run them for linux/mac"
     echo "  set <project> <branch> [file://local_repository_path] - override and build project"
     echo "  unset <project...> - remove project override(s)"
     echo "  branches <project...> - list available branches"
@@ -668,6 +663,28 @@ function ccd_login() {
     az acr login --name hmctsprivate --subscription DCD-CNP-Prod
 }
 
+function ccd_default() {
+    az login
+    ccd_login
+    source ./bin/set-environment-variables.sh
+    ccd_enable defaults
+    # unset backend
+    ccd_unset ccd-user-profile-api ccd-definition-store-api ccd-data-store-api am-role-assignment-service service-auth-provider-api ccd-test-stubs-service
+    # unset frontend
+    ccd_unset ccd-api-gateway ccd-admin-web 
+    # unset sidam
+    ccd_unset fr-am fr-idm shared-db smtp-server idam-api idam-web-public idam-web-admin
+    ccd_compose pull
+    ccd_init
+    ccd_compose up -d
+    echo "Waiting 60 seconds for services to start..."
+    sleep 60
+    echo "Adding users and roles"
+    ./bin/add-users.sh 
+    ./bin/add-ccd-roles.sh 
+    ./bin/add-role-assignments.sh
+}
+
 if [ $# -lt 1 ]; then
     usage
 fi
@@ -704,6 +721,9 @@ case $command in
         ;;
     login)
         ccd_login
+        ;;
+    default|defaults)
+        ccd_default
         ;;
     *)
         usage
