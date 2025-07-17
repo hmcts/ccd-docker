@@ -1,8 +1,7 @@
-version: '2.4'
 services:
 
   ccd-logstash:
-    image: "logstash:7.16.3"
+    image: "logstash:9.0.3"
     container_name: ccd-logstash
     environment:
       - XPACK_MONITORING_ENABLED=false
