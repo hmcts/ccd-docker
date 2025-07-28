@@ -1,6 +1,6 @@
 services:
   ccd-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.3
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.4
     container_name: ccd-elasticsearch
     depends_on:
       - "ccd-data-store-api"
