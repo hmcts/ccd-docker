@@ -183,6 +183,47 @@ function post_user_roles() {
   echo "$response"
 }
 
+function delete_user() {
+  #Deletes a user
+
+  local USER=$1
+
+  curl_result=$(
+    curl -w $"\n%{http_code}" --silent -X DELETE "${IDAM_URL}/api/v1/users/${USER}" -H "accept: application/json" -H "Content-Type: application/json" \
+    -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
+  )
+
+  exit_code=$?
+  if [ $exit_code -eq 0 ]; then
+    # separate body and status into an array
+    IFS=$'\n' response_array=($curl_result)
+
+    array_length=${#response_array[@]}
+    if [ $array_length -eq 1 ]; then
+      response_body='' # clear body
+      response_status=${response_array[0]}
+    else
+      response_body=${response_array[0]}
+      response_status=${response_array[${array_length}-1]}
+    fi
+
+    if [ $(( response_status )) -gt 199 ] && [ $(( response_status )) -lt 300 ]; then
+      # SUCCESS:
+      response="SUCCESS
+      ${response_body}"
+    else
+      # FAIL:
+      response="HTTP-${response_status}
+      ${response_body}"
+    fi
+  else
+    # format a response for low level curl error (e.g. exit code 7 = 'Failed to connect() to host or proxy.')
+    response="CURL-${exit_code}
+    ERROR: User ${USER} delete request has failed with curl exit code: ${exit_code}"
+  fi
+  echo "$response"
+}
+
 function delete_user_role() {
   #Removes a role from the user
 
@@ -1302,6 +1343,51 @@ function process_input_file() {
           input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
           timestamp=$(date -u +"%FT%H:%M:%SZ")
           output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$outputSSOId\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
+
+          elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "deleteuser" ]; then
+
+            log_debug "email: ${email} - User exists, doing delete user logic"
+
+            #Set user activate state to false if true
+            if [ $userActiveState == "true" ]; then
+              log_debug "email: ${email} - User activate state=true, deleting user"
+              submit_response=$(delete_user "${userId}")
+
+              if [[ $submit_response =~ .*email.* ]]; then
+                # SUCCESS:
+                isActive="FALSE"
+                success_counter=$((success_counter+1))
+                inviteStatus="SUCCESS"
+                lastModified=$(date -u +"%FT%H:%M:%SZ")
+                local reason="User successfully deleted"
+                responseMessage="INFO: $reason"
+
+                log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+              else
+                fail_counter=$((fail_counter+1))
+                inviteStatus="FAILED"
+                local reason="User could not be deleted"
+                responseMessage="ERROR: $reason"
+
+                log_error "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+              fi
+            else
+                # SKIP:
+                skipped_counter=$((skipped_counter+1))
+                inviteStatus="SKIPPED"
+                local reason="${UserExistsNotActive}"
+                responseMessage="WARN: $reason"
+
+                log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+                echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+            fi
+
+            # prepare output (NB: escape generated values for CSV)
+            input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+            timestamp=$(date -u +"%FT%H:%M:%SZ")
+            output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$outputSSOId\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
 
         elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "suspend" ]; then
 
