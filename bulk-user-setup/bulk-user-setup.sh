@@ -189,7 +189,7 @@ function delete_user() {
   local USER=$1
 
   curl_result=$(
-    curl -w $"\n%{http_code}" --silent -X DELETE "${IDAM_URL}/api/v1/users/${USER}" -H "accept: application/json" -H "Content-Type: application/json" \
+    curl -w $"\n%{http_code}" --silent -X DELETE "${IDAM_URL}/api/v1/users/${USER}" -H "accept: */*" \
     -H "authorization:Bearer ${IDAM_ACCESS_TOKEN}"
   )
 
@@ -1348,40 +1348,27 @@ function process_input_file() {
 
             log_debug "email: ${email} - User exists, doing delete user logic"
 
-            #Set user activate state to false if true
-            if [ $userActiveState == "true" ]; then
-              log_debug "email: ${email} - User activate state=true, deleting user"
-              submit_response=$(delete_user "${userId}")
+            submit_response=$(delete_user "${userId}")
 
-              if [[ $submit_response =~ .*email.* ]]; then
-                # SUCCESS:
-                isActive="FALSE"
-                success_counter=$((success_counter+1))
-                inviteStatus="SUCCESS"
-                lastModified=$(date -u +"%FT%H:%M:%SZ")
-                local reason="User successfully deleted"
-                responseMessage="INFO: $reason"
+            if [[ $submit_response =~ .*SUCCESS.* ]]; then
+              # SUCCESS:
+              isActive="FALSE"
+              success_counter=$((success_counter+1))
+              inviteStatus="SUCCESS"
+              lastModified=$(date -u +"%FT%H:%M:%SZ")
+              local reason="User successfully deleted"
+              responseMessage="INFO: $reason"
 
-                log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
-              else
-                fail_counter=$((fail_counter+1))
-                inviteStatus="FAILED"
-                local reason="User could not be deleted"
-                responseMessage="ERROR: $reason"
-
-                log_error "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
-              fi
+              log_info "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
             else
-                # SKIP:
-                skipped_counter=$((skipped_counter+1))
-                inviteStatus="SKIPPED"
-                local reason="${UserExistsNotActive}"
-                responseMessage="WARN: $reason"
+              fail_counter=$((fail_counter+1))
+              inviteStatus="FAILED"
+              local reason="User could not be deleted"
+              responseMessage="ERROR: $reason"
 
-                log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-                echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+              log_error "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+              echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
             fi
 
             # prepare output (NB: escape generated values for CSV)
