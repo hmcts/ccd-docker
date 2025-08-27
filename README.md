@@ -193,7 +193,21 @@ b. Run smoke tests to set up user and roles.
 export TEST_URL=http://localhost:4451
 
 ./gradlew clean smoke
+
 ```
+
+[
+Note: incase of any errors relating to Service Auth when running the smoke test, ensure the following environment variable is set as below:
+
+export IDAM_S2S_URL=http://service-auth-provider-api:8080
+
+Alternatively remove this from the environment by issuing 'unset IDAM_S2S_URL', backend.yaml will default to use 'http://service-auth-provider-api:8080'
+
+./ccd compose up -d
+
+Will need to be re-issued to apply the above changes.
+]
+
 
 The smoke tests creates a file `/aat/befta_recent_executions_info.json`, delete this file after running the tests.
 
