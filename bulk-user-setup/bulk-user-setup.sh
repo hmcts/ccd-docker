@@ -1456,7 +1456,7 @@ function process_input_file() {
               # SKIP:
               skipped_counter=$((skipped_counter+1))
               inviteStatus="SKIPPED"
-              local reason="${serExistsActive}"
+              local reason="${UserExistsActive}"
               responseMessage="WARN: $reason"
 
               log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
