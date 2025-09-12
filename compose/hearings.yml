@@ -113,6 +113,8 @@ services:
       SCOPE: "${SCOPE}"
       S2S_URL: "${SERVICE_AUTH_PROVIDER_API_BASE_URL:-http://service-auth-provider-api:8080}"
       SERVICE_AUTH_PROVIDER_API_BASE_URL: "${SERVICE_AUTH_PROVIDER_API_BASE_URL:-http://service-auth-provider-api:8080}"
+      SUPPORT_TOOLS_AUTHORISED_SERVICES: tech_admin_ui
+      SUPPORT_TOOLS_AUTHORISED_ROLES: hmc_tech_admin
 
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
       # JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
