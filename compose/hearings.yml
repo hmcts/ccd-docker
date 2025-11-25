@@ -87,7 +87,7 @@ services:
       CFT_HEARING_SERVICE_DB_HOST: "${CFT_HEARING_SERVICE_DB_HOST:-ccd-shared-database}"
       CFT_HEARING_SERVICE_DB_PORT: "${CFT_HEARING_SERVICE_DB_PORT:-5432}"
       CFT_HEARING_SERVICE_DB_NAME: "${CFT_HEARING_SERVICE_DB_NAME:-hmc_cft_hearing_service}"
-      CFT_HEARING_SERVICE_S2S_AUTHORISED_SERVICES: xui_webapp,hmc_hmi_inbound_adapter,sscs,fis_hmc_api
+      CFT_HEARING_SERVICE_S2S_AUTHORISED_SERVICES: xui_webapp,hmc_hmi_inbound_adapter,sscs,fis_hmc_api,pcs_api
       CLIENT_ID: "${CLIENT_ID}"
       CLIENT_SECRET: "${CLIENT_SECRET}"
       FH_BASE_URL: "${FH_BASE_URL:-https://login.microsoftonline.com}"
