@@ -9,7 +9,7 @@
 - [Under the hood](#under-the-hood-speedboat)
 - [Containers](#containers)
 - [Local development](#local-development)
-- [Running on Apple Silicon](#running-on-apple-silicon)
+- [Running on Apple Silicon (ARM64)](#running-on-apple-silicon)
 - [Troubleshooting](#troubleshooting)
 - [Migrate existing v9.6 PostgreSQL database to v11](/PostgresV11.md)
 - [Variables](#variables)
@@ -18,14 +18,14 @@
 
 ## Prerequisites
 
-- [JDK 11](https://openjdk.java.net/projects/jdk/11/)
+- [JDK 17](https://openjdk.java.net/projects/jdk/17/)
 - [Docker](https://www.docker.com)
 
 **Note:** *once docker is installed, increase the memory and CPU allocations (Docker -> Preferences -> Advanced) to the following minimum values for successful execution of ccd applications altogether:*
 
 | Memory   | CPU   |
 | :------: | :---: |
-| 12+ GB   | 6+    |
+| 13+ GB   | 6+    |
 
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) - minimum version 2.0.57
 - [jq Json Processor](https://ghcr.io/jqlang/jq)
@@ -41,24 +41,32 @@
 git clone git@github.com:hmcts/ccd-docker.git
 ```
 
-2. Login to the Azure Container registry:
+2. For Quick setup on Mac/Linux
+<span style="color:#fef;padding:2px;background-color:#060"> use `./ccd default` 
+  to setup using default services/configuration and simulated idam
+</span>
+- After command is run you should be good to go and can skip the rest
+- Currently windows not supported for default command
+- For custom setup please skip this step and continue setup
+
+3. Authenticate Azure and login to the Azure Container registry:
 
 ```bash
+az login
+
 ./ccd login
 ```
-Note:
-if you experience any error with the above command, try `az login` first for [Azure Authentication for pulling latest docker images](#azure-authentication-for-pulling-latest-docker-images)
+4. ⚠️
+<span style="color:#112;padding:2px;background-color:#fa0"> THIS STEP IS ONLY REQUIRED IF YOU NEED TO MIGRATE POSTGRES VERSION
+</span> 
+ ⚠️
 
-
-3. **THIS STEP IS ONLY REQUIRED IF YOU NEED TO MIGRATE TO POSTGRES V11.** Proceeded to step 4 if this is your first time setting up ccd-docker
-
-- If ccd-docker has been previously setup, images/volumes and the database may point to **Postgres9**. Prior to pulling images run the below commands to **delete** existing images and volumes.
-- [Guide on migrating to V11](PostgresV11.md)
+If ccd-docker has been previously setup, images/volumes and the database may point to an earlier Postgres version. Prior to pulling images run the below commands to **delete** existing images and volumes. [Guide on migrating postgres](PostgresV11.md)
 ```bash
 ./ccd compose down
 ```
 
-4. Pull latest Docker images:
+5. Pull latest Docker images:
    
 ```bash
 ./ccd compose pull
@@ -80,11 +88,17 @@ required only on the first run. Once executed, it doesn't need to be executed ag
 
   CDM apps require a set of environment variables which can be set up by executing the following script.
   
-  Windows : `./bin/set-environment-variables.sh`
+  Windows : 
+  ```bash
+  ./bin/set-environment-variables.sh
+  ```
   
-  Linux/Mac : `source ./bin/set-environment-variables.sh`
+  Linux/Mac : 
+  ```bash
+  source ./bin/set-environment-variables.sh
+  ```
   
-  Note: some users of zsh 'Oh My Zsh' experienced issues. Try switching to bash
+  Note: some users of zsh 'Oh My Zsh' experienced issues. Try switching to bash by : `chsh -s /bin/bash`
   
   To persist the environment variables in Linux/Mac, copy the contents of `env_variables_all.txt` file into ~/.bash_profile.
   A prefix 'export' will be required for each environment variable.
@@ -120,7 +134,7 @@ you may see errors in the `definition-store-api` and `data-store-api` containers
 
 ```bash
 Caused by: org.springframework.web.client.ResourceAccessException:
-    I/O error on GET request for "http://idam-api:5000/o/.well-known/openid-configuration": Connection refused (Connection refused);
+    I/O error on GET request for "http://idam-sim:5000/o/.well-known/openid-configuration": Connection refused (Connection refused);
         nested exception is java.net.ConnectException: Connection refused (Connection refused)
 ```
 
@@ -174,10 +188,8 @@ with the corresponding values from the confluence page at https://tools.hmcts.ne
 At this point most users can run the following 4 scripts
 
 ```bash
-./bin/add-idam-clients.sh
-./bin/add-idam-roles.sh
-./bin/add-users.sh
-./bin/add-ccd-roles.sh
+./bin/add-users.sh && 
+./bin/add-ccd-roles.sh && 
 ./bin/add-role-assignments.sh
 ```
 
@@ -493,7 +505,7 @@ It's possible to disable the Idam containers and run CCD with an Idam Stub provi
 
 #### Step 1 - Disable Sidam containers
 
-make sure 'sidam', 'sidam-local', 'sidam-local-ccd' docker compose files are not enabled. How you do that depends on your currently active compose files.
+make sure 'sidam' docker compose files are not enabled. How you do that depends on your currently active compose files.
 When no active compose files are present, the default ones are executed. But if there's any active, then the defautl ones are ignored. For example:
 
 ```bash
@@ -503,21 +515,17 @@ Currently active compose files:
 backend
 frontend
 sidam
-sidam-local
-sidam-local-ccd
 
 Default compose files:
 backend
 frontend
 sidam
-sidam-local
-sidam-local-ccd
 ```
 
 In this case sidam is currently explicitly enabled. To disable it:
 
 ```bash
-./ccd disable sidam sidam-local sidam-local-ccd
+./ccd disable sidam
 ```
 
 If you are instead running with the default compose file as in:
@@ -528,8 +536,6 @@ Default compose files:
 backend
 frontend
 sidam
-sidam-local
-sidam-local-ccd
 ```
 
 You must explicitly enable only CCD compose files but exclude sidam:
@@ -546,8 +552,6 @@ Default compose files:
 backend
 frontend
 sidam
-sidam-local
-sidam-local-ccd
 ```
 
 #### Step 2 - Setup Env Vars
@@ -589,7 +593,7 @@ Uncomment the below lines in 'backend.yml' file
 
 Comment the below lines in 'backend.yml' file
 ```yaml
-      idam-api:
+      idam-sim:
         condition: service_started
 ```
 
@@ -598,7 +602,7 @@ Comment the below lines in 'backend.yml' file
 #### Step 1 - Enable Sidam containers
 
 ```bash
-./ccd enable sidam sidam-local sidam-local-ccd
+./ccd enable sidam
 ```
 
 or just revert to the default:
@@ -634,7 +638,7 @@ Comment the below lines in 'backend.yml' file
 
 Uncomment the below lines in 'backend.yml' file
 ```yaml
-      idam-api:
+      idam-sim:
         condition: service_started
 ```
 
@@ -795,7 +799,7 @@ Also if a certain database has not been created you might need to create a new c
 
 * To enable **ExUI** rather then the CCD UI
   * `./ccd enable xui-frontend`
-  * export XUI_LAUNCH_DARKLY_CLIENT_ID to value mentioned in xui web app preview template yaml file. 
+  * export XUI_LAUNCH_DARKLY_CLIENT_ID to value mentioned in xui web app preview template yaml file. i.e. 645baeea2787d812993d9d70
   * run docker-compose `./ccd compose up -d`
   * access ExUI at `http://localhost:3455`
 
@@ -808,11 +812,6 @@ Also if a certain database has not been created you might need to create a new c
 * To enable **Logstash**
   * `./ccd enable logstash` (assuming `elasticsearch` is already enabled, otherwise enable it)
   * Note that the config for Logstash is contained within the [logstash directory](logstash)
-
-* To enable **ccd-definition-designer-api**
-  * `./ccd enable backend ccd-definition-designer-api`
-  * run docker-compose `./ccd compose up -d`
-  * verify that ccd-definition-designer-api is up and running by `curl localhost:4544/health`
 
 * To enable **ccd-message-publisher**
   * NOTE: By default the CCD Message Publisher will use an embedded ActiveMQ instance. See [ccd-message-publisher](https://github.com/hmcts/ccd-message-publisher) for more information.
@@ -1120,7 +1119,7 @@ We will need to install the az cli using Python PIP.
 3. Execute the command "pip install azure-cli" using command line. It takes about 20 minutes to install the azure cli.
 4. Verify the installation using the command az --version.
 
-## Running on Apple Silicon (ARM64)
+## Running on Apple Silicon
 
 Rosetta is now Generally Available for all users on macOS 13 or later. It provides faster emulation of Intel-based images on Apple Silicon (M1 & M2...). To use Rosetta, see Settings. Rosetta is enabled by default on macOS 14.1 and later.
 

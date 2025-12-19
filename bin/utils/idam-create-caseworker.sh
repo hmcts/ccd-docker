@@ -105,7 +105,7 @@ userCreationResponse=$(create_user_request)
 if [[ $userCreationResponse -eq 403 ]]; then
   printf "%s%s%s\n" "User " "${email}" " already exists"
   recreate_user
-elif [[ $userCreationResponse -ne 201 ]]; then
+elif [[ $userCreationResponse -ne 201 && $userCreationResponse -ne 200  ]]; then
   printf "%s%s\n" "Unexpected HTTP status code from IDAM: " "${userCreationResponse}"
   exit 1
 else
