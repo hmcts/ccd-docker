@@ -2,19 +2,22 @@
 
 - [Prerequisites](#prerequisites)
 - [Quick start](#quick-start)
-- [Using CCD](#using-ccd)
-- [Idam Stub](#idam-stub)
+- [Configuring CCD](#configuring-ccd)
 - [Running branches](#running-branches)
 - [Enabling additional projects](#enabling-additional-projects)
 - [Under the hood](#under-the-hood-speedboat)
-- [Containers](#containers)
 - [Local development](#local-development)
-- [Running on Apple Silicon (ARM64)](#running-on-apple-silicon)
 - [Troubleshooting](#troubleshooting)
-- [Migrate existing v9.6 PostgreSQL database to v11](/PostgresV11.md)
 - [Variables](#variables)
 - [Remarks](#remarks)
-- [License](#license)
+
+## Additional Documentation
+- [Azure Setup Guide](/docs/Azure.md)
+- [Containers explained](/docs/Containers.md)
+- [Idam Alternatives](/docs/IdamAlt.md)
+- [Running on Apple Silicon (ARM64)](/docs/AppleSilicon.md)
+- [Migrate PostgreSQL database to latest](/docs/PostgresUpgrade.md)
+- [License](/LICENSE.md)
 
 ## Prerequisites
 
@@ -25,9 +28,9 @@
 
 | Memory   | CPU   |
 | :------: | :---: |
-| 13+ GB   | 6+    |
+| 7+ GB   | 6+    |
 
-- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) - minimum version 2.0.57
+- [Azure CLI](/docs/Azure.md) - minimum version 2.0.57
 - [jq Json Processor](https://ghcr.io/jqlang/jq)
 - Mac users, set your default shell to bash `chsh -s /bin/bash`
 
@@ -35,56 +38,63 @@
 
 ## Quick start
 
-1. Checkout `ccd-docker` and `ccd-definition-store-api` projects:
+### 1. Checkout `ccd-docker` and `ccd-definition-store-api` projects:
 
 ```bash
 git clone git@github.com:hmcts/ccd-docker.git
 ```
 
-2. For Quick setup on Mac/Linux
-<span style="color:#fef;padding:2px;background-color:#060"> use `./ccd default` 
+### 2. For Extra Quick setup on Mac/Linux
+<div style="color:#fef;padding:12px;background-color:#2d2d2d">
+<span style="color:#fef;padding:4px;background-color:#070"> Use <code>./ccd default</code> 
   to setup using default services/configuration and simulated idam
 </span>
+
+
 - After command is run you should be good to go and can skip the rest
 - Currently windows not supported for default command
 - For custom setup please skip this step and continue setup
+</div> 
 
-3. Authenticate Azure and login to the Azure Container registry:
+### 3. Authenticate Azure and login to the Azure Container registry:
+Make sure azure cli is installed, if not got to [Azure Setup Guide](/docs/Azure.md)
 
 ```bash
 az login
-
 ./ccd login
 ```
-4. ⚠️
-<span style="color:#112;padding:2px;background-color:#fa0"> THIS STEP IS ONLY REQUIRED IF YOU NEED TO MIGRATE POSTGRES VERSION
-</span> 
- ⚠️
+### 4. Migrate existing Postgres DB
+⚠️ <span style="color:#112;padding:2px;background-color:#fa0"> THIS STEP IS ONLY REQUIRED IF YOU NEED TO MIGRATE POSTGRES VERSION
+</span>⚠️
 
-If ccd-docker has been previously setup, images/volumes and the database may point to an earlier Postgres version. Prior to pulling images run the below commands to **delete** existing images and volumes. [Guide on migrating postgres](PostgresV11.md)
-```bash
+<div style="color:#112;padding:12px;background-color:#998e5d">
+If ccd-docker has been previously setup, images/volumes and the database may point to an earlier Postgres version. Prior to pulling images run the below commands to **delete** existing images and volumes.
+<code>
 ./ccd compose down
-```
+</code>
+</div>
 
-5. Pull latest Docker images:
+See [Guide on migrating postgres](/docs/PostgresUpgrade.md) for more details
+
+### 5. Pull latest Docker images
    
 ```bash
 ./ccd compose pull
 ```
 
-5. Set up environment: 
+### 6. Set up network and configuration 
 
 Note:
 required only on the first run. Once executed, it doesn't need to be executed again
 
-  a. Create docker network
+#### A. Create docker network
   
 ```bash
   ./ccd init
   ```
   Ignore if we get error message ccd-network already exists while running above command
   
-  b. Export environment variables
+#### B. Export environment variables
 
   CDM apps require a set of environment variables which can be set up by executing the following script.
   
@@ -100,14 +110,17 @@ required only on the first run. Once executed, it doesn't need to be executed ag
   
   Note: some users of zsh 'Oh My Zsh' experienced issues. Try switching to bash by : `chsh -s /bin/bash`
   
-  To persist the environment variables in Linux/Mac, copy the contents of `env_variables_all.txt` file into ~/.bash_profile.
-  A prefix 'export' will be required for each environment variable.
+  To persist the environment variables in Linux/Mac run the following script
+  ``` bash
+  ./bin/add-to-bash-profile.sh
+  ``` 
+  to add the above command into your ~/.bash_profile.
 
-  Additionally, export these environment variables to disable ElasticSearch
+  Additionally, export these environment variables to enable ElasticSearch
 
   ```bash
-  export ELASTIC_SEARCH_ENABLED=false
-  export ES_ENABLED_DOCKER=false
+  export ELASTIC_SEARCH_ENABLED=true
+  export ES_ENABLED_DOCKER=true
   ```
 
 6. Creating and starting the containers:
@@ -134,7 +147,7 @@ you may see errors in the `definition-store-api` and `data-store-api` containers
 
 ```bash
 Caused by: org.springframework.web.client.ResourceAccessException:
-    I/O error on GET request for "http://idam-sim:5000/o/.well-known/openid-configuration": Connection refused (Connection refused);
+    I/O error on GET request for "http://idam:5000/o/.well-known/openid-configuration": Connection refused (Connection refused);
         nested exception is java.net.ConnectException: Connection refused (Connection refused)
 ```
 
@@ -165,27 +178,30 @@ Usage and commands available:
 ```
 
 
-## Using CCD
+## Configuring CCD
 
 Once the containers are running, CCD's frontend can be accessed at [http://localhost:3451](http://localhost:3451).
 
-However, some more steps are required to correctly configure SIDAM and CCD before it can be used:
+However, some more steps are required to correctly configure CCD before it can be used:
 
 ---
 **NOTE**
 
 All scripts require the following environment variables to be set
+- IDAM_ADMIN_USER
+- IDAM_ADMIN_PASSWORD
 
+If they are not working then check you have run `source ./bin/set-environment-variables.sh` correctly.
+If still not working then try setting them directly with the following commands.
 ```bash
-export IDAM_ADMIN_USER=<value of Username>
-export IDAM_ADMIN_PASSWORD=<value of Password>
+export IDAM_ADMIN_USER=idamOwner@hmcts.net
+export IDAM_ADMIN_PASSWORD=Ref0rmIsFun
 ```
-
-with the corresponding values from the confluence page at https://tools.hmcts.net/confluence/x/eQP3P
+And check they match the corresponding values from the confluence page at https://tools.hmcts.net/confluence/x/eQP3P
 
 ### CCD Quick Start
 
-At this point most users can run the following 4 scripts
+At this point most users can run the following 3 scripts
 
 ```bash
 ./bin/add-users.sh && 
@@ -230,157 +246,13 @@ Move on to the [Ready for take-off](###Ready-for-take-off) section.
 ---
 A more in depth explanation of the scripts is detailed below
 
-### 1. Configure Oauth2 Client of CCD Gateway on SIDAM
 
-An oauth2 client should be configured for ccd-gateway application, on SIDAM Web Admin.
-
-A script is provided that sets up the CCD Gateway client.  Execute the following:
-
-```bash
-./bin/add-idam-clients.sh
-```
-
-You may verify the service has been added by logging in to the SIDAM Web Admin with the URL and
-logic credentials here:
-
-https://tools.hmcts.net/confluence/x/eQP3P
-
-Navigate to
-
-`Home > Manage Services`
-
-Optionally - to add any further IDAM service clients you can update the
-
-```bash
-./bin/add-idam-clients.sh
-```
-
-to add a new entry and re-run the script (any entries in this file that already exist are skipped)
-
-`${dir}/utils/idam-create-service.sh LABEL CLIENT_ID CLIENT_SECRET REDIRECT_URL SELF_REGISTRATION SCOPE`
-
----
-**NOTE**
-
-* SELF_REGISTRATION - a boolean parameter, defaults to a value of "false" if omitted
-* SCOPE - a space delimited string parameter, defaults to a value of "openid profile roles" if omitted
----
-
-#### Manual Configuration steps
-
-Instead of running the above scripts you can add the services manually using the SIDAM Web UI
-
-You need to login to the SIDAM Web Admin with the URL and logic credentials here: https://tools.hmcts.net/confluence/x/eQP3P
-
-Navigate to
-
-```bash
-Home > Manage Services > Add a new Service
-```
-
-On the **Add Service** screen the following fields are required:
-
-```
-label : <any>
-description : <any>
-client_id : ccd_gateway
-client_secret : ccd_gateway_secret
-new redirect_uri (click 'Add URI' before saving) : http://localhost:3451/oauth2redirect
-```
-
-Follow below steps to configure XUI Webapp on SIDAM Web Admin
-
-On the **Add Service** screen the following fields are required:
-
-```
-label : <xui_webapp>
-description : <xui_webapp>
-client_id : xui_webapp
-client_secret : xui_webapp_secrect
-new redirect_uri (click 'Add URI' before saving) : http://localhost:3455/oauth2/callback
-client scope: profile openid roles manage-user create-user
-```
-
-
-### 2. Create Idam roles
-
-Execute the following script to add roles to SIDAM:
-
-```bash
-./bin/add-idam-roles.sh
-```
-
-The script parses `bin/users.json` and loops through a list of unique roles, passing the role to the `idam-add-role.sh`
-script
-
-To add any further IDAM roles, for example "myNewIdamRole", run the script as follows
-
-```bash
-    ./bin/utils/idam-add-role.sh "myNewIdamRole"
-```
-
----
-**NOTE**
-
-The script adds roles under a _GLOBAL_ namespace and so until the users assigned to these roles are added,
-you cannot verify them using SIDAM Web UI
-
----
-
-#### Manual Configuration steps
-
-Any roles should be configured for ccd-gateway client/service, on SIDAM Web Admin.
-
-You need to login to the SIDAM Web Admin with the URL and logic credentials here: https://tools.hmcts.net/confluence/x/eQP3P
-
-`Navigate to Home > Manage Roles > Select Your Service > Role Label`
-
-Don't worry about the *Assignable roles* section when adding roles
-
-Once the roles are defined under the client/service, go to the service configuration for the service you created in
-Step 1 (`Home > Manage Services > select your service`) and select `ccd-import` role radio option under
-**Private Beta Role** section
-
-**Any business-related roles like `caseworker`,`caseworker-<jurisdiction>` etc to be used in CCD later must also be defined under the client configuration at this stage.**
-
-#### Adding a role to CCD
-
-Execute the following script to add roles to CCD:
-
-```bash
-./bin/add-ccd-roles.sh
-```
-
-The script parses `bin/ccd-roles.json` and loops through a list of roles and their security classifications, passing the values to the `ccd-add-role.sh` script.
-
-By default most FTA (Feature test automation) packs load their own roles into CCD via the definition store each time
-the feature tests are run
-
-To add a further role to CCD (by importing it into the definition store), run the following script
-
-```bash
-./bin/ccd-add-role.sh
-```
-
-supplying the following parameters
-
-```bash
-- role: Name of the role. Must be an existing IDAM role.
-- classification: Classification granted to the role; one of `PUBLIC`,
-        `PRIVATE` or `RESTRICTED`. Default to `PUBLIC`.
-```
-
-For example, to add the `caseworker` role (that must exist in SIDAM) to CCD, use
-
-```bash
-./bin/ccd-add-role.sh caseworker PUBLIC
-```
-
-### 3. Create users
+### 1. Add users
 
 A script is provided that sets up some initial users and roles for running functional tests. Execute the following:
 
 ```bash
+# FOR IDAM FULL STACK
 ./bin/add-users.sh
 ```
 
@@ -408,6 +280,9 @@ Therefore to
 Alternatively, add a user to SIDAM by using the script
 
 ```bash
+# FOR IDAM-SIM
+./bin/utils/idam-simulator-create-user.sh ROLE EMAIL_ADDRESS LAST_NAME FIRST_NAME
+# FOR IDAM FULL STACK
 ./bin/idam-create-caseworker.sh ROLE EMAIL_ADDRESS LAST_NAME FIRST_NAME
 ```
 ---
@@ -429,17 +304,55 @@ Navigate to
 
 and search for users by email address.
 
-### 4. Create role assignments
+### 2. Add CCD roles
+
+Execute the following script to add roles to CCD:
+
+```bash
+# FOR IDAM FULL STACK
+./bin/add-ccd-roles.sh
+```
+
+The script parses `bin/ccd-roles.json` and loops through a list of roles and their security classifications, passing the values to the `ccd-add-role.sh` script.
+
+By default most FTA (Feature test automation) packs load their own roles into CCD via the definition store each time
+the feature tests are run
+
+To add a further role to CCD (by importing it into the definition store), run the following script
+
+```bash
+# FOR IDAM FULL STACK
+./bin/ccd-add-role.sh
+```
+
+supplying the following parameters
+
+```bash
+- role: Name of the role. Must be an existing IDAM role.
+- classification: Classification granted to the role; one of `PUBLIC`,
+        `PRIVATE` or `RESTRICTED`. Default to `PUBLIC`.
+```
+
+For example, to add the `caseworker` role (that must exist in SIDAM) to CCD, use
+
+```bash
+# FOR IDAM FULL STACK
+./bin/ccd-add-role.sh caseworker PUBLIC
+```
+
+### 3. Add role assignments
 
 A script is provided that sets up some initial role assignments for users. Execute the following:
 
 ```bash
+# FOR IDAM FULL STACK
 ./bin/add-role-assignments.sh
 ```
 
 This script will add role assignments for the associated users as defined in
 
 ```bash
+# FOR IDAM FULL STACK
 bin/am-role-assignments.json
 ```
 
@@ -459,7 +372,7 @@ Note that currently the role assignments are created in the role assignment data
 
 The `am-role-assignments.json` can be modified to add further role assignments to users.
 
-### 5. Import case definition
+### 6. Import case definition
 
 #### Note:
 
@@ -497,180 +410,6 @@ If you see only a grey screen after entering your user credentials in the login 
 1- user_profile
 
 2- user_profile_jurisdiction
-
-## Idam Stub
-It's possible to disable the Idam containers and run CCD with an Idam Stub provided by ccd-test-stubs-service. This is useful as a back up plan for when docker Idam is broken or when you local machine is running low on memory and you don't want to spin up the whole Idam containers
-
-### Enable Idam Stub
-
-#### Step 1 - Disable Sidam containers
-
-make sure 'sidam' docker compose files are not enabled. How you do that depends on your currently active compose files.
-When no active compose files are present, the default ones are executed. But if there's any active, then the defautl ones are ignored. For example:
-
-```bash
-./ccd enable show
-
-Currently active compose files:
-backend
-frontend
-sidam
-
-Default compose files:
-backend
-frontend
-sidam
-```
-
-In this case sidam is currently explicitly enabled. To disable it:
-
-```bash
-./ccd disable sidam
-```
-
-If you are instead running with the default compose file as in:
-```bash
-./ccd enable show
-
-Default compose files:
-backend
-frontend
-sidam
-```
-
-You must explicitly enable only CCD compose files but exclude sidam:
-
-```bash
-./ccd enable backend frontend
-./ccd enable show
-
-Currently active compose files:
-backend
-frontend
-
-Default compose files:
-backend
-frontend
-sidam
-```
-
-#### Step 2 - Setup Env Vars
-
-in the '.env' file, uncomment:
-
-```yaml
-#IDAM_STUB_SERVICE_NAME=http://ccd-test-stubs-service:5555
-#IDAM_STUB_LOCALHOST=http://localhost:5555
-```
-
-To allow definition imports to work ('ccd-import-definition.sh') you need to:
-
-```bash
-export IDAM_STUB_LOCALHOST=http://localhost:5555
-```
-
-:warning: Please note: remember to unset 'IDAM_STUB_LOCALHOST' when switching back to the real Idam, otherwise definition import won't work
-
-```bash
-unset IDAM_STUB_LOCALHOST
-```
-
-#### Step 3 - (Optional) Customise IDAM roles
-
-IDAM Stub comes with a predefined IDAM user.\
-To permanently customise the stub user info such as its roles follow the instructions in 'backend.yml' -> ccd-test-stubs-service\
-To modify the user info at runtime, see https://github.com/hmcts/ccd-test-stubs-service#idam-stub
-
-#### Step 4 - Enable stub service dependency
-
-Enable ccd-test-stubs-service dependency on ccd-data-store-api and ccd-definition-store-api in 'backend.yml' file.
-
-Uncomment the below lines in 'backend.yml' file
-```yaml
-      #      ccd-test-stubs-service:
-      #        condition: service_started
-```
-
-Comment the below lines in 'backend.yml' file
-```yaml
-      idam-sim:
-        condition: service_started
-```
-
-### Revert to Idam
-
-#### Step 1 - Enable Sidam containers
-
-```bash
-./ccd enable sidam
-```
-
-or just revert to the default:
-
-```bash
-./ccd enable default
-```
-
-#### Step 2 - Setup Env Vars
-
-in the '.env' file, make sure the following env vars are commented:
-
-```yaml
-#IDAM_STUB_SERVICE_NAME=http://ccd-test-stubs-service:5555
-#IDAM_STUB_LOCALHOST=http://localhost:5555
-```
-
-then from the command line:
-
-```bash
-unset IDAM_STUB_LOCALHOST
-```
-
-#### Step 3 - Disable stub service dependency
-
-Disable ccd-test-stubs-service dependency on ccd-data-store-api and ccd-definition-store-api in 'backend.yml' file.
-
-Comment the below lines in 'backend.yml' file
-```yaml
-    #   ccd-test-stubs-service:
-    #       condition: service_started
-```
-
-Uncomment the below lines in 'backend.yml' file
-```yaml
-      idam-sim:
-        condition: service_started
-```
-
-### Switching between Idam and Idam Stub Example
-
-```bash
-#assuming no containers running and Idam is enabled
-
-#start with Idam
-./ccd compose up -d
-
-#services started
-
-./ccd compose stop
-
-#enable Idam Stub follwing the steps in 'Enable Idam Stub'
-
-#start with Idam Stub
-./ccd compose up -d
-
-#services started
-
-you also can issue a 'down' when Idam Stub is enabled without risking of losing Idam data, since it's disabled
-./ccd compose down
-
-enable Idam follwing the steps in 'Revert to Idam'
-
-#start with Idam. This will now create new CCD containers and reuse the old Idam ones
-./ccd compose up -d
-```
-
-NOTE: :warning: always use 'compose up' rather than 'compose start' when switching between Idam and Idam Stub to have docker compose pick up env vars changes.
 
 ## Running branches
 
@@ -795,7 +534,7 @@ Also if a certain database has not been created you might need to create a new c
 * To enable **document-management-store-app**
   * `./ccd enable backend frontend dm-store`
   * run docker-compose `./ccd compose up -d`
-  * create Blob Store in Azurite `./bin/document-management-store-create-blob-store-container.sh`
+  * create Blob Store in Azurite `./bin/dm-store/document-management-store-create-blob-store-container.sh`
 
 * To enable **ExUI** rather then the CCD UI
   * `./ccd enable xui-frontend`
@@ -990,36 +729,6 @@ The `SERVICE_SECRET` must then also be provided to the container running the mic
 
 To use UK address lookup feature an API key for https://postcodeinfo.service.justice.gov.uk is required. When API key is available it needs to be set on host side under `ADDRESS_LOOKUP_TOKEN` variable name.
 
-## Containers
-
-### Back-end
-
-#### ccd-definition-store-api
-
-Store holding the case type definitions, which are a case's states, events and schema as well as its display configuration for rendering in CCD's UI.
-
-#### ccd-data-store-api
-
-Store where the versioned instances of cases are recorded.
-
-#### ccd-user-profile-api
-
-Display preferences for the CCD users.
-
-#### ccd-test-stubs-service
-
-Service to facilitate testing of external http calls using wiremock. It returns canned responses for requests matching
-the predefined criteria.
-Currently used for:
-   - exposing a set of default callbacks that can be invoked for testing purposes
-   - Idam Stub
-
-### Front-end
-
-#### ccd-api-gateway
-
-Secured API Gateway integrating with IDAM
-
 ## Local development
 
 The provided Docker compose files can be used to get up and running for local development.
@@ -1079,61 +788,13 @@ Mainly, this means:
   - :warning: using the right key, as defined in `service-auth-provider-api` container
 - **URLs**: all URLs should be updated to point to the corresponding locally exposed port
 
-### Azure Authentication for pulling latest docker images
+
+## Troubleshooting
 
 ```bash
 ERROR: Get <docker_image_url>: unauthorized: authentication required
 ```
-
-If you see this above authentication issue while pulling images, please follow below commands,
-
-Install Azure-CLI locally,
-
-```bash
-brew update && brew install azure-cli
-```
-
-and to update a Azure-CLI locally,
-
-```bash
-brew update azure-cli
-```
-
-then,
-login to MS Azure,
-
-```bash
-az login
-```
-and finally, Login to the Azure Container registry:
-
-```bash
-./ccd login
-```
-
-On windows platform, we are installing the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) using executable .msi file.
-If "az login" command throws an error like "Access Denied", please follow these steps.
-We will need to install the az cli using Python PIP.
-1. If Microsoft Azure CLI is already installed, uninstall it from control panel.
-2. Setup the Python(version 2.x/3.x) on windows machine. PIP is bundled with Python.
-3. Execute the command "pip install azure-cli" using command line. It takes about 20 minutes to install the azure cli.
-4. Verify the installation using the command az --version.
-
-## Running on Apple Silicon
-
-Rosetta is now Generally Available for all users on macOS 13 or later. It provides faster emulation of Intel-based images on Apple Silicon (M1 & M2...). To use Rosetta, see Settings. Rosetta is enabled by default on macOS 14.1 and later.
-
-if having trouble emulating x86 images try installing rosetta via the terminal using 
-  > softwareupdate --install-rosetta
-
-and enabling the following settings in docker desktop (version 4.16.1 or greater) under
-  > Settings > General > Use Virtualization framework
-
-  > Settings > General >
-  Use Rosetta for x86_64/amd64 emulation on Apple Silicon
-
-
-## Troubleshooting
+If you see this above authentication issue while pulling images, please follow the [Azure Setup Guide](/docs/Azure.md).
 
 ccd-network could not be found error:
 
@@ -1154,7 +815,7 @@ CCD UI not loading:
 DM Store issues:
 
 - "uk.gov.hmcts.dm.exception.AppConfigurationException: Cloub Blob Container does not exist"
-    > ./bin/document-management-store-create-blob-store-container.sh
+    > ./bin/dm-store/document-management-store-create-blob-store-container.sh
 
 ## Variables
 Here are the important variables exposed in the compose files:
@@ -1201,7 +862,3 @@ DRIVER              VOLUME NAME
 
 # better be empty
 ```
-
-## LICENSE
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
