@@ -15,8 +15,8 @@ services:
       TS_TRANSLATION_SERVICE_DB_NAME: ts_translation_service
       TS_TRANSLATION_SERVICE_DB_USERNAME: ${DB_USERNAME}
       TS_TRANSLATION_SERVICE_DB_PASSWORD: ${DB_PASSWORD}
-      IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-sim:5000}"
-      IDAM_OIDC_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-sim:5000}"
+      IDAM_API_URL: "${IDAM_OVERRIDE_URL:-http://idam:5000}"
+      IDAM_OIDC_URL: "${IDAM_OVERRIDE_URL:-http://idam:5000}"
       TS_TRANSLATION_SERVICE_S2S_AUTHORISED_SERVICES: xui_webapp,ccd_admin,ccd_definition
       S2S_URL: http://service-auth-provider-api:8080
       REFORM_SERVICE_NAME: ts-translation-service
@@ -30,8 +30,6 @@ services:
       ccd-shared-database:
         condition: service_healthy
       service-auth-provider-api:
-        condition: service_started
-      idam-sim:
         condition: service_started
     networks:
       - ccd-network

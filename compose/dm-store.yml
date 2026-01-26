@@ -36,7 +36,7 @@ services:
       SPRING_PROFILES_ACTIVE: dev
       IDAM_TESTING_SUPPORT_ENABLED: "true"
       LOGGING_LEVEL_UK_GOV_HMCTS_IDAM: DEBUG
-      IDAM_USER_BASE_URI: "${IDAM_STUB_SERVICE_NAME:-http://idam-sim:5000}"
+      IDAM_USER_BASE_URI: "${IDAM_OVERRIDE_URL:-http://idam:5000}"
       IDAM_S2S_BASE_URI: http://service-auth-provider-api:8080
       S2S_NAMES_WHITELIST: sscs,divorce,ccd,em_gw,document-management-store,ccd_gw,idam-sim,fpl_case_service,xui_webapp,ccd_case_document_am_api,ccd_data,ccd_case_disposer
       http_proxy:

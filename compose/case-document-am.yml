@@ -6,8 +6,8 @@ services:
     environment:
       CASE_DOCUMENT_AM_API_S2S_SECRET: "${IDAM_KEY_CASE_DOCUMENT}"
       CASE_DOCUMENT_S2S_AUTHORISED_SERVICES: ccd_case_document_am_api,ccd_gw,xui_webapp,ccd_data,bulk_scan_processor,bulk_scan_orchestrator
-      IDAM_API_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-sim:5000}"
-      IDAM_OIDC_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-sim:5000}"
+      IDAM_API_URL: "${IDAM_OVERRIDE_URL:-http://idam:5000}"
+      IDAM_OIDC_URL: "${IDAM_OVERRIDE_URL:-http://idam:5000}"
       S2S_URL: http://service-auth-provider-api:8080
       DM_STORE_BASE_URL: http://dm-store:8080
       CCD_DATA_STORE_API_BASE_URL: http://ccd-data-store-api:4452
