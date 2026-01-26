@@ -6,6 +6,17 @@ WORKSPACE_ROOT=".workspace"
 # Build related
 GRADLE_ASSEMBLE_CMD="./gradlew assemble"
 
+function askYesNo() {
+    while true; do
+        read -n 1 -s yn
+        case $yn in
+            y|Y) eval "$1"; break ;;
+            n|N)  eval "$2"; break ;;
+            *)     echo "Please answer yes (y) or no (n)." ;;
+        esac
+    done
+}
+
 function project_config() {
     project=$1
     config=$2
@@ -541,6 +552,8 @@ function ccd_enable_show() {
             echo $compose_file
         done | sort
         echo
+    else
+        echo "No active compose files, using defaults."
     fi
     echo "Default compose files:"
     for compose_file in $(default_compose_files)
@@ -647,13 +660,10 @@ function ccd_compose() {
 
 function print_warn_on_compose_down_if_idam_enabled {
     if [[ $(active_compose_files) == *"sidam"* ]] && [[ $1 = "down" ]]; then
-        read -p "WARNING - 'down' will remove Idam data. Use 'stop' to preserve data. Or if you intended to remove only CCD containers, disable Idam
-        compose files first. Do you want to continue?" yn
-        case $yn in
-            [Yy]* ) ;;
-            [Nn]* ) exit;;
-            * ) echo "Please answer yes or no.";;
-        esac
+        echo "WARNING - 'down' will remove Idam data. Use 'stop' to preserve data. Or if you intended to remove only CCD containers, disable Idam
+        compose files first. Do you want to continue?"
+
+        askYesNo "break" "exit"
     fi
 }
 
@@ -663,26 +673,105 @@ function ccd_login() {
     az acr login --name hmctsprivate --subscription DCD-CNP-Prod
 }
 
+function echo_ccd() {
+    echo -e "\033[34mCCD ::--\033[0m $@" # blue
+}
+
+function echo_error() {
+    echo -e "\033[1;91mERROR ::--\033[0m $@" # red
+}
+
 function ccd_default() {
-    az login
-    ccd_login
-    source ./bin/set-environment-variables.sh
-    ccd_enable defaults
+    
+    echo -e "\033[34m" # set blue
+    echo "-----------------------------------------------------------------"
+    echo "   _____ _____ _____     ____   ___   ____  _  _______ ____"
+    echo "  / ____/ ____|  __ \\   |  _ \\ / _ \\ / ___|| |/ / ____|  _ \\"
+    echo " | |   | |    | |  | |  | | | | | | | |    | ' /|  _| | |_) |"
+    echo " | |___| |____| |__| |  | |_| | |_| | |___ | . \\| |___|  _ <"
+    echo "  \\_____\\_____|_____/   |____/ \\___/ \\____||_|\\_\\_____|_| \\_\\"
+    echo "-----------------------------------------------------------------"
+    echo -e "\033[0m"  # reset color
+
+    echo_ccd "Looking for azure cli installation..."
+    if ! command -v az >/dev/null 2>&1; then
+        echo_error "Azure CLI is not installed. Please install it from: https://learn.microsoft.com/cli/azure/install-azure-cli"
+        exit 1
+    fi
+    echo_ccd "Azure CLI installation found."
+
+    # Check if user is already logged in
+    if az account show >/dev/null 2>&1; then
+        echo_ccd "Skipping Azure login as already logged in..."
+    else
+        echo_ccd "Logging in to Azure..."
+        if ! az login >/dev/null 2>&1; then
+            echo_error "Azure CLI login failed. Please run 'az login' manually. "
+            exit 1
+        fi
+        echo_ccd "Azure CLI login succeeded."
+    fi
+    
+    echo_ccd "Logging into CCD container registries..."
+    if ! ccd_login >/dev/null; then
+        echo_error "CCD container registry login issues detected. Diagnosing..."
+        az acr check-health -n hmctspublic --yes
+        exit 1
+    fi
+
+    echo_ccd "Setting up default environment variables..."
+    source ./bin/set-environment-variables.sh &>/dev/null
+
+    compose_file_options=$(create_compose_file_options) >/dev/null
+    if docker-compose $compose_file_options ps --services --filter status=running | grep -q . >/dev/null; then
+        echo_ccd "Compose containers currently running running."
+        echo_ccd "Do you wish to remove existing containers and volumes?"
+        askYesNo "docker-compose $compose_file_options down -v &>/dev/null; echo_ccd Containers and volumes removed." "echo_ccd Existing containers and volumes preserved."
+    fi
+    compose_file_options="" # reset variable
+
+    echo_ccd "Enabling default compose files..."
+    ccd_enable defaults >/dev/null
+    
     # unset backend
-    ccd_unset ccd-user-profile-api ccd-definition-store-api ccd-data-store-api am-role-assignment-service service-auth-provider-api ccd-test-stubs-service
+    echo_ccd "Resetting existing backend ccd container config..."
+    ccd_unset ccd-user-profile-api ccd-definition-store-api ccd-data-store-api am-role-assignment-service service-auth-provider-api ccd-test-stubs-service >/dev/null
+    
     # unset frontend
-    ccd_unset ccd-api-gateway ccd-admin-web 
+    echo_ccd "Resetting existing frontend ccd container config..."
+    ccd_unset ccd-api-gateway ccd-admin-web >/dev/null
+    
     # unset sidam
-    ccd_unset fr-am fr-idm shared-db smtp-server idam-api idam-web-public idam-web-admin
-    ccd_compose pull
-    ccd_init
-    ccd_compose up -d
-    echo "Waiting 60 seconds for services to start..."
-    sleep 60
-    echo "Adding users and roles"
-    ./bin/add-users.sh 
-    ./bin/add-ccd-roles.sh 
-    ./bin/add-role-assignments.sh
+    echo_ccd "Resetting existing idam related container config..."
+    ccd_unset idam-sim fr-am fr-idm shared-db smtp-server idam-api idam-web-public idam-web-admin >/dev/null
+
+    compose_file_options=$(create_compose_file_options) >/dev/null
+    echo_ccd "Pulling latest images..."
+    if ! docker-compose $compose_file_options pull &>/dev/null; then
+        echo_error "Failed to pull latest images. Continue anyways? (y/n)"
+        askYesNo "echo_ccd Continuing despite pull failures." "exit 1"
+    fi
+
+    echo_ccd "Initializing ccd network..."
+    ccd_init &>/dev/null # will either create or already exists
+
+    echo_ccd "Starting up services..."
+    if ! docker compose $compose_file_options up -d >/dev/null; then
+        echo_error "Failed to start some containers please check logs."
+        exit 1
+    fi
+
+    echo_ccd "Waiting 30 seconds for services to finish spinning up..."
+    sleep 30
+
+    echo_ccd "\033[33m[------------------] 0% Complete\033[0m - Adding users..."
+    ./bin/add-users.sh &>/dev/null || { echo_error "Users failed to apply correctly." ; exit 1; }
+    echo_ccd "\033[33m[######------------] 33% Complete\033[0m - Adding roles..."
+    ./bin/add-ccd-roles.sh &>/dev/null || { echo_error "Roles failed to apply correctly." ; exit 1; }
+    echo_ccd "\033[33m[############------] 66% Complete\033[0m - Adding role assignments..."
+    ./bin/add-role-assignments.sh &>/dev/null || { echo_error "Role assignments failed to apply correctly." ; exit 1; }
+    echo_ccd "\033[32m[##################] 100% Complete\033[0m - Setup complete!"
+    exit 1
 }
 
 if [ $# -lt 1 ]; then

@@ -66,7 +66,7 @@ function check_exit_code_for_error() {
 create_user_request() {
   response=$(
     curl --insecure --show-error --silent --output /dev/null --write-out "%{http_code}" -X POST \
-      "${IDAM_API_BASE_URL:-http://localhost:5000}"/testing-support/accounts \
+      "${IDAM_OVERRIDE_URL:-http://localhost:5000}"/testing-support/accounts \
       -H "Content-Type: application/json" \
       -d '{
           "email":"'"${email}"'",
@@ -86,7 +86,7 @@ create_user_request() {
 
 delete_user_request() {
   response=$(curl --insecure --show-error --silent --output /dev/null --write-out "%{http_code}" -X DELETE \
-    "${IDAM_API_BASE_URL:-http://localhost:5000}"/testing-support/accounts/"${email}")
+    "${IDAM_OVERRIDE_URL:-http://localhost:5000}"/testing-support/accounts/"${email}")
   echo "$response"
 }
 
@@ -209,7 +209,7 @@ if [ "${ENVIRONMENT:-local}" != "local" ]; then
   exit 0;
 fi
 
-IDAM_URL="http://localhost:5000"
+IDAM_URL=${IDAM_OVERRIDE_URL:-http://localhost:5000}
 IDAM_ACCESS_TOKEN=$(get_idam_token)
 check_exit_code_for_error $? "$IDAM_ACCESS_TOKEN"
 

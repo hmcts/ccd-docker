@@ -15,7 +15,7 @@ apiToken=$(${dir}/idam-authenticate.sh "${IDAM_ADMIN_USER}" "${IDAM_ADMIN_PASSWO
 echo -e "\nCreating IDAM role: ${ID}"
 
 STATUS=$(curl --silent --output /dev/null --write-out '%{http_code}' -H 'Content-Type: application/json' -H "Authorization: AdminApiAuthToken ${apiToken}" \
-  ${IDAM_API_BASE_URL:-http://localhost:5000}/roles -d '{
+  ${IDAM_OVERRIDE_URL:-http://localhost:5000}/roles -d '{
   "id": "'${ID}'",
   "name": "'${ID}'",
   "description": "'${ID}'",

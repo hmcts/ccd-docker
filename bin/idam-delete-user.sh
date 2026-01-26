@@ -9,4 +9,4 @@ email=$1
 
 # Build roles JSON array
 
-curl -XDELETE "http://localhost:5000/testing-support/accounts/${email}" -H "Content-Type: application/json"
+curl -XDELETE "${IDAM_OVERRIDE_URL:-http://localhost:5000}/testing-support/accounts/${email}" -H "Content-Type: application/json"
