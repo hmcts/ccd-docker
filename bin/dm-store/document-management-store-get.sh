@@ -8,8 +8,8 @@
 documentId=$1
 dir=$(dirname "$0")
 
-userToken="$(${dir}/utils/idam-user-token.sh)"
-serviceToken="$(${dir}/utils/lease-service-token.sh ccd_gw)"
+userToken="$(${dir}/../utils/idam-user-token.sh)"
+serviceToken="$(${dir}/../utils/lease-service-token.sh ccd_gw)"
 
 curl --verbose \
   http://localhost:4603/documents/${documentId} \

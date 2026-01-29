@@ -58,12 +58,6 @@ services:
       ccd-network:
         aliases:
           - idam
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
     tmpfs: /opt/app/es
     environment:
       - TESTING_SUPPORT_ENABLED=true

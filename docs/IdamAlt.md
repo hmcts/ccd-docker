@@ -19,6 +19,7 @@ This is useful for covering situations that the simulator cannot cover adequetly
 - [Using an external IDAM instance](#using-an-external-idam-instance)
     - [Enable Override](#enable-override)
     - [Revert to Idam Simulator](#revert-to-idam-simulator)
+- [Troubleshooting full IDAM stack](#troubleshooting-full-idam-stack)
 
 # Run Full Idam Container Stack locally - SIDAM
 
@@ -46,6 +47,9 @@ idam-sim
 In this case idam-sim is currently explicitly enabled. To disable it run:
  `./ccd disable idam-sim`
 
+You then need to enable `sidam` to replace it:
+`./ccd enable sidam`
+
 ### Scenario 2 - Running the default compose files
 ```bash
 ./ccd enable show
@@ -56,10 +60,10 @@ frontend
 idam-sim
 ```
 
-You must explicitly enable only CCD compose files but exclude idam-sim:
+You must explicitly enable only CCD compose files but exclude `idam-sim` and include `sidam` instead:
 
 ```bash
-./ccd enable backend frontend
+./ccd enable backend frontend sidam
 ./ccd enable show
 
 Currently active compose files:
@@ -81,7 +85,7 @@ export IDAM_FULL_ENABLED=true
 ```
 And if we are changing the port that IDAM will be using then we should also run
 ```bash
-export IDAM_OVERRIDE_URL=http://localhost:idam-port
+export IDAM_OVERRIDE_URL=http://localhost:5000
 ```
 
 Here is an example of the process of switching between the two
@@ -100,7 +104,7 @@ Here is an example of the process of switching between the two
 # tell scripts to use full idam stack logic
 export IDAM_FULL_ENABLED=true
 # ONLY IF NEEDED - export to override IDAM url 
-# export IDAM_OVERRIDE_URL=http://localhost:idam-port
+export IDAM_OVERRIDE_URL=http://localhost:5000
 
 # start with Full Idam Container Stack
 ./ccd compose up -d
@@ -150,12 +154,10 @@ to add a new entry and re-run the script (any entries in this file that already 
 
 `${dir}/utils/idam-create-service.sh LABEL CLIENT_ID CLIENT_SECRET REDIRECT_URL SELF_REGISTRATION SCOPE`
 
----
-**NOTE**
-
-* SELF_REGISTRATION - a boolean parameter, defaults to a value of "false" if omitted
-* SCOPE - a space delimited string parameter, defaults to a value of "openid profile roles" if omitted
----
+> [!NOTE]
+> `SELF_REGISTRATION` - a boolean parameter, defaults to a value of "false" if omitted
+>
+> `SCOPE` - a space delimited string parameter, defaults to a value of "openid profile roles" if omitted
 
 #### Manual Configuration steps
 
@@ -210,13 +212,10 @@ To add any further IDAM roles, for example "myNewIdamRole", run the script as fo
     ./bin/utils/idam-add-role.sh "myNewIdamRole"
 ```
 
----
-**NOTE**
-
-The script adds roles under a _GLOBAL_ namespace and so until the users assigned to these roles are added,
+> [!NOTE]
+> The script adds roles under a _GLOBAL_ namespace and so until the users assigned to these roles are added,
 you cannot verify them using SIDAM Web UI
 
----
 
 #### Manual Configuration steps
 
@@ -262,7 +261,8 @@ or just revert to the default:
 unset IDAM_FULL_ENABLED
 unset IDAM_OVERRIDE_URL
 ```
-NOTE: :warning: always use 'compose up' rather than 'compose start' when switching between Idam and Idam Stub to have docker compose pick up env vars changes.
+> [!WARNING] 
+> Always use `compose up` rather than `compose start` when switching between Idam and Idam Stub to have docker compose pick up env vars changes.
 
 
 # Using an external IDAM instance
@@ -294,6 +294,46 @@ And remember to unset 'IDAM_OVERRIDE_URL' when switching back to the Idam-sim, o
 ```bash
 unset IDAM_FULL_ENABLED
 unset IDAM_OVERRIDE_URL
+```
+
+# Troubleshooting full IDAM stack
+> [!NOTE]
+> If using the full Idam stack the containers can be slow to start - both the `definition-store-api` and `data-store-api` containers will
+try to connect to the `idam-api` container when they start.
+
+The following optional containers will not start successfully until `idam-api` container has started.
+* `ts-translation-service`
+* `case-disposer`
+* `case-document-am`
+* `frontend`
+* `xui-frontend`
+* 'hearings'
+
+If `idam-api` is not up and running and accepting connections
+you may see errors in the `definition-store-api` and `data-store-api` containers, such as
+
+```bash
+Caused by: org.springframework.web.client.ResourceAccessException:
+    I/O error on GET request for "http://idam:5000/o/.well-known/openid-configuration": Connection refused (Connection refused);
+        nested exception is java.net.ConnectException: Connection refused (Connection refused)
+```
+
+If the containers fail to start with these error, ensure `idam-api` is running using
+
+ ```bash
+curl http://localhost:5000/health
+ ```
+
+ensuring the response is
+
+```bash
+{"status":"UP"}
+```
+
+Then restart any dependent containers by bringing up again (compose will automatically bring up just the ones which ones have failed)
+
+```bash
+./ccd compose up -d
 ```
 
 [Back to readme](../README.md)

@@ -1,6 +1,6 @@
 # Steps to migrate existing PostgreSQL database to latest version
 
-## Backup old database. Migrate data to the new database. (Optional Step)
+## 1. Backup old database. Migrate data to the new database. (Optional Step)
 
 **The following steps describe the process of backing up the old DB in to the new DB. 
 These steps can be ignored in the case of building a new environment from scratch**
@@ -15,8 +15,10 @@ docker exec -it a210d7e11a5b  /usr/bin/pg_dumpall -U  postgres  > dumpfile
 ```
 
 
-## Pull latest ccd-docker (MANDATORY)
-**Note:** If you want to keep your current database data, please go the step above, [Backup old database](#1--backup-old-database-migrate-data-to-the-new-database--optional-step-)
+## 2. Pull latest ccd-docker (MANDATORY)
+> [!WARNING] 
+> If you want to keep your current database data, please go the step above, [Backup old database](#1-backup-old-database-migrate-data-to-the-new-database-optional-step)
+
 * Make sure images/volumes of microservices are deleted with the following. 
 **This has to be in place to be able to _migrate_ postgres version.**
 ``` 
@@ -32,10 +34,11 @@ docker exec -it a210d7e11a5b  /usr/bin/pg_dumpall -U  postgres  > dumpfile
 ./ccd compose up -d
 ```
 
-**Note:** Skip Step 3 and go to [Step 4](#settings-for-ccd-docker-mandatory) if you did not make a backup of your DB data
+> [!Note] 
+> Skip Step 3 and go to [Step 4](#4-settings-for-ccd-docker-mandatory) if you did not make a backup of your DB data
 
 
-## Restore database from backup
+## 3. Restore database from backup
 * Get the container id of the new DB for instance: **36a8eb5cccba**
 ```
 docker ps | grep compose_ccd-shared-database_1-new
@@ -69,7 +72,7 @@ select * from event;
 ```
 
 
-## Settings for ccd-docker (MANDATORY)
+## 4. Settings for ccd-docker (MANDATORY)
 
 **The following steps should be done to define the microservices dependency to the new DB container**
 

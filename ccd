@@ -427,6 +427,17 @@ function usage() {
     exit 1
 }
 
+function usage_default() {
+    if [ $# -gt 1 ] || ([ $# -eq 1 ] && [ "$1" != "idam" ]); then
+        echo "Setup default compose files and run them for linux/mac"
+        echo "Usage: $(basename $0) default"
+        echo "Setup default compose files with full idam stack and run them for linux/mac"
+        echo "Usage: $(basename $0) default idam"
+        echo
+        exit 1
+    fi
+}
+
 function usage_set() {
     if [ "$1" == "-h" ] || ([ $# -ne 2 ] && [ $# -ne 3 ]); then
         echo "Overrides project to use the supplied branch, and build the project."
@@ -682,6 +693,7 @@ function echo_error() {
 }
 
 function ccd_default() {
+    usage_default $*
     
     echo -e "\033[34m" # set blue
     echo "-----------------------------------------------------------------"
@@ -692,6 +704,13 @@ function ccd_default() {
     echo "  \\_____\\_____|_____/   |____/ \\___/ \\____||_|\\_\\_____|_| \\_\\"
     echo "-----------------------------------------------------------------"
     echo -e "\033[0m"  # reset color
+
+    if [ "$1" == "idam" ]; then
+        echo_ccd "Starting default CCD setup with full idam compose files..."
+    else
+        echo_ccd "Starting default CCD setup..."
+    fi
+
 
     echo_ccd "Looking for azure cli installation..."
     if ! command -v az >/dev/null 2>&1; then
@@ -725,7 +744,7 @@ function ccd_default() {
     compose_file_options=$(create_compose_file_options) >/dev/null
     if docker-compose $compose_file_options ps --services --filter status=running | grep -q . >/dev/null; then
         echo_ccd "Compose containers currently running running."
-        echo_ccd "Do you wish to remove existing containers and volumes?"
+        echo_ccd "Do you wish to remove existing containers and volumes? (y/n)"
         askYesNo "docker-compose $compose_file_options down -v &>/dev/null; echo_ccd Containers and volumes removed." "echo_ccd Existing containers and volumes preserved."
     fi
     compose_file_options="" # reset variable
@@ -745,9 +764,14 @@ function ccd_default() {
     echo_ccd "Resetting existing idam related container config..."
     ccd_unset idam-sim fr-am fr-idm shared-db smtp-server idam-api idam-web-public idam-web-admin >/dev/null
 
+    if [ "$1" == "idam" ]; then
+        echo_ccd "Enable default stack with full idam compose files..."
+        ccd_enable backend frontend sidam >/dev/null
+    fi
+
     compose_file_options=$(create_compose_file_options) >/dev/null
     echo_ccd "Pulling latest images..."
-    if ! docker-compose $compose_file_options pull &>/dev/null; then
+    if ! docker-compose $compose_file_options pull; then
         echo_error "Failed to pull latest images. Continue anyways? (y/n)"
         askYesNo "echo_ccd Continuing despite pull failures." "exit 1"
     fi
@@ -764,13 +788,32 @@ function ccd_default() {
     echo_ccd "Waiting 30 seconds for services to finish spinning up..."
     sleep 30
 
-    echo_ccd "\033[33m[------------------] 0% Complete\033[0m - Adding users..."
-    ./bin/add-users.sh &>/dev/null || { echo_error "Users failed to apply correctly." ; exit 1; }
-    echo_ccd "\033[33m[######------------] 33% Complete\033[0m - Adding roles..."
-    ./bin/add-ccd-roles.sh &>/dev/null || { echo_error "Roles failed to apply correctly." ; exit 1; }
-    echo_ccd "\033[33m[############------] 66% Complete\033[0m - Adding role assignments..."
-    ./bin/add-role-assignments.sh &>/dev/null || { echo_error "Role assignments failed to apply correctly." ; exit 1; }
-    echo_ccd "\033[32m[##################] 100% Complete\033[0m - Setup complete!"
+    if [ "$1" == "idam" ]; then
+        echo_ccd "Setting IDAM_FULL_ENABLED to true for scripts..."
+        export IDAM_FULL_ENABLED=true
+
+        echo_ccd "\033[33m[--------------------] 0% Complete\033[0m - Adding IDAM clients..."
+        ./bin/add-idam-clients.sh &>/dev/null || { echo_error "IDAM clients failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[33m[####----------------] 20% Complete\033[0m - Adding IDAM roles..."
+        ./bin/add-idam-roles.sh &>/dev/null || { echo_error "IDAM roles failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[33m[########------------] 40% Complete\033[0m - Adding users..."
+        ./bin/add-users.sh &>/dev/null || { echo_error "Users failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[33m[############--------] 60% Complete\033[0m - Adding ccd roles..."
+        ./bin/add-ccd-roles.sh &>/dev/null || { echo_error "Roles failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[33m[################----] 80% Complete\033[0m - Adding role assignments..."
+        ./bin/add-role-assignments.sh &>/dev/null || { echo_error "Role assignments failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[32m[####################] 100% Complete\033[0m - Setup complete!"
+    else
+        unset IDAM_FULL_ENABLED
+        echo_ccd "\033[33m[--------------------] 0% Complete\033[0m - Adding users..."
+        ./bin/add-users.sh &>/dev/null || { echo_error "Users failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[33m[######--------------] 33% Complete\033[0m - Adding ccd roles..."
+        ./bin/add-ccd-roles.sh &>/dev/null || { echo_error "Roles failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[33m[##############------] 66% Complete\033[0m - Adding role assignments..."
+        ./bin/add-role-assignments.sh &>/dev/null || { echo_error "Role assignments failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[32m[####################] 100% Complete\033[0m - Setup complete!"
+    fi
+
     exit 1
 }
 
@@ -812,7 +855,7 @@ case $command in
         ccd_login
         ;;
     default|defaults)
-        ccd_default
+        ccd_default $*
         ;;
     *)
         usage
