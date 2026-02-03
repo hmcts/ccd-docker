@@ -4,6 +4,7 @@ services:
     container_name: idam-sim
     ports:
       - "5000:5000"
+      - "9002:5000" # also cover idam-public port
       # - "5005:5005" # Uncomment to enable remote debugging
     environment:
       # these environment variables are used by java-logging library

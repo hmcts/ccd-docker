@@ -24,11 +24,13 @@
 - [Docker](https://www.docker.com)
 
   > [!Note]
-  > *Once docker is installed, increase the memory and CPU allocations (Docker -> Preferences -> Advanced) to the following minimum values for successful execution of ccd applications altogether:*
+  > *Once docker is installed, increase the memory and CPU allocations (Docker -> Preferences -> Advanced) to at least the following minimum values for successful execution of ccd applications altogether:*
   >
   > | Memory   | CPU   |
   > | :------: | :---: |
-  > | 7+ GB   | 6+    |
+  > | 7+ GB   | 4+    |
+  >
+  > For Windows Subsystem for Linux (WSL & WSL2) users [see this page](./docs/WSL.md) for how to do this.
 
 - [Azure CLI](/docs/Azure.md) - minimum version 2.0.57
 - [jq Json Processor](https://ghcr.io/jqlang/jq)
@@ -144,7 +146,9 @@ Ignore if we get error message ccd-network already exists while running above co
 
 ## Configuring CCD
 
-Once the containers are running, CCD's frontend can be accessed at [http://localhost:3451](http://localhost:3451).
+Once the containers are runnning, CCD's admin web can be accessed at [https://localhost:3100](https://localhost:3100).
+If using xui-frontend it ca be accessed at [https://localhost:3455](https://localhost:3455).
+
 
 However, some more steps are required to correctly configure CCD before it can be used:
 

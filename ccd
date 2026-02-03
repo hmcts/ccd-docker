@@ -428,11 +428,11 @@ function usage() {
 }
 
 function usage_default() {
-    if [ $# -gt 1 ] || ([ $# -eq 1 ] && [ "$1" != "idam" ]); then
-        echo "Setup default compose files and run them for linux/mac"
-        echo "Usage: $(basename $0) default"
-        echo "Setup default compose files with full idam stack and run them for linux/mac"
-        echo "Usage: $(basename $0) default idam"
+    if [ $# -gt 1 ] || ([ $# -eq 1 ] && [ "$1" != "idam" ] && [ "$1" != "xui" ]); then
+        echo "Setup default compose files and run them for linux/mac. Usage:"
+        echo "$(basename $0) default            # setup default compose files with idam simulator"
+        echo "$(basename $0) default idam       # setup default compose files with full idam stack"
+        echo "$(basename $0) default xui        # setup default compose files with idam sim + xui-frontend"
         echo
         exit 1
     fi
@@ -767,6 +767,11 @@ function ccd_default() {
     if [ "$1" == "idam" ]; then
         echo_ccd "Enable default stack with full idam compose files..."
         ccd_enable backend frontend sidam >/dev/null
+    fi
+
+    if [ "$1" == "xui" ]; then
+        echo_ccd "Enable default stack with idam simulator and xui frontend compose files..."
+        ccd_enable backend frontend idam-sim xui-frontend >/dev/null
     fi
 
     compose_file_options=$(create_compose_file_options) >/dev/null

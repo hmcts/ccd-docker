@@ -11,13 +11,13 @@ services:
       IDAM_BASE_URL: "${IDAM_OVERRIDE_URL:-http://idam:5000}"
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       IDAM_ADMIN_WEB_SERVICE_KEY: AAAAAAAAAAAAAAAD
-      IDAM_LOGOUT_URL: "${IDAM_OVERRIDE_URL:-http://localhost:5000}/login"
+      IDAM_LOGOUT_URL: "${IDAM_PUBLIC_OVERRIDE:-http://localhost:9002}/login"
       IDAM_OAUTH2_TOKEN_ENDPOINT: "${IDAM_OVERRIDE_URL:-http://idam:5000}/oauth2/token"
       IDAM_OAUTH2_LOGOUT_ENDPOINT: "${IDAM_OVERRIDE_URL:-http://idam:5000}/session/:token"
       IDAM_OAUTH2_AW_CLIENT_SECRET: ccd_admin_secret
       IDAM_SERVICE_NAME: ccd_admin
       IDAM_OAUTH2_CLIENT_ID : ccd_admin
-      ADMINWEB_LOGIN_URL: "${IDAM_OVERRIDE_URL:-http://localhost:5000}/login"
+      ADMINWEB_LOGIN_URL: "${IDAM_PUBLIC_OVERRIDE:-http://localhost:9002}/login"
       ADMINWEB_IMPORT_URL: http://ccd-definition-store-api:4451/import
       ADMINWEB_JURISDICTIONS_URL : http://ccd-definition-store-api:4451/api/data/jurisdictions
       ADMINWEB_USER_PROFILE_URL : http://ccd-user-profile-api:4453/users

@@ -21,13 +21,14 @@ services:
       SERVICES_CCD_DATA_STORE_API: http://ccd-data-store-api:4452
       SERVICES_IDAM_API_URL: "${IDAM_OVERRIDE_URL:-http://idam:5000}"
       SERVICES_IDAM_CLIENT_ID: "${BEFTA_OAUTH2_CLIENT_ID_OF_XUIWEBAPP:-xuiwebapp}"
-      SERVICES_IDAM_LOGIN_URL: "${IDAM_OVERRIDE_URL:-http://localhost:5000}"
+      SERVICES_IDAM_LOGIN_URL: "${IDAM_PUBLIC_OVERRIDE:-http://localhost:9002}"
       SERVICES_IDAM_INDEX_URL: /
       SERVICES_IDAM_OAUTH_CALLBACK_URL: /oauth2/callback
       SERVICES_S2S: http://service-auth-provider-api:8080
       REDISCLOUD_URL: http://localhost:6780
       SYSTEM_USER_NAME: "dummy"
       SYSTEM_USER_PASSWORD: "dummy"
+      SERVICES_ROLE_ASSIGNMENT_API: http://am-role-assignment-service:4096
 
       HEALTH_CCD_COMPONENT_API: http://ccd-api-gateway:3453/health
       HEALTH_CCD_DATA_API: http://ccd-data-store-api:4452/health
@@ -44,6 +45,8 @@ services:
       - ccd-data-store-api
     networks:
       - ccd-network
+    volumes:
+      - ./../secrets:/mnt/secrets:ro
 
 networks:
   ccd-network:

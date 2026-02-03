@@ -2,6 +2,13 @@
 It's possible to disable the Idam-sim containers and run CCD with either full Idam containers provided by the `sidam.yml` file or using the `IDAM_OVERRIDE_URL` environment variable to point services towards an external IDAM instance.
 This is useful for covering situations that the simulator cannot cover adequetly.
 
+> [!WARNING]
+> Be aware that running the full IDAM stack requires significantly more system resources. We recommend at a minimum:
+> 
+> | Memory   | CPU   |
+> | :------: | :---: |
+> | 12+ GB   | 6+    |
+
 ## Table of Contents
 
 - [Run Full Idam Container Stack locally - SIDAM](#run-full-idam-container-stack-locally---sidam)
