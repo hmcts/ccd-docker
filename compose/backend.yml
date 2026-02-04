@@ -45,6 +45,11 @@ services:
       ELASTIC_SEARCH_ENABLED: "${ES_ENABLED_DOCKER}"
       ELASTIC_SEARCH_HOST: "ccd-elasticsearch"
       ELASTIC_SEARCH_FAIL_ON_IMPORT: "true"
+      ### other env vars can be added here as needed #############
+      # ENABLE_CASE_GROUP_ACCESS: "true"
+      # LOGGING_LEVEL_UK_GOV_HMCTS_CCD: "DEBUG"
+      # DEFINITION_STORE_TX_TIMEOUT_DEFAULT: 120  # in seconds
+      ############################################################
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
       # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
     ports:
@@ -72,7 +77,7 @@ services:
       DATA_STORE_DB_USE_SSL: "${DB_USE_SSL}"
       DATA_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DATA_STORE}"
       DATA_STORE_TOKEN_SECRET: iuasbcuasdcbasdgcasdgcuysachjsacyasdgjcgasdj
-      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps,aac_manage_case_assignment,xui_webapp,ccd_case_document_am_api,am_role_assignment_service,ccd_next_hearing_date_updater,hmc_cft_hearing_service,cft_hearing_service
+      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps,aac_manage_case_assignment,xui_webapp,ccd_case_document_am_api,am_role_assignment_service,ccd_next_hearing_date_updater,hmc_cft_hearing_service,cft_hearing_service,web-ui
       DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
       IDAM_USER_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}" # For backward compatibility with older images
@@ -96,6 +101,12 @@ services:
       MIGRATIONS_ENDPOINT_ENABLED: "${MIGRATIONS_ENDPOINT_ENABLED:-true}"
       REFERENCE_DATA_API_URL: "${REFERENCE_DATA_API_URL:-http://ccd-test-stubs-service:5555}"
       ROLE_ASSIGNMENT_URL: "${ROLE_ASSIGNMENT_URL:-http://am-role-assignment-service:4096}"
+      ### other env vars can be added here as needed #############
+      # ENABLE_CASE_GROUP_ACCESS_FILTERING: "true"
+      # DATA_STORE_TX_TIMEOUT_DEFAULT: 120   # in seconds
+      # LOGGING_LEVEL_UK_GOV_HMCTS_CCD: "DEBUG"
+      #
+      ############################################################
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
       # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
     ports:
@@ -190,6 +201,10 @@ services:
       MICROSERVICEKEYS_TS_TRANSLATION_SERVICE: "${IDAM_KEY_TS_TRANSLATION_SERVICE}"
       MICROSERVICEKEYS_CCD_NEXT_HEARING_DATE_UPDATER: "${IDAM_KEY_NEXT_HEARING_UPDATER}"
       TESTING_SUPPORT_ENABLED: "true"
+      ### other microservice keys can be added here as needed ###
+      # MICROSERVICEKEYS_RD_PROFESSIONAL_API: "${IDAM_KEY_CCD_GATEWAY}"
+      # MICROSERVICEKEYS_RD_USER_PROFILE_API: "${IDAM_KEY_CCD_GATEWAY}"
+      # MICROSERVICEKEYS_AM_ORG_ROLE_MAPPING_SERVICE: "${IDAM_KEY_AM_ORG_ROLE_MAPPING:-AAAAAAAAAAAAAAAA}"
     networks:
       - ccd-network
 
