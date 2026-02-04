@@ -2,7 +2,7 @@
 
 USERNAME=${1:-ccd.docker.default@hmcts.net}
 PASSWORD=${2:-Pa55word11}
-IDAM_URI=${IDAM_OVERRIDE_URL:-http://localhost:5000}
+IDAM_URI=${IDAM_API_BASE_URL:-http://localhost:5000}
 REDIRECT_URI="http://localhost:3451/oauth2redirect"
 CLIENT_ID=${3:-ccd_gateway}
 CLIENT_SECRET=${4:-ccd_gateway_secret}

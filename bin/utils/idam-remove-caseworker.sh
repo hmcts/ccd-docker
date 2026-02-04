@@ -6,7 +6,7 @@
 
 remove_user_request() {
   response=$(curl --insecure --show-error --silent --output /dev/null --write-out "%{http_code}" -X DELETE \
-    "${IDAM_OVERRIDE_URL:-http://localhost:5000}"/testing-support/accounts/"${email}")
+    "${IDAM_API_BASE_URL:-http://localhost:5000}"/testing-support/accounts/"${email}")
   echo "$response"
 }
 

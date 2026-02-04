@@ -36,7 +36,7 @@ services:
       DEFINITION_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DEFINITION_STORE}"
       DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin,aac_manage_case_assignment,ccd_case_disposer
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
-      IDAM_USER_URL: "${IDAM_OVERRIDE_URL:-http://idam:5000}"
+      IDAM_USER_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
       IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
       REFORM_SERVICE_NAME: ccd-definition-store-api
       REFORM_TEAM: ccd
@@ -75,9 +75,9 @@ services:
       DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps,aac_manage_case_assignment,xui_webapp,ccd_case_document_am_api,am_role_assignment_service,ccd_next_hearing_date_updater,hmc_cft_hearing_service,cft_hearing_service
       DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
-      IDAM_USER_URL: "${IDAM_OVERRIDE_URL:-http://idam:5000}" # For backward compatibility with older images
-      IDAM_API_BASE_URL: "${IDAM_OVERRIDE_URL:-http://idam:5000}"
-      IDAM_OIDC_URL: "${IDAM_OVERRIDE_URL:-http://idam:5000}"
+      IDAM_USER_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}" # For backward compatibility with older images
+      IDAM_API_BASE_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
+      IDAM_OIDC_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
       IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
       IDAM_OAUTH2_DATA_STORE_CLIENT_SECRET: idam_data_store_client_secret
       REFORM_SERVICE_NAME: ccd-data-store-api
@@ -128,10 +128,10 @@ services:
        ROLE_ASSIGNMENT_IDAM_KEY:
        ROLE_ASSIGNMENT_TOKEN_SECRET:
        ROLE_ASSIGNMENT_S2S_AUTHORISED_SERVICES: ccd_gw,am_role_assignment_service,am_org_role_mapping_service,wa_task_management_api,xui_webapp,ccd_data,aac_manage_case_assignment,hmc_cft_hearing_service,cft_hearing_service
-       IDAM_USER_URL: "${IDAM_OVERRIDE_URL:-http://idam:5000}"
+       IDAM_USER_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
        IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
-       OPEN_ID_API_BASE_URI: "${IDAM_OVERRIDE_URL:-http://idam:5000}/o"
-       OIDC_ISSUER_URL: "${IDAM_OVERRIDE_URL:-http://idam:5000}/openam/oauth2/hmcts"
+       OPEN_ID_API_BASE_URI: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}/o"
+       OIDC_ISSUER_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}/openam/oauth2/hmcts"
        ROLE_ASSIGNMENT_IDAM_CLIENT_ID: am_role_assignment
        ROLE_ASSIGNMENT_IDAM_CLIENT_SECRET: am_role_assignment_secret
        ROLE_ASSIGNMENT_IDAM_ADMIN_USERID: role.assignment.admin@gmail.com
@@ -210,7 +210,7 @@ services:
     build: ../idam-health
     tty: true
     healthcheck:
-      test: ["CMD", "curl", "-f", "${IDAM_OVERRIDE_URL:-http://idam:5000}/health"]
+      test: ["CMD-SHELL", "curl -f ${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}/health || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 15

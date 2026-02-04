@@ -47,7 +47,7 @@ services:
       CFT_HEARING_SERVICE_URL: "${CFT_HEARING_SERVICE_URL:-http://hmc-cft-hearing-service:4561}"
       HMC_SERVICE_BUS_QUEUE: "${HMC_SERVICE_BUS_INBOUND_QUEUE}"
       HMC_SERVICE_BUS_CONNECTION_STRING: "${HMC_SERVICE_BUS_INBOUND_CONNECTION_STRING}"
-      IDAM_API_URL: "${IDAM_OVERRIDE_URL:-http://localhost:5000}"
+      IDAM_API_URL: "${IDAM_API_BASE_URL:-http://localhost:5000}"
       REFORM_SERVICE_NAME: hmc-hmi-inbound-adapter
       REFORM_ENVIRONMENT: local
       S2S_URL: "${S2S_URL:-http://service-auth-provider-api:8080}"
@@ -101,10 +101,10 @@ services:
       HMC_SERVICE_BUS_CONNECTION_STRING: "${HMC_SERVICE_BUS_CONNECTION_STRING}"
       HMC_SERVICE_BUS_TOPIC: "${HMC_SERVICE_BUS_TOPIC}"
       HMC_SERVICE_BUS_SUBSCRIPTION: "${HMC_SERVICE_BUS_SUBSCRIPTION}"
-      IDAM_API_URL: "${IDAM_OVERRIDE_URL:-http://idam:5000}"
-      IDAM_API_BASE_URL: "${IDAM_OVERRIDE_URL:-http://idam:5000}"
+      IDAM_API_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
+      IDAM_API_BASE_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
       IDAM_OAUTH2_DATA_STORE_CLIENT_SECRET: idam_data_store_client_secret
-      IDAM_OIDC_URL: "${IDAM_OVERRIDE_URL:-http://idam:5000}"
+      IDAM_OIDC_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
       IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
       SCOPE: "${SCOPE}"
       S2S_URL: "${SERVICE_AUTH_PROVIDER_API_BASE_URL:-http://service-auth-provider-api:8080}"

@@ -1,5 +1,5 @@
 # Idam Alternative Configurations
-It's possible to disable the Idam-sim containers and run CCD with either full Idam containers provided by the `sidam.yml` file or using the `IDAM_OVERRIDE_URL` environment variable to point services towards an external IDAM instance.
+It's possible to disable the Idam-sim containers and run CCD with either full Idam containers provided by the `sidam.yml` file or using the `IDAM_API_BASE_URL` environment variable to point services towards an external IDAM instance.
 This is useful for covering situations that the simulator cannot cover adequetly.
 
 > [!WARNING]
@@ -90,9 +90,12 @@ instead of using the simulator
 ```bash
 export IDAM_FULL_ENABLED=true
 ```
-And if we are changing the port that IDAM will be using then we should also run
+And **only** if we are changing the port that IDAM will be using then we should also run
 ```bash
-export IDAM_OVERRIDE_URL=http://localhost:5000
+# used by services running outside docker-compose network
+export IDAM_API_BASE_URL=http://localhost:some-other-port
+# used by services running inside docker-compose network
+export IDAM_INTERNAL_API_BASE_URL=http://idam:some-other-port
 ```
 
 Here is an example of the process of switching between the two
@@ -110,8 +113,9 @@ Here is an example of the process of switching between the two
 
 # tell scripts to use full idam stack logic
 export IDAM_FULL_ENABLED=true
-# ONLY IF NEEDED - export to override IDAM url 
-export IDAM_OVERRIDE_URL=http://localhost:5000
+# ONLY IF NEEDED - export to override IDAM port
+export IDAM_API_BASE_URL=http://localhost:some-other-port
+export IDAM_INTERNAL_API_BASE_URL=http://idam:some-other-port
 
 # start with Full Idam Container Stack
 ./ccd compose up -d
@@ -263,10 +267,11 @@ or just revert to the default:
 ./ccd enable default
 ```
 
-#### Step 2 - Unset environment variables for IDAM overrides
+#### Step 2 - Reset environment variables for IDAM simulator
 ```bash
 unset IDAM_FULL_ENABLED
-unset IDAM_OVERRIDE_URL
+export IDAM_API_BASE_URL=http://localhost:5000
+unset IDAM_INTERNAL_API_BASE_URL
 ```
 > [!WARNING] 
 > Always use `compose up` rather than `compose start` when switching between Idam and Idam Stub to have docker compose pick up env vars changes.
@@ -278,29 +283,39 @@ unset IDAM_OVERRIDE_URL
 in the '.env' file, uncomment the entries below and use your custom idam url:
 
 ```yaml
+# uncomment to use full IDAM scripts
 #IDAM_FULL_ENABLED=true
-#IDAM_OVERRIDE_URL=http://some-other-idam-instance:5000
+# uncomment and modify to use different IDAM instance
+#IDAM_API_BASE_URL=http://some-other-idam-instance:5000
+#IDAM_INTERNAL_API_BASE_URL=http://some-other-idam-instance:5000
 ```
 
 To allow some scripts to work properly you also may need to export the same variable:
 
 ```bash
 export IDAM_FULL_ENABLED=true
-export IDAM_OVERRIDE_URL=http://some-other-idam-instance:5000
+# used by services running outside docker-compose network
+export IDAM_API_BASE_URL=http://some-other-idam-instance:5000
+# used by services running inside docker-compose network
+export IDAM_INTERNAL_API_BASE_URL=http://some-other-idam-instance:5000
 ```
 ## Revert to Idam Simulator
 
-in the '.env' file, re-comment the entry from before:
+in the '.env' file, re-comment the entries from before:
 
 ```yaml
+# uncomment to use full IDAM scripts
 IDAM_FULL_ENABLED=true
-IDAM_OVERRIDE_URL=http://some-other-idam-instance:5000
+# uncomment and modify to use different IDAM instance
+IDAM_API_BASE_URL=http://some-other-idam-instance:5000
+IDAM_INTERNAL_API_BASE_URL=http://some-other-idam-instance:5000
 ```
 
-And remember to unset 'IDAM_OVERRIDE_URL' when switching back to the Idam-sim, otherwise it may cause issues
+And remember to unset 'IDAM_FULL_ENABLED' and fix the IDAM_API_BASE_URL when switching back to the Idam-sim, otherwise it may cause issues
 ```bash
 unset IDAM_FULL_ENABLED
-unset IDAM_OVERRIDE_URL
+export IDAM_API_BASE_URL=http://localhost:5000
+unset IDAM_INTERNAL_API_BASE_URL
 ```
 
 # Troubleshooting full IDAM stack

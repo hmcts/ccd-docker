@@ -140,7 +140,7 @@ Any invalid input file will be skipped (i.e. due to missing or incorrect mandato
 When running the script you will be prompted for which environment to use (default being 'local'). This translates to the idam api url to use i.e.:
 
 prod = https://idam-api.platform.hmcts.net
-local = environment variable IDAM_OVERRIDE_URL if present otherwise http://localhost:5000
+local = environment variable IDAM_API_BASE_URL if present otherwise http://localhost:5000
 other = https://idam-api.${other}.platform.hmcts.net
 
 ## Production setup / user guide

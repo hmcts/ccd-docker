@@ -13,8 +13,9 @@
 ## Additional Documentation
 - [Azure Setup Guide](/docs/Azure.md)
 - [Containers explained](/docs/Containers.md)
-- [Idam Alternatives](/docs/IdamAlt.md)
+- [IDAM Alternatives](/docs/IdamAlt.md)
 - [Running on Apple Silicon (ARM64)](/docs/AppleSilicon.md)
+- [Windows Subsystem for Linux configuration](/docs/WSL.md)
 - [Migrate PostgreSQL database to latest](/docs/PostgresUpgrade.md)
 - [License](/LICENSE.md)
 
@@ -26,9 +27,11 @@
   > [!Note]
   > *Once docker is installed, increase the memory and CPU allocations (Docker -> Preferences -> Advanced) to at least the following minimum values for successful execution of ccd applications altogether:*
   >
-  > | Memory   | CPU   |
-  > | :------: | :---: |
-  > | 7+ GB   | 4+    |
+  > | *Resources* | Memory   | CPU<sup>s</sup>  |
+  > | :---: | :------: | :---: |
+  > | Minimum | 7+ GB   | 4+    |
+  > | Full IDAM + XUI | 12+ GB | 6+ |
+  > | Reccomended | 14+ GB | 7+ |
   >
   > For Windows Subsystem for Linux (WSL & WSL2) users [see this page](./docs/WSL.md) for how to do this.
 

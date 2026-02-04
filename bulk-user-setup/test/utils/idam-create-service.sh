@@ -16,7 +16,7 @@ apiToken=$(${dir}/../../../bin/utils/idam-authenticate.sh "${IDAM_ADMIN_USER}" "
 echo -e "\nCreating service with:\nLabel: ${LABEL}\nClient ID: ${CLIENT_ID}\nClient Secret: ${CLIENT_SECRET}\nRedirect URL: ${REDIRECT_URL}\n"
 
 STATUS=$(curl --silent --output /dev/null --write-out '%{http_code}' -X POST -H 'Content-Type: application/json' -H "Authorization: AdminApiAuthToken ${apiToken}" \
-  ${IDAM_OVERRIDE_URL:-http://localhost:5000}/services \
+  ${IDAM_API_BASE_URL:-http://localhost:5000}/services \
   -d '{
     "allowedRoles": [],
     "description": "'${LABEL}'",
