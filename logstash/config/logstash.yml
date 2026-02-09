@@ -1,4 +1,5 @@
 dead_letter_queue.enable: true
+pipeline.ecs_compatibility: disabled
 queue.type: persisted
 xpack.monitoring.elasticsearch.hosts: ${ES_HOSTS}
 xpack.monitoring.enabled: ${XPACK_MONITORING_ENABLED}
