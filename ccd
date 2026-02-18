@@ -6,6 +6,17 @@ WORKSPACE_ROOT=".workspace"
 # Build related
 GRADLE_ASSEMBLE_CMD="./gradlew assemble"
 
+function askYesNo() {
+    while true; do
+        read -n 1 -s yn
+        case $yn in
+            y|Y) eval "$1"; break ;;
+            n|N)  eval "$2"; break ;;
+            *)     echo "Please answer yes (y) or no (n)." ;;
+        esac
+    done
+}
+
 function project_config() {
     project=$1
     config=$2
@@ -115,14 +126,8 @@ function project_config() {
             envPrefix="AM_ROLE_ASSIGNMENT_SERVICE"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
-        ccd-definition-designer-api|definition-designer-api|definition-designer|def-design|designer)
-            name=ccd-definition-designer-api
-            repository="git@github.com:hmcts/ccd-definition-designer-api.git"
-            envPrefix="CCD_DEFINITION_DESIGNER_API"
-            buildCommand=$GRADLE_ASSEMBLE_CMD
-            ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-definition-designer-api, ccd-case-document-am-api, ts-translation-service, ccd-next-hearing-date-updater, hearing-service, operational-reports, outbound-adapter, inbound-adapter"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-case-document-am-api, ts-translation-service, ccd-next-hearing-date-updater, hearing-service, operational-reports, outbound-adapter, inbound-adapter"
             exit 1 ;;
     esac
     case $config in
@@ -409,6 +414,7 @@ function usage() {
     echo "Usage: $(basename $0) <command> [options]"
     echo
     echo "Commands:"
+    echo "  default - setup default compose files and run them for linux/mac"
     echo "  set <project> <branch> [file://local_repository_path] - override and build project"
     echo "  unset <project...> - remove project override(s)"
     echo "  branches <project...> - list available branches"
@@ -419,6 +425,17 @@ function usage() {
     echo "  compose [<docker-compose command> [options]] - wrap docker compose for your configuration"
     echo
     exit 1
+}
+
+function usage_default() {
+    if [ $# -gt 1 ] || ([ $# -eq 1 ] && [ "$1" != "idam" ] && [ "$1" != "xui" ]); then
+        echo "Setup default compose files and run them for linux/mac. Usage:"
+        echo "$(basename $0) default            # setup default compose files with idam simulator"
+        echo "$(basename $0) default idam       # setup default compose files with full idam stack"
+        echo "$(basename $0) default xui        # setup default compose files with idam sim + xui-frontend"
+        echo
+        exit 1
+    fi
 }
 
 function usage_set() {
@@ -546,6 +563,8 @@ function ccd_enable_show() {
             echo $compose_file
         done | sort
         echo
+    else
+        echo "No active compose files, using defaults."
     fi
     echo "Default compose files:"
     for compose_file in $(default_compose_files)
@@ -652,13 +671,10 @@ function ccd_compose() {
 
 function print_warn_on_compose_down_if_idam_enabled {
     if [[ $(active_compose_files) == *"sidam"* ]] && [[ $1 = "down" ]]; then
-        read -p "WARNING - 'down' will remove Idam data. Use 'stop' to preserve data. Or if you intended to remove only CCD containers, disable Idam
-        compose files first. Do you want to continue?" yn
-        case $yn in
-            [Yy]* ) ;;
-            [Nn]* ) exit;;
-            * ) echo "Please answer yes or no.";;
-        esac
+        echo "WARNING - 'down' will remove Idam data. Use 'stop' to preserve data. Or if you intended to remove only CCD containers, disable Idam
+        compose files first. Do you want to continue?"
+
+        askYesNo "break" "exit"
     fi
 }
 
@@ -666,6 +682,144 @@ function ccd_login() {
     #docker logout hmctspublic.azurecr.io &>/dev/null
     az acr login --name hmctspublic --subscription DCD-CNP-Prod
     az acr login --name hmctsprivate --subscription DCD-CNP-Prod
+}
+
+function echo_ccd() {
+    echo -e "\033[34mCCD ::--\033[0m $@" # blue
+}
+
+function echo_error() {
+    echo -e "\033[1;91mERROR ::--\033[0m $@" # red
+}
+
+function ccd_default() {
+    usage_default $*
+    
+    echo -e "\033[34m" # set blue
+    echo "-----------------------------------------------------------------"
+    echo "   _____ _____ _____     ____   ___   ____  _  _______ ____"
+    echo "  / ____/ ____|  __ \\   |  _ \\ / _ \\ / ___|| |/ / ____|  _ \\"
+    echo " | |   | |    | |  | |  | | | | | | | |    | ' /|  _| | |_) |"
+    echo " | |___| |____| |__| |  | |_| | |_| | |___ | . \\| |___|  _ <"
+    echo "  \\_____\\_____|_____/   |____/ \\___/ \\____||_|\\_\\_____|_| \\_\\"
+    echo "-----------------------------------------------------------------"
+    echo -e "\033[0m"  # reset color
+
+    if [ "$1" == "idam" ]; then
+        echo_ccd "Starting default CCD setup with full idam compose files..."
+    else
+        echo_ccd "Starting default CCD setup..."
+    fi
+
+
+    echo_ccd "Looking for azure cli installation..."
+    if ! command -v az >/dev/null 2>&1; then
+        echo_error "Azure CLI is not installed. Please install it from: https://learn.microsoft.com/cli/azure/install-azure-cli"
+        exit 1
+    fi
+    echo_ccd "Azure CLI installation found."
+
+    # Check if user is already logged in
+    if az account show >/dev/null 2>&1; then
+        echo_ccd "Skipping Azure login as already logged in..."
+    else
+        echo_ccd "Logging in to Azure..."
+        if ! az login >/dev/null 2>&1; then
+            echo_error "Azure CLI login failed. Please run 'az login' manually. "
+            exit 1
+        fi
+        echo_ccd "Azure CLI login succeeded."
+    fi
+    
+    echo_ccd "Logging into CCD container registries..."
+    if ! ccd_login >/dev/null; then
+        echo_error "CCD container registry login issues detected. Diagnosing..."
+        az acr check-health -n hmctspublic --yes
+        exit 1
+    fi
+
+    echo_ccd "Setting up default environment variables..."
+    source ./bin/set-environment-variables.sh &>/dev/null
+
+    compose_file_options=$(create_compose_file_options) >/dev/null
+    if docker-compose $compose_file_options ps --services --filter status=running | grep -q . >/dev/null; then
+        echo_ccd "Compose containers currently running running."
+        echo_ccd "Do you wish to remove existing containers and volumes? (y/n)"
+        askYesNo "docker-compose $compose_file_options down -v &>/dev/null; echo_ccd Containers and volumes removed." "echo_ccd Existing containers and volumes preserved."
+    fi
+    compose_file_options="" # reset variable
+
+    echo_ccd "Enabling default compose files..."
+    ccd_enable defaults >/dev/null
+    
+    # unset backend
+    echo_ccd "Resetting existing backend ccd container config..."
+    ccd_unset ccd-user-profile-api ccd-definition-store-api ccd-data-store-api am-role-assignment-service service-auth-provider-api ccd-test-stubs-service >/dev/null
+    
+    # unset frontend
+    echo_ccd "Resetting existing frontend ccd container config..."
+    ccd_unset ccd-api-gateway ccd-admin-web >/dev/null
+    
+    # unset sidam
+    echo_ccd "Resetting existing idam related container config..."
+    ccd_unset idam-sim fr-am fr-idm shared-db smtp-server idam-api idam-web-public idam-web-admin >/dev/null
+
+    if [ "$1" == "idam" ]; then
+        echo_ccd "Enable default stack with full idam compose files..."
+        ccd_enable backend frontend sidam >/dev/null
+    fi
+
+    if [ "$1" == "xui" ]; then
+        echo_ccd "Enable default stack with idam simulator and xui frontend compose files..."
+        ccd_enable backend frontend idam-sim xui-frontend >/dev/null
+    fi
+
+    compose_file_options=$(create_compose_file_options) >/dev/null
+    echo_ccd "Pulling latest images..."
+    if ! docker-compose $compose_file_options pull; then
+        echo_error "Failed to pull latest images. Continue anyways? (y/n)"
+        askYesNo "echo_ccd Continuing despite pull failures." "exit 1"
+    fi
+
+    echo_ccd "Initializing ccd network..."
+    ccd_init &>/dev/null # will either create or already exists
+
+    echo_ccd "Starting up services..."
+    if ! docker compose $compose_file_options up -d >/dev/null; then
+        echo_error "Failed to start some containers please check logs."
+        exit 1
+    fi
+
+    echo_ccd "Waiting 30 seconds for services to finish spinning up..."
+    sleep 30
+
+    if [ "$1" == "idam" ]; then
+        echo_ccd "Setting IDAM_FULL_ENABLED to true for scripts..."
+        export IDAM_FULL_ENABLED=true
+
+        echo_ccd "\033[33m[--------------------] 0% Complete\033[0m - Adding IDAM clients..."
+        ./bin/add-idam-clients.sh &>/dev/null || { echo_error "IDAM clients failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[33m[####----------------] 20% Complete\033[0m - Adding IDAM roles..."
+        ./bin/add-idam-roles.sh &>/dev/null || { echo_error "IDAM roles failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[33m[########------------] 40% Complete\033[0m - Adding users..."
+        ./bin/add-users.sh &>/dev/null || { echo_error "Users failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[33m[############--------] 60% Complete\033[0m - Adding ccd roles..."
+        ./bin/add-ccd-roles.sh &>/dev/null || { echo_error "Roles failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[33m[################----] 80% Complete\033[0m - Adding role assignments..."
+        ./bin/add-role-assignments.sh &>/dev/null || { echo_error "Role assignments failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[32m[####################] 100% Complete\033[0m - Setup complete!"
+    else
+        unset IDAM_FULL_ENABLED
+        echo_ccd "\033[33m[--------------------] 0% Complete\033[0m - Adding users..."
+        ./bin/add-users.sh &>/dev/null || { echo_error "Users failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[33m[######--------------] 33% Complete\033[0m - Adding ccd roles..."
+        ./bin/add-ccd-roles.sh &>/dev/null || { echo_error "Roles failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[33m[##############------] 66% Complete\033[0m - Adding role assignments..."
+        ./bin/add-role-assignments.sh &>/dev/null || { echo_error "Role assignments failed to apply correctly." ; exit 1; }
+        echo_ccd "\033[32m[####################] 100% Complete\033[0m - Setup complete!"
+    fi
+
+    exit 1
 }
 
 if [ $# -lt 1 ]; then
@@ -704,6 +858,9 @@ case $command in
         ;;
     login)
         ccd_login
+        ;;
+    default|defaults)
+        ccd_default $*
         ;;
     *)
         usage

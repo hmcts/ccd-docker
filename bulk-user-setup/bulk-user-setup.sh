@@ -11,7 +11,7 @@ function get_idam_url() {
       url="https://idam-api.platform.hmcts.net"
     elif [ "$ENV" == "local" ]
     then
-      url="http://localhost:5000"
+      url="${IDAM_API_BASE_URL:-http://localhost:5000}"
     else
       url="https://idam-api.${ENV}.platform.hmcts.net"
     fi

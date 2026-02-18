@@ -25,10 +25,9 @@ case $classification in
     exit 1 ;;
 esac
 
-binFolder=$(dirname "$0")
-
-userToken="$(${binFolder}/utils/idam-user-token.sh)"
-serviceToken="$(${binFolder}/utils/lease-service-token.sh ccd_gw)"
+dir=$(dirname "$0")
+userToken="$(${dir}/utils/idam-user-token.sh)"
+serviceToken="$(${dir}/utils/lease-service-token.sh ccd_gw)"
 
 curl -XPUT \
   http://localhost:4451/api/user-role \
