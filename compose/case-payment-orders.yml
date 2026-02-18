@@ -1,0 +1,31 @@
+services:
+  case-payment-orders-api:
+    image: "hmctspublic.azurecr.io/cpo/case-payment-orders-api:${CASE_PAYMENT_ORDERS_API_TAG:-latest}"
+    container_name: case-payment-orders-api
+    environment:
+      SERVER_PORT: 4457
+      CPO_CASE_PAYMENT_ORDERS_DB_HOST: ccd-shared-database
+      CPO_CASE_PAYMENT_ORDERS_DB_PORT: 5432
+      CPO_CASE_PAYMENT_ORDERS_DB_NAME: cpo_case_payment_orders
+      CPO_CASE_PAYMENT_ORDERS_DB_USERNAME: ${DB_USERNAME}
+      CPO_CASE_PAYMENT_ORDERS_DB_PASSWORD: ${DB_PASSWORD}
+      CPO_S2S_AUTHORISED_SERVICES: xui_webapp,payment_app
+      IDAM_API_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
+      IDAM_OIDC_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
+      S2S_URL: http://service-auth-provider-api:8080
+      # override default 'xui_webapp' permissions with values that support the FTA tests
+      S2S_AUTHORIZATIONS_XUI_ID: xui_webapp
+      S2S_AUTHORIZATIONS_XUI_PERMISSION: CRUD
+    ports:
+      - 4457:4457
+    depends_on:
+      ccd-shared-database:
+        condition: service_healthy
+      idam-healthcheck:
+        condition: service_healthy
+    networks:
+      - ccd-network
+
+networks:
+  ccd-network:
+    external: true
