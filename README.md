@@ -60,9 +60,13 @@ Run the following command to setup using default services/configuration and simu
 ```bash
 ./ccd default
 ```
-Run the following command to setup using default services/configuration and the full idam stack 
+OR Run the following command to setup using default services/configuration and the full idam stack 
 ```bash
 ./ccd default idam
+```
+OR Run the following command to setup using default services/configuration and simulated idam plus xui frontend
+```bash
+./ccd default xui
 ```
 After command is run if no extra changes need to be made then you should be good 
 to go and can skip the rest.
