@@ -209,7 +209,7 @@ if [ "${ENVIRONMENT:-local}" != "local" ]; then
   exit 0;
 fi
 
-IDAM_URL="http://localhost:5000"
+IDAM_URL=${IDAM_API_BASE_URL:-http://localhost:5000}
 IDAM_ACCESS_TOKEN=$(get_idam_token)
 check_exit_code_for_error $? "$IDAM_ACCESS_TOKEN"
 
