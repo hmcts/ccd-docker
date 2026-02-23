@@ -126,8 +126,17 @@ function project_config() {
             envPrefix="AM_ROLE_ASSIGNMENT_SERVICE"
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
+        case-payment-orders|case-payment-orders-api)
+            name=cpo-case-payment-orders-api
+            repository="git@github.com:hmcts/cpo-case-payment-orders-api.git"
+            envPrefix="CPO_CASE_PAYMENT_ORDERS_API"
+            buildCommand=$GRADLE_ASSEMBLE_CMD
+            ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-case-document-am-api, ts-translation-service, ccd-next-hearing-date-updater, hearing-service, operational-reports, outbound-adapter, inbound-adapter"
+            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, "
+            echo "   xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-case-document-am-api,"
+            echo "   ts-translation-service, ccd-next-hearing-date-updater, hearing-service, operational-reports, outbound-adapter,"
+            echo "   inbound-adapter, case-payment-orders-api"
             exit 1 ;;
     esac
     case $config in
@@ -330,11 +339,16 @@ function docker_build() {
           (cd $workspace && docker build . -t hmc/operational-reports-runner:$tagName || exit $?)
     fi
 
+    if [[ $project == "case-payment-orders" || $project == "case-payment-orders-api" ]]; then
+          (cd $workspace && docker build . -t cpo/case-payment-orders-api:$tagName || exit $?)
+    fi
+
     if [[ $project != "xui-manage-cases" && $project != "am-role-assignment-service"
     && $project != "ts-translation-service" && $project != "ccd-next-hearing-date-updater"
     && $project != "hearing-service" && $project != "cft-hearing-service"
     && $project != "operational-reports" && $project != "reports-runner" 
-    && $project != "outbound-adapter" && $project != "inbound-adapter" ]]; then
+    && $project != "outbound-adapter" && $project != "inbound-adapter" 
+    && $project != "case-payment-orders" && $project != "case-payment-orders-api" ]]; then
       (cd $workspace && docker build . -t ccd/$imageName:$tagName || exit $?)
     fi
 
