@@ -33,6 +33,7 @@ services:
       ADMINWEB_IMPORT_AUDITS_URL : http://ccd-definition-store-api:4451/api/import-audits
       ADMINWEB_ELASTIC_INDEX_URL : http://ccd-definition-store-api:4451/elastic-support/index
       ADMINWEB_GET_DICTIONARY_URL: http://ts-translation-service:4650/dictionary
+      ADMINWEB_REINDEX_TASKS_URL: http://ccd-definition-store-api:4451/elastic-support/reindex/tasks
       ADMINWEB_ROLES_WHITELIST : "ccd-import,ccd-import-validate"
       APPINSIGHTS_INSTRUMENTATIONKEY: key
     ports:
