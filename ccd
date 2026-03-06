@@ -133,11 +133,9 @@ function project_config() {
             buildCommand=$GRADLE_ASSEMBLE_CMD
             ;;
         *)
-            echo "Project must be one of: ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, "
-            echo "   xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-case-document-am-api,"
-            echo "   ts-translation-service, ccd-next-hearing-date-updater, hearing-service, operational-reports, outbound-adapter,"
-            echo "   inbound-adapter, case-payment-orders-api"
-            exit 1 ;;
+            echo "Project must be one of ccd-data-store-api, ccd-definition-store-api, ccd-user-profile-api, ccd-api-gateway, xui-manage-cases, ccd-message-publisher, ccd-case-disposer, ccd-admin-web, dm-store, ccd-case-document-am-api, ts-translation-service, ccd-next-hearing-date-updater, hearing-service, operational-reports, outbound-adapter, inbound-adapter, case-payment-orders-api"
+            exit 1 
+            ;;
     esac
     case $config in
         name)
