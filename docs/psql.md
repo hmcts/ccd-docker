@@ -1,10 +1,10 @@
-# psql / libpq
+# PSQL / LIBPQ
 One of the requirements for running the scripts is haivng 
 
 ## For Mac: 
 Make sure you have homebrew installed
 ```bash
- command -v psql
+ command -v brew
  ```
  If it **ISN'T** installed then install it using the instrucitons here https://brew.sh/
 _____
