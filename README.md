@@ -19,7 +19,7 @@
 - [Migrate PostgreSQL database to latest](/docs/PostgresUpgrade.md)
 - [License](/LICENSE.md)
 
-## Prerequisites
+## Prerequisites 
 
 - [JDK 17](https://openjdk.java.net/projects/jdk/17/)
 - [Docker](https://www.docker.com)
@@ -37,9 +37,14 @@
 
 - [Azure CLI](/docs/Azure.md) - minimum version 2.0.57
 - [jq Json Processor](https://ghcr.io/jqlang/jq)
+- [psql / libpq](/docs/psql.md)
 - Mac users, set your default shell to bash 
   ```bash
   chsh -s /bin/bash
+  ```
+  If this doesn't work, then try changing it in the Terminal app's settings under
+  ```
+  General > Shells open with: > Command (complete path) > /bin/bash
   ```
 
 ## Quick start
