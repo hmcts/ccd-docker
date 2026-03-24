@@ -27,6 +27,7 @@ services:
 
   ccd-definition-store-api:
     image: "${CCD_DEFINITION_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
+    #image: hmcts/definition-store-api:local
     environment:
       DEFINITION_STORE_DB_HOST: ccd-shared-database
       DEFINITION_STORE_DB_PORT: 5432
@@ -37,6 +38,8 @@ services:
       DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin,aac_manage_case_assignment,ccd_case_disposer
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
       IDAM_USER_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
+      IDAM_OIDC_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
+      OIDC_ISSUER: ${OIDC_ISSUER:-http://localhost:5000/o}
       IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
       REFORM_SERVICE_NAME: ccd-definition-store-api
       REFORM_TEAM: ccd
@@ -55,7 +58,7 @@ services:
     ports:
       - 4451:4451
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
-      # - 5005:5005
+      # - 5006:5006
     depends_on:
       idam-healthcheck:
         condition: service_healthy
@@ -67,7 +70,8 @@ services:
       - ccd-network
 
   ccd-data-store-api:
-    image: "${CCD_DATA_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
+    #image: "${CCD_DATA_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
+    image: hmcts/data-store-api:local
     environment:
       CASE_DOCUMENT_AM_URL: http://ccd-case-document-am-api:4455
       DATA_STORE_DB_HOST: ccd-shared-database
@@ -165,7 +169,7 @@ services:
     ports:
       - 4096:4096
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
-      # - 5005:5005
+      # - 5008:5008
     depends_on:
       idam-healthcheck:
         condition: service_healthy

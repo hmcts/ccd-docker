@@ -127,13 +127,13 @@ Ignore if we get error message ccd-network already exists while running above co
   > Some users of zsh 'Oh My Zsh' experienced issues.
   > Try switching to bash by : `chsh -s /bin/bash`
 
-  Important environment notes:
+  **Important environment notes:**
   - `OIDC_ISSUER` must be derived from a real access token for the target environment. Do not guess it from the public OIDC discovery URL.
   - `CCD_CALLBACK_ALLOWED_HOSTS` is the comma-separated allow-list of HTTPS callback target hosts CCD services may call.
   - `CCD_CALLBACK_ALLOWED_HTTP_HOSTS` is the comma-separated allow-list of HTTP callback target hosts CCD services may call.
   - `CCD_CALLBACK_ALLOW_PRIVATE_HOSTS` controls whether callbacks to private or local hostnames are allowed for local development.
 
-  How to derive `OIDC_ISSUER`:
+  **How to derive `OIDC_ISSUER`:**
   - Do not guess the issuer from the public discovery URL alone.
   - Decode only the JWT payload from a real access token for the target environment and inspect the `iss` claim.
   - Do not store or document full bearer tokens. Record only the derived issuer value.
@@ -152,6 +152,17 @@ Ignore if we get error message ccd-network already exists while running above co
   - JWTs are `header.payload.signature`.
   - The second segment is base64url-encoded JSON.
   - This decodes the payload only. It does not verify the signature.
+  The following services in `ccd-docker` compose set both `IDAM_OIDC_URL` and `OIDC_ISSUER`:
+
+  | Service |
+  | --- |
+  | `ccd-data-store-api` |
+  | `ccd-definition-store-api` |
+  | `cpo-case-payment-orders-api` |
+  | `ts-translation-service` |
+  | `ccd-case-document-am-api` |
+
+  `VERIFY_OIDC_ISSUER=true` is not set in this repo's compose YAML. Use it only in service repos that include a live issuer verifier, where it enables a pre-check that fetches a real test token and fails fast if its `iss` claim does not exactly match `OIDC_ISSUER`.
   
   To persist the environment variables in Linux/Mac run the following script
   to add the script into your ~/.bash_profile.
