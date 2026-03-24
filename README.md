@@ -132,6 +132,26 @@ Ignore if we get error message ccd-network already exists while running above co
   - `CCD_CALLBACK_ALLOWED_HOSTS` is the comma-separated allow-list of HTTPS callback target hosts CCD services may call.
   - `CCD_CALLBACK_ALLOWED_HTTP_HOSTS` is the comma-separated allow-list of HTTP callback target hosts CCD services may call.
   - `CCD_CALLBACK_ALLOW_PRIVATE_HOSTS` controls whether callbacks to private or local hostnames are allowed for local development.
+
+  How to derive `OIDC_ISSUER`:
+  - Do not guess the issuer from the public discovery URL alone.
+  - Decode only the JWT payload from a real access token for the target environment and inspect the `iss` claim.
+  - Do not store or document full bearer tokens. Record only the derived issuer value.
+
+  Example:
+  ```bash
+  TOKEN='eyJ...'
+  PAYLOAD=$(printf '%s' "$TOKEN" | cut -d '.' -f2)
+  python3 - <<'PY' "$PAYLOAD"
+  import base64, json, sys
+  payload = sys.argv[1]
+  payload += '=' * (-len(payload) % 4)
+  print(json.loads(base64.urlsafe_b64decode(payload))["iss"])
+  PY
+  ```
+  - JWTs are `header.payload.signature`.
+  - The second segment is base64url-encoded JSON.
+  - This decodes the payload only. It does not verify the signature.
   
   To persist the environment variables in Linux/Mac run the following script
   to add the script into your ~/.bash_profile.
