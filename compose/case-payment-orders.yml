@@ -12,6 +12,7 @@ services:
       CPO_S2S_AUTHORISED_SERVICES: xui_webapp,payment_app
       IDAM_API_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
       IDAM_OIDC_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
+      OIDC_ISSUER: ${OIDC_ISSUER:-http://localhost:5000/o}
       S2S_URL: http://service-auth-provider-api:8080
       # override default 'xui_webapp' permissions with values that support the FTA tests
       S2S_AUTHORIZATIONS_XUI_ID: xui_webapp

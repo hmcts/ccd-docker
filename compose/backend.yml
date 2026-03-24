@@ -83,6 +83,7 @@ services:
       IDAM_USER_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}" # For backward compatibility with older images
       IDAM_API_BASE_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
       IDAM_OIDC_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
+      OIDC_ISSUER: ${OIDC_ISSUER:-http://localhost:5000/o}
       IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
       IDAM_OAUTH2_DATA_STORE_CLIENT_SECRET: idam_data_store_client_secret
       REFORM_SERVICE_NAME: ccd-data-store-api
@@ -101,6 +102,11 @@ services:
       MIGRATIONS_ENDPOINT_ENABLED: "${MIGRATIONS_ENDPOINT_ENABLED:-true}"
       REFERENCE_DATA_API_URL: "${REFERENCE_DATA_API_URL:-http://ccd-test-stubs-service:5555}"
       ROLE_ASSIGNMENT_URL: "${ROLE_ASSIGNMENT_URL:-http://am-role-assignment-service:4096}"
+      TEST_STUB_SERVICE_BASE_URL: "http://host.docker.internal:5555"
+      BEFTA_TEST_STUB_SERVICE_BASE_URL: "http://localhost:5555"
+      CCD_CALLBACK_ALLOWED_HOSTS: "localhost,127.0.0.1,host.docker.internal"
+      CCD_CALLBACK_ALLOWED_HTTP_HOSTS: "localhost,127.0.0.1,host.docker.internal"
+      CCD_CALLBACK_ALLOW_PRIVATE_HOSTS: "localhost,127.0.0.1,host.docker.internal"
       ### other env vars can be added here as needed #############
       # ENABLE_CASE_GROUP_ACCESS_FILTERING: "true"
       # DATA_STORE_TX_TIMEOUT_DEFAULT: 120   # in seconds
