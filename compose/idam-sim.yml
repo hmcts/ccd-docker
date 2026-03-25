@@ -1,6 +1,6 @@
 services:
   idam-sim:
-    image: "hmctspublic.azurecr.io/hmcts/rse/rse-idam-simulator:latest"
+    image: "hmctsprod.azurecr.io/hmcts/rse/rse-idam-simulator:latest"
     container_name: idam-sim
     ports:
       - "5000:5000"

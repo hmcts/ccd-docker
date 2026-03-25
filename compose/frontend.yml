@@ -2,7 +2,7 @@
 
 services:
   ccd-admin-web:
-    image: "${CCD_ADMIN_WEB_USE_LOCAL-hmctspublic.azurecr.io/}ccd/admin-web:${CCD_ADMIN_WEB_TAG:-latest}"
+    image: "${CCD_ADMIN_WEB_USE_LOCAL-hmctsprod.azurecr.io/}ccd/admin-web:${CCD_ADMIN_WEB_TAG:-latest}"
     container_name: ccd-admin-web
     environment:
       SECURE_AUTH_COOKIE_ENABLED : "false"
@@ -45,7 +45,7 @@ services:
     - ccd-network
 
   ccd-api-gateway:
-    image: "${CCD_API_GATEWAY_USE_LOCAL-hmctspublic.azurecr.io/}ccd/api-gateway-web:${CCD_API_GATEWAY_TAG:-latest}"
+    image: "${CCD_API_GATEWAY_USE_LOCAL-hmctsprod.azurecr.io/}ccd/api-gateway-web:${CCD_API_GATEWAY_TAG:-latest}"
     container_name: ccd-api-gateway-web
     environment:
       IDAM_BASE_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"

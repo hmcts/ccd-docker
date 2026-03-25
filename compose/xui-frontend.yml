@@ -2,7 +2,7 @@
 
 services:
   xui-manage-cases:
-    image: "${XUI_MANAGE_CASES_USE_LOCAL-hmctspublic.azurecr.io/}xui/webapp:${XUI_MANAGE_CASES_TAG:-latest}"
+    image: "${XUI_MANAGE_CASES_USE_LOCAL-hmctsprod.azurecr.io/}xui/webapp:${XUI_MANAGE_CASES_TAG:-latest}"
     container_name: xui-manage-cases
     environment:
       FEATURE_APP_INSIGHTS_ENABLED: "true"

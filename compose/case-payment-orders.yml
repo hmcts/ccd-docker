@@ -1,6 +1,6 @@
 services:
   case-payment-orders-api:
-    image: "hmctspublic.azurecr.io/cpo/case-payment-orders-api:${CASE_PAYMENT_ORDERS_API_TAG:-latest}"
+    image: "hmctsprod.azurecr.io/cpo/case-payment-orders-api:${CASE_PAYMENT_ORDERS_API_TAG:-latest}"
     container_name: case-payment-orders-api
     environment:
       SERVER_PORT: 4457

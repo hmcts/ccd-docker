@@ -4,7 +4,7 @@
 ---
 services:
   fr-am:
-    image: hmctsprivate.azurecr.io/idam/idam-fr-am:latest
+    image: hmctsprod.azurecr.io/idam/idam-fr-am:latest
     hostname: localam
     ports:
       - 8080:8080
@@ -16,7 +16,7 @@ services:
         condition: service_healthy
 
   fr-idm:
-    image: hmctsprivate.azurecr.io/idam/idam-fr-idm:latest
+    image: hmctsprod.azurecr.io/idam/idam-fr-idm:latest
     hostname: localidm
     ports:
       - 18080:18080
@@ -30,7 +30,7 @@ services:
         condition: service_healthy
 
   shared-db:
-    image: hmctsprivate.azurecr.io/idam/shared-db:latest
+    image: hmctsprod.azurecr.io/idam/shared-db:latest
     ports:
       - 5432:5432
     networks:
@@ -51,7 +51,7 @@ services:
       - ccd-network
 
   idam-api:
-    image: hmctspublic.azurecr.io/idam/api:stable
+    image: hmctsprod.azurecr.io/idam/api:stable
     ports:
       - 5000:5000
     networks:
@@ -89,7 +89,7 @@ services:
         condition: service_healthy
 
   idam-web-public:
-    image: hmctspublic.azurecr.io/idam/web-public:stable
+    image: hmctsprod.azurecr.io/idam/web-public:stable
     ports:
       - 9002:8080
     networks:
@@ -101,7 +101,7 @@ services:
         condition: service_started
         
   idam-web-admin:
-    image: hmctspublic.azurecr.io/idam/web-admin:stable
+    image: hmctsprod.azurecr.io/idam/web-admin:stable
     ports:
       - 8082:8080
     networks:
