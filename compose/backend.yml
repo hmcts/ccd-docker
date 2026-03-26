@@ -27,7 +27,6 @@ services:
 
   ccd-definition-store-api:
     image: "${CCD_DEFINITION_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
-    #image: hmcts/definition-store-api:local
     environment:
       DEFINITION_STORE_DB_HOST: ccd-shared-database
       DEFINITION_STORE_DB_PORT: 5432
@@ -58,7 +57,7 @@ services:
     ports:
       - 4451:4451
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
-      # - 5006:5006
+      # - 5005:5005
     depends_on:
       idam-healthcheck:
         condition: service_healthy
@@ -70,8 +69,7 @@ services:
       - ccd-network
 
   ccd-data-store-api:
-    #image: "${CCD_DATA_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
-    image: hmcts/data-store-api:local
+    image: "${CCD_DATA_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
     environment:
       CASE_DOCUMENT_AM_URL: http://ccd-case-document-am-api:4455
       DATA_STORE_DB_HOST: ccd-shared-database
@@ -169,7 +167,7 @@ services:
     ports:
       - 4096:4096
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
-      # - 5008:5008
+      # - 5005:5005
     depends_on:
       idam-healthcheck:
         condition: service_healthy
