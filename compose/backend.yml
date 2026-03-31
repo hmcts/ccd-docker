@@ -103,6 +103,8 @@ services:
       TESTING_SUPPORT_ENABLED: "${TESTING_SUPPORT_ENABLED:-true}"
       MIGRATIONS_ENDPOINT_ENABLED: "${MIGRATIONS_ENDPOINT_ENABLED:-true}"
       REFERENCE_DATA_API_URL: "${REFERENCE_DATA_API_URL:-http://ccd-test-stubs-service:5555}"
+      RD_LOCATION_REF_API_BASE_URL: "${RD_LOCATION_REF_API_BASE_URL:-http://ccd-test-stubs-service:5555}"
+      RD_PROFESSIONAL_API_BASE_URL: "${RD_PROFESSIONAL_API_BASE_URL:-http://ccd-test-stubs-service:5555}"
       ROLE_ASSIGNMENT_URL: "${ROLE_ASSIGNMENT_URL:-http://am-role-assignment-service:4096}"
       TEST_STUB_SERVICE_BASE_URL: "http://host.docker.internal:5555"
       BEFTA_TEST_STUB_SERVICE_BASE_URL: "http://localhost:5555"
