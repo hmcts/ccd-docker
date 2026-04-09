@@ -131,6 +131,43 @@ Ignore if we get error message ccd-network already exists while running above co
   > [!CAUTION]
   > Some users of zsh 'Oh My Zsh' experienced issues.
   > Try switching to bash by : `chsh -s /bin/bash`
+
+  **Important environment notes:**
+  - `OIDC_ISSUER` must be derived from a real access token for the target environment. Do not guess it from the public OIDC discovery URL.
+  - `CCD_CALLBACK_ALLOWED_HOSTS` is the comma-separated allow-list of HTTPS callback target hosts CCD services may call.
+  - `CCD_CALLBACK_ALLOWED_HTTP_HOSTS` is the comma-separated allow-list of HTTP callback target hosts CCD services may call.
+  - `CCD_CALLBACK_ALLOW_PRIVATE_HOSTS` controls whether callbacks to private or local hostnames are allowed for local development.
+
+  **How to derive `OIDC_ISSUER`:**
+  - Do not guess the issuer from the public discovery URL alone.
+  - Decode only the JWT payload from a real access token for the target environment and inspect the `iss` claim.
+  - Do not store or document full bearer tokens. Record only the derived issuer value.
+
+  Example:
+  ```bash
+  TOKEN='eyJ...'
+  PAYLOAD=$(printf '%s' "$TOKEN" | cut -d '.' -f2)
+  python3 - <<'PY' "$PAYLOAD"
+  import base64, json, sys
+  payload = sys.argv[1]
+  payload += '=' * (-len(payload) % 4)
+  print(json.loads(base64.urlsafe_b64decode(payload))["iss"])
+  PY
+  ```
+  - JWTs are `header.payload.signature`.
+  - The second segment is base64url-encoded JSON.
+  - This decodes the payload only. It does not verify the signature.
+  The following services in `ccd-docker` compose set both `IDAM_OIDC_URL` and `OIDC_ISSUER`:
+
+  | Service |
+  | --- |
+  | `ccd-data-store-api` |
+  | `ccd-definition-store-api` |
+  | `cpo-case-payment-orders-api` |
+  | `ts-translation-service` |
+  | `ccd-case-document-am-api` |
+
+  `VERIFY_OIDC_ISSUER=true` is not set in this repo's compose YAML. Use it only in service repos that include a live issuer verifier, where it enables a pre-check that fetches a real test token and fails fast if its `iss` claim does not exactly match `OIDC_ISSUER`.
   
   To persist the environment variables in Linux/Mac run the following script
   to add the script into your ~/.bash_profile.
@@ -840,6 +877,10 @@ Here are the important variables exposed in the compose files:
 | USER_PROFILE_S2S_AUTHORISED_SERVICES | List of micro-services authorised to call this service, comma-separated, as registered in `service-auth-provider-api`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | DATA_STORE_TOKEN_SECRET | Secret for generation of internal event tokens                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | APPINSIGHTS_INSTRUMENTATIONKEY | Secret for Microsoft Insights logging, can be a dummy string in local                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| OIDC_ISSUER | Enforced JWT issuer value used by services that validate IDAM access tokens. This must match the token `iss` claim for the target environment and should be derived from a real token, not guessed from the public discovery URL.                                                                                                                                                                                                                                                                                                                                                                   |
+| CCD_CALLBACK_ALLOWED_HOSTS | Comma-separated allow-list of callback target hosts that CCD services may call over HTTPS. Local defaults include `localhost`, `127.0.0.1`, and `host.docker.internal`.                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| CCD_CALLBACK_ALLOWED_HTTP_HOSTS | Comma-separated allow-list of callback target hosts that CCD services may call over HTTP. Use this only when local callback endpoints are intentionally served over plain HTTP.                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| CCD_CALLBACK_ALLOW_PRIVATE_HOSTS | Controls whether callback targets on private or local hostnames are allowed. This supports local development callbacks to host services outside the Docker network.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | STORAGEACCOUNT_PRIMARY_CONNECTION_STRING | (If dm-store is enabled) Secret for Azure Blob Storage. It is pointing to dockerized Azure Blob Storage emulator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME | (If dm-store is enabled) Container name for Azure Blob Storage                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | AM_DB | Access Management database name                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
