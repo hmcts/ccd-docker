@@ -2,7 +2,7 @@
 
 services:
   ccd-case-disposer:
-    image: "${CCD_CASE_DISPOSER_USE_LOCAL-hmctspublic.azurecr.io/}ccd/case-disposer:${CCD_CASE_DISPOSER_TAG:-latest}"
+    image: "${CCD_CASE_DISPOSER_USE_LOCAL-hmctsprod.azurecr.io/}ccd/case-disposer:${CCD_CASE_DISPOSER_TAG:-latest}"
     environment:
       DATA_STORE_DB_HOST: ccd-shared-database
       DATA_STORE_DB_PORT: 5432

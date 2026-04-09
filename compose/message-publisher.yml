@@ -2,7 +2,7 @@
 
 services:
   ccd-message-publisher:
-    image: "${CCD_MESSAGE_PUBLISHER_USE_LOCAL-hmctspublic.azurecr.io/}ccd/message-publisher:${CCD_MESSAGE_PUBLISHER_TAG:-latest}"
+    image: "${CCD_MESSAGE_PUBLISHER_USE_LOCAL-hmctsprod.azurecr.io/}ccd/message-publisher:${CCD_MESSAGE_PUBLISHER_TAG:-latest}"
     environment:
       DATA_STORE_DB_HOST: ccd-shared-database
       DATA_STORE_DB_PORT: 5432

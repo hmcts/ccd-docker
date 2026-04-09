@@ -691,9 +691,8 @@ function print_warn_on_compose_down_if_idam_enabled {
 }
 
 function ccd_login() {
-    #docker logout hmctspublic.azurecr.io &>/dev/null
-    az acr login --name hmctspublic --subscription DCD-CNP-Prod
-    az acr login --name hmctsprivate --subscription DCD-CNP-Prod
+    #docker logout hmctsprod.azurecr.io &>/dev/null
+    az acr login --name hmctsprod --subscription DCD-CNP-Prod
 }
 
 function echo_ccd() {
@@ -704,17 +703,21 @@ function echo_error() {
     echo -e "\033[1;91mERROR ::--\033[0m $@" # red
 }
 
+function echo_break() {
+    echo -e "\033[34m-----------------------------------------------------------------------------------------------------------------------\033[0m"
+}
+
 function ccd_default() {
     usage_default $*
     
+    echo_break
     echo -e "\033[34m" # set blue
-    echo "-----------------------------------------------------------------"
     echo "   _____ _____ _____     ____   ___   ____  _  _______ ____"
     echo "  / ____/ ____|  __ \\   |  _ \\ / _ \\ / ___|| |/ / ____|  _ \\"
     echo " | |   | |    | |  | |  | | | | | | | |    | ' /|  _| | |_) |"
     echo " | |___| |____| |__| |  | |_| | |_| | |___ | . \\| |___|  _ <"
     echo "  \\_____\\_____|_____/   |____/ \\___/ \\____||_|\\_\\_____|_| \\_\\"
-    echo "-----------------------------------------------------------------"
+    echo_break
     echo -e "\033[0m"  # reset color
 
     if [ "$1" == "idam" ]; then
@@ -746,7 +749,7 @@ function ccd_default() {
     echo_ccd "Logging into CCD container registries..."
     if ! ccd_login >/dev/null; then
         echo_error "CCD container registry login issues detected. Diagnosing..."
-        az acr check-health -n hmctspublic --yes
+        az acr check-health -n hmctsprod --yes
         exit 1
     fi
 
@@ -829,6 +832,19 @@ function ccd_default() {
         echo_ccd "\033[33m[##############------] 66% Complete\033[0m - Adding role assignments..."
         ./bin/add-role-assignments.sh &>/dev/null || { echo_error "Role assignments failed to apply correctly." ; exit 1; }
         echo_ccd "\033[32m[####################] 100% Complete\033[0m - Setup complete!"
+    fi
+
+    echo_break
+    if [ "$1" == "idam" ]; then
+        echo_ccd "Default setup with full idam compose files complete!"
+        echo_ccd "Access admin-web at https://localhost:3100/ with idam credentials ( e.g. ccd.docker.default@hmcts.net : Pa55word11 )"
+    elif [ "$1" == "xui" ]; then
+        echo_ccd "Default setup with idam simulator and xui frontend compose files complete!"
+        echo_ccd "Access admin-web at https://localhost:3100/ with idam credentials ( e.g. ccd.docker.default@hmcts.net : Pa55word11 )"
+        echo_ccd "Access xui frontend at http://localhost:3455/ with idam credentials ( e.g. master.caseworker@gmail.com : Pa55word11 )"
+    else
+        echo_ccd "Default setup complete!"
+        echo_ccd "Access admin-web at https://localhost:3100/ with idam credentials ( e.g. ccd.docker.default@hmcts.net : Pa55word11 )"
     fi
 
     exit 1

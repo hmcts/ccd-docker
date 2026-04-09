@@ -7,7 +7,7 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: "${TS_TRANSLATION_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}ts/translation-service:${TS_TRANSLATION_SERVICE_TAG:-latest}"
+    image: "${TS_TRANSLATION_SERVICE_USE_LOCAL-hmctsprod.azurecr.io/}ts/translation-service:${TS_TRANSLATION_SERVICE_TAG:-latest}"
     container_name: translation-service
     environment:
       TS_TRANSLATION_SERVICE_DB_HOST: ccd-shared-database
