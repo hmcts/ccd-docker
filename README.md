@@ -129,6 +129,7 @@ Ignore if we get error message ccd-network already exists while running above co
 
   **Important environment notes:**
   - `OIDC_ISSUER` must be derived from a real access token for the target environment. Do not guess it from the public OIDC discovery URL.
+  - `OIDC_ALLOWED_ISSUERS` is an optional comma-separated additive list of exact JWT `iss` values. Leave it unset unless a service is confirmed to receive valid tokens from more than one issuer.
   - `CCD_CALLBACK_ALLOWED_HOSTS` is the comma-separated allow-list of HTTPS callback target hosts CCD services may call.
   - `CCD_CALLBACK_ALLOWED_HTTP_HOSTS` is the comma-separated allow-list of HTTP callback target hosts CCD services may call.
   - `CCD_CALLBACK_ALLOW_PRIVATE_HOSTS` controls whether callbacks to private or local hostnames are allowed for local development.
@@ -136,6 +137,7 @@ Ignore if we get error message ccd-network already exists while running above co
   **How to derive `OIDC_ISSUER`:**
   - Do not guess the issuer from the public discovery URL alone.
   - Decode only the JWT payload from a real access token for the target environment and inspect the `iss` claim.
+  - If additional issuers are required, derive each `OIDC_ALLOWED_ISSUERS` value from a real accepted token too.
   - Do not store or document full bearer tokens. Record only the derived issuer value.
 
   Example:
@@ -162,7 +164,17 @@ Ignore if we get error message ccd-network already exists while running above co
   | `ts-translation-service` |
   | `ccd-case-document-am-api` |
 
-  `VERIFY_OIDC_ISSUER=true` is not set in this repo's compose YAML. Use it only in service repos that include a live issuer verifier, where it enables a pre-check that fetches a real test token and fails fast if its `iss` claim does not exactly match `OIDC_ISSUER`.
+  The following services also pass through `OIDC_ALLOWED_ISSUERS` when it is exported in the shell:
+
+  | Service |
+  | --- |
+  | `ccd-data-store-api` |
+  | `ccd-definition-store-api` |
+  | `ccd-case-document-am-api` |
+  | `cpo-case-payment-orders-api` |
+  | `ts-translation-service` |
+
+  `VERIFY_OIDC_ISSUER=true` is not set in this repo's compose YAML. Use it only in service repos that include a live issuer verifier, where it enables a pre-check that fetches a real test token and fails fast if its `iss` claim does not exactly match `OIDC_ISSUER` or an explicitly configured `OIDC_ALLOWED_ISSUERS` value.
   
   To persist the environment variables in Linux/Mac run the following script
   to add the script into your ~/.bash_profile.
@@ -873,6 +885,7 @@ Here are the important variables exposed in the compose files:
 | DATA_STORE_TOKEN_SECRET | Secret for generation of internal event tokens                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | APPINSIGHTS_INSTRUMENTATIONKEY | Secret for Microsoft Insights logging, can be a dummy string in local                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | OIDC_ISSUER | Enforced JWT issuer value used by services that validate IDAM access tokens. This must match the token `iss` claim for the target environment and should be derived from a real token, not guessed from the public discovery URL.                                                                                                                                                                                                                                                                                                                                                                   |
+| OIDC_ALLOWED_ISSUERS | Optional comma-separated additive list of exact JWT issuer values. It is passed through to services that support multi-issuer validation and should stay unset unless additional issuers are confirmed from real accepted tokens.                                                                                                                                                                                                                                                                                                                                                                      |
 | CCD_CALLBACK_ALLOWED_HOSTS | Comma-separated allow-list of callback target hosts that CCD services may call over HTTPS. Local defaults include `localhost`, `127.0.0.1`, and `host.docker.internal`.                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | CCD_CALLBACK_ALLOWED_HTTP_HOSTS | Comma-separated allow-list of callback target hosts that CCD services may call over HTTP. Use this only when local callback endpoints are intentionally served over plain HTTP.                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | CCD_CALLBACK_ALLOW_PRIVATE_HOSTS | Controls whether callback targets on private or local hostnames are allowed. This supports local development callbacks to host services outside the Docker network.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
