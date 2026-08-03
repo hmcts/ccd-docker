@@ -1,11 +1,11 @@
 #!/bin/sh
 
 USERNAME=${1:-ccd.docker.default@hmcts.net}
-PASSWORD=${2:-Pa55word11}
+PASSWORD=${2:-${IDAM_USER_PASSWORD:?IDAM_USER_PASSWORD must be set}}
 IDAM_URI=${IDAM_API_BASE_URL:-http://localhost:5000}
 REDIRECT_URI="http://localhost:3451/oauth2redirect"
 CLIENT_ID=${3:-ccd_gateway}
-CLIENT_SECRET=${4:-ccd_gateway_secret}
+CLIENT_SECRET=${4:-${IDAM_CLIENT_SECRET:?IDAM_CLIENT_SECRET must be set}}
 CURL_OPTS="$CURL_OPTS -S --silent"
 SCOPE=${5:-openid profile roles}
 

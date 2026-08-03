@@ -12,7 +12,7 @@ email=$1
 rolesStr=$2
 surname=${3:-Test}
 forename=${4:-User}
-password=${5:-Pa55word11}
+password=${5:-${IDAM_USER_PASSWORD:?IDAM_USER_PASSWORD must be set}}
 idamUrl=${IDAM_API_BASE_URL:-http://localhost:5000}
 
 if [ -z "$rolesStr" ]

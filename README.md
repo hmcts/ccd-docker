@@ -117,7 +117,16 @@ Ignore if we get error message ccd-network already exists while running above co
   
 #### B. Export environment variables
 
-  CDM apps require a set of environment variables which can be set up by executing the following script.
+  CDM apps require environment variables. For local Docker, generate ignored local-only values first:
+
+  ```bash
+  ./bin/setup-local-secrets.sh
+  source ./bin/set-environment-variables.sh
+  ```
+
+  The bootstrap does not contact shared environments and must not be used for AAT or production credentials.
+  For a shared environment, set `CCD_ENV` and `CCD_ENV_FILE` to the approved managed environment file instead;
+  the bootstrap will not generate values in that mode.
   
 ##### Windows
   ```bash
