@@ -36,6 +36,8 @@ cat > "$env_file" <<EOF
 # Generated for local CCD development only. Do not commit or reuse outside local Docker.
 CCD_ENV=local
 S2S_URL_BASE=http://localhost:4502
+ES_ENABLED_DOCKER=false
+ELASTIC_SEARCH_ENABLED=false
 ELASTIC_SEARCH_FTA_ENABLED=false
 HTTPS_CERT_PATH=$repo_dir/$local_secret_dir/localhost.crt
 HTTPS_KEY_PATH=$repo_dir/$local_secret_dir/localhost.key

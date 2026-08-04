@@ -278,12 +278,12 @@ The `ccd-data-store-api` smoke test uses the same S2S settings. Run it from the 
 
 The same environment configuration applies to functional tests:
 
-| Repository | Smoke test | Functional tests | `TEST_URL` |
-|---|---|---|---|
-| `ccd-definition-store-api` | `./gradlew clean smoke` | `./gradlew functional` | `http://localhost:4451` |
-| `ccd-data-store-api` | `./gradlew clean smoke` | `./gradlew functional` | `http://localhost:4452` |
+| Repository | Smoke test | Functional tests | `TEST_URL` | Elasticsearch flag |
+|---|---|---|---|---|
+| `ccd-definition-store-api` | `./gradlew clean smoke` | `./gradlew functional` | `http://localhost:4451` | `ELASTIC_SEARCH_ENABLED=true` for ES tests |
+| `ccd-data-store-api` | `./gradlew clean smoke` | `./gradlew functional` | `http://localhost:4452` | `ELASTIC_SEARCH_FTA_ENABLED=true` for ES tests |
 
-Run a subset with `./gradlew functional -P tags="@F-105 or @F-110"`. Keep `S2S_URL_BASE`, `CCD_API_GATEWAY_S2S_ID=ccd_gw`, and `CCD_API_GATEWAY_S2S_KEY` configured as above. Elasticsearch-specific Definition Store functional tests require `ELASTIC_SEARCH_ENABLED=true`. Data Store Elasticsearch functional tests require `ELASTIC_SEARCH_FTA_ENABLED=true`; its local default is `false`.
+Run a subset with `./gradlew functional -P tags="@F-105 or @F-110"`. Keep the S2S settings configured as above. When either Elasticsearch flag is enabled, also set `ES_ENABLED_DOCKER=true` before `./ccd compose up -d`; leave all three flags `false` for non-Elasticsearch tests.
 
 > [!Note]
 > If service-auth configuration changes, recreate `service-auth-provider-api` before rerunning the tests. `S2S_URL_BASE` is the test-runner URL; `IDAM_S2S_URL` is the application-container URL.
