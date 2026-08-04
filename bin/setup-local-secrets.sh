@@ -35,6 +35,8 @@ gateway_client_secret=$(generate_local_secret)
 cat > "$env_file" <<EOF
 # Generated for local CCD development only. Do not commit or reuse outside local Docker.
 CCD_ENV=local
+S2S_URL_BASE=http://localhost:4502
+ELASTIC_SEARCH_FTA_ENABLED=false
 HTTPS_CERT_PATH=$repo_dir/$local_secret_dir/localhost.crt
 HTTPS_KEY_PATH=$repo_dir/$local_secret_dir/localhost.key
 DB_USERNAME=ccd
@@ -92,11 +94,12 @@ BEFTA_S2S_CLIENT_SECRET_OF_AAC_MANAGE_CASE_ASSIGNMENT=$(generate_local_secret)
 BEFTA_S2S_CLIENT_SECRET_OF_PAYMENT_APP=$(generate_local_secret)
 BEFTA_S2S_CLIENT_ID_OF_XUI_WEBAPP=xuiwebapp
 BEFTA_OAUTH2_CLIENT_ID_OF_XUIWEBAPP=xuiwebapp
-BEFTA_S2S_CLIENT_ID=ccd_gateway
-BEFTA_S2S_CLIENT_SECRET=$(generate_local_secret)
+BEFTA_S2S_CLIENT_ID=ccd_gw
+BEFTA_S2S_CLIENT_SECRET=$IDAM_KEY_CCD_GATEWAY
 BEFTA_OAUTH2_CLIENT_ID_OF_XUIWEBAPP=xuiwebapp
 CCD_API_GATEWAY_OAUTH2_CLIENT_ID=ccd_gateway
 CCD_API_GATEWAY_OAUTH2_CLIENT_SECRET=$gateway_client_secret
+CCD_API_GATEWAY_S2S_ID=ccd_gw
 CCD_API_GATEWAY_S2S_KEY=$IDAM_KEY_CCD_GATEWAY
 CCD_GW_SERVICE_SECRET=$IDAM_KEY_CCD_GATEWAY
 ROLE_ASSIGNMENT_API_GATEWAY_S2S_CLIENT_KEY=$IDAM_KEY_CCD_GATEWAY

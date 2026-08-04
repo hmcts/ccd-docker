@@ -21,7 +21,7 @@
 
 ## Prerequisites 
 
-- [JDK 17](https://openjdk.java.net/projects/jdk/17/)
+- [JDK 21](https://openjdk.java.net/projects/jdk/21/)
 - [Docker](https://www.docker.com)
 
   > [!Note]
@@ -251,29 +251,45 @@ Create CCD users and roles
 a. Clone `ccd-definition-store-api` if not already checked out `git clone git@github.com:hmcts/ccd-definition-store-api.git`
 and navigate to the `ccd-definition-store-api`. 
 
-b. Run smoke tests to set up user and roles.
+b. Run the smoke test from the checked-out `ccd-definition-store-api` repository. For a local CCD Docker stack, load the environment from this repository explicitly and use the `ccd_gw` S2S identity:
 
 ```bash
-export TEST_URL=http://localhost:4451
-
+export CCD_ENV_FILE=/path/to/ccd-docker/.env
+source /path/to/ccd-docker/bin/set-environment-variables.sh
+export S2S_URL_BASE=http://localhost:4502
+export CCD_API_GATEWAY_S2S_ID=ccd_gw
+export CCD_API_GATEWAY_S2S_KEY="$IDAM_KEY_CCD_GATEWAY"
 ./gradlew clean smoke
-
 ```
 
-> [!Note] 
-> incase of any errors relating to Service Auth when running the smoke test, ensure the following environment variable is set as below:
+S2S URL selection:
 
-export IDAM_S2S_URL=http://service-auth-provider-api:8080
+| Test runner location | `S2S_URL_BASE` |
+|---|---|
+| Host machine | `http://localhost:4502` |
+| CCD Docker network | `http://service-auth-provider-api:8080` |
+| CI or remote environment | That environment's service-auth URL |
 
-Alternatively remove this from the environment by issuing 'unset IDAM_S2S_URL', backend.yaml will default to use 'http://service-auth-provider-api:8080'
+`S2S_URL_BASE` is for the test runner; `IDAM_S2S_URL` is the corresponding application-container setting.
 
-./ccd compose up -d
+The `IDAM_KEY_CCD_GATEWAY`, `BEFTA_S2S_CLIENT_SECRET`, `CCD_GW_SERVICE_SECRET`, and `CCD_API_GATEWAY_S2S_KEY` values must be identical. Recreate `service-auth-provider-api` after changing them. `ccd-admin-web` and `ccd-api-gateway` are not required for this smoke test.
 
-Will need to be re-issued to apply the above changes.
-]
+The `ccd-data-store-api` smoke test uses the same S2S settings. Run it from the `ccd-data-store-api` repository with `TEST_URL=http://localhost:4452`; Elasticsearch must also be enabled and running. The definition-store test uses `TEST_URL=http://localhost:4451`. Both host-run tests use `S2S_URL_BASE=http://localhost:4502` and the `ccd_gw` service identity. When tests run inside Docker, use `S2S_URL_BASE=http://service-auth-provider-api:8080` instead.
+
+The same environment configuration applies to functional tests:
+
+| Repository | Smoke test | Functional tests | `TEST_URL` |
+|---|---|---|---|
+| `ccd-definition-store-api` | `./gradlew clean smoke` | `./gradlew functional` | `http://localhost:4451` |
+| `ccd-data-store-api` | `./gradlew clean smoke` | `./gradlew functional` | `http://localhost:4452` |
+
+Run a subset with `./gradlew functional -P tags="@F-105 or @F-110"`. Keep `S2S_URL_BASE`, `CCD_API_GATEWAY_S2S_ID=ccd_gw`, and `CCD_API_GATEWAY_S2S_KEY` configured as above. Elasticsearch-specific Definition Store functional tests require `ELASTIC_SEARCH_ENABLED=true`. Data Store Elasticsearch functional tests require `ELASTIC_SEARCH_FTA_ENABLED=true`; its local default is `false`.
+
+> [!Note]
+> If service-auth configuration changes, recreate `service-auth-provider-api` before rerunning the tests. `S2S_URL_BASE` is the test-runner URL; `IDAM_S2S_URL` is the application-container URL.
 
 
-The smoke tests creates a file `/aat/befta_recent_executions_info.json`, delete this file after running the tests.
+The smoke test creates a file `/aat/befta_recent_executions_info.json`; delete it before rerunning if cached test data must be reloaded.
 
 ---
 
@@ -578,7 +594,7 @@ Also if a certain database has not been created you might need to create a new c
   * run docker-compose `./ccd compose up -d`
   * create Blob Store in Azurite `./bin/dm-store/document-management-store-create-blob-store-container.sh`
 
-* To enable **ExUI** rather then the CCD UI
+* To enable **ExUI** rather than the CCD UI
   * `./ccd enable xui-frontend`
   * export XUI_LAUNCH_DARKLY_CLIENT_ID to value mentioned in xui web app preview template yaml file. i.e. 645baeea2787d812993d9d70
   * run docker-compose `./ccd compose up -d`
@@ -586,10 +602,18 @@ Also if a certain database has not been created you might need to create a new c
 
 * To enable **ElasticSearch**
   > [!Warning] 
-  > We recommend at lest 16GB of memory for Docker when enabling elasticsearch
+  > We recommend at least 16GB of memory for Docker when enabling Elasticsearch
   * `./ccd enable elasticsearch` (assuming `backend` is already enabled, otherwise enable it)
   * export ES_ENABLED_DOCKER=true
   * verify that Data Store is able to connect to elasticsearch: `curl localhost:4452/health`
+
+  If the definition-store smoke test fails with `Failed to execute check alias existence after 3 attempts`, add `- xpack.security.enabled=false` to the Elasticsearch service environment in `compose/elasticsearch.yml`, then recreate Elasticsearch:
+
+  ```bash
+  docker compose -f compose/elasticsearch.yml rm -sf ccd-elasticsearch
+  ./ccd compose up -d
+  curl http://localhost:9200
+  ```
 
 * To enable **Logstash**
   * `./ccd enable logstash` (assuming `elasticsearch` is already enabled, otherwise enable it)
