@@ -270,11 +270,17 @@ S2S URL selection:
 | CCD Docker network | `http://service-auth-provider-api:8080` |
 | CI or remote environment | That environment's service-auth URL |
 
-`S2S_URL_BASE` is for the test runner; `IDAM_S2S_URL` is the corresponding application-container setting.
+URL settings:
 
-The `IDAM_KEY_CCD_GATEWAY`, `BEFTA_S2S_CLIENT_SECRET`, `CCD_GW_SERVICE_SECRET`, and `CCD_API_GATEWAY_S2S_KEY` values must be identical. Recreate `service-auth-provider-api` after changing them. `ccd-admin-web` and `ccd-api-gateway` are not required for this smoke test.
+- `S2S_URL_BASE`: service-auth URL used by the test runner.
+- `IDAM_S2S_URL`: service-auth URL used by application containers.
 
-The `ccd-data-store-api` smoke test uses the same S2S settings. Run it from the `ccd-data-store-api` repository with `TEST_URL=http://localhost:4452`; Elasticsearch must also be enabled and running. The definition-store test uses `TEST_URL=http://localhost:4451`. Both host-run tests use `S2S_URL_BASE=http://localhost:4502` and the `ccd_gw` service identity. When tests run inside Docker, use `S2S_URL_BASE=http://service-auth-provider-api:8080` instead.
+Shared test requirements:
+
+- Use the `ccd_gw` S2S identity.
+- Keep `IDAM_KEY_CCD_GATEWAY`, `BEFTA_S2S_CLIENT_SECRET`, `CCD_GW_SERVICE_SECRET`, and `CCD_API_GATEWAY_S2S_KEY` identical.
+- `ccd-admin-web` and `ccd-api-gateway` are not required for these tests.
+- If service-auth configuration changes, recreate `service-auth-provider-api` before rerunning the tests.
 
 The same environment configuration applies to functional tests:
 
@@ -283,13 +289,17 @@ The same environment configuration applies to functional tests:
 | `ccd-definition-store-api` | `./gradlew clean smoke` | `./gradlew functional` | `http://localhost:4451` | `ELASTIC_SEARCH_ENABLED=true` for ES tests |
 | `ccd-data-store-api` | `./gradlew clean smoke` | `./gradlew functional` | `http://localhost:4452` | `ELASTIC_SEARCH_FTA_ENABLED=true` for ES tests |
 
-Run a subset with `./gradlew functional -P tags="@F-105 or @F-110"`. Keep the S2S settings configured as above. When either Elasticsearch flag is enabled, also set `ES_ENABLED_DOCKER=true` before `./ccd compose up -d`; leave all three flags `false` for non-Elasticsearch tests.
+Functional-test options:
 
-> [!Note]
-> If service-auth configuration changes, recreate `service-auth-provider-api` before rerunning the tests. `S2S_URL_BASE` is the test-runner URL; `IDAM_S2S_URL` is the application-container URL.
+- Run a subset with `./gradlew functional -P tags="@F-105 or @F-110"`.
+- Keep the S2S settings configured as above.
+- If either Elasticsearch test flag is `true`, set `ES_ENABLED_DOCKER=true` before running `./ccd compose up -d`.
+- Leave all three Elasticsearch flags `false` for non-Elasticsearch tests.
 
+Test-data cache:
 
-The smoke test creates a file `/aat/befta_recent_executions_info.json`; delete it before rerunning if cached test data must be reloaded.
+- The smoke test creates `/aat/befta_recent_executions_info.json`.
+- Delete it before rerunning if cached test data must be reloaded.
 
 ---
 
