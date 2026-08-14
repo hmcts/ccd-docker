@@ -92,9 +92,9 @@ export IDAM_FULL_ENABLED=true
 ```
 And **only** if we are changing the port that IDAM will be using then we should also run
 ```bash
-# used by services running outside docker-compose network
+# used by services running outside docker compose network
 export IDAM_API_BASE_URL=http://localhost:some-other-port
-# used by services running inside docker-compose network
+# used by services running inside docker compose network
 export IDAM_INTERNAL_API_BASE_URL=http://idam:some-other-port
 ```
 
@@ -294,9 +294,9 @@ To allow some scripts to work properly you also may need to export the same vari
 
 ```bash
 export IDAM_FULL_ENABLED=true
-# used by services running outside docker-compose network
+# used by services running outside docker compose network
 export IDAM_API_BASE_URL=http://some-other-idam-instance:5000
-# used by services running inside docker-compose network
+# used by services running inside docker compose network
 export IDAM_INTERNAL_API_BASE_URL=http://some-other-idam-instance:5000
 ```
 ## Revert to Idam Simulator
