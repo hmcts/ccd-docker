@@ -14,7 +14,7 @@ services:
       REFORM_SERVICE_NAME: ccd-user-profile-api
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
-      APPINSIGHTS_INSTRUMENTATIONKEY: key
+      APPINSIGHTS_INSTRUMENTATIONKEY: "${APPINSIGHTS_INSTRUMENTATIONKEY:?APPINSIGHTS_INSTRUMENTATIONKEY must be set}"
     ports:
       - 4453:4453
     depends_on:
@@ -44,7 +44,7 @@ services:
       REFORM_SERVICE_NAME: ccd-definition-store-api
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
-      APPINSIGHTS_INSTRUMENTATIONKEY: key
+      APPINSIGHTS_INSTRUMENTATIONKEY: "${APPINSIGHTS_INSTRUMENTATIONKEY:?APPINSIGHTS_INSTRUMENTATIONKEY must be set}"
       ELASTIC_SEARCH_ENABLED: "${ES_ENABLED_DOCKER}"
       ELASTIC_SEARCH_HOST: "ccd-elasticsearch"
       ELASTIC_SEARCH_FAIL_ON_IMPORT: "true"
@@ -72,6 +72,7 @@ services:
   ccd-data-store-api:
     image: "${CCD_DATA_STORE_API_USE_LOCAL-hmctsprod.azurecr.io/}ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
     environment:
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics"
       CASE_DOCUMENT_AM_URL: http://ccd-case-document-am-api:4455
       DATA_STORE_DB_HOST: ccd-shared-database
       DATA_STORE_DB_PORT: 5432
@@ -79,7 +80,7 @@ services:
       DATA_STORE_DB_PASSWORD: "${DB_PASSWORD}"
       DATA_STORE_DB_USE_SSL: "${DB_USE_SSL}"
       DATA_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DATA_STORE}"
-      DATA_STORE_TOKEN_SECRET: iuasbcuasdcbasdgcasdgcuysachjsacyasdgjcgasdj
+      DATA_STORE_TOKEN_SECRET: "${DATA_STORE_TOKEN_SECRET:?DATA_STORE_TOKEN_SECRET must be set}"
       DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps,aac_manage_case_assignment,xui_webapp,ccd_case_document_am_api,am_role_assignment_service,ccd_next_hearing_date_updater,hmc_cft_hearing_service,cft_hearing_service,web-ui
       DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
@@ -89,11 +90,11 @@ services:
       OIDC_ISSUER: ${OIDC_ISSUER:-http://idam:5000/o}
       OIDC_ALLOWED_ISSUERS: "${OIDC_ALLOWED_ISSUERS:-}"
       IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
-      IDAM_OAUTH2_DATA_STORE_CLIENT_SECRET: idam_data_store_client_secret
+      IDAM_OAUTH2_DATA_STORE_CLIENT_SECRET: "${OAUTH2_CLIENT_CCD_DATA_STORE:?OAUTH2_CLIENT_CCD_DATA_STORE must be set}"
       REFORM_SERVICE_NAME: ccd-data-store-api
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
-      APPINSIGHTS_INSTRUMENTATIONKEY: key
+      APPINSIGHTS_INSTRUMENTATIONKEY: "${APPINSIGHTS_INSTRUMENTATIONKEY:?APPINSIGHTS_INSTRUMENTATIONKEY must be set}"
       ELASTIC_SEARCH_ENABLED: "${ES_ENABLED_DOCKER}"
       ELASTIC_SEARCH_HOSTS: ccd-elasticsearch:9200
       ELASTIC_SEARCH_DATA_NODES_HOSTS: "http://ccd-elasticsearch:9200"
@@ -156,9 +157,9 @@ services:
        OPEN_ID_API_BASE_URI: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}/o"
        OIDC_ISSUER_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}/openam/oauth2/hmcts"
        ROLE_ASSIGNMENT_IDAM_CLIENT_ID: am_role_assignment
-       ROLE_ASSIGNMENT_IDAM_CLIENT_SECRET: am_role_assignment_secret
+       ROLE_ASSIGNMENT_IDAM_CLIENT_SECRET: "${OAUTH2_CLIENT_AM_ROLE_ASSIGNMENT:?OAUTH2_CLIENT_AM_ROLE_ASSIGNMENT must be set}"
        ROLE_ASSIGNMENT_IDAM_ADMIN_USERID: role.assignment.admin@gmail.com
-       ROLE_ASSIGNMENT_IDAM_ADMIN_PASSWORD: "${AM_ROLE_AADMINGMENT_ADMIN_PWD:-Pa55word11}"
+       ROLE_ASSIGNMENT_IDAM_ADMIN_PASSWORD: "${AM_ROLE_ASSIGNMENT_ADMIN_PWD:?AM_ROLE_ASSIGNMENT_ADMIN_PWD must be set}"
        ROLE_ASSIGNMENT_IDAM_ADMIN_SCOPE: profile openid roles search-user
        CCD_DATA_STORE_URL: http://ccd-data-store-api:4452
        AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY:
@@ -192,7 +193,7 @@ services:
       - 4502:8080
     environment:
       SERVER_PORT: 8080
-      JWT_KEY: wThK0f0/lh3FlxFcL4xUWDMI5C1J9KyQBgXV4wseh1e5J1uYJIjvTvArHxQDrYoHJ23xFxjHkOnvNbR5dXRoxA==
+      JWT_KEY: "${JWT_KEY:?JWT_KEY must be set}"
       MICROSERVICEKEYS_AAC_MANAGE_CASE_ASSIGNMENT: "${BEFTA_S2S_CLIENT_SECRET_OF_AAC_MANAGE_CASE_ASSIGNMENT}"
       MICROSERVICEKEYS_CCD_DATA: "${IDAM_KEY_CCD_DATA_STORE}"
       MICROSERVICEKEYS_CCD_GW: "${IDAM_KEY_CCD_GATEWAY}"

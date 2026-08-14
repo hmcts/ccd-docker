@@ -16,7 +16,7 @@ services:
       REFORM_SERVICE_NAME: ccd-case-document-am-api
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
-      APPINSIGHTS_INSTRUMENTATIONKEY: key
+      APPINSIGHTS_INSTRUMENTATIONKEY: "${APPINSIGHTS_INSTRUMENTATIONKEY:?APPINSIGHTS_INSTRUMENTATIONKEY must be set}"
       DOCUMENT_TTL: 3600000
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
       # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'

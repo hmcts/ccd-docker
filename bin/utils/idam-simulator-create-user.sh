@@ -6,13 +6,13 @@
 ##    - role: Comma-separated list of roles.
 ##    - surname: Last name. Default to `Test`.
 ##    - forename: First name. Default to `User`.
-##    - password: User's password. Default to `Pa55word11`.
+##    - password: User's password. If omitted, `IDAM_USER_PASSWORD` must be set.
 
 email=$1
 rolesStr=$2
 surname=${3:-Test}
 forename=${4:-User}
-password=${5:-Pa55word11}
+password=${5:-${IDAM_USER_PASSWORD:?IDAM_USER_PASSWORD must be set}}
 idamUrl=${IDAM_API_BASE_URL:-http://localhost:5000}
 
 if [ -z "$rolesStr" ]

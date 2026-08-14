@@ -10,11 +10,11 @@ services:
       SECURITY_REFERRER_POLICY : origin
       IDAM_BASE_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
       IDAM_S2S_URL: http://service-auth-provider-api:8080
-      IDAM_ADMIN_WEB_SERVICE_KEY: AAAAAAAAAAAAAAAD
+      IDAM_ADMIN_WEB_SERVICE_KEY: "${IDAM_KEY_CCD_ADMIN:?IDAM_KEY_CCD_ADMIN must be set}"
       IDAM_LOGOUT_URL: "${IDAM_PUBLIC_OVERRIDE:-http://localhost:9002}/login"
       IDAM_OAUTH2_TOKEN_ENDPOINT: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}/oauth2/token"
       IDAM_OAUTH2_LOGOUT_ENDPOINT: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}/session/:token"
-      IDAM_OAUTH2_AW_CLIENT_SECRET: ccd_admin_secret
+      IDAM_OAUTH2_AW_CLIENT_SECRET: "${OAUTH2_CLIENT_CCD_ADMIN:?OAUTH2_CLIENT_CCD_ADMIN must be set}"
       IDAM_SERVICE_NAME: ccd_admin
       IDAM_OAUTH2_CLIENT_ID : ccd_admin
       ADMINWEB_LOGIN_URL: "${IDAM_PUBLIC_OVERRIDE:-http://localhost:9002}/login"
@@ -34,7 +34,11 @@ services:
       ADMINWEB_ELASTIC_INDEX_URL : http://ccd-definition-store-api:4451/elastic-support/index
       ADMINWEB_GET_DICTIONARY_URL: http://ts-translation-service:4650/dictionary
       ADMINWEB_ROLES_WHITELIST : "ccd-import,ccd-import-validate"
-      APPINSIGHTS_INSTRUMENTATIONKEY: key
+      APPINSIGHTS_INSTRUMENTATIONKEY: "${APPINSIGHTS_INSTRUMENTATIONKEY:?APPINSIGHTS_INSTRUMENTATIONKEY must be set}"
+      HTTPS_CERT_PATH: /app/.local-secrets/localhost.crt
+      HTTPS_KEY_PATH: /app/.local-secrets/localhost.key
+    volumes:
+      - ${CCD_LOCAL_SECRETS_DIR:-.local-secrets}:/app/.local-secrets:ro
     ports:
     - 3100:3100
     depends_on:
@@ -54,7 +58,7 @@ services:
       IDAM_SERVICE_KEY: "${IDAM_KEY_CCD_GATEWAY}"
       IDAM_OAUTH2_LOGOUT_ENDPOINT: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}/session/:token"
       IDAM_OAUTH2_CLIENT_ID: ccd_gateway
-      IDAM_OAUTH2_CLIENT_SECRET: ccd_gateway_secret
+      IDAM_OAUTH2_CLIENT_SECRET: "${OAUTH2_CLIENT_CCD_GATEWAY:?OAUTH2_CLIENT_CCD_GATEWAY must be set}"
       IDAM_OAUTH2_TOKEN_ENDPOINT: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}/oauth2/token"
       ADDRESS_LOOKUP_TOKEN:
       PROXY_AGGREGATED: http://ccd-data-store-api:4452
@@ -65,7 +69,11 @@ services:
       PROXY_DEFINITION_IMPORT: http://ccd-definition-store-api:4451
       PROXY_DEFINITION_DATA: http://ccd-definition-store-api:4451/api/data
       PROXY_DEFINITION_DISPLAY: http://ccd-definition-store-api:4451/api/display
-      APPINSIGHTS_INSTRUMENTATIONKEY: key
+      APPINSIGHTS_INSTRUMENTATIONKEY: "${APPINSIGHTS_INSTRUMENTATIONKEY:?APPINSIGHTS_INSTRUMENTATIONKEY must be set}"
+      HTTPS_CERT_PATH: /app/.local-secrets/localhost.crt
+      HTTPS_KEY_PATH: /app/.local-secrets/localhost.key
+    volumes:
+      - ${CCD_LOCAL_SECRETS_DIR:-.local-secrets}:/app/.local-secrets:ro
     ports:
       - 3453:3453
     depends_on:

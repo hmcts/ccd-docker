@@ -21,7 +21,7 @@
 
 ## Prerequisites 
 
-- [JDK 17](https://openjdk.java.net/projects/jdk/17/)
+- [JDK 21](https://openjdk.java.net/projects/jdk/21/)
 - [Docker](https://www.docker.com)
 
   > [!Note]
@@ -117,7 +117,18 @@ Ignore if we get error message ccd-network already exists while running above co
   
 #### B. Export environment variables
 
-  CDM apps require a set of environment variables which can be set up by executing the following script.
+  CDM apps require environment variables. For local Docker, generate ignored local-only values first:
+
+  ```bash
+  ./bin/setup-local-secrets.sh
+  source ./bin/set-environment-variables.sh
+  ```
+
+  The bootstrap does not contact shared environments and must not be used for AAT or production credentials.
+
+  When local AAC uses the shared IDAM database, AAC must consume the matching `IDAM_DB_PASSWORD` generated/configured by this bootstrap. AAC does not generate a second database password.
+  For a shared environment, set `CCD_ENV` and `CCD_ENV_FILE` to the approved managed environment file instead;
+  the bootstrap will not generate values in that mode.
   
 ##### Windows
   ```bash
@@ -221,8 +232,8 @@ However, some more steps are required to correctly configure CCD before it can b
 If they are not working then check you have run `source ./bin/set-environment-variables.sh` correctly.
 If still not working then try setting them directly with the following commands.
 ```bash
-export IDAM_ADMIN_USER=idamOwner@hmcts.net
-export IDAM_ADMIN_PASSWORD=Ref0rmIsFun
+export IDAM_ADMIN_USER=<approved-local-idam-admin-user>
+export IDAM_ADMIN_PASSWORD=<approved-local-idam-admin-password>
 ```
 And check they match the corresponding values from the confluence page at https://tools.hmcts.net/confluence/x/eQP3P
 
@@ -242,29 +253,55 @@ Create CCD users and roles
 a. Clone `ccd-definition-store-api` if not already checked out `git clone git@github.com:hmcts/ccd-definition-store-api.git`
 and navigate to the `ccd-definition-store-api`. 
 
-b. Run smoke tests to set up user and roles.
+b. Run the smoke test from the checked-out `ccd-definition-store-api` repository. For a local CCD Docker stack, load the environment from this repository explicitly and use the `ccd_gw` S2S identity:
 
 ```bash
-export TEST_URL=http://localhost:4451
-
+export CCD_ENV_FILE=/path/to/ccd-docker/.env
+source /path/to/ccd-docker/bin/set-environment-variables.sh
+export S2S_URL_BASE=http://localhost:4502
+export CCD_API_GATEWAY_S2S_ID=ccd_gw
+export CCD_API_GATEWAY_S2S_KEY="$IDAM_KEY_CCD_GATEWAY"
 ./gradlew clean smoke
-
 ```
 
-> [!Note] 
-> incase of any errors relating to Service Auth when running the smoke test, ensure the following environment variable is set as below:
+S2S URL selection:
 
-export IDAM_S2S_URL=http://service-auth-provider-api:8080
+| Test runner location | `S2S_URL_BASE` |
+|---|---|
+| Host machine | `http://localhost:4502` |
+| CCD Docker network | `http://service-auth-provider-api:8080` |
+| CI or remote environment | That environment's service-auth URL |
 
-Alternatively remove this from the environment by issuing 'unset IDAM_S2S_URL', backend.yaml will default to use 'http://service-auth-provider-api:8080'
+URL settings:
 
-./ccd compose up -d
+- `S2S_URL_BASE`: service-auth URL used by the test runner.
+- `IDAM_S2S_URL`: service-auth URL used by application containers.
 
-Will need to be re-issued to apply the above changes.
-]
+Shared test requirements:
 
+- Use the `ccd_gw` S2S identity.
+- Keep `IDAM_KEY_CCD_GATEWAY`, `BEFTA_S2S_CLIENT_SECRET`, `CCD_GW_SERVICE_SECRET`, and `CCD_API_GATEWAY_S2S_KEY` identical.
+- `ccd-admin-web` and `ccd-api-gateway` are not required for these tests.
+- If service-auth configuration changes, recreate `service-auth-provider-api` before rerunning the tests.
 
-The smoke tests creates a file `/aat/befta_recent_executions_info.json`, delete this file after running the tests.
+The same environment configuration applies to functional tests:
+
+| Repository | Smoke test | Functional tests | `TEST_URL` | Elasticsearch flag |
+|---|---|---|---|---|
+| `ccd-definition-store-api` | `./gradlew clean smoke` | `./gradlew functional` | `http://localhost:4451` | `ELASTIC_SEARCH_ENABLED=true` for ES tests |
+| `ccd-data-store-api` | `./gradlew clean smoke` | `./gradlew functional` | `http://localhost:4452` | `ELASTIC_SEARCH_FTA_ENABLED=true` for ES tests |
+
+Functional-test options:
+
+- Run a subset with `./gradlew functional -P tags="@F-105 or @F-110"`.
+- Keep the S2S settings configured as above.
+- If either Elasticsearch test flag is `true`, set `ES_ENABLED_DOCKER=true` before running `./ccd compose up -d`.
+- Leave all three Elasticsearch flags `false` for non-Elasticsearch tests.
+
+Test-data cache:
+
+- The smoke test creates `/aat/befta_recent_executions_info.json`.
+- Delete it before rerunning if cached test data must be reloaded.
 
 ---
 
@@ -318,7 +355,7 @@ Alternatively, add a user to SIDAM by using the script
 >
 > FIRST_NAME if omitted defaults to `TesterFirstname`
 >
-> Password for each user created by the script defaults to `Pa55word11`
+> Password for each user must be supplied as the final argument or through the generated `IDAM_USER_PASSWORD` environment variable.
 
 You may verify the service has been added by logging in to the SIDAM Web Admin with the URL and
 logic credentials here:
@@ -431,7 +468,7 @@ Then the indicated role, here `caseworker-cmc-loa1`, must be added to CCD (See [
 ### Ready for take-off 🛫
 
 Back to [http://localhost:3451](http://localhost:3451), you can now log in with any of the email addresses defined when adding users in [3. Create Users](#3.-Create-users).
-All user passwords default to : `Pa55word11`.
+Local user passwords are generated into the ignored `.env` by `bin/setup-local-secrets.sh`; do not use fixed passwords for AAT or production.
 
 If you see only a grey screen after entering your user credentials in the login page, you may need to set profile settings in ccd_user_profile database by adding a single line for the user in the below tables:
 
@@ -569,7 +606,7 @@ Also if a certain database has not been created you might need to create a new c
   * run docker-compose `./ccd compose up -d`
   * create Blob Store in Azurite `./bin/dm-store/document-management-store-create-blob-store-container.sh`
 
-* To enable **ExUI** rather then the CCD UI
+* To enable **ExUI** rather than the CCD UI
   * `./ccd enable xui-frontend`
   * export XUI_LAUNCH_DARKLY_CLIENT_ID to value mentioned in xui web app preview template yaml file. i.e. 645baeea2787d812993d9d70
   * run docker-compose `./ccd compose up -d`
@@ -577,10 +614,18 @@ Also if a certain database has not been created you might need to create a new c
 
 * To enable **ElasticSearch**
   > [!Warning] 
-  > We recommend at lest 16GB of memory for Docker when enabling elasticsearch
+  > We recommend at least 16GB of memory for Docker when enabling Elasticsearch
   * `./ccd enable elasticsearch` (assuming `backend` is already enabled, otherwise enable it)
   * export ES_ENABLED_DOCKER=true
   * verify that Data Store is able to connect to elasticsearch: `curl localhost:4452/health`
+
+  If the definition-store smoke test fails with `Failed to execute check alias existence after 3 attempts`, add `- xpack.security.enabled=false` to the Elasticsearch service environment in `compose/elasticsearch.yml`, then recreate Elasticsearch:
+
+  ```bash
+  docker compose -f compose/elasticsearch.yml rm -sf ccd-elasticsearch
+  ./ccd compose up -d
+  curl http://localhost:9200
+  ```
 
 * To enable **Logstash**
   * `./ccd enable logstash` (assuming `elasticsearch` is already enabled, otherwise enable it)
