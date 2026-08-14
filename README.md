@@ -125,6 +125,8 @@ Ignore if we get error message ccd-network already exists while running above co
   ```
 
   The bootstrap does not contact shared environments and must not be used for AAT or production credentials.
+
+  When local AAC uses the shared IDAM database, AAC must consume the matching `IDAM_DB_PASSWORD` generated/configured by this bootstrap. AAC does not generate a second database password.
   For a shared environment, set `CCD_ENV` and `CCD_ENV_FILE` to the approved managed environment file instead;
   the bootstrap will not generate values in that mode.
   
@@ -230,8 +232,8 @@ However, some more steps are required to correctly configure CCD before it can b
 If they are not working then check you have run `source ./bin/set-environment-variables.sh` correctly.
 If still not working then try setting them directly with the following commands.
 ```bash
-export IDAM_ADMIN_USER=idamOwner@hmcts.net
-export IDAM_ADMIN_PASSWORD=Ref0rmIsFun
+export IDAM_ADMIN_USER=<approved-local-idam-admin-user>
+export IDAM_ADMIN_PASSWORD=<approved-local-idam-admin-password>
 ```
 And check they match the corresponding values from the confluence page at https://tools.hmcts.net/confluence/x/eQP3P
 
@@ -353,7 +355,7 @@ Alternatively, add a user to SIDAM by using the script
 >
 > FIRST_NAME if omitted defaults to `TesterFirstname`
 >
-> Password for each user created by the script defaults to `Pa55word11`
+> Password for each user must be supplied as the final argument or through the generated `IDAM_USER_PASSWORD` environment variable.
 
 You may verify the service has been added by logging in to the SIDAM Web Admin with the URL and
 logic credentials here:
@@ -466,7 +468,7 @@ Then the indicated role, here `caseworker-cmc-loa1`, must be added to CCD (See [
 ### Ready for take-off 🛫
 
 Back to [http://localhost:3451](http://localhost:3451), you can now log in with any of the email addresses defined when adding users in [3. Create Users](#3.-Create-users).
-All user passwords default to : `Pa55word11`.
+Local user passwords are generated into the ignored `.env` by `bin/setup-local-secrets.sh`; do not use fixed passwords for AAT or production.
 
 If you see only a grey screen after entering your user credentials in the login page, you may need to set profile settings in ccd_user_profile database by adding a single line for the user in the below tables:
 

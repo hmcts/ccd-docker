@@ -23,6 +23,8 @@ Remove tracked credential material and provide safe local runtime configuration 
 
 Remediation status: tracked `.env`, plaintext secret files, and credential defaults have been removed or externalised. `bin/setup-local-secrets.sh` generates ignored local-only values; no live credential rotation was performed.
 
+Bulk-user setup now requires `IDAM_ADMIN_USER`, `IDAM_ADMIN_PASSWORD`, and `IDAM_BULK_USER_CLIENT_SECRET`; its local database helpers use the generated `IDAM_DB_PASSWORD`.
+
 - Tracked `.env` contains database passwords, IDAM service keys, OAuth2 client secrets, App Insights configuration, and `CCD_NEXT_HEARING_DATE_PASSWORD`.
 - Tracked plaintext files: `secrets/rpx/appinsights-connection-string-mc` and `secrets/rpx/postgresql-admin-pw`.
 - Compose and helper scripts reference `.env`, the tracked secret directory, and related service configuration.

@@ -31,6 +31,7 @@ openssl req -x509 -newkey rsa:2048 -nodes -days 365 \
 
 generate_local_secret() { openssl rand -hex 32; }
 gateway_client_secret=$(generate_local_secret)
+gateway_idam_key=$(generate_local_secret)
 
 cat > "$env_file" <<EOF
 # Generated for local CCD development only. Do not commit or reuse outside local Docker.
@@ -45,7 +46,7 @@ DB_USERNAME=ccd
 DB_PASSWORD=$(generate_local_secret)
 AM_DB_USERNAME=am
 AM_DB_PASSWORD=$(generate_local_secret)
-IDAM_KEY_CCD_GATEWAY=$(generate_local_secret)
+IDAM_KEY_CCD_GATEWAY=$gateway_idam_key
 IDAM_KEY_CCD_ADMIN=$(generate_local_secret)
 IDAM_KEY_CCD_DATA_STORE=$(generate_local_secret)
 IDAM_KEY_CCD_DEFINITION_STORE=$(generate_local_secret)
@@ -74,9 +75,11 @@ IDAM_SPI_FORGEROCK_AM_PASSWORD=$(generate_local_secret)
 IDAM_SPI_FORGEROCK_IDM_PASSWORD=$(generate_local_secret)
 IDAM_SPI_FORGEROCK_IDM_PIN_DEFAULTPASSWORD=$(generate_local_secret)
 STORAGEACCOUNT_PRIMARY_CONNECTION_STRING=UseDevelopmentStorage=true
-IDAM_DB_PASSWORD=$(generate_local_secret)
+# Local SIDAM shared-db uses the fixed development password.
+IDAM_DB_PASSWORD=openidm
 CCD_CASEWORKER_DEFAULT_PASSWORD=$(generate_local_secret)
 IDAM_USER_PASSWORD=$(generate_local_secret)
+IDAM_BULK_USER_CLIENT_SECRET=$(generate_local_secret)
 IDAM_CLIENT_SECRET=$gateway_client_secret
 IDAM_ADMIN_PASSWORD=$(generate_local_secret)
 IDAM_ADMIN_USER=ccd.docker.default@hmcts.net
@@ -97,14 +100,14 @@ BEFTA_S2S_CLIENT_SECRET_OF_PAYMENT_APP=$(generate_local_secret)
 BEFTA_S2S_CLIENT_ID_OF_XUI_WEBAPP=xuiwebapp
 BEFTA_OAUTH2_CLIENT_ID_OF_XUIWEBAPP=xuiwebapp
 BEFTA_S2S_CLIENT_ID=ccd_gw
-BEFTA_S2S_CLIENT_SECRET=$IDAM_KEY_CCD_GATEWAY
+BEFTA_S2S_CLIENT_SECRET=$gateway_idam_key
 BEFTA_OAUTH2_CLIENT_ID_OF_XUIWEBAPP=xuiwebapp
 CCD_API_GATEWAY_OAUTH2_CLIENT_ID=ccd_gateway
 CCD_API_GATEWAY_OAUTH2_CLIENT_SECRET=$gateway_client_secret
 CCD_API_GATEWAY_S2S_ID=ccd_gw
-CCD_API_GATEWAY_S2S_KEY=$IDAM_KEY_CCD_GATEWAY
-CCD_GW_SERVICE_SECRET=$IDAM_KEY_CCD_GATEWAY
-ROLE_ASSIGNMENT_API_GATEWAY_S2S_CLIENT_KEY=$IDAM_KEY_CCD_GATEWAY
+CCD_API_GATEWAY_S2S_KEY=$gateway_idam_key
+CCD_GW_SERVICE_SECRET=$gateway_idam_key
+ROLE_ASSIGNMENT_API_GATEWAY_S2S_CLIENT_KEY=$gateway_idam_key
 ROLE_ASSIGNMENT_USER_PASSWORD=$(generate_local_secret)
 DEFINITION_IMPORTER_PASSWORD=$(generate_local_secret)
 TESTING_SUPPORT_ENABLED=true

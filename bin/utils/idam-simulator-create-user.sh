@@ -6,7 +6,7 @@
 ##    - role: Comma-separated list of roles.
 ##    - surname: Last name. Default to `Test`.
 ##    - forename: First name. Default to `User`.
-##    - password: User's password. Default to `Pa55word11`.
+##    - password: User's password. If omitted, `IDAM_USER_PASSWORD` must be set.
 
 email=$1
 rolesStr=$2

@@ -10,7 +10,7 @@ The script requires the following bash utilities. Please install them depending 
 The script will prompt for the following information dependent on what is passed to the prompt for 'environment to use':
 
 default environment is assumed to be 'local', for testing against the local docker environment no further prompts will be displayed
-as all the required information is contained within 'bulk-user-setup.config'
+as all the required non-secret settings are contained within `bulk-user-setup.config`. Set `IDAM_ADMIN_USER`, `IDAM_ADMIN_PASSWORD`, and `IDAM_BULK_USER_CLIENT_SECRET` in the approved environment before running it. The configuration no longer contains fixed credentials.
 
 1. environment (default if nothing provided is 'local')
 
@@ -156,4 +156,3 @@ To use this bulk script in any environment other than local the following should
    check the local master caseworker file (caseworker-roles-master.txt) against the remote caseworker roles fetched via a GET api call
    Comparison results will be outputted to the console and log file. There is no automated process for updating the local master file.
    Refer to the output and decide if the missing caseworker roles need to be added to the processing logic.
-
