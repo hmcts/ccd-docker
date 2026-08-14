@@ -434,7 +434,7 @@ function usage() {
     echo "  update <project...> - update project override to match upstream branch; and build"
     echo "  enable <project>|defaults|show - enable a compose file"
     echo "  disable <project> - disable a compose file"
-    echo "  compose [<docker-compose command> [options]] - wrap docker compose for your configuration"
+    echo "  compose [<docker compose command> [options]] - wrap docker compose for your configuration"
     echo
     exit 1
 }
@@ -501,8 +501,8 @@ function usage_disable() {
 
 function usage_compose() {
     if [ $# -eq 1 -a "$1" == "-h" ]; then
-        echo "Use docker-compose to run the configured overrides and enabled projects"
-        echo "Usage: $(basename $0) compose [<docker-compose command> [options]]"
+        echo "Use docker compose to run the configured overrides and enabled projects"
+        echo "Usage: $(basename $0) compose [<docker compose command> [options]]"
         echo
         exit 1
     fi
@@ -549,8 +549,14 @@ function ccd_branches() {
 }
 
 function ccd_init() {
-    echo "creating docker network 'ccd-network'"
-    docker network create ccd-network && echo "'ccd-network' created"
+    echo "checking for docker network 'ccd-network'"
+    existing_network=$(docker network ls -f name=ccd-network -q) 
+    if [ "$existing_network" != "" ]; then
+        echo "docker network 'ccd-network' already exists. Do you want to recreate it?"
+        askYesNo "docker network rm ccd-network && docker network create ccd-network && echo 'ccd-network' recreated" "echo preserving existing network"
+    else
+        docker network create ccd-network && echo "'ccd-network' created"
+    fi
 }
 
 function ccd_status() {
@@ -677,8 +683,8 @@ function ccd_compose() {
     fi
     compose_file_options=$(create_compose_file_options)
     echo "Docker compose:"
-    echo -e "docker-compose $compose_file_options $options\n"
-    docker-compose $compose_file_options $options
+    echo -e "docker compose $compose_file_options $options\n"
+    docker compose $compose_file_options $options
 }
 
 function print_warn_on_compose_down_if_idam_enabled {
@@ -757,10 +763,10 @@ function ccd_default() {
     source ./bin/set-environment-variables.sh &>/dev/null
 
     compose_file_options=$(create_compose_file_options) >/dev/null
-    if docker-compose $compose_file_options ps --services --filter status=running | grep -q . >/dev/null; then
+    if docker compose $compose_file_options ps --services --filter status=running | grep -q . >/dev/null; then
         echo_ccd "Compose containers currently running running."
         echo_ccd "Do you wish to remove existing containers and volumes? (y/n)"
-        askYesNo "docker-compose $compose_file_options down -v &>/dev/null; echo_ccd Containers and volumes removed." "echo_ccd Existing containers and volumes preserved."
+        askYesNo "docker compose $compose_file_options down -v &>/dev/null; echo_ccd Containers and volumes removed." "echo_ccd Existing containers and volumes preserved."
     fi
     compose_file_options="" # reset variable
 
@@ -791,13 +797,13 @@ function ccd_default() {
 
     compose_file_options=$(create_compose_file_options) >/dev/null
     echo_ccd "Pulling latest images..."
-    if ! docker-compose $compose_file_options pull; then
+    if ! docker compose $compose_file_options pull; then
         echo_error "Failed to pull latest images. Continue anyways? (y/n)"
         askYesNo "echo_ccd Continuing despite pull failures." "exit 1"
     fi
 
     echo_ccd "Initializing ccd network..."
-    ccd_init &>/dev/null # will either create or already exists
+    ccd_init # will either create or already exists
 
     echo_ccd "Starting up services..."
     if ! docker compose $compose_file_options up -d >/dev/null; then

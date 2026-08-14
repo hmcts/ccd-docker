@@ -566,13 +566,13 @@ Also if a certain database has not been created you might need to create a new c
 
 * To enable **document-management-store-app**
   * `./ccd enable backend frontend dm-store`
-  * run docker-compose `./ccd compose up -d`
+  * run docker compose `./ccd compose up -d`
   * create Blob Store in Azurite `./bin/dm-store/document-management-store-create-blob-store-container.sh`
 
 * To enable **ExUI** rather then the CCD UI
   * `./ccd enable xui-frontend`
   * export XUI_LAUNCH_DARKLY_CLIENT_ID to value mentioned in xui web app preview template yaml file. i.e. 645baeea2787d812993d9d70
-  * run docker-compose `./ccd compose up -d`
+  * run docker compose `./ccd compose up -d`
   * access ExUI at `http://localhost:3455`
 
 * To enable **ElasticSearch**
@@ -589,36 +589,36 @@ Also if a certain database has not been created you might need to create a new c
 * To enable **ccd-message-publisher**
   * NOTE: By default the CCD Message Publisher will use an embedded ActiveMQ instance. See [ccd-message-publisher](https://github.com/hmcts/ccd-message-publisher) for more information.
   * `./ccd enable backend message-publisher`
-  * Run docker-compose `./ccd compose up -d`
+  * Run docker compose `./ccd compose up -d`
   * Verify that ccd-message-publisher is up and running by `curl localhost:4456/health`
 
 * To enable **ccd-case-disposer**
   * `./ccd enable backend case-disposer`
-  * Run docker-compose `./ccd compose up -d`
+  * Run docker compose `./ccd compose up -d`
 
 * To enable **ccd-next-hearing-date-updater**
   * `./ccd enable backend ccd-next-hearing-date-updater`
-  * Run docker-compose `./ccd compose up -d`
+  * Run docker compose `./ccd compose up -d`
 
 * To enable **ccd-case-document-am-api**
   * `./ccd enable backend frontend dm-store case-document-am`
-  * run docker-compose `./ccd compose up -d`
+  * run docker compose `./ccd compose up -d`
   * verify that ccd-case-document-am-api is up and running by `curl localhost:4455/health`
 
 * To enable **ts-translation-service**
   * `./ccd enable backend ts-translation-service`
-  * run docker-compose `./ccd compose up -d`
+  * run docker compose `./ccd compose up -d`
   * verify that ts-translation-service is up and running by `curl localhost:4650/health`
 
 * To enable **cft-hearing-service**
   * `./ccd enable backend hearings`
-  * run docker-compose `./ccd compose up -d`
+  * run docker compose `./ccd compose up -d`
   * verify that cft-hearing-service is up and running by `curl localhost:4651/health`
   * this will include the inbound and outbound adapters
 
 * To enable **hmc-operational-reports-runner**
   * `./ccd enable backend operational`
-  * run docker-compose `./ccd compose up -d`
+  * run docker compose `./ccd compose up -d`
   * verify that hmc-operational-reports-runner is up and running by `curl localhost:4651/health`
 
 ---
@@ -660,10 +660,10 @@ Retrieve from `.tags.env` the branches and compose files currently enabled and d
 ### Compose
 
 ```bash
-./ccd compose [<docker-compose command> [options]]
+./ccd compose [<docker compose command> [options]]
 ```
 
-The compose command acts as a wrapper around `docker-compose` and accept all commands and options supported by it.
+The compose command acts as a wrapper around `docker compose` and accept all commands and options supported by it.
 
 > [!TIP]
 > For the complete documentation of Docker Compose CLI, see [Compose command-line reference](https://docs.docker.com/compose/reference/).*
@@ -872,6 +872,18 @@ If you see this above authentication issue while pulling images, please follow t
 ### Idam Full Stack Troubleshooting
 If running the full idam stack then see the [full stack troubleshooting section of the IDAM alt docs](./docs/IdamAlt.md#troubleshooting-full-idam-stack)
 
+
+### OIDC Mismatch Troubleshooting
+A recently observed error was causing the IDAM-SIM to return the SIMULATOR_OPENID_BASE_URL value instead of the SIMULATOR_OPENID_BASE_URL_OUTSIDE_NETWORK when being accessed by services outside the docker-network for the OIDC issuer.
+This caused a mismatch in the OIDC issuer when running services like ccd-data-store-api outside the ccd-docker stack.
+This was diagnosed by running `curl -s http://localhost:5000/o/.well-known/openid-configuration | jq -r .issuer`
+Which showed that while the expected OIDC value externally was `localhost:5000` it was actually returning `idam:5000`
+
+This was fixed by first removing all existing containers / volumes and then deleting the docker network `ccd-network`
+Then by recreating from scratch.
+
+The exact root cause is not yet known but the common precursor was updating docker desktop whilst the `ccd-network` already existed.
+
 ---
 
 
@@ -918,7 +930,7 @@ docker.for.win.localhost
 
 Remember that once you changed the above for a particular app you have to make sure the container configuration for that app does not try to automatically start the dependency that you have started locally. To do that either comment out the entry for the locally running app from the **depends_on** section of the config or start the app with **--no-deps** flag.
 
-- If you happen to run `docker-compose up` before setting up the environment variables, you will probably get error while starting the DB. In that
+- If you happen to run `docker compose up` before setting up the environment variables, you will probably get error while starting the DB. In that
 case, clear the containers but also watch out for volumes created to be cleared to get a fresh start since some initialisation scripts don't run if
 you have already existing volume for the container.
 
