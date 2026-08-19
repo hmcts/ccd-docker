@@ -137,6 +137,12 @@ cd bulk-user-setup
 
 This generates a temporary CSV, converts it through the real CSV-to-JSON path, and mocks the IDAM lookup/action handlers. It validates the dispatcher branches for find, add, delete, deleteuser, suspend, unsuspend, updateemail, updatename, invalid input, and already-processed rows without needing local Docker or IDAM.
 
+By default, the temporary fixture, log, and output CSV are deleted after the test. To keep them for inspection, run:
+
+```bash
+KEEP_SMOKE_OUTPUT=true ./test/run-dispatcher-smoke-test.sh
+```
+
 ## Verifying results when testing locally against the test input scenario files
 
 1. After all the .csv test input files are processed you should find a output log file i.e. BULK-SCRIPT-OUTPUT2022-11-14.log

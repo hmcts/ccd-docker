@@ -12,8 +12,22 @@ fi
 
 source ./bulk-user-setup.sh
 
+KEEP_SMOKE_OUTPUT=${KEEP_SMOKE_OUTPUT:-false}
 tmpdir=$(mktemp -d)
-trap 'rm -rf "$tmpdir"' EXIT
+
+function cleanup() {
+  local exit_code=$?
+
+  if [[ "$KEEP_SMOKE_OUTPUT" = true ]]; then
+    if [ "$exit_code" -ne 0 ]; then
+      echo "Smoke test failed; preserved output directory: $tmpdir"
+    fi
+  else
+    rm -rf "$tmpdir"
+  fi
+}
+
+trap cleanup EXIT
 
 LOGFILE="$tmpdir/dispatcher.log"
 LOGLEVEL="ERROR"
@@ -24,7 +38,7 @@ filename="dispatcher-smoke.csv"
 filepath_output_newpath="$tmpdir/output.csv"
 
 touch "$LOGFILE"
-: > "$filepath_output_newpath"
+echo "operation,email,handler" > "$filepath_output_newpath"
 
 handler_calls=()
 
@@ -154,3 +168,10 @@ for index in "${!expected_handlers[@]}"; do
 done
 
 echo "Dispatcher smoke test passed (${#expected_handlers[@]} cases)."
+
+if [[ "$KEEP_SMOKE_OUTPUT" = true ]]; then
+  echo "Smoke test output directory: $tmpdir"
+  echo "Smoke test fixture: $fixture"
+  echo "Smoke test output CSV: $filepath_output_newpath"
+  echo "Smoke test log: $LOGFILE"
+fi
