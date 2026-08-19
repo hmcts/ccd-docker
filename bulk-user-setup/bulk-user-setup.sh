@@ -1504,6 +1504,86 @@ function handle_delete_roles() {
   build_standard_output_csv "$user"
 }
 
+function process_user_record() {
+  local user=$1
+
+  total_counter=$((total_counter+1))
+
+  load_user_record_context "$user"
+  log_user_record_start
+
+  if [ "$inviteStatus" != "SUCCESS" ]; then
+
+    lookup_user_for_record
+    normalise_roles_from_csv
+    warn_about_unused_input_fields
+
+    if ! is_valid_operation; then
+      fail_invalid_operation
+
+    elif ! validateEmailAddress "${email}"; then
+      fail_invalid_email
+
+    elif roles_csv_is_empty && operation_requires_roles; then
+      fail_no_roles_defined
+
+    elif role_string_is_invalid && operation_requires_roles; then
+      fail_invalid_role_string
+
+    elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$csvSSOId" != "null" ]; then
+      fail_sso_user_not_found
+
+    elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "find" ]; then
+      fail_find_user_not_found
+
+    elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "find" ]; then
+      handle_find_user
+
+    elif [ "$operation" == "add" ] && [[ "$ENABLE_USERID_REGISTRATIONS" = true ]]; then
+      handle_add_with_userid_registration
+
+    elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "add" ]; then
+      handle_add_new_user
+
+    elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "deleteuser" ]; then
+      handle_delete_user_account
+
+    elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "suspend" ]; then
+      handle_suspend_user
+
+    elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "unsuspend" ]; then
+      handle_unsuspend_user
+
+    elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "add" ]; then
+      handle_add_roles_to_existing_user
+
+    elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "updateemail" ]; then
+      handle_update_email
+
+    elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "updatename" ]; then
+      handle_update_name
+
+    elif { [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "delete" ]; } || [ "$operation" == "updatename" ]; then
+      handle_missing_user_for_operation
+
+    elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "delete" ] && manual_delete_role_requested; then
+      fail_manual_role_delete_request
+
+    elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "delete" ]; then
+      handle_delete_roles
+    fi
+
+  else
+    handle_already_processed_record
+
+  fi
+
+  update_expected_result_counters
+
+  # record log of action in output file (NB: escape values for CSV)
+  echo "$output_csv" >> "$filepath_output_newpath"
+}
+
 function process_input_file() {
   local filepath_input_original=$1
   local datestamp
@@ -1527,99 +1607,21 @@ function process_input_file() {
     move_input_file_to_backup
     write_output_header
 
-  # strip JSON into individual items then process in a while loop
-  echo "$json" | jq -r -c '.[]' \
-      |  \
-  ( reset_processing_counters
+    # strip JSON into individual items then process in a while loop
+    reset_processing_counters
     while IFS= read -r user; do
-      total_counter=$((total_counter+1))
-
-      load_user_record_context "$user"
-      log_user_record_start
-
-      if [ "$inviteStatus" != "SUCCESS" ]; then
-
-        lookup_user_for_record
-        normalise_roles_from_csv
-        warn_about_unused_input_fields
-
-        if ! is_valid_operation; then
-          fail_invalid_operation
-
-        elif ! validateEmailAddress "${email}"; then
-          fail_invalid_email
-
-        elif roles_csv_is_empty && operation_requires_roles; then
-          fail_no_roles_defined
-
-        elif role_string_is_invalid && operation_requires_roles; then
-          fail_invalid_role_string
-
-        elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$csvSSOId" != "null" ]; then
-          fail_sso_user_not_found
-
-        elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "find" ]; then
-          fail_find_user_not_found
-
-        elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "find" ]; then
-          handle_find_user
-
-        elif [ "$operation" == "add" ] && [[ "$ENABLE_USERID_REGISTRATIONS" = true ]]; then
-          handle_add_with_userid_registration
-
-        elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "add" ]; then
-          handle_add_new_user
-
-        elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "deleteuser" ]; then
-          handle_delete_user_account
-
-        elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "suspend" ]; then
-          handle_suspend_user
-
-        elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "unsuspend" ]; then
-          handle_unsuspend_user
-
-
-        elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "add" ]; then
-          handle_add_roles_to_existing_user
-
-        elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "updateemail" ]; then
-          handle_update_email
-
-        elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "updatename" ]; then
-          handle_update_name
-
-        elif { [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "delete" ]; } || [ "$operation" == "updatename" ]; then
-          handle_missing_user_for_operation
-
-        elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "delete" ] && manual_delete_role_requested; then
-          fail_manual_role_delete_request
-
-        elif [[ $rawReturnedValue != *"HTTP-"* ]] && [ "$operation" == "delete" ]; then
-          handle_delete_roles
-        fi
-
-      else
-        handle_already_processed_record
-
-      fi
-
-      update_expected_result_counters
-
-      # record log of action in output file (NB: escape values for CSV)
-      echo "$output_csv" >> "$filepath_output_newpath"
-    done
+      process_user_record "$user"
+    done < <(echo "$json" | jq -r -c '.[]')
 
     log_debug "****** End - processing input file ${filepath_input_original}"
 
     print_processing_summary
     log_expected_result_summary
-  )
 
-else
-  echo "$json"
+  else
+    echo "$json"
 
-fi
+  fi
 
   # copy output file back to original input file location so it can be used for re-run
   # not required as original input directory is now looped through recursively
@@ -2224,54 +2226,60 @@ process_folder_recurse() {
 
 }
 
-read -p $'\nPlease enter environment (default is local): ' ENV
+function main() {
+  read -p $'\nPlease enter environment (default is local): ' ENV
 
-ENV=${ENV:-local}
+  ENV=${ENV:-local}
 
-if [ "$ENV" == "local" ]; then
-    is_test=true
-    if [[ "$CREATE_TEST_USERS" = true ]]; then
-        echo "Calling ./test/utils/add-users.sh"
-        ./test/utils/add-users.sh
-    fi
-fi
+  if [ "$ENV" == "local" ]; then
+      is_test=true
+      if [[ "$CREATE_TEST_USERS" = true ]]; then
+          echo "Calling ./test/utils/add-users.sh"
+          ./test/utils/add-users.sh
+      fi
+  fi
 
-if [[ "$is_test" = false ]]; then
-  # read input arguments
-  read -p "Please enter directory path containing csv input files: " CSV_DIR_PATH
-  read -p "Please enter ccd idam-admin username: " ADMIN_USER
-  ADMIN_USER_PWD=$(read_password_with_asterisk "Please enter ccd idam-admin password: ")
-  IDAM_CLIENT_SECRET=$(read_password_with_asterisk $'\nPlease enter idam oauth2 secret for ccd-bulk-user-register client: ')
-fi
+  if [[ "$is_test" = false ]]; then
+    # read input arguments
+    read -p "Please enter directory path containing csv input files: " CSV_DIR_PATH
+    read -p "Please enter ccd idam-admin username: " ADMIN_USER
+    ADMIN_USER_PWD=$(read_password_with_asterisk "Please enter ccd idam-admin password: ")
+    IDAM_CLIENT_SECRET=$(read_password_with_asterisk $'\nPlease enter idam oauth2 secret for ccd-bulk-user-register client: ')
+  fi
 
-# Check if a param is set to a valid value
-if [[ ! "$LOGLEVEL" =~ ^(DEBUG|INFO|WARN|ERROR)$ ]]; then
-  echo "Logging level needs to be DEBUG, INFO, WARN or ERROR."
-  exit 1
-fi
-
-if [ -z "${CSV_DIR_PATH}" ] || [ -z "${ADMIN_USER}" ] || [ -z "${ADMIN_USER_PWD}" ] || [ -z "${IDAM_CLIENT_SECRET}" ]
-then
-  echo "${RED}Please provide all required inputs to the script.${NORMAL} Try running again ./bulk-user-creation.sh"
-  exit 1
-fi
-
-IDAM_URL=$(get_idam_url)
-IDAM_ACCESS_TOKEN=$(get_idam_token)
-check_exit_code_for_error $? "$IDAM_ACCESS_TOKEN"
-
-if [ -z "$IDAM_ACCESS_TOKEN" ]
-then
-    echo "${RED}ERROR: Problem getting idam token for admin user:${NORMAL} $ADMIN_USER"
+  # Check if a param is set to a valid value
+  if [[ ! "$LOGLEVEL" =~ ^(DEBUG|INFO|WARN|ERROR)$ ]]; then
+    echo "Logging level needs to be DEBUG, INFO, WARN or ERROR."
     exit 1
-fi
+  fi
 
-# read csv(s) and call curl in a loop for each record
-process_folder_recurse "${CSV_DIR_PATH}"
-if [[ "$ENABLE_CASEWORKER_CHECKS" = true ]]; then
-    echo "Checking caseworker roles .."
-    log_info "Checking caseworker roles .."
-    checkMasterCaseworkerRoles
-fi
+  if [ -z "${CSV_DIR_PATH}" ] || [ -z "${ADMIN_USER}" ] || [ -z "${ADMIN_USER_PWD}" ] || [ -z "${IDAM_CLIENT_SECRET}" ]
+  then
+    echo "${RED}Please provide all required inputs to the script.${NORMAL} Try running again ./bulk-user-creation.sh"
+    exit 1
+  fi
 
-unset https_proxy;
+  IDAM_URL=$(get_idam_url)
+  IDAM_ACCESS_TOKEN=$(get_idam_token)
+  check_exit_code_for_error $? "$IDAM_ACCESS_TOKEN"
+
+  if [ -z "$IDAM_ACCESS_TOKEN" ]
+  then
+      echo "${RED}ERROR: Problem getting idam token for admin user:${NORMAL} $ADMIN_USER"
+      exit 1
+  fi
+
+  # read csv(s) and call curl in a loop for each record
+  process_folder_recurse "${CSV_DIR_PATH}"
+  if [[ "$ENABLE_CASEWORKER_CHECKS" = true ]]; then
+      echo "Checking caseworker roles .."
+      log_info "Checking caseworker roles .."
+      checkMasterCaseworkerRoles
+  fi
+
+  unset https_proxy
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

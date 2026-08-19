@@ -126,6 +126,17 @@ After running the main script input files copied to bulk-user-setup/test/inputs 
 Generated output and backup of input files will be copied to ../outputs/{DateTime} (i.e. /bulk-user-setup/test/outputs/{DateTime}) folder.
 Any invalid input file will be skipped (i.e. due to missing or incorrect mandatory CSV header) and remain in the original bulk-user-setup/test/inputs folder.
 
+## Fast dispatcher smoke test
+
+To quickly check the script still routes the main input/action combinations correctly, run:
+
+```bash
+cd bulk-user-setup
+./test/run-dispatcher-smoke-test.sh
+```
+
+This generates a temporary CSV, converts it through the real CSV-to-JSON path, and mocks the IDAM lookup/action handlers. It validates the dispatcher branches for find, add, delete, deleteuser, suspend, unsuspend, updateemail, updatename, invalid input, and already-processed rows without needing local Docker or IDAM.
+
 ## Verifying results when testing locally against the test input scenario files
 
 1. After all the .csv test input files are processed you should find a output log file i.e. BULK-SCRIPT-OUTPUT2022-11-14.log
@@ -156,4 +167,3 @@ To use this bulk script in any environment other than local the following should
    check the local master caseworker file (caseworker-roles-master.txt) against the remote caseworker roles fetched via a GET api call
    Comparison results will be outputted to the console and log file. There is no automated process for updating the local master file.
    Refer to the output and decide if the missing caseworker roles need to be added to the processing logic.
-
