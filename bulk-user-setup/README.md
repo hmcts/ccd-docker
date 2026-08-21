@@ -33,19 +33,21 @@ Generated log file and output files will be placed in bulk-user-setup/test/outpu
 
 ## CSV file format
 
-The CSV input file must contain a header row. The following input headers are recognised by the script:
+The CSV input file must contain a header row. The script always requires the base headers
+`operation,email,firstName,lastName,roles`; values can be blank where the operation or lookup path does not need them.
+The following input headers are recognised by the script:
 
-| Header            | Mandatory                | Description                                                                                       |
-|-------------------|--------------------------|---------------------------------------------------------------------------------------------------|
-| operation         | **Yes**                  | `add`, `updatename`, `delete`, `find`, `updateemail`, `suspend`, `deleteuser`, or `unsuspend`.    |
-| email             | **Yes**                  | Email address of the user.                                                                        |
-| firstName         | **Depends on operation** | First name of the user.                                                                           |
-| lastName          | **Depends on operation** | Last name of the user.                                                                            |
-| roles             | **Depends on operation** | A pipe delimited list of roles for the user to be added or removed.                               |
-| id                | Optional                 | IDAM user ID. Required when `ENABLE_USERID_REGISTRATIONS=true`; otherwise used for lookup if set. |
-| ssoId             | Optional                 | SSO ID. If supplied, it is used for user lookup before `id` or `email`.                            |
-| status            | Optional                 | Previous operation status. If populated with `SUCCESS`, the row is skipped as already processed.  |
-| result            | Optional                 | Expected result for test verification, e.g. `SUCCESS`, `FAILED`, `SKIPPED`.                       |
+| Header            | Header required          | Value required          | Description                                                                                       |
+|-------------------|--------------------------|-------------------------|---------------------------------------------------------------------------------------------------|
+| operation         | **Yes**                  | **Yes**                 | `add`, `updatename`, `delete`, `find`, `updateemail`, `suspend`, `deleteuser`, or `unsuspend`.    |
+| email             | **Yes**                  | Depends on lookup       | Required when creating a user or looking up by email. If `ssoId` or `id` resolves an existing user, the email returned by IDAM is used. |
+| firstName         | **Yes**                  | Depends on operation    | First name of the user.                                                                           |
+| lastName          | **Yes**                  | Depends on operation    | Last name of the user.                                                                            |
+| roles             | **Yes**                  | Depends on operation    | A pipe delimited list of roles for the user to be added or removed.                               |
+| id                | Depends on configuration | Depends on configuration | IDAM user ID. The header is required when `ENABLE_USERID_REGISTRATIONS=true`; otherwise it is optional and used for lookup if set. |
+| ssoId             | Optional                 | Optional                | SSO ID. If supplied, it is used for user lookup before `id` or `email`.                            |
+| status            | Optional                 | Optional                | Previous operation status. If populated with `SUCCESS`, the row is skipped as already processed.  |
+| result            | Optional                 | Optional                | Expected result for test verification, e.g. `SUCCESS`, `FAILED`, `SKIPPED`.                       |
 
 Example full input header:
 
