@@ -40,32 +40,33 @@ The following input headers are recognised by the script:
 | Header            | Header required          | Value required          | Description                                                                                       |
 |-------------------|--------------------------|-------------------------|---------------------------------------------------------------------------------------------------|
 | operation         | **Yes**                  | **Yes**                 | `add`, `updatename`, `delete`, `find`, `updateemail`, `suspend`, `deleteuser`, or `unsuspend`.    |
-| email             | **Yes**                  | Depends on lookup       | Required when creating a user or looking up by email. If `ssoId` or `id` resolves an existing user, the email returned by IDAM is used. |
+| email             | **Yes**                  | Depends on lookup       | Required when creating a user or looking up by email. If `ssoID` or `idamID` resolves an existing user, the email returned by IDAM is used. |
 | firstName         | **Yes**                  | Depends on operation    | First name of the user.                                                                           |
 | lastName          | **Yes**                  | Depends on operation    | Last name of the user.                                                                            |
 | roles             | **Yes**                  | Depends on operation    | A pipe delimited list of roles for the user to be added or removed.                               |
-| id                | Depends on configuration | Depends on configuration | IDAM user ID. The header is required when `ENABLE_USERID_REGISTRATIONS=true`; otherwise it is optional and used for lookup if set. |
-| ssoId             | Optional                 | Optional                | SSO ID. If supplied, it is used for user lookup before `id` or `email`.                            |
+| idamID            | Depends on configuration | Depends on configuration | IDAM user ID. The header is required when `ENABLE_USERID_REGISTRATIONS=true`; otherwise it is optional and used for lookup if set. |
+| ssoID             | Optional                 | Optional                | SSO ID. If supplied, it is used for user lookup before `idamID` or `email`.                        |
 | status            | Optional                 | Optional                | Previous operation status. If populated with `SUCCESS`, the row is skipped as already processed.  |
 | result            | Optional                 | Optional                | Expected result for test verification, e.g. `SUCCESS`, `FAILED`, `SKIPPED`.                       |
 
 Example full input header:
 
-operation,email,firstName,lastName,roles,id,ssoId,status,result
+operation,email,firstName,lastName,roles,idamID,ssoID,status,result
 
 The process generates the following output fields:
 
 | Header            | Description                                                    |
 |-------------------|----------------------------------------------------------------|
+| idamID            | IDAM user ID returned by IDAM, or the input `idamID` value if supplied. |
 | isActive          | Active state of the user (`TRUE`/`FALSE` or blank).            |
 | lastModified      | Datetime stamp when the user was last updated, or blank.       |
-| ssoID             | SSO ID copied from the input `ssoId` value, if supplied.        |
+| ssoID             | SSO ID returned by IDAM, or the input `ssoID` value if supplied. |
 | status            | Status of operation, e.g. `SUCCESS`, `FAILED`, `SKIPPED`.      |
 | responseMessage   | Additional output message for the operation.                   |
 
 To enable overall testing we can also supply the following headers in the test input files:
 
-operation,email,firstName,lastName,roles,id,ssoId,status,result,userExists,prerequisite,comment
+operation,email,firstName,lastName,roles,idamID,ssoID,status,result,userExists,prerequisite,comment
 
 where:
 userExists is a boolean value (TRUE/FALSE) which can later be used for verification.

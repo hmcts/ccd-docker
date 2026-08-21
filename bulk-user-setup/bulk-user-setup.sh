@@ -446,14 +446,10 @@ function convert_input_file_to_json() {
   verify_json_format_includes_field "${raw_csv_as_json}" "lastName"
   verify_json_format_includes_field "${raw_csv_as_json}" "roles"
 
-  #if [[ "$ENABLE_USERID_REGISTRATIONS" = true ]]; then
-  #  verify_json_format_includes_field "${raw_csv_as_json}" "id"
-  #else
-  #  verify_json_format_does_not_include_field "${raw_csv_as_json}" "id"
-  #fi
-
+  # User ID registrations require an idamID input header. When disabled,
+  # idamID remains optional and is used for lookup if supplied.
   if [[ "$ENABLE_USERID_REGISTRATIONS" = true ]]; then
-    verify_json_format_includes_field "${raw_csv_as_json}" "id"
+    verify_json_format_includes_field "${raw_csv_as_json}" "idamID"
   fi
 
   #"roles": (try(.roles | split("|") | walk( if type == "string" then (sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) else . end)) // null),
@@ -463,8 +459,8 @@ function convert_input_file_to_json() {
     | jq -r -c 'map({
         "idamUser": {
           "email": (try(.email | sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) // null),
-          "id": .id,
-          "ssoId": .ssoId,
+          "id": .idamID,
+          "ssoId": .ssoID,
           "firstName": .firstName,
           "lastName": .lastName,
           "roles": (try(.roles | split("|") | walk( if type == "string" then (sub("^[[:space:]]+"; "") | sub("[[:space:]]+$"; "")) else . end)) // null),
@@ -535,7 +531,7 @@ function move_input_file_to_backup() {
 }
 
 function write_output_header() {
-  echo "operation,email,firstName,lastName,roles,isActive,lastModified,ssoID,status,responseMessage" >> "$filepath_output_newpath"
+  echo "operation,email,firstName,lastName,roles,idamID,isActive,lastModified,ssoID,status,responseMessage" >> "$filepath_output_newpath"
 }
 
 function reset_processing_counters() {
@@ -558,6 +554,7 @@ function load_user_record_context() {
   user=$1
   isActive=" "
   lastModified=" "
+  outputUserId=" "
   outputSSOId=" "
   userId=""
   userActiveState=""
@@ -595,6 +592,11 @@ function load_user_record_context() {
   result=$(echo "$user" | jq --raw-output '.extraCsvData.result')
 
   csvUserId=$(echo "$user" | jq --raw-output '.idamUser.id')
+  csvUserId=$(trim "$csvUserId")
+  if [ "$csvUserId" != "null" ] && [ "$csvUserId" != "use-existing-user-id" ]; then
+    outputUserId="$csvUserId"
+  fi
+
   csvSSOId=$(echo "$user" | jq --raw-output '.idamUser.ssoId')
   csvSSOId=$(trim "$csvSSOId")
 }
@@ -611,6 +613,11 @@ function log_user_record_start() {
 
 function load_api_user_context() {
   userId=$(echo "${rawReturnedValue}" | jq --raw-output '.id')
+  userId=$(trim "$userId")
+  if [ "$userId" != "null" ]; then
+    outputUserId="${userId}"
+  fi
+
   userActiveState=$(echo "${rawReturnedValue}" | jq --raw-output '.active')
   isActive="${userActiveState}"
 
@@ -622,6 +629,13 @@ function load_api_user_context() {
   lastNameFromApi=$(echo "${rawReturnedValue}" | jq --raw-output '.surname')
   usersRolesFromApi=$(echo "$rawReturnedValue" | jq --raw-output '.roles')
   lastModified=$(echo "$rawReturnedValue" | jq --raw-output '.lastModified')
+
+  local apiSSOId
+  apiSSOId=$(echo "${rawReturnedValue}" | jq --raw-output '.ssoId')
+  apiSSOId=$(trim "$apiSSOId")
+  if [ "$apiSSOId" != "null" ] && [ "$apiSSOId" != "" ]; then
+    outputSSOId="${apiSSOId}"
+  fi
 }
 
 function lookup_user_for_record() {
@@ -705,7 +719,7 @@ function build_standard_output_csv() {
   local input_csv
 
   input_csv=$(echo "$current_user" | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
-  output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$outputSSOId\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
+  output_csv="$input_csv,\"$outputUserId\",\"$isActive\",\"$lastModified\",\"$outputSSOId\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
 }
 
 function build_find_output_csv() {
@@ -713,7 +727,7 @@ function build_find_output_csv() {
   local input_csv
 
   input_csv=$(echo "$current_user" | jq -r '[.extraCsvData.operation, .idamUser.email] | @csv')
-  output_csv="$input_csv,\"$firstNameFromApi\",\"$lastNameFromApi\",\"$strApi_v1_user_roles\",\"$isActive\",\"$lastModified\",\"\"$userId\"\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
+  output_csv="$input_csv,\"$firstNameFromApi\",\"$lastNameFromApi\",\"$strApi_v1_user_roles\",\"$outputUserId\",\"$isActive\",\"$lastModified\",\"$outputSSOId\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
 }
 
 function build_userid_registration_output_csv() {
@@ -721,7 +735,7 @@ function build_userid_registration_output_csv() {
   local input_csv
 
   input_csv=$(echo "$current_user" | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
-  output_csv="$input_csv,\"$userId\",\"$isActive\",\"$lastModified\",\"$outputSSOId\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
+  output_csv="$input_csv,\"$outputUserId\",\"$isActive\",\"$lastModified\",\"$outputSSOId\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
 }
 
 function parse_submit_response() {

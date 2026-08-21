@@ -103,7 +103,7 @@ function lookup_user_for_record() {
 
 fixture="$tmpdir/dispatcher.csv"
 cat > "$fixture" <<'CSV'
-operation,email,firstName,lastName,roles,id,ssoId,status,result
+operation,email,firstName,lastName,roles,idamID,ssoID,status,result
 unknown,found.invalid-op@hmcts.gov.uk,First,Last,caseworker-role-one,,,,
 add,invalid-email,First,Last,caseworker-role-one,,,,
 add,found.no-roles@hmcts.gov.uk,First,Last,,,,,
