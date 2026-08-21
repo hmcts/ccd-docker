@@ -90,32 +90,42 @@ The import CSV file is renamed by the process to discourage its accidental re-us
 
 Run the following scripts to create the client and required users and roles for local testing.
 
-****************************************************************************************************************************************************************************
-** Testing ssoID logic can only be currently performed in the Demo environment. This is due to a limitation on local
-   as the idam_api for search user does not return the ssoId attributes when using local docker instance image
-   
-   To test in demo, ensure the required demo test accounts are created first using the steps below
-   a. Connect to the VPN
-   b. Open a browser tab to 'https://idam-api.demo.platform.hmcts.net/swagger-ui/index.html?urls.primaryName=Testing%20Support#/Testing%20Support/createTestAccount'
-   c. click try-it out
-   d. Enter body payload, example:
-        {
-            "email": "ccd.test.add.ssoid@eJudiciary.net",
-            "forename": "test",
-            "surname": "tester",   
-            "password": "Password123!",   
-            "ssoId": "72b606e0-dd56-4c49-9335-2b0bd8f56f86",   
-            "ssoProvider": "eJudiciary.net" 
-        }
-    e.  When executing the ./bulk-user-setup.sh, enter the following details for the demo environment 'ccd-bulk-user-register' service:
-        environment: demo
-        directory path: <enter absolute path and file name of input file to test in demo>
-        username: test1.demo.bulkscript@hmcts.net
-        password: Password123!
-        oauth2 secret: <get from Az keyvault-secrets (env: demo, key-name: ccd-bulk-user-oauth2-client-secret)>
-        If an account does not exist in demo (i.e. if the above is not used within 90 days the password will expire and a new account may be required)
-        create the account such that it has the following roles: ccd-admin, ccd-import, idam-user-dashboard--access
-****************************************************************************************************************************************************************************
+> **Note:** SSO ID logic can currently only be tested in the Demo environment. The local Docker IDAM API search user
+> response does not return the `ssoId` attributes.
+
+To test in Demo, ensure the required demo test accounts are created first:
+
+1. Connect to the VPN.
+2. Open the [createTestAccount Swagger endpoint](https://idam-api.demo.platform.hmcts.net/swagger-ui/index.html?urls.primaryName=Testing%20Support#/Testing%20Support/createTestAccount).
+3. Click `Try it out`.
+4. Enter the request body payload. For example:
+
+   ```json
+   {
+     "email": "ccd.test.add.ssoid@eJudiciary.net",
+     "forename": "test",
+     "surname": "tester",
+     "password": "Password123!",
+     "ssoId": "72b606e0-dd56-4c49-9335-2b0bd8f56f86",
+     "ssoProvider": "eJudiciary.net"
+   }
+   ```
+
+5. When executing `./bulk-user-setup.sh`, enter the following details for the Demo `ccd-bulk-user-register` service:
+
+   ```text
+   environment: demo
+   directory path: <enter absolute path and file name of input file to test in demo>
+   username: test1.demo.bulkscript@hmcts.net
+   password: Password123!
+   oauth2 secret: <get from Az keyvault-secrets (env: demo, key-name: ccd-bulk-user-oauth2-client-secret)>
+   ```
+
+If the account does not exist in Demo, create it with the following roles:
+
+```text
+ccd-admin, ccd-import, idam-user-dashboard--access
+```
 
 1. open terminal ensuring to change directory into root folder "bulk-user-setup"
 2. execute ./test/utils/add-idam-clients.sh (this needs to be done the first time only)
