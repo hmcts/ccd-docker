@@ -767,6 +767,45 @@ function is_valid_operation() {
   [ "$(contains "${OPS[@]}" "${operation}")" == "y" ]
 }
 
+function environment_prompt_options() {
+  local options=("local")
+  local env
+
+  for env in "${ENVS[@]}"; do
+    if [ "$env" != "local" ]; then
+      options+=("$env")
+    fi
+  done
+
+  echo "${options[*]}"
+}
+
+function is_valid_environment() {
+  [ "$ENV" == "local" ] || [ "$(contains "${ENVS[@]}" "${ENV}")" == "y" ]
+}
+
+function print_supported_csv_headers() {
+  local light_blue
+
+  light_blue=$(tput setaf 6)
+
+  echo
+  echo "${light_blue}Supported CSV headers:"
+  printf "  %-12s %-25s %s\n" "Header" "Requirement" "Populate when"
+  printf "  %-12s %-25s %s\n" "operation" "Mandatory, value required" "Every row. One of: ${OPS[*]}."
+  printf "  %-12s %-25s %s\n" "email" "Mandatory, value depends" "Creating a user or looking up by email. May be blank when ssoID/idamID resolves the user."
+  printf "  %-12s %-25s %s\n" "firstName" "Mandatory, value depends" "Adding a user or changing first name. For add/updatename, firstName or lastName must be populated."
+  printf "  %-12s %-25s %s\n" "lastName" "Mandatory, value depends" "Adding a user or changing last name. For add/updatename, firstName or lastName must be populated."
+  printf "  %-12s %-25s %s\n" "roles" "Mandatory, value depends" "Required for add/delete. Use pipe-delimited roles, or all-roles for delete."
+  printf "  %-12s %-25s %s\n" "idamID" "Conditional" "Required when ENABLE_USERID_REGISTRATIONS=true; otherwise optional lookup/registration ID."
+  printf "  %-12s %-25s %s\n" "ssoID" "Optional" "Populate to look up by SSO ID before idamID/email."
+  printf "  %-12s %-25s %s\n" "status" "Optional" "Populate SUCCESS to skip an already processed row; otherwise leave blank."
+  printf "  %-12s %-25s %s\n" "result" "Optional" "Test verification only. Expected result such as SUCCESS, FAILED, or SKIPPED."
+  echo
+  echo "Accepted test metadata headers, ignored by the main process: userExists, prerequisite, comment."
+  echo "Generated output fields accepted on re-run but not used as input: isActive, lastModified, responseMessage.${NORMAL}"
+}
+
 function roles_csv_is_empty() {
   [ "$(echo "$rolesFromCSV" | jq -e '. | length')" == 0 ]
 }
@@ -2241,9 +2280,19 @@ process_folder_recurse() {
 }
 
 function main() {
-  read -p $'\nPlease enter environment (default is local): ' ENV
+  local env_prompt_options
+
+  print_supported_csv_headers
+
+  env_prompt_options=$(environment_prompt_options)
+  read -p $'\n'"Please enter environment [${env_prompt_options}] (default is local): " ENV
 
   ENV=${ENV:-local}
+
+  if ! is_valid_environment; then
+    echo "invalid environment"
+    exit 1
+  fi
 
   if [ "$ENV" == "local" ]; then
       is_test=true

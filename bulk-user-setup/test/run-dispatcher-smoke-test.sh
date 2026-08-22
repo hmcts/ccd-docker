@@ -12,6 +12,58 @@ fi
 
 source ./bulk-user-setup.sh
 
+expected_env_options="local"
+for env in "${ENVS[@]}"; do
+  if [ "$env" != "local" ]; then
+    expected_env_options="${expected_env_options} ${env}"
+  fi
+done
+actual_env_options=$(environment_prompt_options)
+if [ "$actual_env_options" != "$expected_env_options" ]; then
+  echo "Expected environment options '$expected_env_options', got '$actual_env_options'"
+  exit 1
+fi
+
+ENV="local"
+if ! is_valid_environment; then
+  echo "Expected local environment to be valid"
+  exit 1
+fi
+
+ENV="${ENVS[0]}"
+if ! is_valid_environment; then
+  echo "Expected configured environment to be valid"
+  exit 1
+fi
+
+ENV="invalid"
+if is_valid_environment; then
+  echo "Expected invalid environment to be rejected"
+  exit 1
+fi
+ENV="local"
+
+csv_header_help=$(print_supported_csv_headers)
+light_blue=$(tput setaf 6)
+if [[ "$csv_header_help" != *"$light_blue"* ]]; then
+  echo "Expected CSV header help to include light blue information colour"
+  exit 1
+fi
+
+for expected_header in operation email firstName lastName roles idamID ssoID status result; do
+  if [[ "$csv_header_help" != *"$expected_header"* ]]; then
+    echo "Expected CSV header help to include '$expected_header'"
+    exit 1
+  fi
+done
+
+for expected_text in "userExists, prerequisite, comment" "isActive, lastModified, responseMessage"; do
+  if [[ "$csv_header_help" != *"$expected_text"* ]]; then
+    echo "Expected CSV header help to include '$expected_text'"
+    exit 1
+  fi
+done
+
 KEEP_SMOKE_OUTPUT=${KEEP_SMOKE_OUTPUT:-false}
 tmpdir=$(mktemp -d)
 
