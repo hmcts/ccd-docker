@@ -828,6 +828,15 @@ function convert_input_file_to_json() {
 
 }
 
+function select_user_by_exact_email() {
+  local users_json=$1
+  local requested_email=$2
+
+  echo "$users_json" | jq -c --arg email "$requested_email" '
+    map(select((.email // "" | ascii_downcase) == ($email | ascii_downcase))) | first // empty
+  '
+}
+
 function process_input_file() {
   local filepath_input_original=$1
 
@@ -884,7 +893,7 @@ function process_input_file() {
     fi
 
     # write headers to output file
-    echo "operation,email,firstName,lastName,roles,isActive,lastModified,ssoID,status,responseMessage" >> "$filepath_output_newpath"
+    echo "operation,email,firstName,lastName,roles,isActive,lastModified,ssoID,status,responseMessage" > "$filepath_output_newpath"
 
   # strip JSON into individual items then process in a while loop
   echo $json | jq -r -c '.[]' \
@@ -896,6 +905,7 @@ function process_input_file() {
       local isActive=" "
       local lastModified=" "
       local outputSSOId=" "
+      local output_csv=""
 
       # extract CSV fields from json to use in output
       local email=$(echo $user | jq --raw-output '.idamUser.email')
@@ -989,8 +999,10 @@ function process_input_file() {
                     #    fi
                     #done
 
-                    #get the first item from the array
-                    rawReturnedValue=$(echo $rawReturnedValueArray | jq '.[]' | jq --slurp '.[0]')
+                    rawReturnedValue=$(select_user_by_exact_email "$rawReturnedValueArray" "$email")
+                    if [ -z "$rawReturnedValue" ]; then
+                        rawReturnedValue="HTTP-404"
+                    fi
                 fi
             fi
         fi
@@ -1747,7 +1759,7 @@ function process_input_file() {
           timestamp=$(date -u +"%FT%H:%M:%SZ")
           output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$outputSSOId\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
 
-        elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "delete" ] || [ "$operation" == "updatename" ]; then
+        elif [[ $rawReturnedValue == *"HTTP-"* ]] && [[ "$operation" =~ ^(delete|deleteuser|suspend|unsuspend|updateemail|updatename)$ ]]; then
 
           skipped_counter=$((skipped_counter+1))
           inviteStatus="SKIPPED"
@@ -2024,6 +2036,18 @@ function process_input_file() {
         timestamp=$(date -u +"%FT%H:%M:%SZ")
         output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$outputSSOId\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
 
+      fi
+
+      if [ -z "$output_csv" ]; then
+        skipped_counter=$((skipped_counter+1))
+        inviteStatus="SKIPPED"
+        local reason="No matching processing rule for $operation operation"
+        responseMessage="WARN: $reason"
+        log_warn "file: ${filename} , action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
+        echo "${NORMAL}${total_counter}: ${email}: ${YELLOW}SKIPPED${NORMAL}: Status == ${YELLOW}${reason}${NORMAL}"
+
+        input_csv=$(echo $user | jq -r '[.extraCsvData.operation, .idamUser.email, .idamUser.firstName, .idamUser.lastName, .extraCsvData.roles] | @csv')
+        output_csv="$input_csv,\"$isActive\",\"$lastModified\",\"$outputSSOId\",\"$inviteStatus\",\"${responseMessage//\"/\"\"}\""
       fi
 
       local isResultColumnPresent=0
