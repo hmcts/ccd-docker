@@ -33,28 +33,44 @@ Generated log file and output files will be placed in bulk-user-setup/test/outpu
 
 ## CSV file format
 
-The CSV input file must contain the following *mandatory* elements, including a header row.
+The CSV input file must contain a header row. The script always requires the base headers
+`operation,email,firstName,lastName,roles`; values can be blank where the operation or lookup path does not need them.
+The following input headers are recognised by the script:
 
-| Header            | Mandatory                | Description                                                         |
-|-------------------|--------------------------|---------------------------------------------------------------------|
-| operation         | **Yes**                  | `add` or `delete` or `updateName` or `find`                         |
-| email             | **Yes**                  | Email address of the user.                                          |
-| firstName         | **Depends on operation** | First name of the user.                                             |
-| lastName          | **Depends on operation** | Last name of the user.                                              |
-| roles             | **Depends on operation** | A pipe delimited list of roles for the user to be added or removed. |
-| isActive          | (output)                 | active state of the user (TRUE/FALSE or blank)                      |
-| lastModified      | (output)                 | datetime stamp user last updated or blank                           |
-| status            | (output)                 | Status of operation, e.g. `SUCCESS`, `FAILED`, `SKIPPED`            |
-| responseMessage   | (output)                 | additional output message for operation                             |
+| Header            | Header required          | Value required          | Description                                                                                       |
+|-------------------|--------------------------|-------------------------|---------------------------------------------------------------------------------------------------|
+| operation         | **Yes**                  | **Yes**                 | `add`, `updatename`, `delete`, `find`, `updateemail`, `suspend`, `deleteuser`, or `unsuspend`.    |
+| email             | **Yes**                  | Depends on lookup       | Required when creating a user or looking up by email. If `ssoID` or `idamID` resolves an existing user, the email returned by IDAM is used. |
+| firstName         | **Yes**                  | Depends on operation    | First name of the user.                                                                           |
+| lastName          | **Yes**                  | Depends on operation    | Last name of the user.                                                                            |
+| roles             | **Yes**                  | Depends on operation    | A pipe delimited list of roles for the user to be added or removed.                               |
+| idamID            | Depends on configuration | Depends on configuration | IDAM user ID. The header is required when `ENABLE_USERID_REGISTRATIONS=true`; otherwise it is optional and used for lookup if set. |
+| ssoID             | Optional                 | Optional                | SSO ID. If supplied, it is used for user lookup before `idamID` or `email`.                        |
+| status            | Optional                 | Optional                | Previous operation status. If populated with `SUCCESS`, the row is skipped as already processed.  |
+| result            | Optional                 | Optional                | Expected result for test verification, e.g. `SUCCESS`, `FAILED`, `SKIPPED`.                       |
 
-To enable overall testing we can supply the following headers in the test input files:
+Example full input header:
 
-operation,email,firstName,lastName,roles,userExists,result,prerequisite,comment
+operation,email,firstName,lastName,roles,idamID,ssoID,status,result
 
-where: 
-userExists is a boolean value (TRUE/FALSE) which can later be used for verification
-result is a string value (SUCCESS/FAILED/SKIPPED). If this header is provided and populated the test will verify the actual 
-result of the operation.
+The process generates the following output fields:
+
+| Header            | Description                                                    |
+|-------------------|----------------------------------------------------------------|
+| idamID            | IDAM user ID returned by IDAM, or the input `idamID` value if supplied. |
+| isActive          | Active state of the user (`TRUE`/`FALSE` or blank).            |
+| lastModified      | Datetime stamp when the user was last updated, or blank.       |
+| ssoID             | SSO ID returned by IDAM, or the input `ssoID` value if supplied. |
+| status            | Status of operation, e.g. `SUCCESS`, `FAILED`, `SKIPPED`.      |
+| responseMessage   | Additional output message for the operation.                   |
+
+To enable overall testing we can also supply the following headers in the test input files:
+
+operation,email,firstName,lastName,roles,idamID,ssoID,status,result,userExists,prerequisite,comment
+
+where:
+userExists is a boolean value (TRUE/FALSE) which can later be used for verification.
+prerequisite and comment are descriptive test columns and are ignored by the main process.
 
 
 > Note: The field headings are case-sensitive but the order of the columns is not important. Any additional columns
@@ -75,32 +91,42 @@ The import CSV file is renamed by the process to discourage its accidental re-us
 
 Run the following scripts to create the client and required users and roles for local testing.
 
-****************************************************************************************************************************************************************************
-** Testing ssoID logic can only be currently performed in the Demo environment. This is due to a limitation on local
-   as the idam_api for search user does not return the ssoId attributes when using local docker instance image
-   
-   To test in demo, ensure the required demo test accounts are created first using the steps below
-   a. Connect to the VPN
-   b. Open a browser tab to 'https://idam-api.demo.platform.hmcts.net/swagger-ui/index.html?urls.primaryName=Testing%20Support#/Testing%20Support/createTestAccount'
-   c. click try-it out
-   d. Enter body payload, example:
-        {
-            "email": "ccd.test.add.ssoid@eJudiciary.net",
-            "forename": "test",
-            "surname": "tester",   
-            "password": "Password123!",   
-            "ssoId": "72b606e0-dd56-4c49-9335-2b0bd8f56f86",   
-            "ssoProvider": "eJudiciary.net" 
-        }
-    e.  When executing the ./bulk-user-setup.sh, enter the following details for the demo environment 'ccd-bulk-user-register' service:
-        environment: demo
-        directory path: <enter absolute path and file name of input file to test in demo>
-        username: test1.demo.bulkscript@hmcts.net
-        password: Password123!
-        oauth2 secret: <get from Az keyvault-secrets (env: demo, key-name: ccd-bulk-user-oauth2-client-secret)>
-        If an account does not exist in demo (i.e. if the above is not used within 90 days the password will expire and a new account may be required)
-        create the account such that it has the following roles: ccd-admin, ccd-import, idam-user-dashboard--access
-****************************************************************************************************************************************************************************
+> **Note:** SSO ID logic can currently only be tested in the Demo environment. The local Docker IDAM API search user
+> response does not return the `ssoId` attributes.
+
+To test in Demo, ensure the required demo test accounts are created first:
+
+1. Connect to the VPN.
+2. Open the [createTestAccount Swagger endpoint](https://idam-api.demo.platform.hmcts.net/swagger-ui/index.html?urls.primaryName=Testing%20Support#/Testing%20Support/createTestAccount).
+3. Click `Try it out`.
+4. Enter the request body payload. For example:
+
+   ```json
+   {
+     "email": "ccd.test.add.ssoid@eJudiciary.net",
+     "forename": "test",
+     "surname": "tester",
+     "password": "Password123!",
+     "ssoId": "72b606e0-dd56-4c49-9335-2b0bd8f56f86",
+     "ssoProvider": "eJudiciary.net"
+   }
+   ```
+
+5. When executing `./bulk-user-setup.sh`, enter the following details for the Demo `ccd-bulk-user-register` service:
+
+   ```text
+   environment: demo
+   directory path: <enter absolute path and file name of input file to test in demo>
+   username: test1.demo.bulkscript@hmcts.net
+   password: Password123!
+   oauth2 secret: <get from Az keyvault-secrets (env: demo, key-name: ccd-bulk-user-oauth2-client-secret)>
+   ```
+
+If the account does not exist in Demo, create it with the following roles:
+
+```text
+ccd-admin, ccd-import, idam-user-dashboard--access
+```
 
 1. open terminal ensuring to change directory into root folder "bulk-user-setup"
 2. execute ./test/utils/add-idam-clients.sh (this needs to be done the first time only)
@@ -125,6 +151,23 @@ Run the following scripts to create the client and required users and roles for 
 After running the main script input files copied to bulk-user-setup/test/inputs will be processed in turn (only files with extension .csv will be considered)
 Generated output and backup of input files will be copied to ../outputs/{DateTime} (i.e. /bulk-user-setup/test/outputs/{DateTime}) folder.
 Any invalid input file will be skipped (i.e. due to missing or incorrect mandatory CSV header) and remain in the original bulk-user-setup/test/inputs folder.
+
+## Fast dispatcher smoke test
+
+To quickly check the script still routes the main input/action combinations correctly, run:
+
+```bash
+cd bulk-user-setup
+./test/run-dispatcher-smoke-test.sh
+```
+
+This generates a temporary CSV, converts it through the real CSV-to-JSON path, and mocks the IDAM lookup/action handlers. It validates the dispatcher branches for find, add, delete, deleteuser, suspend, unsuspend, updateemail, updatename, invalid input, and already-processed rows without needing local Docker or IDAM.
+
+By default, the temporary fixture, log, and output CSV are deleted after the test. To keep them for inspection, run:
+
+```bash
+KEEP_SMOKE_OUTPUT=true ./test/run-dispatcher-smoke-test.sh
+```
 
 ## Verifying results when testing locally against the test input scenario files
 
@@ -156,4 +199,3 @@ To use this bulk script in any environment other than local the following should
    check the local master caseworker file (caseworker-roles-master.txt) against the remote caseworker roles fetched via a GET api call
    Comparison results will be outputted to the console and log file. There is no automated process for updating the local master file.
    Refer to the output and decide if the missing caseworker roles need to be added to the processing logic.
-
