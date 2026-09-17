@@ -10,7 +10,6 @@ services:
       - DATA_STORE_USER=ccd
       - DATA_STORE_PASS=ccd
       - ES_HOSTS=http://ccd-elasticsearch:9200
-      - LOGSTASH_QUEUE_CLAIM_TIMEOUT=5 minutes
     depends_on:
       ccd-data-store-api:
         condition: service_started

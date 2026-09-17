@@ -793,14 +793,6 @@ Also if a certain database has not been created you might need to create a new c
   * `./ccd enable logstash` (assuming `elasticsearch` is already enabled, otherwise enable it)
   * Note that the config for Logstash is contained within the [logstash directory](logstash)
 
-### Logstash queue claim timeout
-
-`LOGSTASH_QUEUE_CLAIM_TIMEOUT` controls how long a Logstash queue row remains
-claimed before it becomes eligible for retry. The default is `5 minutes`.
-Use PostgreSQL interval syntax, such as `15 minutes` or `1 hour`. Set the
-timeout longer than the maximum expected indexing duration to avoid duplicate
-processing, and apply changes consistently across all Logstash agents.
-
 * To enable **ccd-definition-designer-api**
   * `./ccd enable backend ccd-definition-designer-api`
   * run docker-compose `./ccd compose up -d`
