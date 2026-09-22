@@ -40,18 +40,25 @@ The following input headers are recognised by the script:
 | Header            | Header required          | Value required          | Description                                                                                       |
 |-------------------|--------------------------|-------------------------|---------------------------------------------------------------------------------------------------|
 | operation         | **Yes**                  | **Yes**                 | `add`, `updatename`, `delete`, `find`, `updateemail`, `suspend`, `deleteuser`, or `unsuspend`.    |
-| email             | **Yes**                  | Depends on lookup       | Required when creating a user or looking up by email. If `ssoID` or `idamID` resolves an existing user, the email returned by IDAM is used. |
+| email             | **Yes**                  | Depends on operation    | For `updateemail`, this is the new email address. Otherwise required when creating a user or looking up by email. |
 | firstName         | **Yes**                  | Depends on operation    | First name of the user.                                                                           |
 | lastName          | **Yes**                  | Depends on operation    | Last name of the user.                                                                            |
 | roles             | **Yes**                  | Depends on operation    | A pipe delimited list of roles for the user to be added or removed.                               |
-| idamID            | Depends on configuration | Depends on configuration | IDAM user ID. The header is required when `ENABLE_USERID_REGISTRATIONS=true`; otherwise it is optional and used for lookup if set. |
-| ssoID             | Optional                 | Optional                | SSO ID. If supplied, it is used for user lookup before `idamID` or `email`.                        |
+| idamID            | Depends on configuration | Depends on operation    | IDAM user ID. Either `idamID` or `ssoID` is required for `updateemail`. The header is also required when `ENABLE_USERID_REGISTRATIONS=true`. |
+| ssoID             | Optional                 | Depends on operation    | SSO ID. Either `ssoID` or `idamID` is required for `updateemail`; when both are supplied, `ssoID` is used. |
 | status            | Optional                 | Optional                | Previous operation status. If populated with `SUCCESS`, the row is skipped as already processed.  |
 | result            | Optional                 | Optional                | Expected result for test verification, e.g. `SUCCESS`, `FAILED`, `SKIPPED`.                       |
 
 Example full input header:
 
 operation,email,firstName,lastName,roles,idamID,ssoID,status,result
+
+For `updateemail`, supply the replacement email and identify the existing user with either `ssoID` or `idamID`:
+
+```csv
+operation,email,firstName,lastName,roles,idamID,ssoID,status,result
+updateemail,new.email@justice.gov.uk,,,,,72b606e0-dd56-4c49-9335-2b0bd8f56f86,,
+```
 
 The process generates the following output fields:
 

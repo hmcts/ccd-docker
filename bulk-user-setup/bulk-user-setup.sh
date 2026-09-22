@@ -568,6 +568,7 @@ function load_user_record_context() {
   email=$(echo "$user" | jq --raw-output '.idamUser.email')
   email=$(trim "$email")
   email=$(convertToLowerCase "$email")
+  requestedEmail="$email"
 
   firstName=$(echo "$user" | jq --raw-output '.idamUser.firstName')
   firstName=$(trim "$firstName")
@@ -621,9 +622,13 @@ function load_api_user_context() {
   userActiveState=$(echo "${rawReturnedValue}" | jq --raw-output '.active')
   isActive="${userActiveState}"
 
-  email=$(echo "${rawReturnedValue}" | jq --raw-output '.email')
-  email=$(trim "$email")
-  email=$(convertToLowerCase "${email}")
+  local apiEmail
+  apiEmail=$(echo "${rawReturnedValue}" | jq --raw-output '.email')
+  apiEmail=$(trim "$apiEmail")
+  apiEmail=$(convertToLowerCase "${apiEmail}")
+  if [ "$operation" != "updateemail" ]; then
+    email="$apiEmail"
+  fi
 
   firstNameFromApi=$(echo "${rawReturnedValue}" | jq --raw-output '.forename')
   lastNameFromApi=$(echo "${rawReturnedValue}" | jq --raw-output '.surname')
@@ -641,7 +646,9 @@ function load_api_user_context() {
 function lookup_user_for_record() {
   rawReturnedValue="HTTP-404"
 
-  if [ "$csvSSOId" != "null" ]; then
+  if update_email_identifier_is_missing; then
+    return
+  elif [ "$csvSSOId" != "null" ]; then
     rawReturnedValueArray=$(get_user_api_v1 "${csvSSOId}")
   elif [ "$csvUserId" != "null" ]; then
     rawReturnedValueArray=$(get_user_by_id_api_v1 "${csvUserId}")
@@ -793,12 +800,12 @@ function print_supported_csv_headers() {
   echo "${light_blue}Supported CSV headers:"
   printf "  %-12s %-25s %s\n" "Header" "Requirement" "Populate when"
   printf "  %-12s %-25s %s\n" "operation" "Mandatory, value required" "Every row. One of: ${OPS[*]}."
-  printf "  %-12s %-25s %s\n" "email" "Mandatory, value depends" "Creating a user or looking up by email. May be blank when ssoID/idamID resolves the user."
+  printf "  %-12s %-25s %s\n" "email" "Mandatory, value depends" "For updateemail, the new email. Otherwise used to create or look up a user."
   printf "  %-12s %-25s %s\n" "firstName" "Mandatory, value depends" "Adding a user or changing first name. For add/updatename, firstName or lastName must be populated."
   printf "  %-12s %-25s %s\n" "lastName" "Mandatory, value depends" "Adding a user or changing last name. For add/updatename, firstName or lastName must be populated."
   printf "  %-12s %-25s %s\n" "roles" "Mandatory, value depends" "Required for add/delete. Use pipe-delimited roles, or all-roles for delete."
-  printf "  %-12s %-25s %s\n" "idamID" "Conditional" "Required when ENABLE_USERID_REGISTRATIONS=true; otherwise optional lookup/registration ID."
-  printf "  %-12s %-25s %s\n" "ssoID" "Optional" "Populate to look up by SSO ID before idamID/email."
+  printf "  %-12s %-25s %s\n" "idamID" "Conditional" "For updateemail, one of idamID/ssoID is required; otherwise an optional lookup/registration ID."
+  printf "  %-12s %-25s %s\n" "ssoID" "Conditional" "For updateemail, one of ssoID/idamID is required. Takes lookup precedence when both are supplied."
   printf "  %-12s %-25s %s\n" "status" "Optional" "Populate SUCCESS to skip an already processed row; otherwise leave blank."
   printf "  %-12s %-25s %s\n" "result" "Optional" "Test verification only. Expected result such as SUCCESS, FAILED, or SKIPPED."
   echo
@@ -812,6 +819,12 @@ function roles_csv_is_empty() {
 
 function operation_requires_roles() {
   [ "$operation" == "add" ] || [ "$operation" == "delete" ]
+}
+
+function update_email_identifier_is_missing() {
+  [ "$operation" == "updateemail" ] \
+    && { [ "$csvSSOId" == "null" ] || [ -z "$csvSSOId" ]; } \
+    && { [ "$csvUserId" == "null" ] || [ -z "$csvUserId" ] || [ "$csvUserId" == "use-existing-user-id" ]; }
 }
 
 function role_string_is_invalid() {
@@ -875,6 +888,16 @@ function fail_invalid_email() {
 
 function fail_no_roles_defined() {
   fail_record "${NoRolesDefined}"
+  build_standard_output_csv "$user"
+}
+
+function fail_update_email_identifier_missing() {
+  fail_record "updateemail requires either ssoID or idamID"
+  build_standard_output_csv "$user"
+}
+
+function fail_update_email_user_not_found() {
+  fail_record "${userNotFound} for updateemail"
   build_standard_output_csv "$user"
 }
 
@@ -1249,15 +1272,18 @@ function handle_update_email() {
 
   local emailFromApi
   emailFromApi=$(echo "${rawReturnedValue}" | jq --raw-output '.email')
+  emailFromApi=$(trim "$emailFromApi")
+  emailFromApi=$(convertToLowerCase "$emailFromApi")
 
   if [ "$userActiveState" == "true" ] || [ "$PROCESS_INACTIVE_USER" = "true" ]; then
-    if [ "${email}" != "${emailFromApi}" ]; then
-      if [ "$email" == "null" ]; then
+    if [ "${requestedEmail}" != "${emailFromApi}" ]; then
+      if [ "$requestedEmail" == "null" ]; then
         fail_record "Email cannot be empty"
       else
-        log_debug "email: ${email} - doing email update"
+        log_debug "email: ${requestedEmail} - doing email update"
 
-        local body='{"email": "'${email}'"}'
+        local body
+        body=$(jq -nc --arg email "$requestedEmail" '{email: $email}')
         submit_response=$(update_user "${userId}" "${body}")
         parse_submit_response "$submit_response"
 
@@ -1266,14 +1292,14 @@ function handle_update_email() {
           lastModified=$(date -u +"%FT%H:%M:%SZ")
           inviteStatus="SUCCESS"
           local reason="user email successfully updated"
-          log_debug "action: ${operation}, email: ${email} , status: ${inviteStatus} - ${reason}"
-          echo "${NORMAL}${total_counter}: ${email}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
+          log_debug "action: ${operation}, email: ${requestedEmail} , status: ${inviteStatus} - ${reason}"
+          echo "${NORMAL}${total_counter}: ${requestedEmail}: ${GREEN}${inviteStatus}${NORMAL}: Status == ${GREEN}${reason}${NORMAL}"
         else
           fail_counter=$((fail_counter+1))
           inviteStatus="FAILED"
           local reason="failed updating user email"
-          log_error "file: ${filename} , action: ${operation} , email: ${email} , status: ${inviteStatus} - ${reason}"
-          echo "${NORMAL}${total_counter}: ${email}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
+          log_error "file: ${filename} , action: ${operation} , email: ${requestedEmail} , status: ${inviteStatus} - ${reason}"
+          echo "${NORMAL}${total_counter}: ${requestedEmail}: ${RED}${inviteStatus}${NORMAL}: Status == ${RED}$reason - ${responseMessage}${NORMAL}"
         fi
       fi
     else
@@ -1576,6 +1602,12 @@ function process_user_record() {
 
     elif ! validateEmailAddress "${email}"; then
       fail_invalid_email
+
+    elif update_email_identifier_is_missing; then
+      fail_update_email_identifier_missing
+
+    elif [[ $rawReturnedValue == *"HTTP-"* ]] && [ "$operation" == "updateemail" ]; then
+      fail_update_email_user_not_found
 
     elif roles_csv_is_empty && operation_requires_roles; then
       fail_no_roles_defined

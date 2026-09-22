@@ -12,6 +12,36 @@ fi
 
 source ./bulk-user-setup.sh
 
+update_email_user='{"idamUser":{"email":"New.Email@hmcts.gov.uk","firstName":null,"lastName":null,"roles":[],"id":"test-user-id","ssoId":null},"extraCsvData":{"operation":"updateemail","roles":"","status":null,"result":null}}'
+load_user_record_context "$update_email_user"
+rawReturnedValue='{"id":"test-user-id","active":"true","email":"old.email@hmcts.gov.uk","forename":"First","surname":"Last","roles":[],"lastModified":"2026-01-01T00:00:00Z"}'
+load_api_user_context
+if [ "$requestedEmail" != "new.email@hmcts.gov.uk" ] || [ "$email" != "$requestedEmail" ]; then
+  echo "Expected updateemail to preserve the requested CSV email after loading API user data"
+  exit 1
+fi
+
+function update_user() {
+  if [ "$1" != "test-user-id" ] || [ "$2" != '{"email":"new.email@hmcts.gov.uk"}' ]; then
+    echo "FAILED"
+    echo "unexpected request"
+    return
+  fi
+
+  echo "SUCCESS"
+  echo '{"email":"new.email@hmcts.gov.uk"}'
+}
+
+reset_processing_counters
+total_counter=1
+filename="update-email-smoke.csv"
+LOGFILE=/dev/null
+handle_update_email > /dev/null
+if [ "$inviteStatus" != "SUCCESS" ]; then
+  echo "Expected updateemail to submit the requested CSV email"
+  exit 1
+fi
+
 expected_env_options="local"
 for env in "${ENVS[@]}"; do
   if [ "$env" != "local" ]; then
@@ -108,6 +138,8 @@ function fail_invalid_operation() { record_handler "fail_invalid_operation"; }
 function fail_invalid_email() { record_handler "fail_invalid_email"; }
 function fail_no_roles_defined() { record_handler "fail_no_roles_defined"; }
 function fail_invalid_role_string() { record_handler "fail_invalid_role_string"; }
+function fail_update_email_identifier_missing() { record_handler "fail_update_email_identifier_missing"; }
+function fail_update_email_user_not_found() { record_handler "fail_update_email_user_not_found"; }
 function fail_sso_user_not_found() { record_handler "fail_sso_user_not_found"; }
 function fail_find_user_not_found() { record_handler "fail_find_user_not_found"; }
 function handle_find_user() { record_handler "handle_find_user"; }
@@ -150,6 +182,10 @@ function lookup_user_for_record() {
     return
   fi
 
+  if [[ "$csvUserId" == missing* ]]; then
+    return
+  fi
+
   rawReturnedValue='{"id":"test-user-id","active":"true","email":"found.user@hmcts.gov.uk","forename":"First","surname":"Last","roles":["caseworker","caseworker-role-one"],"lastModified":"2026-01-01T00:00:00Z"}'
 }
 
@@ -169,7 +205,9 @@ add,found.add-existing@hmcts.gov.uk,First,Last,caseworker-role-one,,,,
 deleteuser,found.delete-user@hmcts.gov.uk,First,Last,,,,,
 suspend,found.suspend@hmcts.gov.uk,First,Last,,,,,
 unsuspend,found.unsuspend@hmcts.gov.uk,First,Last,,,,,
-updateemail,found.update-email@hmcts.gov.uk,First,Last,,,,,
+updateemail,found.update-email-without-id@hmcts.gov.uk,First,Last,,,,,
+updateemail,found.update-email-missing-user@hmcts.gov.uk,First,Last,,missing-user-id,,,
+updateemail,found.update-email@hmcts.gov.uk,First,Last,,test-user-id,,,
 updatename,found.update-name@hmcts.gov.uk,First,Last,,,,,
 delete,missing.delete@hmcts.gov.uk,First,Last,caseworker-role-one,,,,
 delete,found.delete-manual@hmcts.gov.uk,First,Last,judiciary,,,,
@@ -191,6 +229,8 @@ expected_handlers=(
   handle_delete_user_account
   handle_suspend_user
   handle_unsuspend_user
+  fail_update_email_identifier_missing
+  fail_update_email_user_not_found
   handle_update_email
   handle_update_name
   handle_missing_user_for_operation
