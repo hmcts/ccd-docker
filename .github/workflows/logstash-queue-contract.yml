@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'logstash/pipeline/01_input.conf'
+      - 'logstash/pipeline/03_output.conf'
       - 'tests/logstash-queue-contract.sh'
       - '.github/workflows/logstash-queue-contract.yml'
 
