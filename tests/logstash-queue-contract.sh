@@ -3,6 +3,12 @@ set -euo pipefail
 
 pipeline=logstash/pipeline/01_input.conf
 statement="$(tr '\n' ' ' < "$pipeline")"
+output=logstash/pipeline/03_output.conf
+expected_returning='q.id AS version, cd.id, created_date, last_modified, jurisdiction, case_type_id, state, last_state_modified_date, data::TEXT AS json_data, data_classification::TEXT AS json_data_classification, reference, security_classification, supplementary_data::TEXT AS json_supplementary_data'
+
+normalise_whitespace() {
+  printf '%s' "$1" | tr -s '[:space:]' ' ' | sed 's/^ //; s/ $//'
+}
 
 for required in 'WITH candidates AS' 'ORDER BY q.id' 'FOR UPDATE SKIP LOCKED' \
     'LIMIT 1000' 'DELETE FROM case_data_logstash_queue q' \
@@ -15,3 +21,15 @@ done
 [[ "$statement" != *'marked_by_logstash'* ]] || {
   echo "$pipeline still uses marked_by_logstash." >&2; exit 1;
 }
+
+returning="${statement#*RETURNING }"
+returning="${returning%%\"*}"
+[[ "$(normalise_whitespace "$returning")" == "$expected_returning" ]] || {
+  echo "$pipeline has an unexpected queue poll RETURNING projection." >&2; exit 1;
+}
+
+for required in 'document_id => "%{id}"' 'version => "%{version}"' 'version_type => "external"'; do
+  grep -Fq "$required" "$output" || {
+    echo "$output is missing Elasticsearch external-version output: $required" >&2; exit 1;
+  }
+done
