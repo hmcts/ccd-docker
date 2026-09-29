@@ -28,8 +28,17 @@ returning="${returning%%\"*}"
   echo "$pipeline has an unexpected queue poll RETURNING projection." >&2; exit 1;
 }
 
-for required in 'document_id => "%{id}"' 'version => "%{version}"' 'version_type => "external"'; do
+for required in 'document_id => "%{id}"' 'version => "%{[@metadata][queue_version]}"' 'version_type => "external"'; do
   grep -Fq "$required" "$output" || {
     echo "$output is missing Elasticsearch external-version output: $required" >&2; exit 1;
   }
 done
+
+filter=logstash/pipeline/02_filter.conf
+rename='rename => { "version" => "[@metadata][queue_version]" }'
+grep -Fq "$rename" "$filter" || {
+  echo "$filter must move the queue version into metadata." >&2; exit 1;
+}
+[[ "$(sed '/clone {/,$d' "$filter")" == *"$rename"* ]] || {
+  echo "$filter must move the queue version before cloning." >&2; exit 1;
+}
