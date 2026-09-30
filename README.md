@@ -940,3 +940,32 @@ DRIVER              VOLUME NAME
 
 # better be empty
 ```
+
+### Upgrading Data Store and Logstash together
+
+For queue-processing migrations, pause case-writing traffic and background jobs first.
+Complete the Data Store release checks, including draining old consumers and verifying
+the Elasticsearch version baseline. Then run:
+
+```bash
+bash bin/upgrade-data-store-logstash.sh
+```
+
+This stops the local Logstash consumer before updating Data Store, then recreates Logstash.
+Logstash waits for `/health/readiness` before starting its pipelines, so it cannot poll
+the queue while Flyway is still applying migrations. It exits without polling if readiness
+is not reached after 120 attempts. Check container logs and verify indexing before resuming
+writes. Stop any additional consumers separately. A forced shutdown after the 120-second
+stop timeout may need manual requeue recovery; an empty database queue alone does not prove delivery.
+
+Use this command for upgrades with an existing consumer; plain `compose up` does not stop
+a running Logstash container before migrations. Fresh starts also use the readiness gate.
+
+The standard Compose file honours `CCD_DEFINITION_STORE_API_TAG` and `CCD_DATA_STORE_API_TAG`
+and the existing `*_USE_LOCAL` settings. Use `./ccd set` for local builds instead of hardcoding
+images in `compose/backend.yml`. Definition Store snapshot migration needs no Logstash cutover.
+
+## LICENSE
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
+

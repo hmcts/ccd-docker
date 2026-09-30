@@ -3,15 +3,20 @@ services:
   ccd-logstash:
     image: "logstash:9.1.2"
     container_name: ccd-logstash
+    command: ["bash", "/usr/share/logstash/ccd/wait-for-data-store.sh"]
     environment:
       - XPACK_MONITORING_ENABLED=false
       - DATA_STORE_URL=jdbc:postgresql://ccd-shared-database:5432/ccd_data?stringtype=unspecified&ssl=false
       - DATA_STORE_USER=ccd
       - DATA_STORE_PASS=ccd
       - ES_HOSTS=http://ccd-elasticsearch:9200
+    depends_on:
+      ccd-data-store-api:
+        condition: service_started
     networks:
       - ccd-network
     volumes:
+      - ${PWD}/logstash/wait-for-data-store.sh:/usr/share/logstash/ccd/wait-for-data-store.sh:ro
       - ${PWD}/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
       - ${PWD}/logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml
       - ${PWD}/logstash/pipeline/01_input.conf:/usr/share/logstash/pipeline/01_input.conf
@@ -23,4 +28,3 @@ services:
 networks:
   ccd-network:
     external: true
-
