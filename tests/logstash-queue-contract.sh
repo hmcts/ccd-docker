@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Check queue polling SQL, returned fields and Elasticsearch version metadata.
+# Reads pipeline configuration only; no network calls or database changes.
+# Run from the repository root: bash tests/logstash-queue-contract.sh
 set -euo pipefail
 
 pipeline=logstash/pipeline/01_input.conf

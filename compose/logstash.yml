@@ -4,6 +4,7 @@ services:
   ccd-logstash:
     image: "logstash:7.16.3"
     container_name: ccd-logstash
+    command: ["bash", "/usr/share/logstash/ccd/wait-for-data-store.sh"]
     environment:
       - XPACK_MONITORING_ENABLED=false
       - DATA_STORE_URL=jdbc:postgresql://ccd-shared-database:5432/ccd_data?stringtype=unspecified&ssl=false
@@ -16,6 +17,7 @@ services:
     networks:
       - ccd-network
     volumes:
+      - ${PWD}/logstash/wait-for-data-store.sh:/usr/share/logstash/ccd/wait-for-data-store.sh:ro
       - ${PWD}/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
       - ${PWD}/logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml
       - ${PWD}/logstash/pipeline/01_input.conf:/usr/share/logstash/pipeline/01_input.conf
