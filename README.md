@@ -1,182 +1,238 @@
 # CCD Docker :whale:
-
 - [Prerequisites](#prerequisites)
 - [Quick start](#quick-start)
-- [Using CCD](#using-ccd)
-- [Idam Stub](#idam-stub)
+- [Configuring CCD](#configuring-ccd)
 - [Running branches](#running-branches)
 - [Enabling additional projects](#enabling-additional-projects)
 - [Under the hood](#under-the-hood-speedboat)
-- [Containers](#containers)
 - [Local development](#local-development)
-- [Running on Apple Silicon](#running-on-apple-silicon)
 - [Troubleshooting](#troubleshooting)
-- [Migrate existing v9.6 PostgreSQL database to v11](/PostgresV11.md)
 - [Variables](#variables)
 - [Remarks](#remarks)
-- [License](#license)
 
-## Prerequisites
+## Additional Documentation
+- [Azure Setup Guide](/docs/Azure.md)
+- [Containers explained](/docs/Containers.md)
+- [IDAM Alternatives](/docs/IdamAlt.md)
+- [Running on Apple Silicon (ARM64)](/docs/AppleSilicon.md)
+- [Windows Subsystem for Linux configuration](/docs/WSL.md)
+- [Migrate PostgreSQL database to latest](/docs/PostgresUpgrade.md)
+- [License](/LICENSE.md)
 
-- [JDK 11](https://openjdk.java.net/projects/jdk/11/)
+## Prerequisites 
+
+- [JDK 17](https://openjdk.java.net/projects/jdk/17/)
 - [Docker](https://www.docker.com)
 
-**Note:** *once docker is installed, increase the memory and CPU allocations (Docker -> Preferences -> Advanced) to the following minimum values for successful execution of ccd applications altogether:*
+  > [!Note]
+  > *Once docker is installed, increase the memory and CPU allocations (Docker -> Preferences -> Advanced) to at least the following minimum values for successful execution of ccd applications altogether:*
+  >
+  > | *Resources* | Memory   | CPU<sup>s</sup>  |
+  > | :---: | :------: | :---: |
+  > | Minimum | 7+ GB   | 4+    |
+  > | Full IDAM + XUI | 12+ GB | 6+ |
+  > | Reccomended | 14+ GB | 7+ |
+  >
+  > For Windows Subsystem for Linux (WSL & WSL2) users [see this page](./docs/WSL.md) for how to do this.
 
-| Memory   | CPU   |
-| :------: | :---: |
-| 12+ GB   | 6+    |
-
-- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) - minimum version 2.0.57
-- [jq Json Processor](https://stedolan.github.io/jq)
-- Mac users, set your default shell to bash `chsh -s /bin/bash`
-
-*The following documentation assumes that the current directory is `ccd-docker`.*
+- [Azure CLI](/docs/Azure.md) - minimum version 2.0.57
+- [jq Json Processor](https://ghcr.io/jqlang/jq)
+- [psql / libpq](/docs/psql.md)
+- Mac users, set your default shell to bash 
+  ```bash
+  chsh -s /bin/bash
+  ```
+  If this doesn't work, then try changing it in the Terminal app's settings under
+  ```
+  General > Shells open with: > Command (complete path) > /bin/bash
+  ```
 
 ## Quick start
 
-1. Checkout `ccd-docker` and `ccd-definition-store-api` projects:
+*The following documentation assumes that the current directory is `ccd-docker`.*
+
+### 1. Checkout `ccd-docker` and `ccd-definition-store-api` projects:
 
 ```bash
 git clone git@github.com:hmcts/ccd-docker.git
 ```
 
-2. Login to the Azure Container registry:
+### 2. For Extra Quick setup on Mac/Linux
+
+For customised setups please ignore this step and [continue setup at step 3](#3-authenticate-azure-and-login-to-the-azure-container-registry)
+
+Run the following command to setup using default services/configuration and simulated idam 
+```bash
+./ccd default
+```
+OR Run the following command to setup using default services/configuration and the full idam stack 
+```bash
+./ccd default idam
+```
+OR Run the following command to setup using default services/configuration and simulated idam plus xui frontend
+```bash
+./ccd default xui
+```
+After command is run if no extra changes need to be made then you should be good 
+to go and can skip the rest.
+If any additional scripts need runnig then make sure the environoment variables are set, 
+as defined in [Export environment variables](#b-export-environment-variables)
+
+### 3. Authenticate Azure and login to the Azure Container registry:
+Make sure Azure CLI is installed, if not got to [Azure Setup Guide.](/docs/Azure.md) Then login to azure and the ccd container repositories using the commands below
 
 ```bash
+az login
 ./ccd login
 ```
-Note:
-if you experience any error with the above command, try `az login` first for [Azure Authentication for pulling latest docker images](#azure-authentication-for-pulling-latest-docker-images)
+### 4. Migrate existing Postgres DB
+> [!IMPORTANT]
+> ⚠️ **THIS STEP IS ONLY REQUIRED IF YOU NEED TO MIGRATE POSTGRES VERSION** ⚠️
 
+If ccd-docker has been previously setup, images/volumes and the database may point to an earlier Postgres version. Prior to pulling images run the below commands to **delete** existing images and volumes.
 
-3. **THIS STEP IS ONLY REQUIRED IF YOU NEED TO MIGRATE TO POSTGRES V11.** Proceeded to step 4 if this is your first time setting up ccd-docker
-
-- If ccd-docker has been previously setup, images/volumes and the database may point to **Postgres9**. Prior to pulling images run the below commands to **delete** existing images and volumes.
-- [Guide on migrating to V11](PostgresV11.md)
-```bash
+```
 ./ccd compose down
 ```
 
-4. Pull latest Docker images:
+See [Guide on migrating postgres](/docs/PostgresUpgrade.md) for more details
+
+### 5. Pull latest Docker images
    
 ```bash
 ./ccd compose pull
 ```
 
-5. Set up environment: 
+### 6. Set up network and configuration 
 
-Note:
-required only on the first run. Once executed, it doesn't need to be executed again
+> [!Note]
+> Required only on the first run. Once executed, it doesn't need to be executed again
 
-  a. Create docker network
+#### A. Create docker network
   
 ```bash
   ./ccd init
   ```
-  Ignore if we get error message ccd-network already exists while running above command
+Ignore if we get error message ccd-network already exists while running above command
   
-  b. Export environment variables
+#### B. Export environment variables
 
   CDM apps require a set of environment variables which can be set up by executing the following script.
   
-  Windows : `./bin/set-environment-variables.sh`
+##### Windows
+  ```bash
+  ./bin/set-environment-variables.sh
+  ```
   
-  Linux/Mac : `source ./bin/set-environment-variables.sh`
-  
-  Note: some users of zsh 'Oh My Zsh' experienced issues. Try switching to bash
-  
-  To persist the environment variables in Linux/Mac, copy the contents of `env_variables_all.txt` file into ~/.bash_profile.
-  A prefix 'export' will be required for each environment variable.
+##### Linux / Mac 
+  ```bash
+  source ./bin/set-environment-variables.sh
+  ```
+  > [!CAUTION]
+  > Some users of zsh 'Oh My Zsh' experienced issues.
+  > Try switching to bash by : `chsh -s /bin/bash`
 
-  Additionally, export these environment variables to disable ElasticSearch
+  **Important environment notes:**
+  - `OIDC_ISSUER` must be derived from a real access token for the target environment. Do not guess it from the public OIDC discovery URL.
+  - `OIDC_ALLOWED_ISSUERS` is an optional comma-separated additive list of exact JWT `iss` values. Leave it unset unless a service is confirmed to receive valid tokens from more than one issuer.
+  - `CCD_CALLBACK_ALLOWED_HOSTS` is the comma-separated allow-list of HTTPS callback target hosts CCD services may call.
+  - `CCD_CALLBACK_ALLOWED_HTTP_HOSTS` is the comma-separated allow-list of HTTP callback target hosts CCD services may call.
+  - `CCD_CALLBACK_ALLOW_PRIVATE_HOSTS` controls whether callbacks to private or local hostnames are allowed for local development.
+
+  **How to derive `OIDC_ISSUER`:**
+  - Do not guess the issuer from the public discovery URL alone.
+  - Decode only the JWT payload from a real access token for the target environment and inspect the `iss` claim.
+  - If additional issuers are required, derive each `OIDC_ALLOWED_ISSUERS` value from a real accepted token too.
+  - Do not store or document full bearer tokens. Record only the derived issuer value.
+
+  Example:
+  ```bash
+  TOKEN='eyJ...'
+  PAYLOAD=$(printf '%s' "$TOKEN" | cut -d '.' -f2)
+  python3 - <<'PY' "$PAYLOAD"
+  import base64, json, sys
+  payload = sys.argv[1]
+  payload += '=' * (-len(payload) % 4)
+  print(json.loads(base64.urlsafe_b64decode(payload))["iss"])
+  PY
+  ```
+  - JWTs are `header.payload.signature`.
+  - The second segment is base64url-encoded JSON.
+  - This decodes the payload only. It does not verify the signature.
+  The following services in `ccd-docker` compose set both `IDAM_OIDC_URL` and `OIDC_ISSUER`:
+
+  | Service |
+  | --- |
+  | `ccd-data-store-api` |
+  | `ccd-definition-store-api` |
+  | `cpo-case-payment-orders-api` |
+  | `ts-translation-service` |
+  | `ccd-case-document-am-api` |
+
+  The following services also pass through `OIDC_ALLOWED_ISSUERS` when it is exported in the shell:
+
+  | Service |
+  | --- |
+  | `ccd-data-store-api` |
+  | `ccd-definition-store-api` |
+  | `ccd-case-document-am-api` |
+  | `cpo-case-payment-orders-api` |
+  | `ts-translation-service` |
+
+  `VERIFY_OIDC_ISSUER=true` is not set in this repo's compose YAML. Use it only in service repos that include a live issuer verifier, where it enables a pre-check that fetches a real test token and fails fast if its `iss` claim does not exactly match `OIDC_ISSUER` or an explicitly configured `OIDC_ALLOWED_ISSUERS` value.
+  
+  To persist the environment variables in Linux/Mac run the following script
+  to add the script into your ~/.bash_profile.
+  ``` bash
+  ./bin/add-to-bash-profile.sh
+  exec bash -l
+  ``` 
+
+#### C. Enabling ElasticSearch if needed
+  Additionally, export these environment variables to enable ElasticSearch
 
   ```bash
-  export ELASTIC_SEARCH_ENABLED=false
-  export ES_ENABLED_DOCKER=false
+  export ELASTIC_SEARCH_ENABLED=true
+  export ES_ENABLED_DOCKER=true
   ```
 
-6. Creating and starting the containers:
+### 7. Creating and starting the containers:
 
 ```bash
 ./ccd compose up -d
 ```
 
-**NOTE**
-
-The `idam-api` container can be slow to start - both the `definition-store-api` and `data-store-api` containers will
-try to connect to the `idam-api` container when they start.
-
-The following optional containers will not start successfully until `idam-api` container has started.
-* `ts-translation-service`
-* `case-disposer`
-* `case-document-am`
-* `frontend`
-* `xui-frontend`
-
-If `idam-api` is not up and running and accepting connections
-you may see errors in the `definition-store-api` and `data-store-api` containers, such as
-
-```bash
-Caused by: org.springframework.web.client.ResourceAccessException:
-    I/O error on GET request for "http://idam-api:5000/o/.well-known/openid-configuration": Connection refused (Connection refused);
-        nested exception is java.net.ConnectException: Connection refused (Connection refused)
-```
-
-If you the containers fail to start with these error, ensure `idam-api` is running using
-
- ```bash
-curl http://localhost:5000/health
- ```
-
-ensuring the response is
-
-```bash
-{"status":"UP"}
-```
-
-Then restart any dependent containers by bringing up again (compose will automatically bring up just the ones which ones have failed)
-
-```bash
-./ccd compose up -d
-```
----
-
-
-Usage and commands available:
-
-```bash
-./ccd
-```
-
-
-## Using CCD
-
-Once the containers are running, CCD's frontend can be accessed at [http://localhost:3451](http://localhost:3451).
-
-However, some more steps are required to correctly configure SIDAM and CCD before it can be used:
 
 ---
-**NOTE**
 
-All scripts require the following environment variables to be set
+## Configuring CCD
 
+Once the containers are runnning, CCD's admin web can be accessed at [https://localhost:3100](https://localhost:3100).
+If using xui-frontend it ca be accessed at [https://localhost:3455](https://localhost:3455).
+
+
+However, some more steps are required to correctly configure CCD before it can be used:
+
+> [!NOTE]
+> All scripts require the following environment variables to be set
+> - IDAM_ADMIN_USER
+> - IDAM_ADMIN_PASSWORD
+
+If they are not working then check you have run `source ./bin/set-environment-variables.sh` correctly.
+If still not working then try setting them directly with the following commands.
 ```bash
-export IDAM_ADMIN_USER=<value of Username>
-export IDAM_ADMIN_PASSWORD=<value of Password>
+export IDAM_ADMIN_USER=idamOwner@hmcts.net
+export IDAM_ADMIN_PASSWORD=Ref0rmIsFun
 ```
-
-with the corresponding values from the confluence page at https://tools.hmcts.net/confluence/x/eQP3P
+And check they match the corresponding values from the confluence page at https://tools.hmcts.net/confluence/x/eQP3P
 
 ### CCD Quick Start
 
-At this point most users can run the following 4 scripts
+At this point most users can run the following 3 scripts
 
 ```bash
-./bin/add-idam-clients.sh
-./bin/add-idam-roles.sh
-./bin/add-users.sh
-./bin/add-ccd-roles.sh
+./bin/add-users.sh && 
+./bin/add-ccd-roles.sh && 
 ./bin/add-role-assignments.sh
 ```
 
@@ -192,7 +248,21 @@ b. Run smoke tests to set up user and roles.
 export TEST_URL=http://localhost:4451
 
 ./gradlew clean smoke
+
 ```
+
+> [!Note] 
+> incase of any errors relating to Service Auth when running the smoke test, ensure the following environment variable is set as below:
+
+export IDAM_S2S_URL=http://service-auth-provider-api:8080
+
+Alternatively remove this from the environment by issuing 'unset IDAM_S2S_URL', backend.yaml will default to use 'http://service-auth-provider-api:8080'
+
+./ccd compose up -d
+
+Will need to be re-issued to apply the above changes.
+]
+
 
 The smoke tests creates a file `/aat/befta_recent_executions_info.json`, delete this file after running the tests.
 
@@ -203,157 +273,13 @@ Move on to the [Ready for take-off](###Ready-for-take-off) section.
 ---
 A more in depth explanation of the scripts is detailed below
 
-### 1. Configure Oauth2 Client of CCD Gateway on SIDAM
 
-An oauth2 client should be configured for ccd-gateway application, on SIDAM Web Admin.
-
-A script is provided that sets up the CCD Gateway client.  Execute the following:
-
-```bash
-./bin/add-idam-clients.sh
-```
-
-You may verify the service has been added by logging in to the SIDAM Web Admin with the URL and
-logic credentials here:
-
-https://tools.hmcts.net/confluence/x/eQP3P
-
-Navigate to
-
-`Home > Manage Services`
-
-Optionally - to add any further IDAM service clients you can update the
-
-```bash
-./bin/add-idam-clients.sh
-```
-
-to add a new entry and re-run the script (any entries in this file that already exist are skipped)
-
-`${dir}/utils/idam-create-service.sh LABEL CLIENT_ID CLIENT_SECRET REDIRECT_URL SELF_REGISTRATION SCOPE`
-
----
-**NOTE**
-
-* SELF_REGISTRATION - a boolean parameter, defaults to a value of "false" if omitted
-* SCOPE - a space delimited string parameter, defaults to a value of "openid profile roles" if omitted
----
-
-#### Manual Configuration steps
-
-Instead of running the above scripts you can add the services manually using the SIDAM Web UI
-
-You need to login to the SIDAM Web Admin with the URL and logic credentials here: https://tools.hmcts.net/confluence/x/eQP3P
-
-Navigate to
-
-```bash
-Home > Manage Services > Add a new Service
-```
-
-On the **Add Service** screen the following fields are required:
-
-```
-label : <any>
-description : <any>
-client_id : ccd_gateway
-client_secret : ccd_gateway_secret
-new redirect_uri (click 'Add URI' before saving) : http://localhost:3451/oauth2redirect
-```
-
-Follow below steps to configure XUI Webapp on SIDAM Web Admin
-
-On the **Add Service** screen the following fields are required:
-
-```
-label : <xui_webapp>
-description : <xui_webapp>
-client_id : xui_webapp
-client_secret : xui_webapp_secrect
-new redirect_uri (click 'Add URI' before saving) : http://localhost:3455/oauth2/callback
-client scope: profile openid roles manage-user create-user
-```
-
-
-### 2. Create Idam roles
-
-Execute the following script to add roles to SIDAM:
-
-```bash
-./bin/add-idam-roles.sh
-```
-
-The script parses `bin/users.json` and loops through a list of unique roles, passing the role to the `idam-add-role.sh`
-script
-
-To add any further IDAM roles, for example "myNewIdamRole", run the script as follows
-
-```bash
-    ./bin/utils/idam-add-role.sh "myNewIdamRole"
-```
-
----
-**NOTE**
-
-The script adds roles under a _GLOBAL_ namespace and so until the users assigned to these roles are added,
-you cannot verify them using SIDAM Web UI
-
----
-
-#### Manual Configuration steps
-
-Any roles should be configured for ccd-gateway client/service, on SIDAM Web Admin.
-
-You need to login to the SIDAM Web Admin with the URL and logic credentials here: https://tools.hmcts.net/confluence/x/eQP3P
-
-`Navigate to Home > Manage Roles > Select Your Service > Role Label`
-
-Don't worry about the *Assignable roles* section when adding roles
-
-Once the roles are defined under the client/service, go to the service configuration for the service you created in
-Step 1 (`Home > Manage Services > select your service`) and select `ccd-import` role radio option under
-**Private Beta Role** section
-
-**Any business-related roles like `caseworker`,`caseworker-<jurisdiction>` etc to be used in CCD later must also be defined under the client configuration at this stage.**
-
-#### Adding a role to CCD
-
-Execute the following script to add roles to CCD:
-
-```bash
-./bin/add-ccd-roles.sh
-```
-
-The script parses `bin/ccd-roles.json` and loops through a list of roles and their security classifications, passing the values to the `ccd-add-role.sh` script.
-
-By default most FTA (Feature test automation) packs load their own roles into CCD via the definition store each time
-the feature tests are run
-
-To add a further role to CCD (by importing it into the definition store), run the following script
-
-```bash
-./bin/ccd-add-role.sh
-```
-
-supplying the following parameters
-
-```bash
-- role: Name of the role. Must be an existing IDAM role.
-- classification: Classification granted to the role; one of `PUBLIC`,
-        `PRIVATE` or `RESTRICTED`. Default to `PUBLIC`.
-```
-
-For example, to add the `caseworker` role (that must exist in SIDAM) to CCD, use
-
-```bash
-./bin/ccd-add-role.sh caseworker PUBLIC
-```
-
-### 3. Create users
+### 1. Add users
 
 A script is provided that sets up some initial users and roles for running functional tests. Execute the following:
 
 ```bash
+# FOR IDAM FULL STACK
 ./bin/add-users.sh
 ```
 
@@ -381,16 +307,19 @@ Therefore to
 Alternatively, add a user to SIDAM by using the script
 
 ```bash
+# FOR IDAM-SIM
+./bin/utils/idam-simulator-create-user.sh ROLE EMAIL_ADDRESS LAST_NAME FIRST_NAME
+# FOR IDAM FULL STACK
 ./bin/idam-create-caseworker.sh ROLE EMAIL_ADDRESS LAST_NAME FIRST_NAME
 ```
----
-**NOTE**
-LAST_NAME if omitted defaults to `TesterLastName`
-FIRST_NAME if omitted defaults to `TesterFirstname`
 
-Password for each user created by the script defaults to `Pa55word11`
+> [!NOTE]
+> LAST_NAME if omitted defaults to `TesterLastName`
+>
+> FIRST_NAME if omitted defaults to `TesterFirstname`
+>
+> Password for each user created by the script defaults to `Pa55word11`
 
----
 You may verify the service has been added by logging in to the SIDAM Web Admin with the URL and
 logic credentials here:
 
@@ -402,17 +331,55 @@ Navigate to
 
 and search for users by email address.
 
-### 4. Create role assignments
+### 2. Add CCD roles
+
+Execute the following script to add roles to CCD:
+
+```bash
+# FOR IDAM FULL STACK
+./bin/add-ccd-roles.sh
+```
+
+The script parses `bin/ccd-roles.json` and loops through a list of roles and their security classifications, passing the values to the `ccd-add-role.sh` script.
+
+By default most FTA (Feature test automation) packs load their own roles into CCD via the definition store each time
+the feature tests are run
+
+To add a further role to CCD (by importing it into the definition store), run the following script
+
+```bash
+# FOR IDAM FULL STACK
+./bin/ccd-add-role.sh
+```
+
+supplying the following parameters
+
+```bash
+- role: Name of the role. Must be an existing IDAM role.
+- classification: Classification granted to the role; one of `PUBLIC`,
+        `PRIVATE` or `RESTRICTED`. Default to `PUBLIC`.
+```
+
+For example, to add the `caseworker` role (that must exist in SIDAM) to CCD, use
+
+```bash
+# FOR IDAM FULL STACK
+./bin/ccd-add-role.sh caseworker PUBLIC
+```
+
+### 3. Add role assignments
 
 A script is provided that sets up some initial role assignments for users. Execute the following:
 
 ```bash
+# FOR IDAM FULL STACK
 ./bin/add-role-assignments.sh
 ```
 
 This script will add role assignments for the associated users as defined in
 
 ```bash
+# FOR IDAM FULL STACK
 bin/am-role-assignments.json
 ```
 
@@ -432,7 +399,7 @@ Note that currently the role assignments are created in the role assignment data
 
 The `am-role-assignments.json` can be modified to add further role assignments to users.
 
-### 5. Import case definition
+### 6. Import case definition
 
 #### Note:
 
@@ -449,7 +416,8 @@ Case definitions can also be imported manually via the command line, using the f
 Parameters:
 - `path_to_definition`: Path to `.xlsx` file containing the case definition.
 
-**Note:** For CCD to work, the definition must contain the caseworker's email address.
+> [!Note] 
+> For CCD to work, the definition must contain the caseworker's email address.
 
 If the import fails with an error of the form:
 
@@ -471,187 +439,7 @@ If you see only a grey screen after entering your user credentials in the login 
 
 2- user_profile_jurisdiction
 
-## Idam Stub
-It's possible to disable the Idam containers and run CCD with an Idam Stub provided by ccd-test-stubs-service. This is useful as a back up plan for when docker Idam is broken or when you local machine is running low on memory and you don't want to spin up the whole Idam containers
-
-### Enable Idam Stub
-
-#### Step 1 - Disable Sidam containers
-
-make sure 'sidam', 'sidam-local', 'sidam-local-ccd' docker compose files are not enabled. How you do that depends on your currently active compose files.
-When no active compose files are present, the default ones are executed. But if there's any active, then the defautl ones are ignored. For example:
-
-```bash
-./ccd enable show
-
-Currently active compose files:
-backend
-frontend
-sidam
-sidam-local
-sidam-local-ccd
-
-Default compose files:
-backend
-frontend
-sidam
-sidam-local
-sidam-local-ccd
-```
-
-In this case sidam is currently explicitly enabled. To disable it:
-
-```bash
-./ccd disable sidam sidam-local sidam-local-ccd
-```
-
-If you are instead running with the default compose file as in:
-```bash
-./ccd enable show
-
-Default compose files:
-backend
-frontend
-sidam
-sidam-local
-sidam-local-ccd
-```
-
-You must explicitly enable only CCD compose files but exclude sidam:
-
-```bash
-./ccd enable backend frontend
-./ccd enable show
-
-Currently active compose files:
-backend
-frontend
-
-Default compose files:
-backend
-frontend
-sidam
-sidam-local
-sidam-local-ccd
-```
-
-#### Step 2 - Setup Env Vars
-
-in the '.env' file, uncomment:
-
-```yaml
-#IDAM_STUB_SERVICE_NAME=http://ccd-test-stubs-service:5555
-#IDAM_STUB_LOCALHOST=http://localhost:5555
-```
-
-To allow definition imports to work ('ccd-import-definition.sh') you need to:
-
-```bash
-export IDAM_STUB_LOCALHOST=http://localhost:5555
-```
-
-:warning: Please note: remember to unset 'IDAM_STUB_LOCALHOST' when switching back to the real Idam, otherwise definition import won't work
-
-```bash
-unset IDAM_STUB_LOCALHOST
-```
-
-#### Step 3 - (Optional) Customise IDAM roles
-
-IDAM Stub comes with a predefined IDAM user.\
-To permanently customise the stub user info such as its roles follow the instructions in 'backend.yml' -> ccd-test-stubs-service\
-To modify the user info at runtime, see https://github.com/hmcts/ccd-test-stubs-service#idam-stub
-
-#### Step 4 - Enable stub service dependency
-
-Enable ccd-test-stubs-service dependency on ccd-data-store-api and ccd-definition-store-api in 'backend.yml' file.
-
-Uncomment the below lines in 'backend.yml' file
-```yaml
-      #      ccd-test-stubs-service:
-      #        condition: service_started
-```
-
-Comment the below lines in 'backend.yml' file
-```yaml
-      idam-api:
-        condition: service_started
-```
-
-### Revert to Idam
-
-#### Step 1 - Enable Sidam containers
-
-```bash
-./ccd enable sidam sidam-local sidam-local-ccd
-```
-
-or just revert to the default:
-
-```bash
-./ccd enable default
-```
-
-#### Step 2 - Setup Env Vars
-
-in the '.env' file, make sure the following env vars are commented:
-
-```yaml
-#IDAM_STUB_SERVICE_NAME=http://ccd-test-stubs-service:5555
-#IDAM_STUB_LOCALHOST=http://localhost:5555
-```
-
-then from the command line:
-
-```bash
-unset IDAM_STUB_LOCALHOST
-```
-
-#### Step 3 - Disable stub service dependency
-
-Disable ccd-test-stubs-service dependency on ccd-data-store-api and ccd-definition-store-api in 'backend.yml' file.
-
-Comment the below lines in 'backend.yml' file
-```yaml
-    #   ccd-test-stubs-service:
-    #       condition: service_started
-```
-
-Uncomment the below lines in 'backend.yml' file
-```yaml
-      idam-api:
-        condition: service_started
-```
-
-### Switching between Idam and Idam Stub Example
-
-```bash
-#assuming no containers running and Idam is enabled
-
-#start with Idam
-./ccd compose up -d
-
-#services started
-
-./ccd compose stop
-
-#enable Idam Stub follwing the steps in 'Enable Idam Stub'
-
-#start with Idam Stub
-./ccd compose up -d
-
-#services started
-
-you also can issue a 'down' when Idam Stub is enabled without risking of losing Idam data, since it's disabled
-./ccd compose down
-
-enable Idam follwing the steps in 'Revert to Idam'
-
-#start with Idam. This will now create new CCD containers and reuse the old Idam ones
-./ccd compose up -d
-```
-
-NOTE: :warning: always use 'compose up' rather than 'compose start' when switching between Idam and Idam Stub to have docker compose pick up env vars changes.
+---
 
 ## Running branches
 
@@ -739,7 +527,10 @@ when no branches are used; or:
 
 when branches are in use.
 
-:information_source: *In addition to the `status` command, the current status is also displayed for every `compose` commands.*
+> [!TIP]
+> In addition to the `status` command, the current status is also displayed for every `compose` commands.
+
+---
 
 ## Enabling additional projects
 
@@ -753,13 +544,14 @@ By default, `ccd-docker` runs the most commonly used backend and frontend projec
   * **ccd-data-store-api**: CCD's cases repository
   * **ccd-test-stubs-service**: CCD's testing support for stubbing http calls (service callbacks etc)
   * **am-role-assignment-service**: Users' role assignments for access management
+  * **cft-hearing-service**: Hearing Service API
 * Front-end:
   * **idam-web-public**: SIDAM's login UI
   * **ccd-api-gateway**: Proxy with SIDAM and S2S integration
 
 Optional compose files will allow other projects to be enabled on demand using the `enable` and `disable` commands.
 
-**Note on Running Optional Projects** 
+### Note on Running Optional Projects 
 
 If this is the first time running these optional projects from ccd docker you will need to do `./ccd compose pull` after you have enable the optional project
 
@@ -770,21 +562,22 @@ Also if a certain database has not been created you might need to create a new c
 * Using the ids from previous command use  `docker image rm <id>`
 * Then run `./ccd compose up -d`
 
-**Optional Project Commands**
+### Optional Project Commands
 
 * To enable **document-management-store-app**
   * `./ccd enable backend frontend dm-store`
-  * run docker-compose `./ccd compose up -d`
-  * create Blob Store in Azurite `./bin/document-management-store-create-blob-store-container.sh`
+  * run docker compose `./ccd compose up -d`
+  * create Blob Store in Azurite `./bin/dm-store/document-management-store-create-blob-store-container.sh`
 
 * To enable **ExUI** rather then the CCD UI
   * `./ccd enable xui-frontend`
-  * export XUI_LAUNCH_DARKLY_CLIENT_ID to value mentioned in xui web app preview template yaml file. 
-  * run docker-compose `./ccd compose up -d`
+  * export XUI_LAUNCH_DARKLY_CLIENT_ID to value mentioned in xui web app preview template yaml file. i.e. 645baeea2787d812993d9d70
+  * run docker compose `./ccd compose up -d`
   * access ExUI at `http://localhost:3455`
 
 * To enable **ElasticSearch**
-  * NOTE: we recommend at lest 16GB of memory for Docker when enabling elasticsearch
+  > [!Warning] 
+  > We recommend at lest 16GB of memory for Docker when enabling elasticsearch
   * `./ccd enable elasticsearch` (assuming `backend` is already enabled, otherwise enable it)
   * export ES_ENABLED_DOCKER=true
   * verify that Data Store is able to connect to elasticsearch: `curl localhost:4452/health`
@@ -793,34 +586,42 @@ Also if a certain database has not been created you might need to create a new c
   * `./ccd enable logstash` (assuming `elasticsearch` is already enabled, otherwise enable it)
   * Note that the config for Logstash is contained within the [logstash directory](logstash)
 
-* To enable **ccd-definition-designer-api**
-  * `./ccd enable backend ccd-definition-designer-api`
-  * run docker-compose `./ccd compose up -d`
-  * verify that ccd-definition-designer-api is up and running by `curl localhost:4544/health`
-
 * To enable **ccd-message-publisher**
   * NOTE: By default the CCD Message Publisher will use an embedded ActiveMQ instance. See [ccd-message-publisher](https://github.com/hmcts/ccd-message-publisher) for more information.
   * `./ccd enable backend message-publisher`
-  * Run docker-compose `./ccd compose up -d`
+  * Run docker compose `./ccd compose up -d`
   * Verify that ccd-message-publisher is up and running by `curl localhost:4456/health`
 
 * To enable **ccd-case-disposer**
   * `./ccd enable backend case-disposer`
-  * Run docker-compose `./ccd compose up -d`
+  * Run docker compose `./ccd compose up -d`
 
 * To enable **ccd-next-hearing-date-updater**
   * `./ccd enable backend ccd-next-hearing-date-updater`
-  * Run docker-compose `./ccd compose up -d`
+  * Run docker compose `./ccd compose up -d`
 
 * To enable **ccd-case-document-am-api**
   * `./ccd enable backend frontend dm-store case-document-am`
-  * run docker-compose `./ccd compose up -d`
+  * run docker compose `./ccd compose up -d`
   * verify that ccd-case-document-am-api is up and running by `curl localhost:4455/health`
 
 * To enable **ts-translation-service**
   * `./ccd enable backend ts-translation-service`
-  * run docker-compose `./ccd compose up -d`
+  * run docker compose `./ccd compose up -d`
   * verify that ts-translation-service is up and running by `curl localhost:4650/health`
+
+* To enable **cft-hearing-service**
+  * `./ccd enable backend hearings`
+  * run docker compose `./ccd compose up -d`
+  * verify that cft-hearing-service is up and running by `curl localhost:4651/health`
+  * this will include the inbound and outbound adapters
+
+* To enable **hmc-operational-reports-runner**
+  * `./ccd enable backend operational`
+  * run docker compose `./ccd compose up -d`
+  * verify that hmc-operational-reports-runner is up and running by `curl localhost:4651/health`
+
+---
 
 ## Under the hood :speedboat:
 
@@ -859,12 +660,13 @@ Retrieve from `.tags.env` the branches and compose files currently enabled and d
 ### Compose
 
 ```bash
-./ccd compose [<docker-compose command> [options]]
+./ccd compose [<docker compose command> [options]]
 ```
 
-The compose command acts as a wrapper around `docker-compose` and accept all commands and options supported by it.
+The compose command acts as a wrapper around `docker compose` and accept all commands and options supported by it.
 
-:information_source: *For the complete documentation of Docker Compose CLI, see [Compose command-line reference](https://docs.docker.com/compose/reference/).*
+> [!TIP]
+> For the complete documentation of Docker Compose CLI, see [Compose command-line reference](https://docs.docker.com/compose/reference/).*
 
 Here are some useful commands:
 
@@ -920,7 +722,8 @@ The `-f` (follow) option allows to follow the tail of the logs.
 
 Start or stop all or specified composed containers. Stopped containers can be restarted with the `start` command.
 
-:warning: Please note: Re-starting a project with stop/start does **not** apply configuration changes. Instead, the `up` command should be used to that end.
+> [!warning] 
+> Re-starting a project with stop/start does **not** apply configuration changes. Instead, the `up` command should be used to that end.
 
 #### Pull
 
@@ -945,7 +748,8 @@ environment:
 
 The `CLIENT_SECRET` must then also be provided to the container used by the client service.
 
-:information_source: *To prevent duplication, the client secret should be defined in the `.env` file and then used in the compose files using string interpolation `"${<VARIABLE_NAME>}"`.*
+> [!TIP]
+> To prevent duplication, the client secret should be defined in the `.env` file and then used in the compose files using string interpolation `"${<VARIABLE_NAME>}"`.
 
 #### Service-to-Service
 
@@ -958,41 +762,14 @@ environment:
 
 The `SERVICE_SECRET` must then also be provided to the container running the micro-service.
 
-:information_source: *To prevent duplication, the client secret should be defined in the `.env` file and then used in the compose files using string interpolation `"${<VARIABLE_NAME>}"`.*
+> [!TIP]
+> To prevent duplication, the client secret should be defined in the `.env` file and then used in the compose files using string interpolation `"${<VARIABLE_NAME>}"`.
 
 #### Address lookup
 
 To use UK address lookup feature an API key for https://postcodeinfo.service.justice.gov.uk is required. When API key is available it needs to be set on host side under `ADDRESS_LOOKUP_TOKEN` variable name.
 
-## Containers
-
-### Back-end
-
-#### ccd-definition-store-api
-
-Store holding the case type definitions, which are a case's states, events and schema as well as its display configuration for rendering in CCD's UI.
-
-#### ccd-data-store-api
-
-Store where the versioned instances of cases are recorded.
-
-#### ccd-user-profile-api
-
-Display preferences for the CCD users.
-
-#### ccd-test-stubs-service
-
-Service to facilitate testing of external http calls using wiremock. It returns canned responses for requests matching
-the predefined criteria.
-Currently used for:
-   - exposing a set of default callbacks that can be invoked for testing purposes
-   - Idam Stub
-
-### Front-end
-
-#### ccd-api-gateway
-
-Secured API Gateway integrating with IDAM
+---
 
 ## Local development
 
@@ -1053,67 +830,30 @@ Mainly, this means:
   - :warning: using the right key, as defined in `service-auth-provider-api` container
 - **URLs**: all URLs should be updated to point to the corresponding locally exposed port
 
-### Azure Authentication for pulling latest docker images
-
-```bash
-ERROR: Get <docker_image_url>: unauthorized: authentication required
-```
-
-If you see this above authentication issue while pulling images, please follow below commands,
-
-Install Azure-CLI locally,
-
-```bash
-brew update && brew install azure-cli
-```
-
-and to update a Azure-CLI locally,
-
-```bash
-brew update azure-cli
-```
-
-then,
-login to MS Azure,
-
-```bash
-az login
-```
-and finally, Login to the Azure Container registry:
-
-```bash
-./ccd login
-```
-
-On windows platform, we are installing the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) using executable .msi file.
-If "az login" command throws an error like "Access Denied", please follow these steps.
-We will need to install the az cli using Python PIP.
-1. If Microsoft Azure CLI is already installed, uninstall it from control panel.
-2. Setup the Python(version 2.x/3.x) on windows machine. PIP is bundled with Python.
-3. Execute the command "pip install azure-cli" using command line. It takes about 20 minutes to install the azure cli.
-4. Verify the installation using the command az --version.
-
-## Running on Apple Silicon (ARM64)
-
-Running x86 on M1 chip apple devices:
-if having trouble emulating x86 images try installing rosetta via the terminal using 
-  > softwareupdate --install-rosetta
-
-and enabling the following settings in docker desktop (version 4.16.1 or greater) under
-  > Settings > General > Virtualization framework
-
-  > Settings > Features in development > Use Rosetta for x86/amd64
-  emulation on Apple Silicon
+---
 
 ## Troubleshooting
 
-ccd-network could not be found error:
+### Setup Troubleshooting
 
-- if you get "CCD: ERROR: Network ccd-network declared as external, but could not be found. Please create the network manually using docker network create ccd-network"
-    > ./ccd init
+#### Networking
+If you get `CCD: ERROR: Network ccd-network declared as external, but could not be found.`
 
-CCD UI not loading:
+Please create the network manually using docker network create ccd-network
+```bash
+./ccd init
+```
 
+#### Pulling images
+```bash
+ERROR: Get <docker_image_url>: unauthorized: authentication required
+```
+If you see this above authentication issue while pulling images, please follow the [Azure Setup Guide](/docs/Azure.md).
+
+
+### After setup issues
+
+#### CCD UI not loading
 - it might take few minutes for all the services to startup
     > wait few minutes and then retry accessing CCD UI
 - sometimes happens that some of the back-ends (data store, definition store, user profile) cannot startup because the database liquibase lock is stuck.
@@ -1123,10 +863,29 @@ CCD UI not loading:
 - it's possible that some of the services cannot start or crash because of lack of availabel memory. This especially when starting Idam and or ElasticSearch
     > give more memory to Docker. Configurable under Preferences -> Advanced
 
-DM Store issues:
+
+#### DM Store issues:
 
 - "uk.gov.hmcts.dm.exception.AppConfigurationException: Cloub Blob Container does not exist"
-    > ./bin/document-management-store-create-blob-store-container.sh
+    > ./bin/dm-store/document-management-store-create-blob-store-container.sh
+
+### Idam Full Stack Troubleshooting
+If running the full idam stack then see the [full stack troubleshooting section of the IDAM alt docs](./docs/IdamAlt.md#troubleshooting-full-idam-stack)
+
+
+### OIDC Mismatch Troubleshooting
+A recently observed error was causing the IDAM-SIM to return the SIMULATOR_OPENID_BASE_URL value instead of the SIMULATOR_OPENID_BASE_URL_OUTSIDE_NETWORK when being accessed by services outside the docker-network for the OIDC issuer.
+This caused a mismatch in the OIDC issuer when running services like ccd-data-store-api outside the ccd-docker stack.
+This was diagnosed by running `curl -s http://localhost:5000/o/.well-known/openid-configuration | jq -r .issuer`
+Which showed that while the expected OIDC value externally was `localhost:5000` it was actually returning `idam:5000`
+
+This was fixed by first removing all existing containers / volumes and then deleting the docker network `ccd-network`
+Then by recreating from scratch.
+
+The exact root cause is not yet known but the common precursor was updating docker desktop whilst the `ccd-network` already existed.
+
+---
+
 
 ## Variables
 Here are the important variables exposed in the compose files:
@@ -1142,6 +901,11 @@ Here are the important variables exposed in the compose files:
 | USER_PROFILE_S2S_AUTHORISED_SERVICES | List of micro-services authorised to call this service, comma-separated, as registered in `service-auth-provider-api`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | DATA_STORE_TOKEN_SECRET | Secret for generation of internal event tokens                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | APPINSIGHTS_INSTRUMENTATIONKEY | Secret for Microsoft Insights logging, can be a dummy string in local                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| OIDC_ISSUER | Enforced JWT issuer value used by services that validate IDAM access tokens. This must match the token `iss` claim for the target environment and should be derived from a real token, not guessed from the public discovery URL.                                                                                                                                                                                                                                                                                                                                                                   |
+| OIDC_ALLOWED_ISSUERS | Optional comma-separated additive list of exact JWT issuer values. It is passed through to services that support multi-issuer validation and should stay unset unless additional issuers are confirmed from real accepted tokens.                                                                                                                                                                                                                                                                                                                                                                      |
+| CCD_CALLBACK_ALLOWED_HOSTS | Comma-separated allow-list of callback target hosts that CCD services may call over HTTPS. Local defaults include `localhost`, `127.0.0.1`, and `host.docker.internal`.                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| CCD_CALLBACK_ALLOWED_HTTP_HOSTS | Comma-separated allow-list of callback target hosts that CCD services may call over HTTP. Use this only when local callback endpoints are intentionally served over plain HTTP.                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| CCD_CALLBACK_ALLOW_PRIVATE_HOSTS | Controls whether callback targets on private or local hostnames are allowed. This supports local development callbacks to host services outside the Docker network.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | STORAGEACCOUNT_PRIMARY_CONNECTION_STRING | (If dm-store is enabled) Secret for Azure Blob Storage. It is pointing to dockerized Azure Blob Storage emulator.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME | (If dm-store is enabled) Container name for Azure Blob Storage                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | AM_DB | Access Management database name                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
@@ -1150,6 +914,9 @@ Here are the important variables exposed in the compose files:
 | WIREMOCK_SERVER_MAPPINGS_PATH | Path to the WireMock mapping files. If not set, it will use the default mappings from the project repository. __Note__: If setting the variable, please keep all WireMock json stub files in a directory named _mappings_ and exclude this directory in the path. For e.g. if you place the _mappings_ in /home/user/mappings then export WIREMOCK_SERVER_MAPPINGS_PATH=/home/user. Stop the service and start service using command `./ccd compose up -d ccd-test-stub-service`. If switching back to repository mappings please unset the variable using command `unset WIREMOCK_SERVER_MAPPINGS_PATH` |
 | IDAM_KEY_CASE_DOCUMENT | IDAM service-to-service secret key for `ccd_case_document_am_api` micro-service (CCD Case Document Am Api), as registered in `service-auth-provider-api`                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | IDAM_KEY_TS_TRANSLATION_SERVICE | IDAM service-to-service secret key for `ts-translation-service` micro-service (Ts Translation Service), as registered in `service-auth-provider-api`                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+
+---
+
 ## Remarks
 
 - A container can be configured to call a localhost host resource with the localhost shortcut added for docker containers recently. However the shortcut must be set according the docker host operating system.
@@ -1163,7 +930,7 @@ docker.for.win.localhost
 
 Remember that once you changed the above for a particular app you have to make sure the container configuration for that app does not try to automatically start the dependency that you have started locally. To do that either comment out the entry for the locally running app from the **depends_on** section of the config or start the app with **--no-deps** flag.
 
-- If you happen to run `docker-compose up` before setting up the environment variables, you will probably get error while starting the DB. In that
+- If you happen to run `docker compose up` before setting up the environment variables, you will probably get error while starting the DB. In that
 case, clear the containers but also watch out for volumes created to be cleared to get a fresh start since some initialisation scripts don't run if
 you have already existing volume for the container.
 
@@ -1173,10 +940,6 @@ DRIVER              VOLUME NAME
 
 # better be empty
 ```
-
-## LICENSE
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
 
 ### Upgrading Data Store and Logstash together
 
@@ -1201,3 +964,8 @@ a running Logstash container before migrations. Fresh starts also use the readin
 The standard Compose file honours `CCD_DEFINITION_STORE_API_TAG` and `CCD_DATA_STORE_API_TAG`
 and the existing `*_USE_LOCAL` settings. Use `./ccd set` for local builds instead of hardcoding
 images in `compose/backend.yml`. Definition Store snapshot migration needs no Logstash cutover.
+
+## LICENSE
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
+

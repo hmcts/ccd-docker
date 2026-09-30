@@ -1,8 +1,7 @@
-version: '2.4'
 services:
 
   ccd-logstash:
-    image: "logstash:7.16.3"
+    image: "logstash:9.1.2"
     container_name: ccd-logstash
     command: ["bash", "/usr/share/logstash/ccd/wait-for-data-store.sh"]
     environment:

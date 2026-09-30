@@ -1,10 +1,9 @@
 ---
-version: '2.4'
 #add non core CCD services here
 
 services:
   am-database:
-    image: hmctspublic.azurecr.io/am/db:latest
+    image: hmctsprod.azurecr.io/am/db:latest
     container_name: access_management_db
     environment:
       AM_DB: "${AM_DB}"

@@ -5,7 +5,7 @@
 ######################
 
 get_user_roles() {
-  docker run -e PGPASSWORD='openidm' --rm --network ccd-network postgres:11-alpine psql --host shared-db --username openidm --tuples-only --command "SELECT data.roles FROM managedObjects mo, LATERAL (SELECT regexp_replace(string_agg((element::json -> '_ref')::text, ','), '( *\\w*\\/)|(\")', '', 'g') AS roles FROM json_array_elements_text(mo.fullobject->'effectiveRoles') as data(element)) data WHERE mo.fullobject ->> 'userName'='${1}';" openidm
+  docker run -e PGPASSWORD='openidm' --rm --network ccd-network postgres:15-alpine psql --host shared-db --username openidm --tuples-only --command "SELECT data.roles FROM managedObjects mo, LATERAL (SELECT regexp_replace(string_agg((element::json -> '_ref')::text, ','), '( *\\w*\\/)|(\")', '', 'g') AS roles FROM json_array_elements_text(mo.fullobject->'effectiveRoles') as data(element)) data WHERE mo.fullobject ->> 'userName'='${1}';" openidm
 }
 
 create_user_request() {
@@ -105,7 +105,7 @@ userCreationResponse=$(create_user_request)
 if [[ $userCreationResponse -eq 403 ]]; then
   printf "%s%s%s\n" "User " "${email}" " already exists"
   recreate_user
-elif [[ $userCreationResponse -ne 201 ]]; then
+elif [[ $userCreationResponse -ne 201 && $userCreationResponse -ne 200  ]]; then
   printf "%s%s\n" "Unexpected HTTP status code from IDAM: " "${userCreationResponse}"
   exit 1
 else

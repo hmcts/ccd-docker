@@ -29,7 +29,7 @@ STATUS=$(curl --silent --output /dev/null --write-out '%{http_code}' -X POST -H 
 }')
 
 if [ $STATUS -eq 201 ]; then
-  echo "Service created sucessfully"
+  echo "Service created successfully"
 elif [ $STATUS -eq 409 ]; then
   echo "Service already exists!"
 else

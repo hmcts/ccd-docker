@@ -1,17 +1,16 @@
 ---
-version: '2.4'
 #only add core CCD services here. Side services should be added to others.yaml
 
 services:
   ccd-user-profile-api:
-    image: "${CCD_USER_PROFILE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/user-profile-api:${CCD_USER_PROFILE_API_TAG:-latest}"
+    image: "${CCD_USER_PROFILE_API_USE_LOCAL-hmctsprod.azurecr.io/}ccd/user-profile-api:${CCD_USER_PROFILE_API_TAG:-latest}"
     environment:
       USER_PROFILE_DB_HOST: ccd-shared-database
       USER_PROFILE_DB_PORT: 5432
       USER_PROFILE_DB_USERNAME: "${DB_USERNAME}"
       USER_PROFILE_DB_PASSWORD: "${DB_PASSWORD}"
       USER_PROFILE_DB_USE_SSL: "${DB_USE_SSL}"
-      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      IDAM_S2S_URL: "${SERVICE_AUTH_PROVIDER_API_BASE_URL:-http://service-auth-provider-api:8080}"
       REFORM_SERVICE_NAME: ccd-user-profile-api
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
@@ -19,12 +18,15 @@ services:
     ports:
       - 4453:4453
     depends_on:
-      - ccd-shared-database
+      ccd-shared-database:
+        condition: service_healthy
+      idam-healthcheck:
+        condition: service_healthy
     networks:
       - ccd-network
 
   ccd-definition-store-api:
-    image: "${CCD_DEFINITION_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
+    image: "${CCD_DEFINITION_STORE_API_USE_LOCAL-hmctsprod.azurecr.io/}ccd/definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
     environment:
       DEFINITION_STORE_DB_HOST: ccd-shared-database
       DEFINITION_STORE_DB_PORT: 5432
@@ -34,8 +36,11 @@ services:
       DEFINITION_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DEFINITION_STORE}"
       DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin,aac_manage_case_assignment,ccd_case_disposer
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
-      IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
-      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      IDAM_USER_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
+      IDAM_OIDC_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
+      OIDC_ISSUER: ${OIDC_ISSUER:-http://idam:5000/o}
+      OIDC_ALLOWED_ISSUERS: "${OIDC_ALLOWED_ISSUERS:-}"
+      IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
       REFORM_SERVICE_NAME: ccd-definition-store-api
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
@@ -43,27 +48,29 @@ services:
       ELASTIC_SEARCH_ENABLED: "${ES_ENABLED_DOCKER}"
       ELASTIC_SEARCH_HOST: "ccd-elasticsearch"
       ELASTIC_SEARCH_FAIL_ON_IMPORT: "true"
+      ### other env vars can be added here as needed #############
+      # ENABLE_CASE_GROUP_ACCESS: "true"
+      # LOGGING_LEVEL_UK_GOV_HMCTS_CCD: "DEBUG"
+      # DEFINITION_STORE_TX_TIMEOUT_DEFAULT: 120  # in seconds
+      ############################################################
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
-      # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
+      # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
     ports:
       - 4451:4451
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
       # - 5005:5005
     depends_on:
-# Uncomment this line to enable ccd test stub service
-#     ccd-test-stubs-service:
-#       condition: service_started
-      idam-api:
-        condition: service_started
+      idam-healthcheck:
+        condition: service_healthy
       ccd-shared-database:
-        condition: service_started
+        condition: service_healthy
       ccd-user-profile-api:
         condition: service_started
     networks:
       - ccd-network
 
   ccd-data-store-api:
-    image: "${CCD_DATA_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
+    image: "${CCD_DATA_STORE_API_USE_LOCAL-hmctsprod.azurecr.io/}ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
     environment:
       CASE_DOCUMENT_AM_URL: http://ccd-case-document-am-api:4455
       DATA_STORE_DB_HOST: ccd-shared-database
@@ -73,13 +80,15 @@ services:
       DATA_STORE_DB_USE_SSL: "${DB_USE_SSL}"
       DATA_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DATA_STORE}"
       DATA_STORE_TOKEN_SECRET: iuasbcuasdcbasdgcasdgcuysachjsacyasdgjcgasdj
-      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps,aac_manage_case_assignment,xui_webapp,ccd_case_document_am_api,am_role_assignment_service,ccd_next_hearing_date_updater,hmc_cft_hearing_service
+      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,ccd_gateway,fpl_case_service,ccd_data,ccd_ps,aac_manage_case_assignment,xui_webapp,ccd_case_document_am_api,am_role_assignment_service,ccd_next_hearing_date_updater,hmc_cft_hearing_service,cft_hearing_service,web-ui
       DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
-      IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}" # For backward compatibility with older images
-      IDAM_API_BASE_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
-      IDAM_OIDC_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
-      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      IDAM_USER_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}" # For backward compatibility with older images
+      IDAM_API_BASE_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
+      IDAM_OIDC_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
+      OIDC_ISSUER: ${OIDC_ISSUER:-http://idam:5000/o}
+      OIDC_ALLOWED_ISSUERS: "${OIDC_ALLOWED_ISSUERS:-}"
+      IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
       IDAM_OAUTH2_DATA_STORE_CLIENT_SECRET: idam_data_store_client_secret
       REFORM_SERVICE_NAME: ccd-data-store-api
       REFORM_TEAM: ccd
@@ -96,21 +105,31 @@ services:
       TESTING_SUPPORT_ENABLED: "${TESTING_SUPPORT_ENABLED:-true}"
       MIGRATIONS_ENDPOINT_ENABLED: "${MIGRATIONS_ENDPOINT_ENABLED:-true}"
       REFERENCE_DATA_API_URL: "${REFERENCE_DATA_API_URL:-http://ccd-test-stubs-service:5555}"
+      RD_LOCATION_REF_API_BASE_URL: "${RD_LOCATION_REF_API_BASE_URL:-http://ccd-test-stubs-service:5555}"
+      RD_PROFESSIONAL_API_BASE_URL: "${RD_PROFESSIONAL_API_BASE_URL:-http://ccd-test-stubs-service:5555}"
       ROLE_ASSIGNMENT_URL: "${ROLE_ASSIGNMENT_URL:-http://am-role-assignment-service:4096}"
+      TEST_STUB_SERVICE_BASE_URL: "http://host.docker.internal:5555"
+      BEFTA_TEST_STUB_SERVICE_BASE_URL: "http://localhost:5555"
+      CCD_CALLBACK_ALLOWED_HOSTS: "localhost,127.0.0.1,host.docker.internal"
+      CCD_CALLBACK_ALLOWED_HTTP_HOSTS: "localhost,127.0.0.1,host.docker.internal"
+      CCD_CALLBACK_ALLOW_PRIVATE_HOSTS: "localhost,127.0.0.1,host.docker.internal"
+      ### other env vars can be added here as needed #############
+      # ENABLE_CASE_GROUP_ACCESS_FILTERING: "true"
+      # DATA_STORE_TX_TIMEOUT_DEFAULT: 120   # in seconds
+      # LOGGING_LEVEL_UK_GOV_HMCTS_CCD: "DEBUG"
+      #
+      ############################################################
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
-      # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
+      # JAVA_TOOL_OPTIONS: '-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
     ports:
       - 4452:4452
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
       # - 5005:5005
     depends_on:
-# Uncomment this line to enable ccd test stub service
-#     ccd-test-stubs-service:
-#       condition: service_started
-      idam-api:
-        condition: service_started
+      idam-healthcheck:
+        condition: service_healthy
       ccd-shared-database:
-        condition: service_started
+        condition: service_healthy
       ccd-user-profile-api:
         condition: service_started
       ccd-definition-store-api:
@@ -119,7 +138,7 @@ services:
       - ccd-network
 
   am-role-assignment-service:
-    image: "${AM_ROLE_ASSIGNMENT_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}am/role-assignment-service:${AM_ROLE_ASSIGNMENT_SERVICE_TAG:-latest}"
+    image: "${AM_ROLE_ASSIGNMENT_SERVICE_USE_LOCAL-hmctsprod.azurecr.io/}am/role-assignment-service:${AM_ROLE_ASSIGNMENT_SERVICE_TAG:-latest}"
     environment:
        ROLE_ASSIGNMENT_DB_HOST: ccd-shared-database
        ROLE_ASSIGNMENT_DB_NAME: role_assignment
@@ -131,11 +150,11 @@ services:
        LD_SDK_KEY:
        ROLE_ASSIGNMENT_IDAM_KEY:
        ROLE_ASSIGNMENT_TOKEN_SECRET:
-       ROLE_ASSIGNMENT_S2S_AUTHORISED_SERVICES: ccd_gw,am_role_assignment_service,am_org_role_mapping_service,wa_task_management_api,xui_webapp,ccd_data,aac_manage_case_assignment,hmc_cft_hearing_service
-       IDAM_USER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}"
-       IDAM_S2S_URL: http://service-auth-provider-api:8080
-       OPEN_ID_API_BASE_URI: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}/o"
-       OIDC_ISSUER_URL: "${IDAM_STUB_SERVICE_NAME:-http://idam-api:5000}/openam/oauth2/hmcts"
+       ROLE_ASSIGNMENT_S2S_AUTHORISED_SERVICES: ccd_gw,am_role_assignment_service,am_org_role_mapping_service,wa_task_management_api,xui_webapp,ccd_data,aac_manage_case_assignment,hmc_cft_hearing_service,cft_hearing_service
+       IDAM_USER_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}"
+       IDAM_S2S_URL: "${IDAM_S2S_URL:-http://service-auth-provider-api:8080}"
+       OPEN_ID_API_BASE_URI: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}/o"
+       OIDC_ISSUER_URL: "${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}/openam/oauth2/hmcts"
        ROLE_ASSIGNMENT_IDAM_CLIENT_ID: am_role_assignment
        ROLE_ASSIGNMENT_IDAM_CLIENT_SECRET: am_role_assignment_secret
        ROLE_ASSIGNMENT_IDAM_ADMIN_USERID: role.assignment.admin@gmail.com
@@ -148,26 +167,23 @@ services:
        REFORM_ENVIRONMENT: local
        BYPASS_ORG_DROOL_RULE: "true"
       # Uncomment this line to enable JVM debugging and uncomment the port mapping below
-      #  JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -XX:+UseConcMarkSweepGC -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+      #  JAVA_TOOL_OPTIONS: -XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=65.0 -XX:MinRAMPercentage=30.0 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
     ports:
       - 4096:4096
       # Uncomment this and the JAVA_TOOL_OPTIONS flag for JVM debugging
       # - 5005:5005
     depends_on:
-# Uncomment this line to enable ccd test stub service
-#     ccd-test-stubs-service:
-#       condition: service_started
-      idam-api:
-        condition: service_started
+      idam-healthcheck:
+        condition: service_healthy
       ccd-shared-database:
-        condition: service_started
+        condition: service_healthy
       ccd-data-store-api:
         condition: service_started
     networks:
       - ccd-network
 
   service-auth-provider-api:
-    image: "hmctspublic.azurecr.io/rpe/service-auth-provider:latest"
+    image: "hmctsprod.azurecr.io/rpe/service-auth-provider:latest"
     healthcheck:
       interval: 10s
       timeout: 10s
@@ -197,15 +213,15 @@ services:
       MICROSERVICEKEYS_TS_TRANSLATION_SERVICE: "${IDAM_KEY_TS_TRANSLATION_SERVICE}"
       MICROSERVICEKEYS_CCD_NEXT_HEARING_DATE_UPDATER: "${IDAM_KEY_NEXT_HEARING_UPDATER}"
       TESTING_SUPPORT_ENABLED: "true"
+      ### other microservice keys can be added here as needed ###
+      # MICROSERVICEKEYS_RD_PROFESSIONAL_API: "${IDAM_KEY_CCD_GATEWAY}"
+      # MICROSERVICEKEYS_RD_USER_PROFILE_API: "${IDAM_KEY_CCD_GATEWAY}"
+      # MICROSERVICEKEYS_AM_ORG_ROLE_MAPPING_SERVICE: "${IDAM_KEY_AM_ORG_ROLE_MAPPING:-AAAAAAAAAAAAAAAA}"
     networks:
       - ccd-network
 
   ccd-shared-database:
     build: ../database
-    healthcheck:
-      interval: 10s
-      timeout: 10s
-      retries: 10
     environment:
       DB_USERNAME:
       DB_PASSWORD:
@@ -217,8 +233,23 @@ services:
     networks:
       - ccd-network
 
+  idam-healthcheck:
+    build: ../idam-health
+    tty: true
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f ${IDAM_INTERNAL_API_BASE_URL:-http://idam:5000}/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 30s
+    networks:
+      - ccd-network
+    depends_on:
+      ccd-shared-database:
+        condition: service_healthy
+
   ccd-test-stubs-service:
-    image: "${CCD_TEST_STUBS_SERVICE_USE_LOCAL-hmctspublic.azurecr.io/}ccd/test-stubs-service:${CCD_TEST_STUBS_SERVICE_TAG:-latest}"
+    image: "${CCD_TEST_STUBS_SERVICE_USE_LOCAL-hmctsprod.azurecr.io/}ccd/test-stubs-service:${CCD_TEST_STUBS_SERVICE_TAG:-latest}"
     environment:
       - WIREMOCK_SERVER_MAPPINGS_PATH=wiremock
     ports:
