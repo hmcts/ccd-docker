@@ -48,6 +48,7 @@ services:
       ELASTIC_SEARCH_ENABLED: "${ES_ENABLED_DOCKER}"
       ELASTIC_SEARCH_HOST: "ccd-elasticsearch"
       ELASTIC_SEARCH_FAIL_ON_IMPORT: "true"
+      DECENTRALISED_EVENTS_CASE_TYPES_PCS:
       ### other env vars can be added here as needed #############
       # ENABLE_CASE_GROUP_ACCESS: "true"
       # LOGGING_LEVEL_UK_GOV_HMCTS_CCD: "DEBUG"
